@@ -1,0 +1,8 @@
+ea4bc82a6ad023ab7ee23ee620429895
+::res://::1714589364
+icon.svg::CompressedTexture2D::8787957073170914014::1714589243::1714589248::1::::<><>::
+lobby.gd::GDScript::-1::1714589976::0::1::::<>Node<>::
+::res://scenes/::1714589628
+game.tscn::PackedScene::5326139717189944347::1714589628::0::1::::<><>::res://scripts/Game.gd
+::res://scripts/::1714589625
+Game.gd::GDScript::-1::1714589625::0::1::::<>Node2D<>::
