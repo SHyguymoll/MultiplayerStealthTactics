@@ -1,6 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=3 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
+
+[sub_resource type="MeshLibrary" id="MeshLibrary_xw04w"]
+item/0/name = ""
+item/0/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+item/0/shapes = []
+item/0/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+item/0/navigation_layers = 1
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_re23i")
@@ -34,3 +41,6 @@ offset_bottom = 8.0
 [node name="OpponentAgents" type="CanvasLayer" parent="."]
 
 [node name="World" type="CanvasLayer" parent="."]
+
+[node name="GridMap" type="GridMap" parent="World"]
+mesh_library = SubResource("MeshLibrary_xw04w")
