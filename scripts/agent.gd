@@ -40,8 +40,7 @@ var queued_action : GameActions
 
 enum States {
 	STAND, CROUCH, PRONE,
-	RUN, SNEAK, CROUCH_WALK, CROUCH_SNEAK, CRAWL,
-	PARANOID_WALK,
+	RUN, WALK, PARANOID_WALK, CROUCH_WALK, CRAWL,
 	USING_ITEM, USING_WEAPON, RELOADING_WEAPON,
 	STUNNED, DEAD,
 }
@@ -60,6 +59,6 @@ func perform_action():
 					_animate.queue("CrouchFromProne")
 					_animate.queue("StandFromCrouch")
 					_animate.queue("Idle")
-				States.CROUCH, States.CROUCH_SNEAK, States.CROUCH_WALK:
+				States.CROUCH, States.CROUCH_WALK:
 					_animate.queue("StandFromCrouch")
 					_animate.queue("Idle")
