@@ -1,5 +1,5 @@
 class_name Agent
-extends Node2D
+extends Node3D
 
 signal action_completed
 signal action_interrupted
@@ -25,7 +25,8 @@ var held_weapons : Array[GameWeapon] = [null] #max length should be 4, including
 var selected_item : int = 0 #index for item
 var selected_weapon : int = 0 #index for weapon
 
-@onready var _animate : AnimationPlayer = $AnimationPlayer
+@export var looping_animations : Array[StringName]
+@onready var anim : AnimationTree = $AnimationTree
 
 enum GameActions {
 	GO_STAND, GO_CROUCH, GO_PRONE,
@@ -42,23 +43,58 @@ enum States {
 	STAND, CROUCH, PRONE,
 	RUN, WALK, PARANOID_WALK, CROUCH_WALK, CRAWL,
 	USING_ITEM, USING_WEAPON, RELOADING_WEAPON,
-	STUNNED, DEAD,
+	HURT, STUNNED, DEAD,
 }
-var state : States = States.STAND
+@export var state : States = States.STAND
 
 var target_position : Vector2
 var target_direction : float
-
+var stun_time : int = 0
+var health : int
 var target_camo_level : int
+var target_weapons_animation := Vector2.ONE
+var head_rot_off_z : float = 0.0
+
+func in_standing_state() -> bool:
+	return state in [States.STAND, States.WALK, States.RUN, States.PARANOID_WALK]
+
+func in_crouching_state() -> bool:
+	return state in [States.CROUCH, States.CROUCH_WALK]
+
+func in_prone_state() -> bool:
+	return state in [States.PRONE, States.CRAWL]
 
 func perform_action():
 	match queued_action:
 		GameActions.GO_STAND:
 			match state:
 				States.PRONE, States.CRAWL:
-					_animate.queue("CrouchFromProne")
-					_animate.queue("StandFromCrouch")
-					_animate.queue("Idle")
+					pass
 				States.CROUCH, States.CROUCH_WALK:
-					_animate.queue("StandFromCrouch")
-					_animate.queue("Idle")
+					pass
+		GameActions.GO_CROUCH:
+			match state:
+				States.WALK, States.RUN, States.STAND, States.PARANOID_WALK:
+					pass
+				States.PRONE, States.CRAWL:
+					pass
+
+func _enter_tree() -> void:
+	set_multiplayer_authority(name.to_int())
+
+func _ready() -> void:
+	$HBoxContainer/HScrollBar.min_value = 0
+	$HBoxContainer/HScrollBar.max_value = len(States.keys()) - 1
+	$HBoxContainer/HScrollBar.value = 0
+	$HBoxContainer/HScrollBar.step = 1
+
+func _process(delta: float) -> void:
+	$HBoxContainer/Label.text == States.keys()[state]
+	state = $HBoxContainer/HScrollBar.value
+
+func _physics_process(delta: float) -> void:
+	anim.set("parameters/Crouch/blend_position", target_weapons_animation)
+	anim.set("parameters/Stand/blend_position", target_weapons_animation)
+	if is_multiplayer_authority():
+		var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+		position = position + Vector3(move_dir.x, 0, move_dir.y)

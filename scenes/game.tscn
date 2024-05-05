@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=4 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
+[ext_resource type="PackedScene" uid="uid://oitco668lkwj" path="res://scenes/agent.tscn" id="2_f04am"]
 
 [sub_resource type="MeshLibrary" id="MeshLibrary_xw04w"]
 item/0/name = ""
@@ -11,6 +12,7 @@ item/0/navigation_layers = 1
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_re23i")
+player_scene = ExtResource("2_f04am")
 
 [node name="Menus" type="CanvasLayer" parent="."]
 layer = 128
@@ -23,7 +25,31 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.509804, 0.262745, 0.509804, 0.835294)
 
+[node name="VBoxContainer" type="VBoxContainer" parent="Menus/HostScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.5
+offset_top = -33.0
+offset_right = 50.5
+offset_bottom = 33.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Host" type="Button" parent="Menus/HostScreen/VBoxContainer"]
+layout_mode = 2
+text = "HOST GAME"
+
+[node name="Join" type="Button" parent="Menus/HostScreen/VBoxContainer"]
+layout_mode = 2
+text = "JOIN GAME"
+
 [node name="MainMenu" type="ColorRect" parent="Menus"]
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -32,6 +58,7 @@ grow_vertical = 2
 color = Color(0.509804, 0.262745, 0.509804, 0.835294)
 
 [node name="Button" type="Button" parent="Menus/MainMenu"]
+visible = false
 layout_mode = 0
 offset_right = 8.0
 offset_bottom = 8.0
@@ -44,3 +71,13 @@ offset_bottom = 8.0
 
 [node name="GridMap" type="GridMap" parent="World"]
 mesh_library = SubResource("MeshLibrary_xw04w")
+
+[node name="Camera3D" type="Camera3D" parent="World"]
+transform = Transform3D(0.907777, -0.17594, 0.380769, 0, 0.907777, 0.419452, -0.419452, -0.380769, 0.82406, 1.68, 1.689, 2.942)
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
+spawn_path = NodePath("..")
+
+[connection signal="pressed" from="Menus/HostScreen/VBoxContainer/Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="Menus/HostScreen/VBoxContainer/Join" to="." method="_on_join_pressed"]
