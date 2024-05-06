@@ -25,7 +25,35 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.509804, 0.262745, 0.509804, 0.835294)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Menus/HostScreen"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Menus/HostScreen"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="SettingsScreen" type="ColorRect" parent="Menus"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.509804, 0.262745, 0.509804, 0.835294)
+
+[node name="MainMenu" type="ColorRect" parent="Menus"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.509804, 0.262745, 0.509804, 0.835294)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Menus/MainMenu"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -40,32 +68,19 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="Host" type="Button" parent="Menus/HostScreen/VBoxContainer"]
+[node name="Host" type="Button" parent="Menus/MainMenu/VBoxContainer"]
 layout_mode = 2
 text = "HOST GAME"
 
-[node name="Join" type="Button" parent="Menus/HostScreen/VBoxContainer"]
+[node name="Join" type="Button" parent="Menus/MainMenu/VBoxContainer"]
 layout_mode = 2
 text = "JOIN GAME"
 
-[node name="MainMenu" type="ColorRect" parent="Menus"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.509804, 0.262745, 0.509804, 0.835294)
+[node name="Settings" type="Button" parent="Menus/MainMenu/VBoxContainer"]
+layout_mode = 2
+text = "SETTINGS"
 
-[node name="Button" type="Button" parent="Menus/MainMenu"]
-visible = false
-layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
-
-[node name="PlayerAgents" type="CanvasLayer" parent="."]
-
-[node name="OpponentAgents" type="CanvasLayer" parent="."]
+[node name="Agents" type="CanvasLayer" parent="."]
 
 [node name="World" type="CanvasLayer" parent="."]
 
@@ -79,5 +94,5 @@ transform = Transform3D(0.907777, -0.17594, 0.380769, 0, 0.907777, 0.419452, -0.
 _spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
 spawn_path = NodePath("..")
 
-[connection signal="pressed" from="Menus/HostScreen/VBoxContainer/Host" to="." method="_on_host_pressed"]
-[connection signal="pressed" from="Menus/HostScreen/VBoxContainer/Join" to="." method="_on_join_pressed"]
+[connection signal="pressed" from="Menus/MainMenu/VBoxContainer/Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="Menus/MainMenu/VBoxContainer/Join" to="." method="_on_join_pressed"]

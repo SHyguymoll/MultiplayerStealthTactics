@@ -27,7 +27,8 @@ func _on_host_pressed() -> void:
 	peer.create_server(5040)
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(_add_player)
-	$Menus.visible = false
+	$Menus/MainMenu.visible = false
+	$Menus/HostScreen.visible = true
 	_add_player()
 
 func _add_player(id = 1):
