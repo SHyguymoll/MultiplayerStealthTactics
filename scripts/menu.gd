@@ -1,9 +1,11 @@
 extends ColorRect
 
-var mp_ag_notif_scene = preload("res://scenes/agent_notifier.tscn")
-var ag_sel_scene = preload("res://scenes/agent_selector.tscn")
-var agent_count = 0
+var selected_agents = []
 var other_player_id := 0
+
+@onready var _player_agents : ItemList = $HostScreen/PlayerAgents/ItemList
+@onready var _enemy_agents : HBoxContainer = $HostScreen/EnemyAgentCounter
+
 
 func _ready() -> void:
 	$HostScreen.visible = false
@@ -11,6 +13,7 @@ func _ready() -> void:
 	$MainMenu.visible = true
 	Lobby.player_info = get_agents()
 	Lobby.player_connected.connect(_on_player_connect)
+	Lobby.player_disconnected.connect(_on_player_disconnect)
 	pass
 
 
@@ -31,66 +34,68 @@ func get_agents():
 	}
 
 func _on_join_pressed() -> void:
-	$HostScreen/Label.visible = false
+	$HostScreen/Label.text = "Waiting for Host..."
+	$HostScreen/ButtonsHbox/Start.visible = false
+	other_player_id = 1
 	Lobby.join_game()
 	$MainMenu.visible = false
 	$HostScreen.visible = true
-	_create_selectors(4)
+	_populate_agent_list()
 
 
 func _on_host_pressed() -> void:
 	Lobby.create_game()
 	$MainMenu.visible = false
 	$HostScreen.visible = true
-	_create_selectors(4)
+	_populate_agent_list()
 
 
-func _create_selectors(selector_count : int):
-	if selector_count < 1:
-		printerr("invalid number of selectors, must be positive integer")
-		return
-	var new_selector : AgentSelector = ag_sel_scene.instantiate()
-	new_selector.name = "1"
-	new_selector.agent_selected.connect(_add_agent)
-	new_selector.selector_removed.connect(_remove_agent)
-	$HostScreen/AgentHBox.add_child(new_selector)
-	new_selector.opt_but.disabled = false
-	var prev_selector = new_selector
-	for i in range(1, selector_count):
-		new_selector = ag_sel_scene.instantiate()
-		new_selector.name = str(i)
-		new_selector.agent_selected.connect(_add_agent)
-		new_selector.selector_removed.connect(_remove_agent)
-		prev_selector.agent_selected.connect(new_selector.enable_opt_button)
-		$HostScreen/AgentHBox.add_child(new_selector)
-		prev_selector = new_selector
+func _populate_agent_list():
+	for agent in Lobby.player_info.agents:
+		_player_agents.add_item(agent.name)
 
 
-func _add_agent(agent_name):
-	agent_count += 1
-	update_hidden_agents.rpc_id(other_player_id, agent_count)
-
-func _remove_agent():
-	agent_count -= 1
-	update_hidden_agents.rpc_id(other_player_id, agent_count)
+func _on_item_list_item_selected(index: int) -> void:
+	if index in selected_agents:
+		_player_agents.set_item_text(
+				index, _player_agents.get_item_text(index).trim_suffix(" *"))
+		selected_agents.erase(index)
+		update_hidden_agents.rpc_id(other_player_id, len(selected_agents))
+	elif len(selected_agents) < 4:
+		selected_agents.append(index)
+		_player_agents.set_item_text(
+				index, _player_agents.get_item_text(index) + " *")
+		update_hidden_agents.rpc_id(other_player_id, len(selected_agents))
+	else:
+		_player_agents.deselect(index)
 
 @rpc("any_peer")
 func update_hidden_agents(number : int):
-	var change = number - $HostScreen/AgentHBox2.get_child_count()
+	var change = number - _enemy_agents.get_child_count()
 	if change < 0:
-		for extra in $HostScreen/AgentHBox2.get_children().slice(0, abs(change)):
+		for extra in _enemy_agents.get_children().slice(0, abs(change)):
 			extra.queue_free()
 	else:
 		for i in range(change):
-			$HostScreen/AgentHBox2.add_child(mp_ag_notif_scene.instantiate())
+			var new_notif = TextureRect.new()
+			new_notif.texture = load("res://assets/sprites/AgentInfoBackground.png")
+			_enemy_agents.add_child(new_notif)
 
-@rpc
 func _on_player_connect(peer_id, player_info):
 	if peer_id == 1:
 		return
-	other_player_id = multiplayer.get_remote_sender_id()
-	update_hidden_agents.rpc_id(other_player_id, agent_count)
-	$HostScreen/Label.text = "Player found!"
+	if other_player_id == 0:
+		other_player_id = multiplayer.get_remote_sender_id()
+	update_hidden_agents.rpc_id(other_player_id, len(selected_agents))
+	if multiplayer.is_server():
+		$HostScreen/Label.text = "Player found! " + str(other_player_id)
+	else:
+		$HostScreen/Label.text = "Host found! " + str(other_player_id)
+
+
+func _on_player_disconnect(id):
+	$HostScreen/Label.text = "Lost connection to {0}!".format([id])
+
 
 func _on_start_pressed() -> void:
 	Lobby.load_game.rpc("res://scenes/game.tscn")
@@ -98,3 +103,6 @@ func _on_start_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	pass # Replace with function body.
+
+
+

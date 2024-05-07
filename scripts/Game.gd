@@ -28,15 +28,6 @@ func create_sound_effect() -> void:
 func ping():
 	print("pong!")
 
-
-func _on_host_pressed() -> void:
-	peer.create_server(5040)
-	multiplayer.multiplayer_peer = peer
-	multiplayer.peer_connected.connect(_add_player)
-	$Menus/MainMenu.visible = false
-	$Menus/HostScreen.visible = true
-	#_add_player()
-
 func _add_player(id = 1):
 	var new_player = player_scene.instantiate()
 	new_player.name = str(id)
@@ -46,7 +37,3 @@ func _add_player(id = 1):
 func spawn_agent(player_id):
 	pass
 
-func _on_join_pressed() -> void:
-	peer.create_client("localhost", 5040)
-	multiplayer.multiplayer_peer = peer
-	$Menus.visible = false
