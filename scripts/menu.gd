@@ -31,36 +31,48 @@ func get_agents():
 	}
 
 func _on_join_pressed() -> void:
+	$HostScreen/Label.visible = false
 	Lobby.join_game()
 	$MainMenu.visible = false
 	$HostScreen.visible = true
+	_create_selectors(4)
 
 
 func _on_host_pressed() -> void:
 	Lobby.create_game()
 	$MainMenu.visible = false
 	$HostScreen.visible = true
-	_conditional_create("")
+	_create_selectors(4)
 
 
-func _create_selector():
+func _create_selectors(selector_count : int):
+	if selector_count < 1:
+		printerr("invalid number of selectors, must be positive integer")
+		return
 	var new_selector : AgentSelector = ag_sel_scene.instantiate()
-	new_selector.agent_selected.connect(_conditional_create)
-	new_selector.selector_removed.connect(_conditional_remove)
+	new_selector.name = "1"
+	new_selector.agent_selected.connect(_add_agent)
+	new_selector.selector_removed.connect(_remove_agent)
 	$HostScreen/AgentHBox.add_child(new_selector)
+	new_selector.opt_but.disabled = false
+	var prev_selector = new_selector
+	for i in range(1, selector_count):
+		new_selector = ag_sel_scene.instantiate()
+		new_selector.name = str(i)
+		new_selector.agent_selected.connect(_add_agent)
+		new_selector.selector_removed.connect(_remove_agent)
+		prev_selector.agent_selected.connect(new_selector.enable_opt_button)
+		$HostScreen/AgentHBox.add_child(new_selector)
+		prev_selector = new_selector
 
-func _conditional_create(agent_name):
+
+func _add_agent(agent_name):
 	agent_count += 1
-	if agent_count < GameSettings.AGENT_LIMIT:
-		_create_selector()
-		update_hidden_agents.rpc_id(other_player_id, $HostScreen/AgentHBox.get_child_count())
+	update_hidden_agents.rpc_id(other_player_id, agent_count)
 
-func _conditional_remove(selector_used : bool):
-	if selector_used:
-		agent_count -= 1
-	if $HostScreen/AgentHBox.get_child_count() == 1: # replace lack of selectors
-		_create_selector()
-	update_hidden_agents.rpc_id(other_player_id, $HostScreen/AgentHBox.get_child_count())
+func _remove_agent():
+	agent_count -= 1
+	update_hidden_agents.rpc_id(other_player_id, agent_count)
 
 @rpc("any_peer")
 func update_hidden_agents(number : int):
@@ -72,11 +84,13 @@ func update_hidden_agents(number : int):
 		for i in range(change):
 			$HostScreen/AgentHBox2.add_child(mp_ag_notif_scene.instantiate())
 
+@rpc
 func _on_player_connect(peer_id, player_info):
 	if peer_id == 1:
 		return
-	other_player_id = peer_id
-	update_hidden_agents.rpc_id(other_player_id, $HostScreen/AgentHBox.get_child_count())
+	other_player_id = multiplayer.get_remote_sender_id()
+	update_hidden_agents.rpc_id(other_player_id, agent_count)
+	$HostScreen/Label.text = "Player found!"
 
 func _on_start_pressed() -> void:
 	Lobby.load_game.rpc("res://scenes/game.tscn")
