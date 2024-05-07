@@ -3,96 +3,23 @@
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
 [ext_resource type="PackedScene" uid="uid://oitco668lkwj" path="res://scenes/agent.tscn" id="2_f04am"]
 
-[sub_resource type="MeshLibrary" id="MeshLibrary_xw04w"]
-item/0/name = ""
-item/0/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-item/0/shapes = []
-item/0/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-item/0/navigation_layers = 1
+[sub_resource type="PlaneMesh" id="PlaneMesh_dd7v8"]
+size = Vector2(15, 15)
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_re23i")
 player_scene = ExtResource("2_f04am")
 
-[node name="Menus" type="CanvasLayer" parent="."]
-layer = 128
+[node name="Agents" type="Node3D" parent="."]
 
-[node name="HostScreen" type="ColorRect" parent="Menus"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.509804, 0.262745, 0.509804, 0.835294)
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Menus/HostScreen"]
-layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-
-[node name="SettingsScreen" type="ColorRect" parent="Menus"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.509804, 0.262745, 0.509804, 0.835294)
-
-[node name="MainMenu" type="ColorRect" parent="Menus"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.509804, 0.262745, 0.509804, 0.835294)
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Menus/MainMenu"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -50.5
-offset_top = -33.0
-offset_right = 50.5
-offset_bottom = 33.0
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-
-[node name="Host" type="Button" parent="Menus/MainMenu/VBoxContainer"]
-layout_mode = 2
-text = "HOST GAME"
-
-[node name="Join" type="Button" parent="Menus/MainMenu/VBoxContainer"]
-layout_mode = 2
-text = "JOIN GAME"
-
-[node name="Settings" type="Button" parent="Menus/MainMenu/VBoxContainer"]
-layout_mode = 2
-text = "SETTINGS"
-
-[node name="Agents" type="CanvasLayer" parent="."]
-
-[node name="World" type="CanvasLayer" parent="."]
-
-[node name="GridMap" type="GridMap" parent="World"]
-mesh_library = SubResource("MeshLibrary_xw04w")
+[node name="World" type="Node3D" parent="."]
 
 [node name="Camera3D" type="Camera3D" parent="World"]
 transform = Transform3D(0.907777, -0.17594, 0.380769, 0, 0.907777, 0.419452, -0.419452, -0.380769, 0.82406, 1.68, 1.689, 2.942)
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="World"]
+mesh = SubResource("PlaneMesh_dd7v8")
+
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
 spawn_path = NodePath("..")
-
-[connection signal="pressed" from="Menus/MainMenu/VBoxContainer/Host" to="." method="_on_host_pressed"]
-[connection signal="pressed" from="Menus/MainMenu/VBoxContainer/Join" to="." method="_on_join_pressed"]

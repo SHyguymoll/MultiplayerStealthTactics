@@ -1,0 +1,141 @@
+[gd_scene load_steps=3 format=3 uid="uid://tpqpwqi5p3an"]
+
+[ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="1_s0wmi"]
+[ext_resource type="Script" path="res://scripts/menu.gd" id="1_y43yw"]
+
+[node name="Menus" type="ColorRect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.509804, 0.262745, 0.509804, 1)
+script = ExtResource("1_y43yw")
+
+[node name="HostScreen" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="HostScreen"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -279.5
+offset_right = 279.5
+offset_bottom = 65.0
+grow_horizontal = 2
+theme = ExtResource("1_s0wmi")
+text = "Waiting for Opponent..."
+horizontal_alignment = 1
+
+[node name="AgentHBox" type="HBoxContainer" parent="HostScreen"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -354.0
+offset_bottom = -7.99979
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="AgentHBox2" type="HBoxContainer" parent="HostScreen"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -4.0
+offset_bottom = 342.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="ButtonsHbox" type="HBoxContainer" parent="HostScreen"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -73.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+
+[node name="Ready" type="Button" parent="HostScreen/ButtonsHbox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme = ExtResource("1_s0wmi")
+text = "READY"
+
+[node name="Start" type="Button" parent="HostScreen/ButtonsHbox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
+text = "START"
+
+[node name="Quit" type="Button" parent="HostScreen/ButtonsHbox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
+text = "QUIT"
+
+[node name="SettingsScreen" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainMenu" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -248.0
+offset_top = -152.0
+offset_right = 248.0
+offset_bottom = 152.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Host" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+text = "HOST GAME"
+
+[node name="Join" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+text = "JOIN GAME"
+
+[node name="Settings" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+text = "SETTINGS"
+
+[connection signal="pressed" from="HostScreen/ButtonsHbox/Start" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="HostScreen/ButtonsHbox/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="MainMenu/VBoxContainer/Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="MainMenu/VBoxContainer/Join" to="." method="_on_join_pressed"]
