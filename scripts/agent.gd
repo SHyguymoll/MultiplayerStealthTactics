@@ -4,10 +4,12 @@ extends Node3D
 signal action_completed
 signal action_interrupted
 signal agent_died
+signal action_chosen
+signal agent_selected
+signal agent_deselected
 
 var view_dist : float #length of vision cone
 var view_arc : float #arc of vision cone
-var view_direction : float #radian rotation of view in relation to body rotation
 var eye_strength : float #multiplier applied to vision cone in relation to view target distance
 
 var hearing_dist : int #distance of furthest possibly heard audio event
@@ -25,7 +27,8 @@ var held_weapons : Array[GameWeapon] = [null] #max length should be 4, including
 var selected_item : int = 0 #index for item
 var selected_weapon : int = 0 #index for weapon
 
-@export var looping_animations : Array[StringName]
+var player_id : int #id of player who brought the agent
+
 @onready var anim : AnimationTree = $AnimationTree
 
 enum GameActions {
@@ -53,7 +56,7 @@ var stun_time : int = 0
 var health : int
 var target_camo_level : int
 var target_weapons_animation := Vector2.ONE
-var head_rot_off_z : float = 0.0
+var head_rot_off_z : float = 0.0 #rot of head in relation to body rot
 
 func in_standing_state() -> bool:
 	return state in [States.STAND, States.WALK, States.RUN, States.PARANOID_WALK]
@@ -89,7 +92,7 @@ func _ready() -> void:
 	$HBoxContainer/HScrollBar.step = 1
 
 func _process(delta: float) -> void:
-	$HBoxContainer/Label.text == States.keys()[state]
+	$HBoxContainer/Label.text = States.keys()[state]
 	state = $HBoxContainer/HScrollBar.value
 
 func _physics_process(delta: float) -> void:

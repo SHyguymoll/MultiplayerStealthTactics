@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://qsow8vks5k1o"]
+
+[ext_resource type="Texture2D" uid="uid://cs046cxbqk6xa" path="res://assets/sprites/AgentInfoBackground.png" id="1_6st5s"]
+
+[node name="AgentNotifier" type="TextureRect"]
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("1_6st5s")
+stretch_mode = 3
