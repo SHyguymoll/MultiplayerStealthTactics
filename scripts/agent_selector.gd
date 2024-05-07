@@ -16,9 +16,12 @@ func _ready() -> void:
 	_tex_rect.texture = add_agent_texture
 	for agent in Lobby.player_info.agents:
 		_opt_but.add_item(agent.name)
+	_opt_but.selected = 0
 
 
 func _on_option_button_item_selected(index: int) -> void:
+	if index == 0:
+		return
 	agent_selected.emit(_opt_but.get_item_text(index))
 	_opt_but.disabled = true
 	_tex_rect.texture = agent_selected_texture
