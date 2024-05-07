@@ -43,9 +43,13 @@ func join_game(address = ""):
 	multiplayer.multiplayer_peer = peer
 
 
-func create_game():
+func create_game(max_connections = 0):
 	var peer = ENetMultiplayerPeer.new()
-	var error = peer.create_server(PORT, MAX_CONNECTIONS)
+	var error
+	if max_connections > 0:
+		error = peer.create_server(PORT, max_connections)
+	else:
+		error = peer.create_server(PORT, MAX_CONNECTIONS)
 	if error:
 		return error
 	multiplayer.multiplayer_peer = peer

@@ -13,6 +13,7 @@ color = Color(0.509804, 0.262745, 0.509804, 1)
 script = ExtResource("1_y43yw")
 
 [node name="HostScreen" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -79,12 +80,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 theme = ExtResource("1_s0wmi")
+toggle_mode = true
 text = "READY"
 
 [node name="Start" type="Button" parent="HostScreen/ButtonsHbox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme = ExtResource("1_s0wmi")
+disabled = true
 text = "START"
 
 [node name="Quit" type="Button" parent="HostScreen/ButtonsHbox"]
@@ -103,7 +106,6 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="MainMenu" type="Control" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -136,13 +138,20 @@ layout_mode = 2
 theme = ExtResource("1_s0wmi")
 text = "JOIN GAME"
 
+[node name="Singleplayer" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+text = "SINGLEPLAYER"
+
 [node name="Settings" type="Button" parent="MainMenu/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("1_s0wmi")
 text = "SETTINGS"
 
 [connection signal="item_selected" from="HostScreen/PlayerAgents/ItemList" to="." method="_on_item_list_item_selected"]
+[connection signal="toggled" from="HostScreen/ButtonsHbox/Ready" to="." method="_on_ready_toggled"]
 [connection signal="pressed" from="HostScreen/ButtonsHbox/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="HostScreen/ButtonsHbox/Quit" to="." method="_on_quit_pressed"]
 [connection signal="pressed" from="MainMenu/VBoxContainer/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="MainMenu/VBoxContainer/Join" to="." method="_on_join_pressed"]
+[connection signal="pressed" from="MainMenu/VBoxContainer/Singleplayer" to="." method="_on_singleplayer_pressed"]
