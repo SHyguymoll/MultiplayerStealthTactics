@@ -1,0 +1,7 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://d0mg34cbak5t1"]
+
+[ext_resource type="FontFile" uid="uid://50pgbui3omif" path="res://assets/fonts/Jersey_25/Jersey25-Regular.ttf" id="1_gvu3e"]
+
+[resource]
+default_font = ExtResource("1_gvu3e")
+default_font_size = 64
