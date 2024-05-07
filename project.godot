@@ -11,12 +11,14 @@ config_version=5
 [application]
 
 config/name="MultiplayerStealthTactics"
+run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-Lobby="res://scripts/lobby.gd"
+Lobby="*res://scripts/lobby.gd"
+GameSettings="*res://game_settings.gd"
 
 [display]
 
