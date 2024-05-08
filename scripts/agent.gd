@@ -30,6 +30,13 @@ var selected_weapon : int = 0 #index for weapon
 var player_id : int #id of player who brought the agent
 
 @onready var anim : AnimationTree = $AnimationTree
+@onready var _skeleton : Skeleton3D = $Agent/game_rig/Skeleton3D
+@onready var _eyes : ShapeCast3D = $Eyes
+@onready var _ears : ShapeCast3D = $Ears
+@onready var _body : Area3D = $Body
+@export var head_bone_name : String = "DEF-spine.006"
+var head_bone_ind : int
+
 
 enum GameActions {
 	GO_STAND, GO_CROUCH, GO_PRONE,
@@ -56,7 +63,7 @@ var stun_time : int = 0
 var health : int
 var target_camo_level : int
 var target_weapons_animation := Vector2.ONE
-var head_rot_off_z : float = 0.0 #rot of head in relation to body rot
+var head_rot_off_y : float = 0.0 #rot of head in relation to body rot
 
 func in_standing_state() -> bool:
 	return state in [States.STAND, States.WALK, States.RUN, States.PARANOID_WALK]
@@ -90,14 +97,37 @@ func _ready() -> void:
 	$HBoxContainer/HScrollBar.max_value = len(States.keys()) - 1
 	$HBoxContainer/HScrollBar.value = 0
 	$HBoxContainer/HScrollBar.step = 1
+	head_bone_ind = _skeleton.find_bone(head_bone_name)
 
 func _process(delta: float) -> void:
 	$HBoxContainer/Label.text = States.keys()[state]
 	state = $HBoxContainer/HScrollBar.value
 
+
+func decide_head_position() -> Vector3:
+	if in_standing_state():
+		return Vector3(0, 0.889, 0.06)
+	elif in_crouching_state():
+		return Vector3(0, 0.732, 0.175)
+	elif in_prone_state():
+		return Vector3(0, 0.195, 0.537)
+	else:
+		return _eyes.position
+
+
 func _physics_process(delta: float) -> void:
 	anim.set("parameters/Crouch/blend_position", target_weapons_animation)
 	anim.set("parameters/Stand/blend_position", target_weapons_animation)
+	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
+	_eyes.rotation.y = head_rot_off_y
+	if in_standing_state() or in_crouching_state():
+		(_body.get_node("Middle") as CollisionShape3D).disabled = false
+	else:
+		(_body.get_node("Middle") as CollisionShape3D).disabled = true
+	if in_standing_state():
+		(_body.get_node("Top") as CollisionShape3D).disabled = false
+	else:
+		(_body.get_node("Top") as CollisionShape3D).disabled = true
 	if is_multiplayer_authority():
 		var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		position = position + Vector3(move_dir.x, 0, move_dir.y)
