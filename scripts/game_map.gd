@@ -1,11 +1,6 @@
 class_name GameMap
 extends Node3D
 
-signal server_agent_entered_exfil_zone(agent : Agent)
-signal server_agent_exited_exfil_zone(agent : Agent)
-signal client_agent_entered_exfil_zone(agent : Agent)
-signal client_agent_exited_exfil_zone(agent : Agent)
-
 # spawns must comfortably support 4 agents
 @export var server_agent_spawns = {
 	1:
@@ -39,4 +34,20 @@ enum Objectives {
 @export var client_exfiltrate_zone : Area3D
 
 func _ready() -> void:
-	server_exfiltrate_zone
+	server_exfiltrate_zone.area_entered.connect(_server_agent_entered_exfil)
+	server_exfiltrate_zone.area_exited.connect(_server_agent_exited_exfil)
+	client_exfiltrate_zone.area_entered.connect(_client_agent_entered_exfil)
+	client_exfiltrate_zone.area_exited.connect(_client_agent_exited_exfil)
+
+
+func _server_agent_entered_exfil(agent_area : Area3D):
+	var agent : Agent = agent_area.get_parent()
+
+func _server_agent_exited_exfil(agent_area : Area3D):
+	var agent : Agent = agent_area.get_parent()
+
+func _client_agent_entered_exfil(agent_area : Area3D):
+	var agent : Agent = agent_area.get_parent()
+
+func _client_agent_exited_exfil(agent_area : Area3D):
+	var agent : Agent = agent_area.get_parent()
