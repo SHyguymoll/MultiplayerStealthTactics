@@ -24,3 +24,12 @@ GameSettings="*res://game_settings.gd"
 
 window/size/viewport_width=1612
 window/size/viewport_height=908
+
+[layer_names]
+
+3d_physics/layer_1="world_collisions"
+3d_physics/layer_2="agent_sight"
+3d_physics/layer_3="agent_ears"
+3d_physics/layer_12="attack_hitboxes"
+3d_physics/layer_13="server_agent_exfil"
+3d_physics/layer_14="client_agent_exfil"
