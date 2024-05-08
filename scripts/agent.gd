@@ -8,13 +8,17 @@ signal action_chosen
 signal agent_selected
 signal agent_deselected
 
-var view_dist : float #length of vision cone
-var view_arc : float #arc of vision cone
-var eye_strength : float #multiplier applied to vision cone in relation to view target distance
+signal spotted_agent(other_agent : Agent)
+signal spotted_element(element : Node3D)
 
-var hearing_dist : int #distance of furthest possibly heard audio event
+var view_dist : float = 2.5 #length of vision "cone"
+var view_across : float = 1 #"arc" of vision "cone"
+var eye_strength : float = 1 #multiplier applied to vision "cone" in relation to view target distance
 
-var movement_dist : int #distance of furthest possible movement in tiles per turn
+var hearing_dist : float = 1.5 #distance of furthest possibly heard audio event
+var ear_strength : float = 1
+
+var movement_dist : float #distance of furthest possible movement
 var movement_speed : float #maximum movement speed per turn
 
 var camo_level : int #bounded from 0 to 100
@@ -32,7 +36,9 @@ var player_id : int #id of player who brought the agent
 @onready var anim : AnimationTree = $AnimationTree
 @onready var _skeleton : Skeleton3D = $Agent/game_rig/Skeleton3D
 @onready var _eyes : ShapeCast3D = $Eyes
+@onready var _eye_cone = _eyes.shape as ConvexPolygonShape3D
 @onready var _ears : ShapeCast3D = $Ears
+@onready var _ear_cylinder = _ears.shape as CylinderShape3D
 @onready var _body : Area3D = $Body
 
 
@@ -58,7 +64,7 @@ enum States {
 var target_position : Vector2
 var target_direction : float
 var stun_time : int = 0
-var health : int
+var health : int = 10
 var target_camo_level : int
 var target_weapons_animation := Vector2.ONE
 var head_rot_off_y : float = 0.0 #rot of head in relation to body rot
@@ -90,15 +96,96 @@ func perform_action():
 func _enter_tree() -> void:
 	set_multiplayer_authority(name.to_int())
 
-func _ready() -> void:
-	$HBoxContainer/HScrollBar.min_value = 0
-	$HBoxContainer/HScrollBar.max_value = len(States.keys()) - 1
-	$HBoxContainer/HScrollBar.value = 0
-	$HBoxContainer/HScrollBar.step = 1
 
-func _process(delta: float) -> void:
-	$HBoxContainer/Label.text = States.keys()[state]
-	state = $HBoxContainer/HScrollBar.value
+func update_eye_cone(dist_mult : float):
+	_eye_cone.points[1] = Vector3(
+					-view_across * dist_mult * dist_mult,
+					view_across * dist_mult * dist_mult,
+					view_dist * dist_mult)
+	_eye_cone.points[2] = Vector3(
+					view_across * dist_mult * dist_mult,
+					view_across * dist_mult * dist_mult,
+					view_dist * dist_mult)
+	_eye_cone.points[3] = Vector3(
+					view_across * dist_mult * dist_mult,
+					-view_across * dist_mult * dist_mult,
+					view_dist * dist_mult)
+	_eye_cone.points[4] = Vector3(
+					-view_across * dist_mult * dist_mult,
+					-view_across * dist_mult * dist_mult,
+					view_dist * dist_mult)
+
+
+func update_ear_radius(mult : float):
+	_ear_cylinder.radius = hearing_dist * mult
+
+
+func debug_setup():
+	# states
+	$DebugValues/DuringGame/StateScroll.min_value = 0
+	$DebugValues/DuringGame/StateScroll.max_value = len(States.keys()) - 1
+	$DebugValues/DuringGame/StateScroll.value = 0
+	$DebugValues/DuringGame/StateScroll.step = 1
+	# eyes
+	$DebugValues/DuringGame/EyeScroll.min_value = 0.05
+	$DebugValues/DuringGame/EyeScroll.max_value = 1
+	$DebugValues/DuringGame/EyeScroll.value = 1
+	$DebugValues/GameSetup/EyeLengthScroll.min_value = 0.5
+	$DebugValues/GameSetup/EyeLengthScroll.max_value = 4.5
+	$DebugValues/GameSetup/EyeLengthScroll.value = 2.5
+	$DebugValues/GameSetup/EyeAcrossScroll.min_value = 0.5
+	$DebugValues/GameSetup/EyeAcrossScroll.max_value = 1.5
+	$DebugValues/GameSetup/EyeAcrossScroll.value = 1
+	# ears
+	$DebugValues/DuringGame/EarScroll.min_value = 0
+	$DebugValues/DuringGame/EarScroll.max_value = 1
+	$DebugValues/DuringGame/EarScroll.value = 1
+	$DebugValues/GameSetup/EarScroll.min_value = 0.25
+	$DebugValues/GameSetup/EarScroll.max_value = 3
+	$DebugValues/GameSetup/EarScroll.value = 1.5
+	# head rotation
+	$DebugValues/DuringGame/HeadScroll.min_value = -75
+	$DebugValues/DuringGame/HeadScroll.max_value = 75
+	$DebugValues/DuringGame/HeadScroll.value = 0
+	$DebugValues/DuringGame/HeadScroll.step = 1
+
+
+func debug_process():
+	$DebugValues/DuringGame/StateLabel.text = States.keys()[state]
+	state = $DebugValues/DuringGame/StateScroll.value
+	view_dist = $DebugValues/GameSetup/EyeLengthScroll.value
+	view_across = $DebugValues/GameSetup/EyeAcrossScroll.value
+	hearing_dist = $DebugValues/GameSetup/EarScroll.value
+
+	eye_strength = $DebugValues/DuringGame/EyeScroll.value
+	ear_strength = $DebugValues/DuringGame/EarScroll.value
+	_eyes.rotation_degrees.y = $DebugValues/DuringGame/HeadScroll.value
+	$DebugCamera.position = lerp(
+			Vector3(1.56, 0.553, 0.802),
+			Vector3(0.969, 3.016, 0.634),
+			$DebugValues/CameraScroll.value)
+	$DebugCamera.rotation_degrees = lerp(
+			Vector3(0, 61.3, 0),
+			Vector3(-74.9, 61.3, 0.629),
+			$DebugValues/CameraScroll.value)
+
+
+func _ready() -> void:
+	# set up sensors
+	update_eye_cone(1.0)
+	update_ear_radius(1.0)
+	# custom texture
+	if skin_texture != DEFAULT_SKIN:
+		_custom_skin_mat = StandardMaterial3D.new()
+		_custom_skin_mat.set("albedo_texture", load(skin_texture))
+		_mesh.set_surface_override_material(0, _custom_skin_mat)
+	# debug
+	debug_setup()
+
+
+func _process(_delta: float) -> void:
+	debug_process()
+	pass
 
 
 func decide_head_position() -> Vector3:
@@ -112,11 +199,13 @@ func decide_head_position() -> Vector3:
 		return _eyes.position
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	anim.set("parameters/Crouch/blend_position", target_weapons_animation)
 	anim.set("parameters/Stand/blend_position", target_weapons_animation)
 	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
 	_eyes.rotation.y = head_rot_off_y
+	update_eye_cone(eye_strength)
+	update_ear_radius(ear_strength)
 	if in_standing_state() or in_crouching_state():
 		(_body.get_node("Middle") as CollisionShape3D).disabled = false
 	else:
