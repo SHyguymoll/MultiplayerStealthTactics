@@ -34,8 +34,6 @@ var player_id : int #id of player who brought the agent
 @onready var _eyes : ShapeCast3D = $Eyes
 @onready var _ears : ShapeCast3D = $Ears
 @onready var _body : Area3D = $Body
-@export var head_bone_name : String = "DEF-spine.006"
-var head_bone_ind : int
 
 
 enum GameActions {
@@ -97,7 +95,6 @@ func _ready() -> void:
 	$HBoxContainer/HScrollBar.max_value = len(States.keys()) - 1
 	$HBoxContainer/HScrollBar.value = 0
 	$HBoxContainer/HScrollBar.step = 1
-	head_bone_ind = _skeleton.find_bone(head_bone_name)
 
 func _process(delta: float) -> void:
 	$HBoxContainer/Label.text = States.keys()[state]
