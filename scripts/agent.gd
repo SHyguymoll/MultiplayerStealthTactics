@@ -33,8 +33,12 @@ var selected_weapon : int = 0 #index for weapon
 
 var player_id : int #id of player who brought the agent
 
+const DEFAULT_SKIN = "res://assets/models/exports/textures/AgentUVs.png"
+@export var skin_texture : String = DEFAULT_SKIN
+
 @onready var anim : AnimationTree = $AnimationTree
-@onready var _skeleton : Skeleton3D = $Agent/game_rig/Skeleton3D
+@onready var _mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Mesh
+@onready var _custom_skin_mat : StandardMaterial3D
 @onready var _eyes : ShapeCast3D = $Eyes
 @onready var _eye_cone = _eyes.shape as ConvexPolygonShape3D
 @onready var _ears : ShapeCast3D = $Ears

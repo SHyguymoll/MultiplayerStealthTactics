@@ -2,27 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://y5eku2vgj6ca"
-path.s3tc="res://.godot/imported/solid_serpent_MST.png-b2afba7f79a76c2b29bd431a53425108.s3tc.ctex"
+uid="uid://ckow16l0bsefu"
+path="res://.godot/imported/Agent_AgentUVs.png-999311de74cf86b0fde8058dad856d63.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/models/Skins/solid_serpent_MST.png"
-dest_files=["res://.godot/imported/solid_serpent_MST.png-b2afba7f79a76c2b29bd431a53425108.s3tc.ctex"]
+source_file="res://assets/models/exports/Agent_AgentUVs.png"
+dest_files=["res://.godot/imported/Agent_AgentUVs.png-999311de74cf86b0fde8058dad856d63.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -32,4 +31,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1
