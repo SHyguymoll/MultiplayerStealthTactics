@@ -33,8 +33,7 @@ var selected_weapon : int = 0 #index for weapon
 
 var player_id : int #id of player who brought the agent
 
-const DEFAULT_SKIN = "res://assets/models/exports/textures/AgentUVs.png"
-@export var skin_texture : String = DEFAULT_SKIN
+@export var skin_texture : String
 
 @onready var anim : AnimationTree = $AnimationTree
 @onready var _mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Mesh
@@ -179,9 +178,10 @@ func _ready() -> void:
 	update_eye_cone(1.0)
 	update_ear_radius(1.0)
 	# custom texture
-	if skin_texture != DEFAULT_SKIN:
+	if skin_texture:
 		_custom_skin_mat = StandardMaterial3D.new()
-		_custom_skin_mat.set("albedo_texture", load(skin_texture))
+		var texture : Texture2D = load(skin_texture)
+		_custom_skin_mat.albedo_texture = texture
 		_mesh.set_surface_override_material(0, _custom_skin_mat)
 	# debug
 	debug_setup()

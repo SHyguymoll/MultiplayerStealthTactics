@@ -3,20 +3,19 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://y5eku2vgj6ca"
-path.s3tc="res://.godot/imported/solid_serpent_MST.png-b2afba7f79a76c2b29bd431a53425108.s3tc.ctex"
+path="res://.godot/imported/solid_serpent_MST.png-b2afba7f79a76c2b29bd431a53425108.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/models/Skins/solid_serpent_MST.png"
-dest_files=["res://.godot/imported/solid_serpent_MST.png-b2afba7f79a76c2b29bd431a53425108.s3tc.ctex"]
+dest_files=["res://.godot/imported/solid_serpent_MST.png-b2afba7f79a76c2b29bd431a53425108.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
