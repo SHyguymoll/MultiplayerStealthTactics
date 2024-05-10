@@ -5,8 +5,8 @@ signal action_completed
 signal action_interrupted
 signal agent_died
 signal action_chosen
-signal agent_selected
-signal agent_deselected
+signal agent_selected(agent : Agent)
+signal agent_deselected(agent : Agent)
 
 signal spotted_agent(other_agent : Agent)
 signal spotted_element(element : Node3D)
@@ -32,6 +32,7 @@ var selected_item : int = 0 #index for item
 var selected_weapon : int = 0 #index for weapon
 
 var player_id : int #id of player who brought the agent
+var agent_already_selected : bool
 
 @export var skin_texture : String
 
@@ -195,6 +196,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	debug_process()
+	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, 0.2)
 	pass
 
 
@@ -227,3 +229,12 @@ func _physics_process(_delta: float) -> void:
 	if is_multiplayer_authority():
 		var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		position = position + Vector3(move_dir.x, 0, move_dir.y)
+
+
+func _agent_clicked(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int) -> void:
+	if event is InputEventMouse:
+		if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
+			agent_already_selected = not agent_already_selected
+			emit_signal("agent_selected" if agent_already_selected else "agent_deselected", self)
+			_outline_mat.albedo_color = Color.AQUA
+

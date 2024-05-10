@@ -7,6 +7,8 @@ var peer = ENetMultiplayerPeer.new()
 var server_agents : Array[Agent]
 var client_agents : Array[Agent]
 
+var selected_agent : Agent = null
+
 func _ready():
 	# Preconfigure game.
 	server_agents = []
@@ -33,5 +35,10 @@ func ping():
 
 @rpc("authority", "call_local", "reliable")
 func spawn_agent(player_id, agent_stats):
+	var new_agent = Agent.new()
+	new_agent.agent_selected.connect(_show_agent_state_actions)
 	pass
 
+func _show_agent_state_actions(agent : Agent):
+
+	pass

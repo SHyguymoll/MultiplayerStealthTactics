@@ -15566,3 +15566,5 @@ horizontal_alignment = 1
 [node name="CameraScroll" type="HScrollBar" parent="DebugValues"]
 layout_mode = 2
 max_value = 1.0
+
+[connection signal="input_event" from="MouseClick" to="." method="_agent_clicked"]
