@@ -38,6 +38,8 @@ var player_id : int #id of player who brought the agent
 @onready var anim : AnimationTree = $AnimationTree
 @onready var _mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Mesh
 @onready var _custom_skin_mat : StandardMaterial3D
+var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
+var _outline_mat : StandardMaterial3D
 @onready var _eyes : ShapeCast3D = $Eyes
 @onready var _eye_cone = _eyes.shape as ConvexPolygonShape3D
 @onready var _ears : ShapeCast3D = $Ears
@@ -183,6 +185,10 @@ func _ready() -> void:
 		var texture : Texture2D = load(skin_texture)
 		_custom_skin_mat.albedo_texture = texture
 		_mesh.set_surface_override_material(0, _custom_skin_mat)
+	# outline shader
+	_outline_mat = _outline_mat_base.duplicate()
+	_mesh.set_surface_override_material(1, _outline_mat)
+
 	# debug
 	debug_setup()
 
