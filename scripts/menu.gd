@@ -1,12 +1,12 @@
 extends ColorRect
 
-var selected_agents = []
-var other_player_id := 0
-
 @onready var _player_agents : ItemList = $HostScreen/PlayerAgents/ItemList
 @onready var _enemy_agents : HBoxContainer = $HostScreen/EnemyAgentCounter
 
 func _ready() -> void:
+	GameSettings.selected_agents.clear()
+	GameSettings.client_selected_agents.clear()
+	GameSettings.server_client_id = 0
 	$HostScreen.visible = false
 	$SettingsScreen.visible = false
 	$MainMenu.visible = true
@@ -16,7 +16,7 @@ func _ready() -> void:
 	pass
 
 
-func get_agents():
+func get_agents(): # replace with loading from a file later
 	return {
 		name="test",
 		agents=[
@@ -32,10 +32,11 @@ func get_agents():
 		]
 	}
 
+
 func _on_join_pressed() -> void:
 	$HostScreen/Label.text = "Waiting for Host..."
 	$HostScreen/ButtonsHbox/Start.visible = false
-	other_player_id = 1
+	GameSettings.server_client_id = 1
 	GameSettings.local_mode = false
 	Lobby.join_game()
 	$MainMenu.visible = false
@@ -70,16 +71,16 @@ func _populate_agent_list():
 
 
 func _on_item_list_item_selected(index: int) -> void:
-	if index in selected_agents:
+	if index in GameSettings.selected_agents:
 		_player_agents.set_item_text(
 				index, _player_agents.get_item_text(index).trim_suffix(" *"))
-		selected_agents.erase(index)
-		update_hidden_agents.rpc_id(other_player_id, len(selected_agents))
-	elif len(selected_agents) < GameSettings.AGENT_LIMIT:
-		selected_agents.append(index)
+		GameSettings.selected_agents.erase(index)
+		update_hidden_agents.rpc_id(GameSettings.server_client_id, len(GameSettings.selected_agents))
+	elif len(GameSettings.selected_agents) < GameSettings.AGENT_LIMIT:
+		GameSettings.selected_agents.append(index)
 		_player_agents.set_item_text(
 				index, _player_agents.get_item_text(index) + " *")
-		update_hidden_agents.rpc_id(other_player_id, len(selected_agents))
+		update_hidden_agents.rpc_id(GameSettings.server_client_id, len(GameSettings.selected_agents))
 	else:
 		_player_agents.deselect(index)
 
@@ -95,34 +96,36 @@ func update_hidden_agents(number : int):
 			new_notif.texture = load("res://assets/sprites/AgentInfoBackground.png")
 			_enemy_agents.add_child(new_notif)
 
+
 func _on_player_connect(peer_id, player_info):
 	if peer_id == 1:
 		return
-	if other_player_id == 0:
-		other_player_id = multiplayer.get_remote_sender_id()
-	update_hidden_agents.rpc_id(other_player_id, len(selected_agents))
+	if GameSettings.server_client_id == 0:
+		GameSettings.server_client_id = multiplayer.get_remote_sender_id()
+	update_hidden_agents.rpc_id(GameSettings.server_client_id, len(GameSettings.selected_agents))
 	if multiplayer.is_server():
-		$HostScreen/Label.text = "Player found! " + str(other_player_id)
+		$HostScreen/Label.text = "Player found! " + str(GameSettings.server_client_id)
 	else:
-		$HostScreen/Label.text = "Host found! " + str(other_player_id)
+		$HostScreen/Label.text = "Host found! " + str(GameSettings.server_client_id)
 
 
 func _on_player_disconnect(id):
 	$HostScreen/Label.text = "Lost connection to {0}!".format([id])
 
+
 func _on_ready_toggled(toggled_on: bool) -> void:
-	_update_readiness.rpc_id(other_player_id, toggled_on)
+	_update_readiness.rpc_id(GameSettings.server_client_id, toggled_on, GameSettings.selected_agents)
 
 @rpc("any_peer", "call_remote", "reliable")
-func _update_readiness(toggled_on) -> void:
+func _update_readiness(toggled_on : bool, new_selected_agents) -> void: # client-only
 	$HostScreen/ButtonsHbox/Start.disabled = not toggled_on
+	if toggled_on:
+		GameSettings.client_selected_agents = new_selected_agents
 
-func _on_start_pressed() -> void:
+
+func _on_start_pressed() -> void: # server-only
 	Lobby.load_game.rpc("res://scenes/game.tscn")
 
 
 func _on_quit_pressed() -> void:
 	pass # Replace with function body.
-
-
-
