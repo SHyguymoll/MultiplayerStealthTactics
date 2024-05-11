@@ -1,7 +1,18 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://d0mg34cbak5t1"]
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://d0mg34cbak5t1"]
 
 [ext_resource type="FontFile" uid="uid://50pgbui3omif" path="res://assets/fonts/Jersey_25/Jersey25-Regular.ttf" id="1_gvu3e"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_18xqt"]
+bg_color = Color(0.760784, 0.490196, 1, 0.419608)
+border_width_left = 5
+border_width_top = 5
+border_color = Color(0.760784, 0.490196, 1, 0.419608)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ge46r"]
+bg_color = Color(0.556863, 0, 0.631373, 1)
 
 [resource]
 default_font = ExtResource("1_gvu3e")
 default_font_size = 64
+ProgressBar/styles/background = SubResource("StyleBoxFlat_18xqt")
+ProgressBar/styles/fill = SubResource("StyleBoxFlat_ge46r")
