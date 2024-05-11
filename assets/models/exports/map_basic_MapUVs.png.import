@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://blr7vkdw2c3ci"
-path.s3tc="res://.godot/imported/AgentUVs.png-7a92907e229485c239f65a4ca5a79b20.s3tc.ctex"
+uid="uid://dntgr7y22hcvh"
+path="res://.godot/imported/map_basic_MapUVs.png-c041df8bdfdeb07f7b52d72dc92a9b8e.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
+generator_parameters={}
 
 [deps]
 
-source_file="res://assets/models/AgentUVs.png"
-dest_files=["res://.godot/imported/AgentUVs.png-7a92907e229485c239f65a4ca5a79b20.s3tc.ctex"]
+source_file="res://assets/models/exports/map_basic_MapUVs.png"
+dest_files=["res://.godot/imported/map_basic_MapUVs.png-c041df8bdfdeb07f7b52d72dc92a9b8e.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
