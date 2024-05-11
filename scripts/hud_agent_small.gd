@@ -31,12 +31,12 @@ var item := {
 
 
 func update_state(new_state):
-	($AgentState as TextureRect).texture = state[new_state]
+	($AgentState as TextureRect).texture = state.get(new_state, state.unknown)
 
 
 func update_weapon(new_weapon):
-	pass
+	($Equipped/Weapon as TextureRect).texture = weapon.get(new_weapon, weapon.fist)
 
 
-func update_item(new_weapon):
-	pass
+func update_item(new_item):
+	($Equipped/Item as TextureRect).texture = item.get(new_item, item.none)
