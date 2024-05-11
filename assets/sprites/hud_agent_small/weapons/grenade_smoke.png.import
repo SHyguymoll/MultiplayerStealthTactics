@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://kpef2e517ggg"
-path="res://.godot/imported/stunned.png-5d9c3fb6a2b93ddbc8c1458c75aa2a5a.ctex"
+uid="uid://byt0brgih1cql"
+path="res://.godot/imported/grenade_smoke.png-8c11f513a7913ecca6472c77f1b8be43.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/hud_agent_small/stunned.png"
-dest_files=["res://.godot/imported/stunned.png-5d9c3fb6a2b93ddbc8c1458c75aa2a5a.ctex"]
+source_file="res://assets/sprites/hud_agent_small/weapons/grenade_smoke.png"
+dest_files=["res://.godot/imported/grenade_smoke.png-8c11f513a7913ecca6472c77f1b8be43.ctex"]
 
 [params]
 

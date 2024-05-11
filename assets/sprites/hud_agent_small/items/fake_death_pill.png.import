@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cgxed5wghxvvi"
-path="res://.godot/imported/asleep.png-4f6b6bad8565081c760914ca987d0def.ctex"
+uid="uid://cahcpuf0gdy6a"
+path="res://.godot/imported/fake_death_pill.png-cb14c31f6df92cf1f74907b4081213d5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/hud_agent_small/asleep.png"
-dest_files=["res://.godot/imported/asleep.png-4f6b6bad8565081c760914ca987d0def.ctex"]
+source_file="res://assets/sprites/hud_agent_small/items/fake_death_pill.png"
+dest_files=["res://.godot/imported/fake_death_pill.png-cb14c31f6df92cf1f74907b4081213d5.ctex"]
 
 [params]
 

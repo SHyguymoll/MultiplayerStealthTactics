@@ -21,3 +21,16 @@ mesh = SubResource("PlaneMesh_dd7v8")
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
 spawn_path = NodePath("..")
+
+[node name="HUDBase" type="CanvasLayer" parent="."]
+
+[node name="QuickViews" type="HBoxContainer" parent="HUDBase"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -123.0
+offset_right = 822.0
+grow_vertical = 0
+alignment = 1
+
+[node name="HUDSelected" type="CanvasLayer" parent="."]
