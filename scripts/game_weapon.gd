@@ -1,10 +1,16 @@
 class_name GameWeapon
 extends Node
 
+enum Types {
+	SMALL,
+	BIG,
+	THROWN,
+	PLACED,
+}
 var reserve_ammo : int
 var ammo_capacity : int
 var loaded_ammo : int = 0
-
+var type : Types
 
 func _ready():
 	reload_weapon()

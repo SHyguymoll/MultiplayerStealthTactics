@@ -16,7 +16,7 @@ func _ready() -> void:
 	pass
 
 
-func get_agents(): # replace with loading from a file later
+func get_agents(): #TODO: replace with loading from a file later
 	return {
 		name="test",
 		agents=[

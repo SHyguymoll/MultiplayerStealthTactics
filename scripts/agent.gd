@@ -1,5 +1,5 @@
 class_name Agent
-extends Node3D
+extends CharacterBody3D
 
 signal action_completed
 signal action_interrupted
@@ -25,11 +25,11 @@ var camo_level : int #bounded from 0 to 100
 
 var weapon_accuracy : float #bounded from 0.00 to 1.00
 
-var held_items : Array[GameItem] = [null] #max length should be 5, including no item (null)
-var held_weapons : Array[GameWeapon] = [null] #max length should be 4, including no item (null)
+var held_items : Array[GameItem] = [] #max length should be 3
+var held_weapons : Array[GameWeapon] = [] #max length should be 2
 
-var selected_item : int = 0 #index for item
-var selected_weapon : int = 0 #index for weapon
+var selected_item : int = -1 #index for item
+var selected_weapon : int = -1 #index for weapon
 
 var player_id : int #id of player who brought the agent
 var agent_already_selected : bool
@@ -46,6 +46,7 @@ var _outline_mat : StandardMaterial3D
 @onready var _ears : ShapeCast3D = $Ears
 @onready var _ear_cylinder = _ears.shape as CylinderShape3D
 @onready var _body : Area3D = $Body
+@onready var _world_collide : CollisionShape3D = $WorldCollision #( as CollisionShape3D).get_shape()
 
 
 enum GameActions {
@@ -72,8 +73,10 @@ var target_direction : float
 var stun_time : int = 0
 var health : int = 10
 var target_camo_level : int
-var target_weapons_animation := Vector2.ONE
-var head_rot_off_y : float = 0.0 #rot of head in relation to body rot
+var weapons_animation_blend := Vector2.ONE
+var target_head_rot_off_y : float = 0.0 #rot of head in relation to body rot
+var target_world_collide_height : float
+var target_world_collide_y : float
 
 func in_standing_state() -> bool:
 	return state in [States.STAND, States.WALK, States.RUN, States.PARANOID_WALK]
@@ -150,10 +153,10 @@ func debug_setup():
 	$DebugValues/GameSetup/EarScroll.max_value = 3
 	$DebugValues/GameSetup/EarScroll.value = 1.5
 	# head rotation
-	$DebugValues/DuringGame/HeadScroll.min_value = -75
-	$DebugValues/DuringGame/HeadScroll.max_value = 75
+	$DebugValues/DuringGame/HeadScroll.min_value = -(PI * 0.9)/2
+	$DebugValues/DuringGame/HeadScroll.max_value = (PI * 0.9)/2
 	$DebugValues/DuringGame/HeadScroll.value = 0
-	$DebugValues/DuringGame/HeadScroll.step = 1
+	$DebugValues/DuringGame/HeadScroll.step = 0.01
 
 
 func debug_process():
@@ -165,7 +168,7 @@ func debug_process():
 
 	eye_strength = $DebugValues/DuringGame/EyeScroll.value
 	ear_strength = $DebugValues/DuringGame/EarScroll.value
-	_eyes.rotation_degrees.y = $DebugValues/DuringGame/HeadScroll.value
+	target_head_rot_off_y = $DebugValues/DuringGame/HeadScroll.value
 	$DebugCamera.position = lerp(
 			Vector3(1.56, 0.553, 0.802),
 			Vector3(0.969, 3.016, 0.634),
@@ -211,11 +214,25 @@ func decide_head_position() -> Vector3:
 		return _eyes.position
 
 
+func decide_weapon_blend() -> Vector2:
+	if selected_weapon > -1:
+		match held_weapons[selected_weapon].type:
+			GameWeapon.Types.SMALL:
+				return Vector2(-1, 1)
+			GameWeapon.Types.BIG:
+				return Vector2(-1, -1)
+			_:
+				return Vector2(1, -1)
+	else:
+		return Vector2.ONE
+
+
 func _physics_process(_delta: float) -> void:
-	anim.set("parameters/Crouch/blend_position", target_weapons_animation)
-	anim.set("parameters/Stand/blend_position", target_weapons_animation)
+	weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), 0.2)
+	anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
+	anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
-	_eyes.rotation.y = head_rot_off_y
+	_eyes.rotation.y = lerpf(_eyes.rotation.y, target_head_rot_off_y, 0.2)
 	update_eye_cone(eye_strength)
 	update_ear_radius(ear_strength)
 	if in_standing_state() or in_crouching_state():
@@ -226,6 +243,21 @@ func _physics_process(_delta: float) -> void:
 		(_body.get_node("Top") as CollisionShape3D).disabled = false
 	else:
 		(_body.get_node("Top") as CollisionShape3D).disabled = true
+	if in_standing_state():
+		target_world_collide_height = 0.962
+		target_world_collide_y = 0.499
+	if in_crouching_state():
+		target_world_collide_height = 0.666
+		target_world_collide_y = 0.35
+	if in_prone_state():
+		target_world_collide_height = 0.264
+		target_world_collide_y = 0.15
+	_world_collide.position.y = lerpf(_world_collide.position.y, target_world_collide_y, 0.2)
+	(_world_collide.get_shape() as BoxShape3D).size.y = lerpf(
+			(_world_collide.get_shape() as BoxShape3D).size.y,
+			target_world_collide_height,
+			0.2
+	)
 	if is_multiplayer_authority():
 		var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		position = position + Vector3(move_dir.x, 0, move_dir.y)
