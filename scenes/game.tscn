@@ -1,9 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=2 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_dd7v8"]
-size = Vector2(15, 15)
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_re23i")
@@ -15,9 +12,6 @@ script = ExtResource("1_re23i")
 [node name="Camera3D" type="Camera3D" parent="World"]
 transform = Transform3D(0.907777, -0.17594, 0.380769, 0, 0.907777, 0.419452, -0.419452, -0.380769, 0.82406, 1.68, 1.689, 2.942)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="World"]
-mesh = SubResource("PlaneMesh_dd7v8")
-
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
 spawn_path = NodePath("..")
@@ -28,7 +22,7 @@ spawn_path = NodePath("..")
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -123.0
+offset_top = -189.0
 offset_right = 822.0
 grow_vertical = 0
 alignment = 1

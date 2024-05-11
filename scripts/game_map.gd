@@ -2,26 +2,19 @@ class_name GameMap
 extends Node3D
 
 # spawns must comfortably support 4 agents
-@export var server_agent_spawns = {
-	1:
-		[Vector2.ZERO, 0],
-	2:
-		[Vector2.ZERO, 0],
-	3:
-		[Vector2.ZERO, 0],
-	4:
-		[Vector2.ZERO, 0],
-}
-@export var client_agent_spawns = {
-	1:
-		[Vector2.ZERO, 0],
-	2:
-		[Vector2.ZERO, 0],
-	3:
-		[Vector2.ZERO, 0],
-	4:
-		[Vector2.ZERO, 0],
-}
+# spawn entry format is [position, rotation]
+@export var server_agent_spawns = [
+	[Vector2.ZERO, 0],
+	[Vector2.ZERO, 0],
+	[Vector2.ZERO, 0],
+	[Vector2.ZERO, 0],
+]
+@export var client_agent_spawns = [
+	[Vector2.ZERO, 0],
+	[Vector2.ZERO, 0],
+	[Vector2.ZERO, 0],
+	[Vector2.ZERO, 0],
+]
 
 enum Objectives {
 	CAPTURE_ENEMY_FLAG,
