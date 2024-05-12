@@ -2,7 +2,7 @@ class_name HUDAgentSmall
 extends Control
 
 const REMAIN_DIV = 3
-const DELTA_DIV = 5
+const DELTA_DIV = 0.85
 
 var state := {
 	active = preload("res://assets/sprites/hud_agent_small/state/active.png"),
@@ -99,41 +99,41 @@ func update_item_res(new_val):
 
 func _process(delta: float) -> void:
 	if _wep_in_bar.value < _wep_in_bar.max_value/REMAIN_DIV:
-		_wep_in_bar.modulate.s += delta/DELTA_DIV * _wep_in_mod_dir
-		if (
-				is_equal_approx(_wep_in_bar.modulate.s, 1.0) and
-				_wep_in_mod_dir == 1 or
-				is_zero_approx(_wep_in_bar.modulate.s) and
-				_wep_in_mod_dir == -1):
+		_wep_in_bar.modulate.s = clamp(_wep_in_bar.modulate.s + (delta/DELTA_DIV * _wep_in_mod_dir), 0.0, 1.0)
+		if (_wep_in_bar.modulate.s == 1.0 and _wep_in_mod_dir == 1 or
+				_wep_in_bar.modulate.s == 0.0 and _wep_in_mod_dir == -1):
 			_wep_in_mod_dir *= -1
 			_wep_in_bar.modulate.v = 1
+	else:
+		if _wep_in_bar.modulate.s != 0.0:
+			_wep_in_bar.modulate.s = 0.0
 
 	if _wep_res_bar.value < _wep_res_bar.max_value/REMAIN_DIV:
-		_wep_res_bar.modulate.s += delta/DELTA_DIV * _wep_res_mod_dir
-		if (
-				is_equal_approx(_wep_res_bar.modulate.s, 1.0) and
-				_wep_res_mod_dir == 1 or
-				is_zero_approx(_wep_res_bar.modulate.s) and
-				_wep_res_mod_dir == -1):
+		_wep_res_bar.modulate.s = clamp(_wep_res_bar.modulate.s + (delta/DELTA_DIV * _wep_res_mod_dir), 0.0, 1.0)
+		if (_wep_res_bar.modulate.s == 1.0 and _wep_res_mod_dir == 1 or
+				_wep_res_bar.modulate.s == 0.0 and _wep_res_mod_dir == -1):
 			_wep_res_mod_dir *= -1
-			_wep_res_mod_dir.modulate.v = 1
+			_wep_res_bar.modulate.v = 1
+	else:
+		if _wep_res_bar.modulate.s != 0.0:
+			_wep_res_bar.modulate.s = 0.0
 
 	if _item_in_bar.value < _item_in_bar.max_value/REMAIN_DIV:
-		_item_in_bar.modulate.s += delta/DELTA_DIV * _item_in_mod_dir
-		if (
-				is_equal_approx(_item_in_bar.modulate.s, 1.0) and
-				_item_in_mod_dir == 1 or
-				is_zero_approx(_item_in_bar.modulate.s) and
-				_item_in_mod_dir == -1):
+		_item_in_bar.modulate.s = clamp(_item_in_bar.modulate.s + (delta/DELTA_DIV * _item_in_mod_dir), 0.0, 1.0)
+		if (_item_in_bar.modulate.s == 1.0 and _item_in_mod_dir == 1 or
+				_item_in_bar.modulate.s == 0.0 and _item_in_mod_dir == -1):
 			_item_in_mod_dir *= -1
-			_item_in_mod_dir.modulate.v = 1
+			_item_in_bar.modulate.v = 1
+	else:
+		if _item_in_bar.modulate.s != 0.0:
+			_item_in_bar.modulate.s = 0.0
 
 	if _item_res_bar.value < _item_res_bar.max_value/REMAIN_DIV:
-		_item_res_bar.modulate.s += delta/DELTA_DIV * _item_res_mod_dir
-		if (
-				is_equal_approx(_item_res_bar.modulate.s, 1.0) and
-				_item_res_mod_dir == 1 or
-				is_zero_approx(_item_res_bar.modulate.s) and
-				_item_res_mod_dir == -1):
+		_item_res_bar.modulate.s = clamp(_item_res_bar.modulate.s + (delta/DELTA_DIV * _item_res_mod_dir), 0.0, 1.0)
+		if (_item_res_bar.modulate.s == 1.0 and _item_res_mod_dir == 1 or
+				_item_res_bar.modulate.s == 0.0 and _item_res_mod_dir == -1):
 			_item_res_mod_dir *= -1
-			_item_res_mod_dir.modulate.v = 1
+			_item_res_bar.modulate.v = 1
+	else:
+		if _item_res_bar.modulate.s != 0.0:
+			_item_res_bar.modulate.s = 0.0
