@@ -4,7 +4,7 @@ extends Control
 const REMAIN_DIV = 3
 const DELTA_DIV = 0.85
 
-var state := {
+const STATE := {
 	active = preload("res://assets/sprites/hud_agent_small/state/active.png"),
 	alert = preload("res://assets/sprites/hud_agent_small/state/alert.png"),
 	stunned = preload("res://assets/sprites/hud_agent_small/state/stunned.png"),
@@ -13,7 +13,7 @@ var state := {
 	unknown = preload("res://assets/sprites/hud_agent_small/state/unknown.png"),
 }
 
-var weapon := {
+const WEAPON := {
 	fist = preload("res://assets/sprites/hud_agent_small/weapons/fist.png"),
 	pistol = preload("res://assets/sprites/hud_agent_small/weapons/pistol.png"),
 	rifle = preload("res://assets/sprites/hud_agent_small/weapons/rifle.png"),
@@ -25,7 +25,7 @@ var weapon := {
 	enemy_flag = preload("res://assets/sprites/hud_agent_small/weapons/flag.png"),
 }
 
-var item := {
+const ITEM := {
 	none = preload("res://assets/sprites/hud_agent_small/items/none.png"),
 	body_armor = preload("res://assets/sprites/hud_agent_small/items/body_armor.png"),
 	fake_death = preload("res://assets/sprites/hud_agent_small/items/fake_death_pill.png"),
@@ -46,15 +46,15 @@ var _item_in_mod_dir = 1
 var _item_res_mod_dir = 1
 
 func update_state(new_state):
-	($Textures/AgentState as TextureRect).texture = state.get(new_state, state.unknown)
+	($Textures/AgentState as TextureRect).texture = STATE.get(new_state, STATE.unknown)
 
 
 func update_weapon(new_weapon):
-	($Textures/Equipped/Weapon as TextureRect).texture = weapon.get(new_weapon, weapon.fist)
+	($Textures/Equipped/Weapon as TextureRect).texture = WEAPON.get(new_weapon, WEAPON.fist)
 
 
 func update_item(new_item):
-	($Textures/Equipped/Item as TextureRect).texture = item.get(new_item, item.none)
+	($Textures/Equipped/Item as TextureRect).texture = ITEM.get(new_item, ITEM.none)
 
 
 func init_weapon_in(min_val, max_val, cur_val):

@@ -3,7 +3,7 @@ extends Node2D
 
 const TWEEN_TIME = 0.2
 
-var button_icons := {
+const ICONS := {
 	none = preload("res://assets/sprites/radial_menu/none.png"),
 	cancel_back = preload("res://assets/sprites/radial_menu/cancel.png"),
 	stance_stand = preload("res://assets/sprites/radial_menu/stand.png"),
