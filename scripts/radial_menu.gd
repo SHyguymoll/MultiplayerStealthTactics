@@ -34,28 +34,38 @@ func button_spread_animation():
 	var twe := create_tween()
 	twe.set_parallel(true)
 	twe.set_trans(Tween.TRANS_CUBIC)
-	twe.tween_property($UL, "position", Vector2(-272, -272), TWEEN_TIME)
-	twe.tween_property($U, "position", Vector2(-68, -331), TWEEN_TIME)
-	twe.tween_property($UR, "position", Vector2(136, -272), TWEEN_TIME)
-	twe.tween_property($L, "position", Vector2(-331, -68), TWEEN_TIME)
-	twe.tween_property($R, "position", Vector2(195, -68), TWEEN_TIME)
-	twe.tween_property($DL, "position", Vector2(-272, 136), TWEEN_TIME)
-	twe.tween_property($D, "position", Vector2(-68, 195), TWEEN_TIME)
-	twe.tween_property($DR, "position", Vector2(136, 136), TWEEN_TIME)
+	twe.tween_property(_ul, "position", Vector2(-272, -272), TWEEN_TIME)
+	twe.tween_property(_u, "position", Vector2(-68, -331), TWEEN_TIME)
+	twe.tween_property(_ur, "position", Vector2(136, -272), TWEEN_TIME)
+	twe.tween_property(_l, "position", Vector2(-331, -68), TWEEN_TIME)
+	twe.tween_property(_r, "position", Vector2(195, -68), TWEEN_TIME)
+	twe.tween_property(_dl, "position", Vector2(-272, 136), TWEEN_TIME)
+	twe.tween_property(_d, "position", Vector2(-68, 195), TWEEN_TIME)
+	twe.tween_property(_dr, "position", Vector2(136, 136), TWEEN_TIME)
 
-func button_collapse_animation():
+func button_collapse_animation(instant := false):
 	var middle = Vector2(-68, -68)
+	if instant:
+		_ul.position = middle
+		_u.position = middle
+		_ur.position = middle
+		_l.position = middle
+		_r.position = middle
+		_dl.position = middle
+		_d.position = middle
+		_dr.position = middle
+		return
 	var twe := create_tween()
 	twe.set_parallel(true)
 	twe.set_trans(Tween.TRANS_CUBIC)
-	twe.tween_property($UL, "position", middle, TWEEN_TIME)
-	twe.tween_property($U, "position", middle, TWEEN_TIME)
-	twe.tween_property($UR, "position", middle, TWEEN_TIME)
-	twe.tween_property($L, "position", middle, TWEEN_TIME)
-	twe.tween_property($R, "position", middle, TWEEN_TIME)
-	twe.tween_property($DL, "position", middle, TWEEN_TIME)
-	twe.tween_property($D, "position", middle, TWEEN_TIME)
-	twe.tween_property($DR, "position", middle, TWEEN_TIME)
+	twe.tween_property(_ul, "position", middle, TWEEN_TIME)
+	twe.tween_property(_u, "position", middle, TWEEN_TIME)
+	twe.tween_property(_ur, "position", middle, TWEEN_TIME)
+	twe.tween_property(_l, "position", middle, TWEEN_TIME)
+	twe.tween_property(_r, "position", middle, TWEEN_TIME)
+	twe.tween_property(_dl, "position", middle, TWEEN_TIME)
+	twe.tween_property(_d, "position", middle, TWEEN_TIME)
+	twe.tween_property(_dr, "position", middle, TWEEN_TIME)
 
 
 func _ready() -> void:
@@ -65,7 +75,36 @@ func _ready() -> void:
 func button_menu_screen(choice : String):
 	match choice:
 		"top":
-			pass
+			if referenced_agent.in_standing_state():
+				_ul.icon = ICONS.stance_crouch
+				_u.icon = ICONS.run
+				_ur.icon = ICONS.walk
+				_l.icon = ICONS.stance_prone
+				_m.icon = ICONS.cancel_back
+				_r.icon = ICONS.use_weapon
+				_dl.icon = ICONS.none
+				_d.icon = ICONS.swap_item
+				_dr.icon = ICONS.swap_weapon
+			if referenced_agent.in_crouching_state():
+				_ul.icon = ICONS.stance_stand
+				_u.icon = ICONS.none
+				_ur.icon = ICONS.crouch_walk
+				_l.icon = ICONS.stance_prone
+				_m.icon = ICONS.cancel_back
+				_r.icon = ICONS.use_weapon
+				_dl.icon = ICONS.none
+				_d.icon = ICONS.swap_item
+				_dr.icon = ICONS.swap_weapon
+			if referenced_agent.in_prone_state():
+				_ul.icon = ICONS.stance_stand
+				_u.icon = ICONS.none
+				_ur.icon = ICONS.crawl
+				_l.icon = ICONS.stance_crouch
+				_m.icon = ICONS.cancel_back
+				_r.icon = ICONS.none
+				_dl.icon = ICONS.none
+				_d.icon = ICONS.swap_item
+				_dr.icon = ICONS.swap_weapon
 		"top":
 			pass
 		"top":
@@ -79,9 +118,36 @@ func button_menu_screen(choice : String):
 
 
 func _button_pressed_metadata(button_texture : Texture2D):
-	if button_texture == button_icons.none:
-		return
 	print(button_texture)
+	match button_texture:
+		ICONS.none:
+			return
+		ICONS.cancel_back:
+			pass
+		ICONS.stance_stand:
+			pass
+		ICONS.run:
+			pass
+		ICONS.walk:
+			pass
+		ICONS.stance_crouch:
+			pass
+		ICONS.crouch_walk:
+			pass
+		ICONS.stance_prone:
+			pass
+		ICONS.crawl:
+			pass
+		ICONS.swap_item:
+			pass
+		ICONS.swap_weapon:
+			pass
+		ICONS.use_weapon:
+			pass
+	if button_texture in HUDAgentSmall.WEAPON:
+		pass
+	if button_texture in HUDAgentSmall.ITEM:
+		pass
 
 
 func _on_ul_pressed() -> void:
