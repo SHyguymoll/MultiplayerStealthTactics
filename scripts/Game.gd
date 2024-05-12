@@ -10,10 +10,13 @@ var client_agents : Dictionary
 var selected_agent : Agent = null
 var game_map : GameMap
 
+@onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
+
 func _ready():
 	# Preconfigure game.
 	server_agents = {}
 	client_agents = {}
+	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	#Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 
 # Called only on the server.
@@ -31,9 +34,7 @@ func server_populate_agent_dictionaries(): #TODO
 	var spawn_ind = 0
 	for agent_ind in GameSettings.selected_agents:
 		create_agent.rpc(1, Lobby.players[1].agents[agent_ind], game_map.server_agent_spawns[spawn_ind])
-		server_agents[get_node("Agents/1_{0}".format([Lobby.players[1].agents[agent_ind].name]))] = {
-			small_hud = hud_agent_small_scene.instantiate()
-		}
+		spawn_ind += 1
 
 	pass
 
@@ -56,6 +57,33 @@ func create_agent(player_id, agent_stats, spawn_details): #TODO
 	new_agent.action_completed
 	new_agent.action_interrupted
 	new_agent.agent_died
+
+	if player_id == 1:
+		server_agents[new_agent] = {}
+		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
+			var new_quick : HUDAgentSmall = hud_agent_small_scene.instantiate()
+			new_quick.update_state("active")
+			new_quick.update_item("none")
+			new_quick.update_weapon("none")
+			new_quick.init_weapon_in(0, 0, 0)
+			new_quick.init_weapon_res(0, 0, 0)
+			new_quick.init_item_in(0, 0, 0)
+			new_quick.init_item_res(0, 0, 0)
+			server_agents[new_agent]["small_hud"] = new_quick
+			_quick_views.add_child(server_agents[new_agent]["small_hud"])
+	else:
+		client_agents[new_agent] = {}
+		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
+			var new_quick : HUDAgentSmall = hud_agent_small_scene.instantiate()
+			new_quick.update_state("active")
+			new_quick.update_item("none")
+			new_quick.update_weapon("none")
+			new_quick.init_weapon_in(0, 0, 0)
+			new_quick.init_weapon_res(0, 0, 0)
+			new_quick.init_item_in(0, 0, 0)
+			new_quick.init_item_res(0, 0, 0)
+			client_agents[new_agent]["small_hud"] = new_quick
+			_quick_views.add_child(server_agents[new_agent]["small_hud"])
 
 	pass
 

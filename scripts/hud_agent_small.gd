@@ -1,3 +1,4 @@
+class_name HUDAgentSmall
 extends Control
 var state := {
 	active = preload("res://assets/sprites/hud_agent_small/state/active.png"),
