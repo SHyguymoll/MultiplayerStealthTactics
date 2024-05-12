@@ -3,6 +3,7 @@ extends Node3D
 
 @export var agent_scene : PackedScene
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
+var hud_radial_menu = preload("res://scenes/hud_radial_menu.tscn")
 
 var server_agents : Dictionary
 var client_agents : Dictionary
@@ -96,5 +97,10 @@ func create_agent(player_id, agent_stats, spawn_details): #TODO
 	pass
 
 func _hud_agent_details_actions(agent : Agent): #TODO
+	if selected_agent:
+		selected_agent.agent_deselected.emit(selected_agent)
+	selected_agent = agent
+	var new_radial_menu : HUDRadialMenu = hud_radial_menu.instantiate()
+	new_radial_menu.referenced_agent = agent
 	($World/Camera3D as Camera3D).unproject_position(agent.position)
 	pass
