@@ -6,7 +6,7 @@ const DELTA_DIV = 0.85
 
 var state := {
 	active = preload("res://assets/sprites/hud_agent_small/state/active.png"),
-	alert = "",
+	alert = preload("res://assets/sprites/hud_agent_small/state/alert.png"),
 	stunned = preload("res://assets/sprites/hud_agent_small/state/stunned.png"),
 	asleep = preload("res://assets/sprites/hud_agent_small/state/asleep.png"),
 	dead = preload("res://assets/sprites/hud_agent_small/state/dead.png"),
