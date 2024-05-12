@@ -33,12 +33,20 @@ func create_sound_effect() -> void: #TODO
 func server_populate_agent_dictionaries(): #TODO
 	var spawn_ind = 0
 	for agent_ind in GameSettings.selected_agents:
-		create_agent.rpc(1, Lobby.players[1].agents[agent_ind], game_map.server_agent_spawns[spawn_ind])
+		create_agent.rpc(
+				1,
+				Lobby.players[1].agents[agent_ind],
+				game_map.server_agent_spawns[spawn_ind])
 		spawn_ind += 1
-
+	spawn_ind = 0
+	for agent_ind in GameSettings.client_selected_agents:
+		create_agent.rpc(
+				GameSettings.server_client_id,
+				Lobby.players[GameSettings.server_client_id].agents[agent_ind],
+				game_map.client_agent_spawns[spawn_ind])
 	pass
 
-@rpc()
+@rpc("call_local")
 func ping():
 	print("pong!")
 
@@ -88,5 +96,5 @@ func create_agent(player_id, agent_stats, spawn_details): #TODO
 	pass
 
 func _hud_agent_details_actions(agent : Agent): #TODO
-
+	($World/Camera3D as Camera3D).unproject_position(agent.position)
 	pass

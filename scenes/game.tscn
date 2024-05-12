@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=3 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
+[ext_resource type="Script" path="res://scripts/radial_menu.gd" id="2_r5s3r"]
 
 [node name="Game" type="Node3D"]
 script = ExtResource("1_re23i")
@@ -28,3 +29,66 @@ grow_vertical = 0
 alignment = 1
 
 [node name="HUDSelected" type="CanvasLayer" parent="."]
+
+[node name="RadialMenu" type="Node2D" parent="HUDSelected"]
+position = Vector2(1314, 379)
+script = ExtResource("2_r5s3r")
+
+[node name="GridContainer" type="GridContainer" parent="HUDSelected/RadialMenu"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -197.5
+offset_top = -50.5
+offset_right = 197.5
+offset_bottom = 50.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 3
+
+[node name="UpLeft" type="Button" parent="HUDSelected/RadialMenu/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Up" type="Button" parent="HUDSelected/RadialMenu/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="UpRight" type="Button" parent="HUDSelected/RadialMenu/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Left" type="Button" parent="HUDSelected/RadialMenu/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Cancel" type="Button" parent="HUDSelected/RadialMenu/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Right" type="Button" parent="HUDSelected/RadialMenu/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="DownLeft" type="Button" parent="HUDSelected/RadialMenu/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Down" type="Button" parent="HUDSelected/RadialMenu/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="DownRight" type="Button" parent="HUDSelected/RadialMenu/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
