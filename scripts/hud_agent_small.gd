@@ -37,13 +37,9 @@ const ITEM := {
 
 @onready var _wep_in_bar : ProgressBar = $WeaponAmmoIn
 @onready var _wep_res_bar : ProgressBar = $WeaponAmmoReserve
-@onready var _item_in_bar : ProgressBar = $ItemAmmoIn
-@onready var _item_res_bar : ProgressBar = $ItemAmmoReserve
 
 var _wep_in_mod_dir = 1
 var _wep_res_mod_dir = 1
-var _item_in_mod_dir = 1
-var _item_res_mod_dir = 1
 
 func update_state(new_state):
 	($Textures/AgentState as TextureRect).texture = STATE.get(new_state, STATE.unknown)
@@ -77,26 +73,6 @@ func update_weapon_res(new_val):
 	_wep_res_bar.value = new_val
 
 
-func init_item_in(min_val, max_val, cur_val):
-	_item_in_bar.min_value = min_val
-	_item_in_bar.max_value = max_val
-	_item_in_bar.value = cur_val
-
-
-func update_item_in(new_val):
-	_item_in_bar.value = new_val
-
-
-func init_item_res(min_val, max_val, cur_val):
-	_item_res_bar.min_value = min_val
-	_item_res_bar.max_value = max_val
-	_item_res_bar.value = cur_val
-
-
-func update_item_res(new_val):
-	_item_res_bar.value = new_val
-
-
 func _process(delta: float) -> void:
 	if _wep_in_bar.value < _wep_in_bar.max_value/REMAIN_DIV:
 		_wep_in_bar.modulate.s = clamp(_wep_in_bar.modulate.s + (delta/DELTA_DIV * _wep_in_mod_dir), 0.0, 1.0)
@@ -117,23 +93,3 @@ func _process(delta: float) -> void:
 	else:
 		if _wep_res_bar.modulate.s != 0.0:
 			_wep_res_bar.modulate.s = 0.0
-
-	if _item_in_bar.value < _item_in_bar.max_value/REMAIN_DIV:
-		_item_in_bar.modulate.s = clamp(_item_in_bar.modulate.s + (delta/DELTA_DIV * _item_in_mod_dir), 0.0, 1.0)
-		if (_item_in_bar.modulate.s == 1.0 and _item_in_mod_dir == 1 or
-				_item_in_bar.modulate.s == 0.0 and _item_in_mod_dir == -1):
-			_item_in_mod_dir *= -1
-			_item_in_bar.modulate.v = 1
-	else:
-		if _item_in_bar.modulate.s != 0.0:
-			_item_in_bar.modulate.s = 0.0
-
-	if _item_res_bar.value < _item_res_bar.max_value/REMAIN_DIV:
-		_item_res_bar.modulate.s = clamp(_item_res_bar.modulate.s + (delta/DELTA_DIV * _item_res_mod_dir), 0.0, 1.0)
-		if (_item_res_bar.modulate.s == 1.0 and _item_res_mod_dir == 1 or
-				_item_res_bar.modulate.s == 0.0 and _item_res_mod_dir == -1):
-			_item_res_mod_dir *= -1
-			_item_res_bar.modulate.v = 1
-	else:
-		if _item_res_bar.modulate.s != 0.0:
-			_item_res_bar.modulate.s = 0.0
