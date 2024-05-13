@@ -25,7 +25,7 @@ var camo_level : int #bounded from 0 to 100
 
 var weapon_accuracy : float #bounded from 0.00 to 1.00
 
-var held_items : Array[GameItem] = [] #max length should be 3
+var held_items : Array[String] = [] #max length should be 3
 var held_weapons : Array[GameWeapon] = [] #max length should be 2
 
 var selected_item : int = -1 #index for item

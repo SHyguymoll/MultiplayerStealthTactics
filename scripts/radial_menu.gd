@@ -2,6 +2,8 @@ class_name HUDRadialMenu
 extends Node2D
 
 const TWEEN_TIME = 0.2
+const ICON_DIST = 32
+const DIST_CIRCLE_ADD = 40
 
 const ICONS := {
 	none = preload("res://assets/sprites/radial_menu/none.png"),
@@ -20,6 +22,7 @@ const ICONS := {
 }
 
 var referenced_agent : Agent
+var current_screen : String
 
 @onready var _ul : Button = $UL
 @onready var _u : Button = $U
@@ -32,20 +35,25 @@ var referenced_agent : Agent
 @onready var _dr : Button = $DR
 
 func button_spread_animation():
+	var mid = _m.size.x/-2
+	_disable_all_buttons()
 	var twe := create_tween()
 	twe.set_parallel(true)
 	twe.set_trans(Tween.TRANS_CUBIC)
-	twe.tween_property(_ul, "position", Vector2(-272, -272), TWEEN_TIME)
-	twe.tween_property(_u, "position", Vector2(-68, -331), TWEEN_TIME)
-	twe.tween_property(_ur, "position", Vector2(136, -272), TWEEN_TIME)
-	twe.tween_property(_l, "position", Vector2(-331, -68), TWEEN_TIME)
-	twe.tween_property(_r, "position", Vector2(195, -68), TWEEN_TIME)
-	twe.tween_property(_dl, "position", Vector2(-272, 136), TWEEN_TIME)
-	twe.tween_property(_d, "position", Vector2(-68, 195), TWEEN_TIME)
-	twe.tween_property(_dr, "position", Vector2(136, 136), TWEEN_TIME)
+	twe.tween_property(_ul, "position", Vector2(mid - ICON_DIST*3, mid - ICON_DIST*3), TWEEN_TIME)
+	twe.tween_property(_u, "position", Vector2(mid, mid - ICON_DIST*3 - DIST_CIRCLE_ADD), TWEEN_TIME)
+	twe.tween_property(_ur, "position", Vector2(mid + ICON_DIST*3, mid - ICON_DIST*3), TWEEN_TIME)
+	twe.tween_property(_l, "position", Vector2(mid - ICON_DIST*3 - DIST_CIRCLE_ADD, mid), TWEEN_TIME)
+	_m.position = Vector2(mid, mid)
+	twe.tween_property(_r, "position", Vector2(mid + ICON_DIST*3 + DIST_CIRCLE_ADD, mid), TWEEN_TIME)
+	twe.tween_property(_dl, "position", Vector2(mid - ICON_DIST*3, mid + ICON_DIST*3), TWEEN_TIME)
+	twe.tween_property(_d, "position", Vector2(mid, mid + ICON_DIST*3 + DIST_CIRCLE_ADD), TWEEN_TIME)
+	twe.tween_property(_dr, "position", Vector2(mid + ICON_DIST*3, mid + ICON_DIST*3), TWEEN_TIME)
+	twe.finished.connect(_enable_all_buttons)
 
-func button_collapse_animation(instant := false):
-	var middle = Vector2(-68, -68)
+func button_collapse_animation(instant := false, and_free := false):
+	_disable_all_buttons()
+	var middle = _m.size/-2
 	if instant:
 		_ul.position = middle
 		_u.position = middle
@@ -67,14 +75,86 @@ func button_collapse_animation(instant := false):
 	twe.tween_property(_dl, "position", middle, TWEEN_TIME)
 	twe.tween_property(_d, "position", middle, TWEEN_TIME)
 	twe.tween_property(_dr, "position", middle, TWEEN_TIME)
+	if and_free:
+		twe.finished.connect(queue_free)
+
+func _enable_all_buttons():
+	_ul.disabled = false
+	_u.disabled = false
+	_ur.disabled = false
+	_l.disabled = false
+	_m.disabled = false
+	_r.disabled = false
+	_dl.disabled = false
+	_d.disabled = false
+	_dr.disabled = false
+
+func _disable_all_buttons():
+	_ul.disabled = true
+	_u.disabled = true
+	_ur.disabled = true
+	_l.disabled = true
+	_m.disabled = true
+	_r.disabled = true
+	_dl.disabled = true
+	_d.disabled = true
+	_dr.disabled = true
+
+
+func debug_agent():
+	referenced_agent = Agent.new()
+	referenced_agent.held_items = ["cigar", "analyzer", "box"]
+	referenced_agent.held_weapons = [GameWeapon.new(), GameWeapon.new()]
+	referenced_agent.held_weapons[0].icon = HUDAgentSmall.WEAPON.rifle
+	referenced_agent.held_weapons[0].type = GameWeapon.Types.BIG
+	referenced_agent.held_weapons[1].icon = HUDAgentSmall.WEAPON.noise_maker
+	referenced_agent.held_weapons[1].type = GameWeapon.Types.THROWN
+	referenced_agent.held_weapons[1].reserve_ammo = 5
+
 
 
 func _ready() -> void:
-	button_spread_animation()
+	debug_agent()
+	button_collapse_animation(true)
+	current_screen = "top"
+	button_menu_screen()
 
 
-func button_menu_screen(choice : String):
-	match choice:
+func determine_items():
+	_ul.icon = ICONS.none
+	_u.icon = ICONS.none
+	_ur.icon = ICONS.none
+	var candidates := referenced_agent.held_items.duplicate()
+	if referenced_agent.selected_item > -1:
+		candidates.remove_at(referenced_agent.selected_item)
+		candidates.insert(referenced_agent.selected_item, HUDAgentSmall.ITEM.none)
+	for item in candidates:
+		if _ul.icon == ICONS.none:
+			_ul.icon = HUDAgentSmall.ITEM[item]
+		elif _u.icon == ICONS.none:
+			_u.icon = HUDAgentSmall.ITEM[item]
+		elif _ur.icon == ICONS.none:
+			_ur.icon = HUDAgentSmall.ITEM[item]
+
+
+func determine_weapons(): #TODO
+	_ul.icon = ICONS.none
+	_ur.icon = ICONS.none
+	var candidates : Array[GameWeapon] = referenced_agent.held_weapons.duplicate()
+	if referenced_agent.selected_weapon > -1:
+		candidates.remove_at(referenced_agent.selected_weapon)
+		candidates.insert(referenced_agent.selected_weapon, HUDAgentSmall.WEAPON.fist)
+	for weapon in candidates:
+		if weapon.type == GameWeapon.Types.THROWN and weapon.reserve_ammo == 0:
+			continue
+		if _ul.icon == ICONS.none:
+			_ul.icon = weapon.icon
+		elif _ur.icon == ICONS.none:
+			_ur.icon = weapon.icon
+
+
+func button_menu_screen():
+	match current_screen:
 		"top":
 			if referenced_agent.in_standing_state():
 				_ul.icon = ICONS.stance_crouch
@@ -106,16 +186,34 @@ func button_menu_screen(choice : String):
 				_dl.icon = ICONS.look
 				_d.icon = ICONS.swap_item
 				_dr.icon = ICONS.swap_weapon
-		"top":
-			pass
-		"top":
-			pass
-		"top":
-			pass
-		"top":
-			pass
-		"top":
-			pass
+		"swap_item":
+			determine_items()
+			_l.icon = ICONS.none
+			_m.icon = ICONS.cancel_back
+			_r.icon = ICONS.none
+			_dl.icon = ICONS.none
+			_d.icon = ICONS.none
+			_dr.icon = ICONS.none
+		"swap_weapon":
+			determine_weapons()
+			_u.icon = ICONS.none
+			_l.icon = ICONS.none
+			_m.icon = ICONS.cancel_back
+			_r.icon = ICONS.none
+			_dl.icon = ICONS.none
+			_d.icon = ICONS.none
+			_dr.icon = ICONS.none
+	_ul.visible = _ul.icon != ICONS.none
+	_u.visible = _u.icon != ICONS.none
+	_ur.visible = _ur.icon != ICONS.none
+	_l.visible = _l.icon != ICONS.none
+	_m.visible = _m.icon != ICONS.none
+	_r.visible = _r.icon != ICONS.none
+	_dl.visible = _dl.icon != ICONS.none
+	_d.visible = _d.icon != ICONS.none
+	_dr.visible = _dr.icon != ICONS.none
+	button_collapse_animation(true)
+	button_spread_animation()
 
 
 func _button_pressed_metadata(button_texture : Texture2D):
@@ -124,7 +222,13 @@ func _button_pressed_metadata(button_texture : Texture2D):
 		ICONS.none:
 			return
 		ICONS.cancel_back:
-			pass
+			if current_screen in ["swap_item", "swap_weapon"]:
+				current_screen = "top"
+				button_menu_screen()
+				button_collapse_animation(true)
+				button_spread_animation()
+			else:
+				button_collapse_animation(false, true)
 		ICONS.stance_stand:
 			pass
 		ICONS.run:
@@ -140,9 +244,11 @@ func _button_pressed_metadata(button_texture : Texture2D):
 		ICONS.crawl:
 			pass
 		ICONS.swap_item:
-			pass
+			current_screen = "swap_item"
+			button_menu_screen()
 		ICONS.swap_weapon:
-			pass
+			current_screen = "swap_weapon"
+			button_menu_screen()
 		ICONS.use_weapon:
 			pass
 	if button_texture in HUDAgentSmall.WEAPON:

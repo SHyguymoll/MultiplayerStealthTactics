@@ -1,17 +1,10 @@
-[gd_scene load_steps=11 format=3 uid="uid://d4hiq2jbaabj5"]
+[gd_scene load_steps=3 format=3 uid="uid://d4hiq2jbaabj5"]
 
 [ext_resource type="Script" path="res://scripts/radial_menu.gd" id="1_n51wc"]
 [ext_resource type="Texture2D" uid="uid://bc6012otbs3eg" path="res://assets/sprites/radial_menu/none.png" id="2_nl0k1"]
-[ext_resource type="Texture2D" uid="uid://dc8iocjvp517w" path="res://assets/sprites/radial_menu/crouch.png" id="4_0pvhu"]
-[ext_resource type="Texture2D" uid="uid://2fuvhrc6fkej" path="res://assets/sprites/radial_menu/use_weapon.png" id="5_thagb"]
-[ext_resource type="Texture2D" uid="uid://cn45ivii6dh1d" path="res://assets/sprites/radial_menu/run.png" id="6_oytyf"]
-[ext_resource type="Texture2D" uid="uid://can1hi6okiaxy" path="res://assets/sprites/radial_menu/cancel.png" id="6_prbmd"]
-[ext_resource type="Texture2D" uid="uid://xvwdlmiww52h" path="res://assets/sprites/radial_menu/prone.png" id="6_s3y4l"]
-[ext_resource type="Texture2D" uid="uid://bay3d8u6qm6yt" path="res://assets/sprites/radial_menu/swap_item.png" id="7_bpyar"]
-[ext_resource type="Texture2D" uid="uid://5dl6woqngd2q" path="res://assets/sprites/radial_menu/walk.png" id="7_lwg4v"]
-[ext_resource type="Texture2D" uid="uid://dppcbu3mp0fue" path="res://assets/sprites/radial_menu/swap_weapon.png" id="8_klixb"]
 
 [node name="RadialMenu" type="Node2D"]
+position = Vector2(960, 540)
 script = ExtResource("1_n51wc")
 
 [node name="UL" type="Button" parent="."]
@@ -20,15 +13,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -68.0
-offset_top = -68.0
-offset_right = 68.0
-offset_bottom = 68.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("4_0pvhu")
+icon = ExtResource("2_nl0k1")
 
 [node name="U" type="Button" parent="."]
 anchors_preset = 8
@@ -36,15 +29,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -68.0
-offset_top = -68.0
-offset_right = 68.0
-offset_bottom = 68.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("6_oytyf")
+icon = ExtResource("2_nl0k1")
 
 [node name="UR" type="Button" parent="."]
 anchors_preset = 8
@@ -52,15 +45,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -68.0
-offset_top = -68.0
-offset_right = 68.0
-offset_bottom = 68.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("7_lwg4v")
+icon = ExtResource("2_nl0k1")
 
 [node name="L" type="Button" parent="."]
 anchors_preset = 8
@@ -68,15 +61,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -68.0
-offset_top = -68.0
-offset_right = 68.0
-offset_bottom = 68.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("6_s3y4l")
+icon = ExtResource("2_nl0k1")
 
 [node name="M" type="Button" parent="."]
 anchors_preset = 8
@@ -84,15 +77,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -68.0
-offset_top = -68.0
-offset_right = 68.0
-offset_bottom = 68.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("6_prbmd")
+icon = ExtResource("2_nl0k1")
 
 [node name="R" type="Button" parent="."]
 anchors_preset = 8
@@ -100,15 +93,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -68.0
-offset_top = -68.0
-offset_right = 68.0
-offset_bottom = 68.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("5_thagb")
+icon = ExtResource("2_nl0k1")
 
 [node name="DL" type="Button" parent="."]
 anchors_preset = 8
@@ -116,10 +109,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -68.0
-offset_top = -68.0
-offset_right = 68.0
-offset_bottom = 68.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -132,15 +125,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -68.0
-offset_top = -68.0
-offset_right = 68.0
-offset_bottom = 68.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("7_bpyar")
+icon = ExtResource("2_nl0k1")
 
 [node name="DR" type="Button" parent="."]
 anchors_preset = 8
@@ -148,15 +141,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -68.0
-offset_top = -68.0
-offset_right = 68.0
-offset_bottom = 68.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("8_klixb")
+icon = ExtResource("2_nl0k1")
 
 [connection signal="pressed" from="UL" to="." method="_on_ul_pressed"]
 [connection signal="pressed" from="U" to="." method="_on_u_pressed"]
