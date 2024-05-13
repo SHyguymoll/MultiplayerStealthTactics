@@ -114,7 +114,6 @@ func debug_agent():
 	referenced_agent.held_weapons[1].reserve_ammo = 5
 
 
-
 func _ready() -> void:
 	debug_agent()
 	button_collapse_animation(true)
@@ -139,7 +138,7 @@ func determine_items():
 			_ur.icon = HUDAgentSmall.ITEM[item]
 
 
-func determine_weapons(): #TODO
+func determine_weapons():
 	_ul.icon = ICONS.none
 	_ur.icon = ICONS.none
 	var candidates : Array[GameWeapon] = referenced_agent.held_weapons.duplicate()

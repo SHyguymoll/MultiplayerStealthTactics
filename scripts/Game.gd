@@ -102,5 +102,7 @@ func _hud_agent_details_actions(agent : Agent): #TODO
 	selected_agent = agent
 	var new_radial_menu : HUDRadialMenu = hud_radial_menu.instantiate()
 	new_radial_menu.referenced_agent = agent
-	($World/Camera3D as Camera3D).unproject_position(agent.position)
+	new_radial_menu.position = (
+			$World/Camera3D as Camera3D).unproject_position(
+					agent.position).clamp(Vector2(get_window().size) - get_window().size * 0.85, get_window().size * 0.85)
 	pass
