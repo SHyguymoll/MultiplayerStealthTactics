@@ -107,9 +107,9 @@ func debug_agent():
 	referenced_agent.state = Agent.States.CRAWL
 	referenced_agent.held_items = ["cigar", "analyzer", "box"]
 	referenced_agent.held_weapons = [GameWeapon.new(), GameWeapon.new()]
-	referenced_agent.held_weapons[0].icon = HUDAgentSmall.WEAPON.rifle
+	referenced_agent.held_weapons[0].icon = GameIcons.WEP.rifle
 	referenced_agent.held_weapons[0].type = GameWeapon.Types.BIG
-	referenced_agent.held_weapons[1].icon = HUDAgentSmall.WEAPON.noise_maker
+	referenced_agent.held_weapons[1].icon = GameIcons.WEP.noise_maker
 	referenced_agent.held_weapons[1].type = GameWeapon.Types.THROWN
 	referenced_agent.held_weapons[1].reserve_ammo = 5
 
@@ -128,13 +128,13 @@ func determine_items():
 	var candidates := referenced_agent.held_items.duplicate()
 	if referenced_agent.selected_item > -1:
 		candidates.remove_at(referenced_agent.selected_item)
-		candidates.insert(referenced_agent.selected_item, HUDAgentSmall.ITEM.none)
+		candidates.insert(referenced_agent.selected_item, GameIcons.ITM.none)
 	if len(candidates) > 0:
-		_ul.icon = HUDAgentSmall.ITEM[candidates[0]]
+		_ul.icon = GameIcons.ITM[candidates[0]]
 	if len(candidates) > 1:
-		_u.icon = HUDAgentSmall.ITEM[candidates[1]]
+		_u.icon = GameIcons.ITM[candidates[1]]
 	if len(candidates) > 2:
-		_ur.icon = HUDAgentSmall.ITEM[candidates[2]]
+		_ur.icon = GameIcons.ITM[candidates[2]]
 
 
 func determine_weapons():
@@ -143,7 +143,7 @@ func determine_weapons():
 	var candidates : Array[GameWeapon] = referenced_agent.held_weapons.duplicate()
 	if referenced_agent.selected_weapon > -1:
 		candidates.remove_at(referenced_agent.selected_weapon)
-		candidates.insert(referenced_agent.selected_weapon, HUDAgentSmall.WEAPON.fist)
+		candidates.insert(referenced_agent.selected_weapon, GameIcons.WEP.fist)
 	if len(candidates) > 0:
 		_ul.icon = candidates[0].icon
 	if len(candidates) > 1:
@@ -222,7 +222,6 @@ func button_menu_screen():
 
 
 func _button_pressed_metadata(button_texture : Texture2D):
-	print(button_texture)
 	match button_texture:
 		ICONS.none:
 			return
@@ -256,9 +255,9 @@ func _button_pressed_metadata(button_texture : Texture2D):
 			button_menu_screen()
 		ICONS.use_weapon:
 			pass
-	if button_texture in HUDAgentSmall.WEAPON:
+	if button_texture in GameIcons.WEP:
 		pass
-	if button_texture in HUDAgentSmall.ITEM:
+	if button_texture in GameIcons.ITM:
 		pass
 
 

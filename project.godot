@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Lobby="*res://scripts/lobby.gd"
 GameSettings="*res://scripts/game_settings.gd"
+GameIcons="*res://scripts/game_icons.gd"
 
 [display]
 
