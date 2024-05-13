@@ -8,6 +8,7 @@ const DIST_CIRCLE_ADD = 40
 const ICONS := {
 	none = preload("res://assets/sprites/radial_menu/none.png"),
 	cancel_back = preload("res://assets/sprites/radial_menu/cancel.png"),
+	halt = preload("res://assets/sprites/radial_menu/halt.png"),
 	look = preload("res://assets/sprites/radial_menu/look.png"),
 	stance_stand = preload("res://assets/sprites/radial_menu/stand.png"),
 	run = preload("res://assets/sprites/radial_menu/run.png"),
@@ -103,6 +104,7 @@ func _disable_all_buttons():
 
 func debug_agent():
 	referenced_agent = Agent.new()
+	referenced_agent.state = Agent.States.CRAWL
 	referenced_agent.held_items = ["cigar", "analyzer", "box"]
 	referenced_agent.held_weapons = [GameWeapon.new(), GameWeapon.new()]
 	referenced_agent.held_weapons[0].icon = HUDAgentSmall.WEAPON.rifle
@@ -159,7 +161,11 @@ func button_menu_screen():
 			if referenced_agent.in_standing_state():
 				_ul.icon = ICONS.stance_crouch
 				_u.icon = ICONS.run
+				if referenced_agent.state == referenced_agent.States.RUN:
+					_u.icon = ICONS.halt
 				_ur.icon = ICONS.walk
+				if referenced_agent.state == referenced_agent.States.WALK:
+					_ur.icon = ICONS.halt
 				_l.icon = ICONS.stance_prone
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.use_weapon
@@ -170,6 +176,8 @@ func button_menu_screen():
 				_ul.icon = ICONS.stance_stand
 				_u.icon = ICONS.none
 				_ur.icon = ICONS.crouch_walk
+				if referenced_agent.state == referenced_agent.States.CROUCH_WALK:
+					_ur.icon = ICONS.halt
 				_l.icon = ICONS.stance_prone
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.use_weapon
@@ -180,6 +188,8 @@ func button_menu_screen():
 				_ul.icon = ICONS.stance_stand
 				_u.icon = ICONS.none
 				_ur.icon = ICONS.crawl
+				if referenced_agent.state == referenced_agent.States.CRAWL:
+					_ur.icon = ICONS.halt
 				_l.icon = ICONS.stance_crouch
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.none
