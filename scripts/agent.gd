@@ -46,7 +46,7 @@ var _outline_mat : StandardMaterial3D
 @onready var _ears : ShapeCast3D = $Ears
 @onready var _ear_cylinder = _ears.shape as CylinderShape3D
 @onready var _body : Area3D = $Body
-@onready var _world_collide : CollisionShape3D = $WorldCollision #( as CollisionShape3D).get_shape()
+@onready var _world_collide : CollisionShape3D = $WorldCollision
 
 
 enum GameActions {

@@ -12,7 +12,6 @@
 [ext_resource type="Texture2D" uid="uid://dppcbu3mp0fue" path="res://assets/sprites/radial_menu/swap_weapon.png" id="8_klixb"]
 
 [node name="RadialMenu" type="Node2D"]
-position = Vector2(816, 453)
 script = ExtResource("1_n51wc")
 
 [node name="UL" type="Button" parent="."]

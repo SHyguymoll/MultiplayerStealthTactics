@@ -6,6 +6,7 @@ const TWEEN_TIME = 0.2
 const ICONS := {
 	none = preload("res://assets/sprites/radial_menu/none.png"),
 	cancel_back = preload("res://assets/sprites/radial_menu/cancel.png"),
+	look = preload("res://assets/sprites/radial_menu/look.png"),
 	stance_stand = preload("res://assets/sprites/radial_menu/stand.png"),
 	run = preload("res://assets/sprites/radial_menu/run.png"),
 	walk = preload("res://assets/sprites/radial_menu/walk.png"),
@@ -82,7 +83,7 @@ func button_menu_screen(choice : String):
 				_l.icon = ICONS.stance_prone
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.use_weapon
-				_dl.icon = ICONS.none
+				_dl.icon = ICONS.look
 				_d.icon = ICONS.swap_item
 				_dr.icon = ICONS.swap_weapon
 			if referenced_agent.in_crouching_state():
@@ -92,7 +93,7 @@ func button_menu_screen(choice : String):
 				_l.icon = ICONS.stance_prone
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.use_weapon
-				_dl.icon = ICONS.none
+				_dl.icon = ICONS.look
 				_d.icon = ICONS.swap_item
 				_dr.icon = ICONS.swap_weapon
 			if referenced_agent.in_prone_state():
@@ -102,7 +103,7 @@ func button_menu_screen(choice : String):
 				_l.icon = ICONS.stance_crouch
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.none
-				_dl.icon = ICONS.none
+				_dl.icon = ICONS.look
 				_d.icon = ICONS.swap_item
 				_dr.icon = ICONS.swap_weapon
 		"top":
