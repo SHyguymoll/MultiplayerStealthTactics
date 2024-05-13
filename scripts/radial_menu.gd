@@ -129,13 +129,12 @@ func determine_items():
 	if referenced_agent.selected_item > -1:
 		candidates.remove_at(referenced_agent.selected_item)
 		candidates.insert(referenced_agent.selected_item, HUDAgentSmall.ITEM.none)
-	for item in candidates:
-		if _ul.icon == ICONS.none:
-			_ul.icon = HUDAgentSmall.ITEM[item]
-		elif _u.icon == ICONS.none:
-			_u.icon = HUDAgentSmall.ITEM[item]
-		elif _ur.icon == ICONS.none:
-			_ur.icon = HUDAgentSmall.ITEM[item]
+	if len(candidates) > 0:
+		_ul.icon = HUDAgentSmall.ITEM[candidates[0]]
+	if len(candidates) > 1:
+		_u.icon = HUDAgentSmall.ITEM[candidates[1]]
+	if len(candidates) > 2:
+		_ur.icon = HUDAgentSmall.ITEM[candidates[2]]
 
 
 func determine_weapons():
@@ -145,13 +144,10 @@ func determine_weapons():
 	if referenced_agent.selected_weapon > -1:
 		candidates.remove_at(referenced_agent.selected_weapon)
 		candidates.insert(referenced_agent.selected_weapon, HUDAgentSmall.WEAPON.fist)
-	for weapon in candidates:
-		if weapon.type == GameWeapon.Types.THROWN and weapon.reserve_ammo == 0:
-			continue
-		if _ul.icon == ICONS.none:
-			_ul.icon = weapon.icon
-		elif _ur.icon == ICONS.none:
-			_ur.icon = weapon.icon
+	if len(candidates) > 0:
+		_ul.icon = candidates[0].icon
+	if len(candidates) > 1:
+		_ur.icon = candidates[1].icon
 
 
 func button_menu_screen():
