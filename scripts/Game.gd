@@ -1,12 +1,12 @@
 class_name Game
 extends Node3D
 
+var agent_scene = preload("res://scenes/agent.tscn")
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 
 var server_agents : Dictionary
 var client_agents : Dictionary
 
-var selected_agent : Agent = null
 @export var game_map : GameMap
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
@@ -64,6 +64,7 @@ func start_game():
 	ping.rpc()
 	server_populate_agent_dictionaries()
 	#send_populated_dictionaries.rpc_id(other_player)
+
 	pass
 
 func create_sound_effect() -> void: #TODO
@@ -123,16 +124,18 @@ func ping():
 
 @rpc("authority", "call_local", "reliable")
 func create_agent(player_id, agent_stats, spawn : Node3D): #TODO
-	var new_agent = Agent.new()
+	var new_agent = agent_scene.instantiate()
 	new_agent.name = str(player_id) + "_" + str(agent_stats.name)
 	new_agent.agent_selected.connect(_hud_agent_details_actions)
-	new_agent.agent_deselected.connect(_radial_menu.button_collapse_animation)
+	#new_agent.agent_deselected.connect(_radial_menu.button_collapse_animation)
 	new_agent.action_chosen
 	new_agent.action_completed
 	new_agent.action_interrupted
 	new_agent.agent_died
 	new_agent.position = spawn.position
 	new_agent.rotation.y = spawn.rotation.y
+	new_agent.set_multiplayer_authority(player_id)
+	$Agents.add_child(new_agent)
 
 	if player_id == 1:
 		server_agents[new_agent] = {}
@@ -159,9 +162,9 @@ func create_agent(player_id, agent_stats, spawn : Node3D): #TODO
 	pass
 
 func _hud_agent_details_actions(agent : Agent): #TODO
-	if selected_agent:
-		selected_agent.agent_deselected.emit(selected_agent)
-	selected_agent = agent
+	if multiplayer.multiplayer_peer.get_unique_id() != agent.get_multiplayer_authority():
+		return
+	agent.flash_outline(Color.AQUA)
 	_radial_menu.referenced_agent = agent
 	_radial_menu.position = (
 			$World/Camera3D as Camera3D).unproject_position(

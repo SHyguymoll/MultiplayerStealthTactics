@@ -6,7 +6,7 @@ signal action_interrupted
 signal agent_died
 signal action_chosen
 signal agent_selected(agent : Agent)
-signal agent_deselected(agent : Agent)
+#signal agent_deselected(agent : Agent)
 
 signal spotted_agent(other_agent : Agent)
 signal spotted_element(element : Node3D)
@@ -31,8 +31,7 @@ var held_weapons : Array[GameWeapon] = [] #max length should be 2
 var selected_item : int = -1 #index for item
 var selected_weapon : int = -1 #index for weapon
 
-var player_id : int #id of player who brought the agent
-var agent_already_selected : bool
+#var player_id : int #id of player who brought the agent
 
 @export var skin_texture : String
 
@@ -42,9 +41,9 @@ var agent_already_selected : bool
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat : StandardMaterial3D
 @onready var _eyes : ShapeCast3D = $Eyes
-@onready var _eye_cone = _eyes.shape as ConvexPolygonShape3D
+@onready var _eye_cone : ConvexPolygonShape3D = _eyes.shape
 @onready var _ears : ShapeCast3D = $Ears
-@onready var _ear_cylinder = _ears.shape as CylinderShape3D
+@onready var _ear_cylinder : CylinderShape3D = _ears.shape
 @onready var _body : Area3D = $Body
 @onready var _world_collide : CollisionShape3D = $WorldCollision
 
@@ -102,8 +101,8 @@ func perform_action():
 				States.PRONE, States.CRAWL:
 					pass
 
-func _enter_tree() -> void:
-	set_multiplayer_authority(name.to_int())
+#func _enter_tree() -> void:
+	#set_multiplayer_authority(name.split("_")[0].to_int())
 
 
 func update_eye_cone(dist_mult : float):
@@ -194,11 +193,11 @@ func _ready() -> void:
 	_mesh.set_surface_override_material(1, _outline_mat)
 
 	# debug
-	debug_setup()
+	# debug_setup()
 
 
 func _process(_delta: float) -> void:
-	debug_process()
+	# debug_process()
 	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, 0.2)
 	pass
 
@@ -266,7 +265,7 @@ func _physics_process(_delta: float) -> void:
 func _agent_clicked(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int) -> void:
 	if event is InputEventMouse:
 		if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
-			agent_already_selected = not agent_already_selected
-			emit_signal("agent_selected" if agent_already_selected else "agent_deselected", self)
-			_outline_mat.albedo_color = Color.AQUA
+			agent_selected.emit(self)
 
+func flash_outline(color : Color):
+	_outline_mat.albedo_color = color

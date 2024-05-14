@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=5 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
+[ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
 [ext_resource type="PackedScene" uid="uid://mr6n3d2nksvr" path="res://scenes/maps/game_map.tscn" id="2_ow13f"]
 [ext_resource type="PackedScene" uid="uid://d4hiq2jbaabj5" path="res://scenes/hud_radial_menu.tscn" id="2_xp2mg"]
 
@@ -13,13 +14,10 @@ game_map = NodePath("World/GameMap")
 [node name="World" type="Node3D" parent="."]
 
 [node name="Camera3D" type="Camera3D" parent="World"]
-transform = Transform3D(0.907777, -0.17594, 0.380769, 0, 0.907777, 0.419452, -0.419452, -0.380769, 0.82406, 1.68, 1.689, 2.942)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 9.54, 0)
+script = ExtResource("2_f2a8t")
 
 [node name="GameMap" parent="World" instance=ExtResource("2_ow13f")]
-
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
-spawn_path = NodePath("..")
 
 [node name="HUDBase" type="CanvasLayer" parent="."]
 
