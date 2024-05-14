@@ -2,19 +2,15 @@ class_name GameMap
 extends Node3D
 
 # spawns must comfortably support 4 agents
-# spawn entry format is [position, rotation]
-@export var server_agent_spawns = [
-	[Vector2.ZERO, 0],
-	[Vector2.ZERO, 0],
-	[Vector2.ZERO, 0],
-	[Vector2.ZERO, 0],
-]
-@export var client_agent_spawns = [
-	[Vector2.ZERO, 0],
-	[Vector2.ZERO, 0],
-	[Vector2.ZERO, 0],
-	[Vector2.ZERO, 0],
-]
+# agents will be spawned at node3d position (but made flush with floor) with node3d y rotation
+@export var ag_spwn_serv_1 : Node3D
+@export var ag_spwn_serv_2 : Node3D
+@export var ag_spwn_serv_3 : Node3D
+@export var ag_spwn_serv_4 : Node3D
+@export var ag_spwn_clie_1 : Node3D
+@export var ag_spwn_clie_2 : Node3D
+@export var ag_spwn_clie_3 : Node3D
+@export var ag_spwn_clie_4 : Node3D
 
 enum Objectives {
 	CAPTURE_ENEMY_FLAG,
