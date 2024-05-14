@@ -54,8 +54,16 @@ data = PackedVector3Array(-0.8842, 0, -2.3887, -1.6551, 0.84, -2.3887, -1.6551, 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ycwvl"]
 size = Vector3(2.38, 1, 1.16)
 
-[node name="GameMap" type="Node3D"]
+[node name="GameMap" type="Node3D" node_paths=PackedStringArray("agent_spawn_server_1", "agent_spawn_server_2", "agent_spawn_server_3", "agent_spawn_server_4", "agent_spawn_client_1", "agent_spawn_client_2", "agent_spawn_client_3", "agent_spawn_client_4")]
 script = ExtResource("1_8s54t")
+agent_spawn_server_1 = NodePath("Spawns/Server1")
+agent_spawn_server_2 = NodePath("Spawns/Server2")
+agent_spawn_server_3 = NodePath("Spawns/Server3")
+agent_spawn_server_4 = NodePath("Spawns/Server4")
+agent_spawn_client_1 = NodePath("Spawns/Client1")
+agent_spawn_client_2 = NodePath("Spawns/Client2")
+agent_spawn_client_3 = NodePath("Spawns/Client3")
+agent_spawn_client_4 = NodePath("Spawns/Client4")
 
 [node name="map_basic" parent="." instance=ExtResource("2_cn121")]
 

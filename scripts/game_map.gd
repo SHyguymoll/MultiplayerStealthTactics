@@ -3,14 +3,14 @@ extends Node3D
 
 # spawns must comfortably support 4 agents
 # agents will be spawned at node3d position (but made flush with floor) with node3d y rotation
-@export var ag_spwn_serv_1 : Node3D
-@export var ag_spwn_serv_2 : Node3D
-@export var ag_spwn_serv_3 : Node3D
-@export var ag_spwn_serv_4 : Node3D
-@export var ag_spwn_clie_1 : Node3D
-@export var ag_spwn_clie_2 : Node3D
-@export var ag_spwn_clie_3 : Node3D
-@export var ag_spwn_clie_4 : Node3D
+@export var agent_spawn_server_1 : Node3D
+@export var agent_spawn_server_2 : Node3D
+@export var agent_spawn_server_3 : Node3D
+@export var agent_spawn_server_4 : Node3D
+@export var agent_spawn_client_1 : Node3D
+@export var agent_spawn_client_2 : Node3D
+@export var agent_spawn_client_3 : Node3D
+@export var agent_spawn_client_4 : Node3D
 
 enum Objectives {
 	CAPTURE_ENEMY_FLAG,
