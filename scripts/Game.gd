@@ -13,13 +13,14 @@ var client_agents : Dictionary
 @onready var _radial_menu = $HUDSelected/RadialMenu
 
 func _ready():
-	debug_game()
-	return
+	#debug_game()
+	#return
 	# Preconfigure game.
 	server_agents = {}
 	client_agents = {}
+	_radial_menu.visible = false
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
-	#Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
+	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 
 func debug_game():
 	Lobby.players = {
@@ -61,6 +62,7 @@ func debug_game():
 # Called only on the server.
 func start_game():
 	# All peers are ready to receive RPCs in this scene.
+	await get_tree().create_timer(1).timeout
 	ping.rpc()
 	server_populate_agent_dictionaries()
 	#send_populated_dictionaries.rpc_id(other_player)
@@ -72,50 +74,58 @@ func create_sound_effect() -> void: #TODO
 
 func server_populate_agent_dictionaries(): #TODO
 	# server's agents
+	var spawn = game_map.agent_spawn_server_1
 	create_agent.rpc(
 			1,
 			Lobby.players[1].agents[0],
-			game_map.agent_spawn_server_1)
+			spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
 	if len(Lobby.players[1].agents) > 1:
+		spawn = game_map.agent_spawn_server_2
 		create_agent.rpc(
 				1,
 				Lobby.players[1].agents[1],
-				game_map.agent_spawn_server_2)
+				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
 	if len(Lobby.players[1].agents) > 2:
+		spawn = game_map.agent_spawn_server_3
 		create_agent.rpc(
 				1,
 				Lobby.players[1].agents[2],
-				game_map.agent_spawn_server_3)
+				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
 	if len(Lobby.players[1].agents) > 3:
+		spawn = game_map.agent_spawn_server_4
 		create_agent.rpc(
 				1,
 				Lobby.players[1].agents[3],
-				game_map.agent_spawn_server_4)
+				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
 	# client's agents
+	spawn = game_map.agent_spawn_client_1
 	create_agent.rpc(
 			GameSettings.server_client_id,
 			Lobby.players[GameSettings.server_client_id].agents[0],
-			game_map.agent_spawn_client_1)
+			spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
 	if len(Lobby.players[GameSettings.server_client_id].agents) > 1:
+		spawn = game_map.agent_spawn_client_2
 		create_agent.rpc(
 				GameSettings.server_client_id,
 				Lobby.players[GameSettings.server_client_id].agents[1],
-				game_map.agent_spawn_client_2)
+				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
 	if len(Lobby.players[GameSettings.server_client_id].agents) > 2:
+		spawn = game_map.agent_spawn_client_3
 		create_agent.rpc(
 				GameSettings.server_client_id,
 				Lobby.players[GameSettings.server_client_id].agents[2],
-				game_map.agent_spawn_client_3)
+				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
 	if len(Lobby.players[GameSettings.server_client_id].agents) > 3:
+		spawn = game_map.agent_spawn_client_4
 		create_agent.rpc(
 				GameSettings.server_client_id,
 				Lobby.players[GameSettings.server_client_id].agents[3],
-				game_map.agent_spawn_client_4)
-	pass
+				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+
 
 @rpc("call_local")
 func ping():
-	print("pong!")
+	print("{0}: pong!".format([multiplayer.multiplayer_peer.get_unique_id()]))
 
 #func _add_player(id = 1):
 	#var new_player = player_scene.instantiate()
@@ -123,7 +133,9 @@ func ping():
 	#call_deferred("add_child", new_player)
 
 @rpc("authority", "call_local", "reliable")
-func create_agent(player_id, agent_stats, spawn : Node3D): #TODO
+func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
+	print("{0}: attempting to spawn agent".format([player_id]))
+	print(agent_stats)
 	var new_agent = agent_scene.instantiate()
 	new_agent.name = str(player_id) + "_" + str(agent_stats.name)
 	new_agent.agent_selected.connect(_hud_agent_details_actions)
@@ -132,8 +144,8 @@ func create_agent(player_id, agent_stats, spawn : Node3D): #TODO
 	new_agent.action_completed
 	new_agent.action_interrupted
 	new_agent.agent_died
-	new_agent.position = spawn.position
-	new_agent.rotation.y = spawn.rotation.y
+	new_agent.position = Vector3(pos_x, pos_y, pos_z)
+	new_agent.rotation.y = rot_y
 	new_agent.set_multiplayer_authority(player_id)
 	$Agents.add_child(new_agent)
 
