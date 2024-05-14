@@ -1,14 +1,13 @@
 class_name Game
 extends Node3D
 
-@export var agent_scene : PackedScene
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 
 var server_agents : Dictionary
 var client_agents : Dictionary
 
 var selected_agent : Agent = null
-var game_map : GameMap
+@export var game_map : GameMap
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu
@@ -54,6 +53,9 @@ func debug_game():
 	GameSettings.server_client_id = 2
 	GameSettings.selected_agents = [0]
 	GameSettings.selected_agents = [0]
+	var peer = ENetMultiplayerPeer.new()
+	peer.create_server(7000, 2)
+	multiplayer.multiplayer_peer = peer
 	start_game()
 
 # Called only on the server.
@@ -68,19 +70,46 @@ func create_sound_effect() -> void: #TODO
 	pass
 
 func server_populate_agent_dictionaries(): #TODO
-	var spawn_ind = 0
-	for agent_ind in GameSettings.selected_agents:
+	# server's agents
+	create_agent.rpc(
+			1,
+			Lobby.players[1].agents[0],
+			game_map.agent_spawn_server_1)
+	if len(Lobby.players[1].agents) > 1:
 		create_agent.rpc(
 				1,
-				Lobby.players[1].agents[agent_ind],
-				game_map.server_agent_spawns[spawn_ind])
-		spawn_ind += 1
-	spawn_ind = 0
-	for agent_ind in GameSettings.client_selected_agents:
+				Lobby.players[1].agents[1],
+				game_map.agent_spawn_server_2)
+	if len(Lobby.players[1].agents) > 2:
+		create_agent.rpc(
+				1,
+				Lobby.players[1].agents[2],
+				game_map.agent_spawn_server_3)
+	if len(Lobby.players[1].agents) > 3:
+		create_agent.rpc(
+				1,
+				Lobby.players[1].agents[3],
+				game_map.agent_spawn_server_4)
+	# client's agents
+	create_agent.rpc(
+			GameSettings.server_client_id,
+			Lobby.players[GameSettings.server_client_id].agents[0],
+			game_map.agent_spawn_client_1)
+	if len(Lobby.players[GameSettings.server_client_id].agents) > 1:
 		create_agent.rpc(
 				GameSettings.server_client_id,
-				Lobby.players[GameSettings.server_client_id].agents[agent_ind],
-				game_map.client_agent_spawns[spawn_ind])
+				Lobby.players[GameSettings.server_client_id].agents[1],
+				game_map.agent_spawn_client_2)
+	if len(Lobby.players[GameSettings.server_client_id].agents) > 2:
+		create_agent.rpc(
+				GameSettings.server_client_id,
+				Lobby.players[GameSettings.server_client_id].agents[2],
+				game_map.agent_spawn_client_3)
+	if len(Lobby.players[GameSettings.server_client_id].agents) > 3:
+		create_agent.rpc(
+				GameSettings.server_client_id,
+				Lobby.players[GameSettings.server_client_id].agents[3],
+				game_map.agent_spawn_client_4)
 	pass
 
 @rpc("call_local")
@@ -93,42 +122,39 @@ func ping():
 	#call_deferred("add_child", new_player)
 
 @rpc("authority", "call_local", "reliable")
-func create_agent(player_id, agent_stats, spawn_details): #TODO
+func create_agent(player_id, agent_stats, spawn : Node3D): #TODO
 	var new_agent = Agent.new()
 	new_agent.name = str(player_id) + "_" + str(agent_stats.name)
 	new_agent.agent_selected.connect(_hud_agent_details_actions)
-	new_agent.agent_deselected
+	new_agent.agent_deselected.connect(_radial_menu.button_collapse_animation)
 	new_agent.action_chosen
 	new_agent.action_completed
 	new_agent.action_interrupted
 	new_agent.agent_died
+	new_agent.position = spawn.position
+	new_agent.rotation.y = spawn.rotation.y
 
 	if player_id == 1:
 		server_agents[new_agent] = {}
 		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
-			var new_quick : HUDAgentSmall = hud_agent_small_scene.instantiate()
-			new_quick.update_state("active")
-			new_quick.update_item("none")
-			new_quick.update_weapon("none")
-			new_quick.init_weapon_in(0, 0, 0)
-			new_quick.init_weapon_res(0, 0, 0)
-			new_quick.init_item_in(0, 0, 0)
-			new_quick.init_item_res(0, 0, 0)
-			server_agents[new_agent]["small_hud"] = new_quick
+			server_agents[new_agent]["small_hud"] = hud_agent_small_scene.instantiate()
 			_quick_views.add_child(server_agents[new_agent]["small_hud"])
+			server_agents[new_agent]["small_hud"].update_state("active")
+			server_agents[new_agent]["small_hud"].update_item("none")
+			server_agents[new_agent]["small_hud"].update_weapon("none")
+			server_agents[new_agent]["small_hud"].init_weapon_in(0, 0, 0)
+			server_agents[new_agent]["small_hud"].init_weapon_res(0, 0, 0)
+
 	else:
 		client_agents[new_agent] = {}
 		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
-			var new_quick : HUDAgentSmall = hud_agent_small_scene.instantiate()
-			new_quick.update_state("active")
-			new_quick.update_item("none")
-			new_quick.update_weapon("none")
-			new_quick.init_weapon_in(0, 0, 0)
-			new_quick.init_weapon_res(0, 0, 0)
-			new_quick.init_item_in(0, 0, 0)
-			new_quick.init_item_res(0, 0, 0)
-			client_agents[new_agent]["small_hud"] = new_quick
-			_quick_views.add_child(server_agents[new_agent]["small_hud"])
+			client_agents[new_agent]["small_hud"] = hud_agent_small_scene.instantiate()
+			_quick_views.add_child(client_agents[new_agent]["small_hud"])
+			client_agents[new_agent]["small_hud"].update_state("active")
+			client_agents[new_agent]["small_hud"].update_item("none")
+			client_agents[new_agent]["small_hud"].update_weapon("none")
+			client_agents[new_agent]["small_hud"].init_weapon_in(0, 0, 0)
+			client_agents[new_agent]["small_hud"].init_weapon_res(0, 0, 0)
 
 	pass
 
