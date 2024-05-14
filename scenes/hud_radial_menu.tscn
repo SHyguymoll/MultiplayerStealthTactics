@@ -4,7 +4,6 @@
 [ext_resource type="Texture2D" uid="uid://bc6012otbs3eg" path="res://assets/sprites/radial_menu/none.png" id="2_nl0k1"]
 
 [node name="RadialMenu" type="Node2D"]
-position = Vector2(960, 540)
 script = ExtResource("1_n51wc")
 
 [node name="UL" type="Button" parent="."]

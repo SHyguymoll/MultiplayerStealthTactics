@@ -38,6 +38,7 @@ var current_screen : String
 func button_spread_animation():
 	var mid = _m.size.x/-2
 	_disable_all_buttons()
+	visible = true
 	var twe := create_tween()
 	twe.set_parallel(true)
 	twe.set_trans(Tween.TRANS_CUBIC)
@@ -52,7 +53,7 @@ func button_spread_animation():
 	twe.tween_property(_dr, "position", Vector2(mid + ICON_DIST*3, mid + ICON_DIST*3), TWEEN_TIME)
 	twe.finished.connect(_enable_all_buttons)
 
-func button_collapse_animation(instant := false, and_free := false):
+func button_collapse_animation(instant := false):
 	_disable_all_buttons()
 	var middle = _m.size/-2
 	if instant:
@@ -64,6 +65,7 @@ func button_collapse_animation(instant := false, and_free := false):
 		_dl.position = middle
 		_d.position = middle
 		_dr.position = middle
+		visible = false
 		return
 	var twe := create_tween()
 	twe.set_parallel(true)
@@ -76,8 +78,7 @@ func button_collapse_animation(instant := false, and_free := false):
 	twe.tween_property(_dl, "position", middle, TWEEN_TIME)
 	twe.tween_property(_d, "position", middle, TWEEN_TIME)
 	twe.tween_property(_dr, "position", middle, TWEEN_TIME)
-	if and_free:
-		twe.finished.connect(queue_free)
+	twe.finished.connect(func(): visible = false)
 
 func _enable_all_buttons():
 	_ul.disabled = false
@@ -116,10 +117,12 @@ func debug_agent():
 
 func _ready() -> void:
 	debug_agent()
+	init_menu()
+
+func init_menu():
 	button_collapse_animation(true)
 	current_screen = "top"
 	button_menu_screen()
-
 
 func determine_items():
 	_ul.icon = ICONS.none
@@ -232,7 +235,7 @@ func _button_pressed_metadata(button_texture : Texture2D):
 				button_collapse_animation(true)
 				button_spread_animation()
 			else:
-				button_collapse_animation(false, true)
+				button_collapse_animation()
 		ICONS.stance_stand:
 			pass
 		ICONS.run:

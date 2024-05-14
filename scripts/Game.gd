@@ -3,7 +3,6 @@ extends Node3D
 
 @export var agent_scene : PackedScene
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
-var hud_radial_menu = preload("res://scenes/hud_radial_menu.tscn")
 
 var server_agents : Dictionary
 var client_agents : Dictionary
@@ -12,19 +11,56 @@ var selected_agent : Agent = null
 var game_map : GameMap
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
+@onready var _radial_menu = $HUDSelected/RadialMenu
 
 func _ready():
+	debug_game()
+	return
 	# Preconfigure game.
 	server_agents = {}
 	client_agents = {}
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	#Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 
+func debug_game():
+	Lobby.players = {
+		1:
+			{name="test",
+		agents=[
+			{
+				name="agent 1",
+				mission_count=0,
+				hp=10,
+				view_dist=1.0,
+				view_arc=1.0,
+				items=[],
+				weapons=[],
+			},
+		]},
+		2:
+			{name="test",
+		agents=[
+			{
+				name="agent 1",
+				mission_count=0,
+				hp=10,
+				view_dist=1.0,
+				view_arc=1.0,
+				items=[],
+				weapons=[],
+			},
+		]}
+	}
+	GameSettings.server_client_id = 2
+	GameSettings.selected_agents = [0]
+	GameSettings.selected_agents = [0]
+	start_game()
+
 # Called only on the server.
 func start_game():
 	# All peers are ready to receive RPCs in this scene.
 	ping.rpc()
-	#server_populate_agent_dictionaries()
+	server_populate_agent_dictionaries()
 	#send_populated_dictionaries.rpc_id(other_player)
 	pass
 
@@ -100,9 +136,9 @@ func _hud_agent_details_actions(agent : Agent): #TODO
 	if selected_agent:
 		selected_agent.agent_deselected.emit(selected_agent)
 	selected_agent = agent
-	var new_radial_menu : HUDRadialMenu = hud_radial_menu.instantiate()
-	new_radial_menu.referenced_agent = agent
-	new_radial_menu.position = (
+	_radial_menu.referenced_agent = agent
+	_radial_menu.position = (
 			$World/Camera3D as Camera3D).unproject_position(
 					agent.position).clamp(Vector2(get_window().size) - get_window().size * 0.85, get_window().size * 0.85)
+	_radial_menu.init_menu()
 	pass
