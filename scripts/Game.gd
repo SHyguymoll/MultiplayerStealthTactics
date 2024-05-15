@@ -7,6 +7,10 @@ var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 var server_agents : Dictionary
 var client_agents : Dictionary
 
+var action_timeline := {
+
+}
+
 @export var game_map : GameMap
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews

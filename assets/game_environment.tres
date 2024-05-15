@@ -1,0 +1,14 @@
+[gd_resource type="Environment" format=3 uid="uid://dqgljxlig081s"]
+
+[resource]
+background_color = Color(1, 1, 1, 1)
+tonemap_mode = 3
+fog_light_color = Color(0.388235, 0.321569, 0.482353, 1)
+fog_light_energy = 0.69
+fog_density = 0.203
+fog_sky_affect = 0.218
+volumetric_fog_enabled = true
+volumetric_fog_density = 1.0
+volumetric_fog_emission_energy = 0.0
+volumetric_fog_anisotropy = 0.0
+volumetric_fog_length = 19.38
