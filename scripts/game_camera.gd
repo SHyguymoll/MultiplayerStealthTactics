@@ -4,11 +4,12 @@ var drag_enabled := false
 var last_position := Vector2.ZERO
 var final_position := Vector2.ZERO
 var cutscene_mode := false
-var sensitivity := 5.5
+var sensitivity := 10.5
 var quickness := 0.3
+var fov_target := 75.0
 
 func _ready() -> void:
-	position = Vector3(0, 5, 0)
+	position = Vector3(0, 15, 0)
 	h_offset = 0
 	v_offset = 0
 
@@ -26,8 +27,17 @@ func _input(event: InputEvent) -> void:
 		last_position = event.position
 
 func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("fov_change"):
+		match fov_target:
+			75.0:
+				fov_target = 45.0
+			45.0:
+				fov_target = 20.0
+			20.0:
+				fov_target = 75.0
 	position.x = lerpf(position.x, (final_position.x * sensitivity/get_viewport().size.x), quickness)
 	position.z = lerpf(position.z, (final_position.y * sensitivity/get_viewport().size.y), quickness)
+	fov = lerpf(fov, fov_target, quickness)
 
 	#$/root/Game/Label.text = str(position, "\n", last_position, "\n", final_position, "\n", h_offset, "\n", v_offset)
 # (mouse_offset.x/get_viewport().size.x)
