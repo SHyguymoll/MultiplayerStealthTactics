@@ -63,6 +63,7 @@ fov_change={
 3d_physics/layer_3="agent_ears"
 3d_physics/layer_4="server_player_clickable"
 3d_physics/layer_5="client_player_clickable"
+3d_physics/layer_6="Layer 6"
 3d_physics/layer_12="attack_hitboxes"
 3d_physics/layer_13="server_agent_exfil"
 3d_physics/layer_14="client_agent_exfil"
