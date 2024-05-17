@@ -112,6 +112,7 @@ func perform_action():
 		GameActions.GO_STAND:
 			if in_crouching_state() or in_prone_state():
 				_anim_state.travel("Stand")
+				state = States.STAND
 
 		GameActions.GO_CROUCH:
 			if in_standing_state() or in_prone_state():
