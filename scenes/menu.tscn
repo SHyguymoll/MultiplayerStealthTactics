@@ -1,7 +1,26 @@
-[gd_scene load_steps=3 format=3 uid="uid://tpqpwqi5p3an"]
+[gd_scene load_steps=10 format=3 uid="uid://tpqpwqi5p3an"]
 
 [ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="1_s0wmi"]
 [ext_resource type="Script" path="res://scripts/menu.gd" id="1_y43yw"]
+[ext_resource type="Texture2D" uid="uid://bkhpurxit5akt" path="res://assets/ui/logos/SpinnyBitFlat.png" id="3_0hrpe"]
+[ext_resource type="Texture2D" uid="uid://cm1j5ov30v5ah" path="res://assets/ui/logos/MST_Logo_Transparent.png" id="3_hbl0t"]
+[ext_resource type="Texture2D" uid="uid://s4mrrqcjlq67" path="res://assets/ui/logos/SpinnyBit_0.png" id="4_508h6"]
+[ext_resource type="Texture2D" uid="uid://bcc8y0qqc1u5e" path="res://assets/ui/logos/SpinnyBit_1.png" id="5_ithcw"]
+[ext_resource type="Texture2D" uid="uid://dvx0x10yp1r32" path="res://assets/ui/logos/SpinnyBit_2.png" id="6_rt20l"]
+[ext_resource type="Texture2D" uid="uid://di2uw7av3tand" path="res://assets/ui/logos/SpinnyBit_3.png" id="7_g15ho"]
+
+[sub_resource type="AnimatedTexture" id="AnimatedTexture_higo5"]
+frames = 5
+frame_0/texture = ExtResource("3_0hrpe")
+frame_0/duration = 3.0
+frame_1/texture = ExtResource("4_508h6")
+frame_1/duration = 0.11
+frame_2/texture = ExtResource("5_ithcw")
+frame_2/duration = 0.11
+frame_3/texture = ExtResource("6_rt20l")
+frame_3/duration = 0.11
+frame_4/texture = ExtResource("7_g15ho")
+frame_4/duration = 0.11
 
 [node name="Menus" type="ColorRect"]
 anchors_preset = 15
@@ -113,17 +132,47 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MainMenu"]
-layout_mode = 1
-anchors_preset = 8
+[node name="BackCircle" type="TextureRect" parent="MainMenu"]
+clip_children = 2
+clip_contents = true
+layout_mode = 2
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -831.0
+offset_top = -454.0
+offset_right = 1089.0
+offset_bottom = 626.0
+scale = Vector2(0.865, 0.865)
+texture = SubResource("AnimatedTexture_higo5")
+
+[node name="Logo" type="TextureRect" parent="MainMenu"]
+z_index = 2
+layout_mode = 2
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -843.0
+offset_top = -512.0
+offset_right = 1077.0
+offset_bottom = 568.0
+scale = Vector2(0.875, 0.875)
+mouse_filter = 2
+texture = ExtResource("3_hbl0t")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainMenu"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.624
+anchor_right = 0.5
+anchor_bottom = 0.624
 offset_left = -248.0
-offset_top = -152.0
+offset_top = 0.407959
 offset_right = 248.0
-offset_bottom = 152.0
+offset_bottom = 304.408
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
