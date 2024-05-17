@@ -12,33 +12,32 @@ signal unspotted_element(element : Node3D)
 signal heard_sound(listener : Agent, sound : Node3D)
 signal agent_died(deceased : Agent)
 
-var view_dist : float = 2.5 #length of vision "cone"
-var view_across : float = 1 #"arc" of vision "cone"
-var eye_strength : float = 1 #multiplier applied to vision "cone" in relation to view target distance
+var view_dist : float = 2.5 #length of vision "cone" (really a pyramid)
+var view_across : float = 1 #size of vision pyramid base
+var eye_strength : float = 0.8 #multiplier applied to vision pyramid in relation to view target distance
 
 var hearing_dist : float = 1.5 #distance of furthest possibly heard audio event
-var ear_strength : float = 1
+var ear_strength : float = 1 #multiplier applied to ear cylinder in relation to audio target distance
 
-var movement_dist : float #distance of furthest possible movement
-var movement_speed : float #maximum movement speed per turn
+var movement_dist : float = 7.0 #distance of furthest possible movement
+var movement_speed : float = 2.75 #movement speed when running (divided by 2 for walking, 2.5 for prone)
 
-var camo_level : int #bounded from 0 to 100
+var camo_level : int #bounded from 0 to 100, based on current state
 
-var weapon_accuracy : float #bounded from 0.00 to 1.00
+var weapon_accuracy : float #bounded from 0.00 to 1.00, based on movement and weapon usage
 
 var held_items : Array[String] = [] #max length should be 3
 var held_weapons : Array[GameWeapon] = [] #max length should be 2
 
-var selected_item : int = -1 #index for item
-var selected_weapon : int = -1 #index for weapon
+var selected_item : int = -1 #index for item (-1 for no item)
+var selected_weapon : int = -1 #index for weapon (-1 for no weapon)
 
-var percieved_by_friendly := false
-
-#var player_id : int #id of player who brought the agent
+var percieved_by_friendly := false #determines if hud is updated
 
 @export var skin_texture : String
 
-@onready var anim : AnimationTree = $AnimationTree
+@onready var _anim : AnimationTree = $AnimationTree
+@onready var _anim_state : AnimationNodeStateMachinePlayback = _anim.get("parameters/playback")
 @onready var _mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Mesh
 @onready var _custom_skin_mat : StandardMaterial3D
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
@@ -80,6 +79,7 @@ var target_direction : float
 var stun_time : int = 0
 var health : int = 10
 var target_camo_level : int
+var target_accuracy : float
 var weapons_animation_blend := Vector2.ONE
 var target_head_rot_off_y : float = 0.0 #rot of head in relation to body rot
 var target_world_collide_height : float
@@ -110,12 +110,12 @@ func can_stand():
 func perform_action():
 	match queued_action[0]:
 		GameActions.GO_STAND:
-			match state:
-				States.PRONE, States.CRAWL:
-					pass
-				States.CROUCH, States.CROUCH_WALK:
-					pass
+			if in_crouching_state() or in_prone_state():
+				_anim_state.travel("Stand")
+
 		GameActions.GO_CROUCH:
+			if in_standing_state() or in_prone_state():
+				pass
 			match state:
 				States.WALK, States.RUN, States.STAND:
 					pass
@@ -251,8 +251,8 @@ func decide_weapon_blend() -> Vector2:
 
 func _physics_process(_delta: float) -> void:
 	weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), 0.2)
-	anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
-	anim.set("parameters/Stand/blend_position", weapons_animation_blend)
+	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
+	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
 	_eyes.rotation.y = lerpf(_eyes.rotation.y, target_head_rot_off_y, 0.2)
 	update_eye_cone(eye_strength)
