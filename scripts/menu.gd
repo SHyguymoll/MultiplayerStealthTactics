@@ -114,6 +114,9 @@ func _on_player_disconnect(id):
 
 
 func _on_ready_toggled(toggled_on: bool) -> void:
+	if not len(GameSettings.selected_agents):
+		$HostScreen/ButtonsHbox/Ready.text = "Select your Agents!"
+		return
 	_update_readiness.rpc_id(GameSettings.server_client_id, toggled_on, GameSettings.selected_agents)
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -124,6 +127,9 @@ func _update_readiness(toggled_on : bool, new_selected_agents) -> void: # client
 
 
 func _on_start_pressed() -> void: # server-only
+	if not len(GameSettings.selected_agents):
+		$HostScreen/ButtonsHbox/Start.text = "Select your Agents!"
+		return
 	Lobby.load_game.rpc("res://scenes/game.tscn")
 
 
