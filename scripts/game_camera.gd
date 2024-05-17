@@ -20,8 +20,8 @@ func _input(event: InputEvent) -> void:
 			drag_enabled = event.pressed
 			if event.pressed:
 				last_position = event.position
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			explode(2, 10)
+		#if event.button_index == MOUSE_BUTTON_LEFT:
+			#explode(2, 10)
 	elif event is InputEventMouseMotion and drag_enabled and not cutscene_mode:
 		final_position += (last_position - event.position)
 		last_position = event.position
