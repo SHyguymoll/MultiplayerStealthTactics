@@ -115,9 +115,9 @@ func debug_agent():
 	referenced_agent.held_weapons[1].reserve_ammo = 5
 
 
-func _ready() -> void:
-	debug_agent()
-	init_menu()
+#func _ready() -> void:
+	#debug_agent()
+	#init_menu()
 
 func init_menu():
 	button_collapse_animation(true)
@@ -168,6 +168,7 @@ func button_menu_screen():
 					_l.icon = ICONS.stance_prone
 				else:
 					_l.icon = ICONS.none
+				#_l.icon = ICONS.stance_prone
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.use_weapon
 				_dl.icon = ICONS.look
@@ -178,6 +179,7 @@ func button_menu_screen():
 					_ul.icon = ICONS.stance_stand
 				else:
 					_ul.icon = ICONS.none
+				#_ul.icon = ICONS.stance_stand
 				_u.icon = ICONS.none
 				_ur.icon = ICONS.crouch_walk
 				if referenced_agent.state == referenced_agent.States.CROUCH_WALK:
@@ -186,6 +188,7 @@ func button_menu_screen():
 					_l.icon = ICONS.stance_prone
 				else:
 					_l.icon = ICONS.none
+				#_l.icon = ICONS.stance_prone
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.use_weapon
 				_dl.icon = ICONS.look
@@ -196,6 +199,7 @@ func button_menu_screen():
 					_ul.icon = ICONS.stance_stand
 				else:
 					_ul.icon = ICONS.none
+				#_ul.icon = ICONS.stance_stand
 				_u.icon = ICONS.none
 				_ur.icon = ICONS.crawl
 				if referenced_agent.state == referenced_agent.States.CRAWL:
@@ -204,6 +208,7 @@ func button_menu_screen():
 					_l.icon = ICONS.stance_crouch
 				else:
 					_l.icon = ICONS.none
+				#_l.icon = ICONS.stance_crouch
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.none
 				_dl.icon = ICONS.look

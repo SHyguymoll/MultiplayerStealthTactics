@@ -23,7 +23,7 @@ script = ExtResource("2_f2a8t")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 
 [node name="HUDBase" type="CanvasLayer" parent="."]
-visible = false
+follow_viewport_enabled = true
 
 [node name="QuickViews" type="HBoxContainer" parent="HUDBase"]
 anchors_preset = 2
@@ -34,7 +34,7 @@ offset_right = 822.0
 grow_vertical = 0
 
 [node name="HUDSelected" type="CanvasLayer" parent="."]
-visible = false
+follow_viewport_enabled = true
 
 [node name="RadialMenu" parent="HUDSelected" instance=ExtResource("2_xp2mg")]
 position = Vector2(-60, -60)
