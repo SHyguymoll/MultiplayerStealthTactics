@@ -251,6 +251,12 @@ func _button_pressed_metadata(button_texture : Texture2D):
 				button_spread_animation()
 			else:
 				button_collapse_animation()
+		ICONS.swap_item:
+			current_screen = "swap_item"
+			button_menu_screen()
+		ICONS.swap_weapon:
+			current_screen = "swap_weapon"
+			button_menu_screen()
 		ICONS.stance_stand:
 			pass
 		ICONS.run:
@@ -265,18 +271,12 @@ func _button_pressed_metadata(button_texture : Texture2D):
 			pass
 		ICONS.crawl:
 			pass
-		ICONS.swap_item:
-			current_screen = "swap_item"
-			button_menu_screen()
-		ICONS.swap_weapon:
-			current_screen = "swap_weapon"
-			button_menu_screen()
 		ICONS.use_weapon:
 			pass
 	if button_texture in GameIcons.WEP:
-		pass
+		var wep_in_question = GameIcons.WEP.find_key(button_texture)
 	if button_texture in GameIcons.ITM:
-		pass
+		var itm_in_question = GameIcons.ITM.find_key(button_texture)
 
 
 func _on_ul_pressed() -> void:
