@@ -57,11 +57,11 @@ var _outline_mat : StandardMaterial3D
 # and any important metadata (position, rotation, selection, etc.) follows.
 enum GameActions {
 	GO_STAND, GO_CROUCH, GO_PRONE,
-	MOVE_TO_POS, SNEAK_TO_POS,
+	RUN_TO_POS, WALK_TO_POS, CROUCH_WALK_TO_POS, CRAWL_TO_POS,
 	LOOK_AROUND,
 	CHANGE_ITEM, CHANGE_WEAPON,
 	PICK_UP_ITEM, PICK_UP_WEAPON,
-	USE_ITEM, USE_WEAPON, RELOAD_WEAPON,
+	USE_WEAPON, RELOAD_WEAPON,
 	HALT,
 }
 var queued_action = []
@@ -116,14 +116,12 @@ func perform_action():
 
 		GameActions.GO_CROUCH:
 			if in_standing_state() or in_prone_state():
-				pass
-			match state:
-				States.WALK, States.RUN, States.STAND:
-					pass
-				States.PRONE, States.CRAWL:
-					pass
+				_anim_state.travel("Crouch")
+				state = States.CROUCH
 		GameActions.GO_PRONE:
-			pass
+			if in_standing_state() or in_crouching_state():
+				_anim_state.travel("B_Prone")
+				state = States.PRONE
 
 #func _enter_tree() -> void:
 	#set_multiplayer_authority(name.split("_")[0].to_int())
@@ -250,7 +248,7 @@ func decide_weapon_blend() -> Vector2:
 		return Vector2.ONE
 
 
-func _physics_process(_delta: float) -> void:
+func _game_step(delta: float) -> void:
 	weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), 0.2)
 	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
 	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
@@ -281,6 +279,7 @@ func _physics_process(_delta: float) -> void:
 			target_world_collide_height,
 			0.2
 	)
+	_anim.advance(delta)
 	#if is_multiplayer_authority():
 		#var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		#position = position + Vector3(move_dir.x, 0, move_dir.y)

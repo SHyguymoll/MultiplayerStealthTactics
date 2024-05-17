@@ -11,6 +11,12 @@ var action_timeline := {
 
 }
 
+enum GamePhases {
+	SELECTION,
+	EXECUTION,
+	RESOLUTION,
+}
+var game_phase : GamePhases = GamePhases.SELECTION
 @export var game_map : GameMap
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
@@ -66,7 +72,7 @@ func debug_game():
 # Called only on the server.
 func start_game():
 	# All peers are ready to receive RPCs in this scene.
-	await get_tree().create_timer(1).timeout
+	await get_tree().create_timer(0.25).timeout
 	ping.rpc()
 	server_populate_variables()
 	#send_populated_dictionaries.rpc_id(other_player)
@@ -87,6 +93,18 @@ func force_camera(new_pos, new_fov = -1.0):
 
 func create_sound_effect() -> void: #TODO
 	pass
+
+
+func _physics_process(delta: float) -> void:
+	match game_phase:
+		GamePhases.SELECTION:
+			pass
+		GamePhases.EXECUTION:
+			for agent in $Agents.get_children() as Array[Agent]:
+				agent._game_step(delta)
+		GamePhases.RESOLUTION:
+			pass
+
 
 func server_populate_variables(): #TODO
 	# server's agents
@@ -169,6 +187,7 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 	new_agent.unspotted_element
 	new_agent.heard_sound
 	new_agent.agent_died.connect(_agent_died)
+
 	new_agent.position = Vector3(pos_x, pos_y, pos_z)
 	new_agent.rotation.y = rot_y
 	new_agent.set_multiplayer_authority(player_id)
@@ -201,6 +220,8 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 func _agent_sees_agent(spotter : Agent, spottee : Agent):
 	if not spotter.is_multiplayer_authority():
 		return
+	var dist = spotter.position.distance_to(spottee.position)
+	var sight_chance = dist * (spotter.eye_strength^dist) / (spottee.camo_level)
 	if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority():
 		pass
 
