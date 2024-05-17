@@ -33,7 +33,7 @@ func _process(delta: float) -> void:
 				fov_target = 45.0
 			45.0:
 				fov_target = 20.0
-			20.0:
+			_:
 				fov_target = 75.0
 	position.x = lerpf(position.x, (final_position.x * sensitivity/get_viewport().size.x), quickness)
 	position.z = lerpf(position.z, (final_position.y * sensitivity/get_viewport().size.y), quickness)

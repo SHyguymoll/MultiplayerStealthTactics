@@ -70,8 +70,21 @@ func start_game():
 	ping.rpc()
 	server_populate_variables()
 	#send_populated_dictionaries.rpc_id(other_player)
-
+	force_camera.rpc_id(GameSettings.server_client_id,
+			(game_map.agent_spawn_client_1.position + game_map.agent_spawn_client_2.position + game_map.agent_spawn_client_3.position + game_map.agent_spawn_client_4.position)/4)
+	force_camera((game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position + game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4)
 	pass
+
+
+@rpc("authority", "call_remote", "reliable")
+func force_camera(new_pos, new_fov = -1.0):
+	if new_pos is Vector2:
+		$World/Camera3D.final_position = new_pos
+	elif new_pos is Vector3:
+		$World/Camera3D.final_position = Vector2(new_pos.x, new_pos.z)
+	if new_fov != -1.0:
+		$World/Camera3D.fov_target = new_fov
+
 
 func create_sound_effect() -> void: #TODO
 	pass

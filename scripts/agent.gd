@@ -285,7 +285,7 @@ func _physics_process(_delta: float) -> void:
 		#position = position + Vector3(move_dir.x, 0, move_dir.y)
 
 
-func _agent_clicked(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int) -> void:
+func _agent_clicked(camera: Node, event: InputEvent, _position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	if event is InputEventMouse:
 		if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
 			agent_selected.emit(self)
