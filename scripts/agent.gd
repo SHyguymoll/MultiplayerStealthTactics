@@ -1,15 +1,17 @@
 class_name Agent
 extends CharacterBody3D
 
-signal action_completed
-signal action_interrupted
-signal agent_died
-signal action_chosen
+signal action_completed(actor : Agent)
+signal action_interrupted(interrupted_actor : Agent)
+signal agent_died(deceased : Agent)
+#signal action_chosen
 signal agent_selected(agent : Agent)
 #signal agent_deselected(agent : Agent)
 
 signal spotted_agent(other_agent : Agent)
+signal unspotted_agent(other_agent : Agent)
 signal spotted_element(element : Node3D)
+signal heard_sound(sound : Node3D)
 
 var view_dist : float = 2.5 #length of vision "cone"
 var view_across : float = 1 #"arc" of vision "cone"
@@ -31,6 +33,8 @@ var held_weapons : Array[GameWeapon] = [] #max length should be 2
 var selected_item : int = -1 #index for item
 var selected_weapon : int = -1 #index for weapon
 
+var percieved_by_friendly := false
+
 #var player_id : int #id of player who brought the agent
 
 @export var skin_texture : String
@@ -40,10 +44,10 @@ var selected_weapon : int = -1 #index for weapon
 @onready var _custom_skin_mat : StandardMaterial3D
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat : StandardMaterial3D
-@onready var _eyes : ShapeCast3D = $Eyes
-@onready var _eye_cone : ConvexPolygonShape3D = _eyes.shape
-@onready var _ears : ShapeCast3D = $Ears
-@onready var _ear_cylinder : CylinderShape3D = _ears.shape
+@onready var _eyes : Area3D = $Eyes
+@onready var _eye_cone : ConvexPolygonShape3D = _eyes.get_node("CollisionShape3D").shape
+@onready var _ears : Area3D = $Ears
+@onready var _ear_cylinder : CylinderShape3D = _ears.get_node("CollisionShape3D").shape
 @onready var _body : Area3D = $Body
 @onready var _world_collide : CollisionShape3D = $WorldCollision
 @onready var _prone_ray : RayCast3D = $ProneCheck
@@ -55,7 +59,7 @@ var _outline_mat : StandardMaterial3D
 # and any important metadata (position, rotation, selection, etc.) follows.
 enum GameActions {
 	GO_STAND, GO_CROUCH, GO_PRONE,
-	MOVE_TO_POS, SNEAK_TO_POS, PARANOID_SNEAK_TO_POS,
+	MOVE_TO_POS, SNEAK_TO_POS,
 	LOOK_AROUND,
 	CHANGE_ITEM, CHANGE_WEAPON,
 	PICK_UP_ITEM, PICK_UP_WEAPON,
@@ -66,7 +70,7 @@ var queued_action = []
 
 enum States {
 	STAND, CROUCH, PRONE,
-	RUN, WALK, PARANOID_WALK, CROUCH_WALK, CRAWL,
+	RUN, WALK, CROUCH_WALK, CRAWL,
 	USING_ITEM, USING_WEAPON, RELOADING_WEAPON,
 	HURT, STUNNED, DEAD,
 }
@@ -83,7 +87,7 @@ var target_world_collide_height : float
 var target_world_collide_y : float
 
 func in_standing_state() -> bool:
-	return state in [States.STAND, States.WALK, States.RUN, States.PARANOID_WALK]
+	return state in [States.STAND, States.WALK, States.RUN]
 
 func in_crouching_state() -> bool:
 	return state in [States.CROUCH, States.CROUCH_WALK]
@@ -105,7 +109,7 @@ func can_stand():
 
 
 func perform_action():
-	match queued_action:
+	match queued_action[0]:
 		GameActions.GO_STAND:
 			match state:
 				States.PRONE, States.CRAWL:
@@ -114,10 +118,12 @@ func perform_action():
 					pass
 		GameActions.GO_CROUCH:
 			match state:
-				States.WALK, States.RUN, States.STAND, States.PARANOID_WALK:
+				States.WALK, States.RUN, States.STAND:
 					pass
 				States.PRONE, States.CRAWL:
 					pass
+		GameActions.GO_PRONE:
+			pass
 
 #func _enter_tree() -> void:
 	#set_multiplayer_authority(name.split("_")[0].to_int())
@@ -287,3 +293,8 @@ func _agent_clicked(camera: Node, event: InputEvent, position: Vector3, normal: 
 
 func flash_outline(color : Color):
 	_outline_mat.albedo_color = color
+
+
+func _on_eyes_area_entered(area: Area3D) -> void:
+	var par = area.get_parent()
+
