@@ -148,11 +148,15 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 	var new_agent = agent_scene.instantiate()
 	new_agent.name = str(player_id) + "_" + str(agent_stats.name)
 	new_agent.agent_selected.connect(_hud_agent_details_actions)
-	#new_agent.agent_deselected.connect(_radial_menu.button_collapse_animation)
-	new_agent.action_chosen
 	new_agent.action_completed
 	new_agent.action_interrupted
-	new_agent.agent_died
+
+	new_agent.spotted_agent.connect(_agent_sees_agent)
+	new_agent.unspotted_agent.connect(_agent_lost_agent)
+	new_agent.spotted_element
+	new_agent.unspotted_element
+	new_agent.heard_sound
+	new_agent.agent_died.connect(_agent_died)
 	new_agent.position = Vector3(pos_x, pos_y, pos_z)
 	new_agent.rotation.y = rot_y
 	new_agent.set_multiplayer_authority(player_id)
@@ -179,7 +183,29 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 			client_agents[new_agent]["small_hud"].update_weapon("none")
 			client_agents[new_agent]["small_hud"].init_weapon_in(0, 0, 0)
 			client_agents[new_agent]["small_hud"].init_weapon_res(0, 0, 0)
+	pass
 
+
+func _agent_sees_agent(spotter : Agent, spottee : Agent):
+	pass
+
+
+func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
+	pass
+
+
+func _agent_died(deceased : Agent):
+	print(deceased.name, " has died, big f")
+	if deceased.get_multiplayer_authority() == 1:
+		if deceased.percieved_by_friendly:
+			(server_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameIcons.STE.dead)
+		else:
+			(server_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameIcons.STE.unknown)
+	else:
+		if deceased.percieved_by_friendly:
+			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameIcons.STE.dead)
+		else:
+			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameIcons.STE.unknown)
 	pass
 
 func _hud_agent_details_actions(agent : Agent): #TODO
