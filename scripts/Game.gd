@@ -187,10 +187,20 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 
 
 func _agent_sees_agent(spotter : Agent, spottee : Agent):
-	pass
+	if not spotter.is_multiplayer_authority():
+		return
+	if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority():
+		pass
 
 
 func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
+	if not unspotter.is_multiplayer_authority():
+		return
+	if unspotter.get_multiplayer_authority() != unspottee.get_multiplayer_authority():
+		pass
+
+
+func _agent_heard_something(listener : Agent, sound : Node3D):
 	pass
 
 
@@ -209,7 +219,7 @@ func _agent_died(deceased : Agent):
 	pass
 
 func _hud_agent_details_actions(agent : Agent): #TODO
-	if multiplayer.multiplayer_peer.get_unique_id() != agent.get_multiplayer_authority():
+	if not agent.is_multiplayer_authority():
 		return
 	agent.flash_outline(Color.AQUA)
 	_radial_menu.referenced_agent = agent

@@ -9,7 +9,7 @@ signal spotted_agent(spotter : Agent, spottee : Agent)
 signal unspotted_agent(unspotter : Agent, unspottee : Agent)
 signal spotted_element(element : Node3D)
 signal unspotted_element(element : Node3D)
-signal heard_sound(sound : Node3D)
+signal heard_sound(listener : Agent, sound : Node3D)
 signal agent_died(deceased : Agent)
 
 var view_dist : float = 2.5 #length of vision "cone"
