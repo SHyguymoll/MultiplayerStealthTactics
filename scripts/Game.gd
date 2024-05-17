@@ -68,7 +68,7 @@ func start_game():
 	# All peers are ready to receive RPCs in this scene.
 	await get_tree().create_timer(1).timeout
 	ping.rpc()
-	server_populate_agent_dictionaries()
+	server_populate_variables()
 	#send_populated_dictionaries.rpc_id(other_player)
 
 	pass
@@ -76,7 +76,7 @@ func start_game():
 func create_sound_effect() -> void: #TODO
 	pass
 
-func server_populate_agent_dictionaries(): #TODO
+func server_populate_variables(): #TODO
 	# server's agents
 	var spawn = game_map.agent_spawn_server_1
 	create_agent.rpc(
@@ -125,6 +125,11 @@ func server_populate_agent_dictionaries(): #TODO
 				GameSettings.server_client_id,
 				Lobby.players[GameSettings.server_client_id].agents[3],
 				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+
+
+@rpc("authority", "call_remote", "reliable")
+func append_action_timeline(timeline_entry, actions):
+	action_timeline[timeline_entry] = actions
 
 
 @rpc("call_local")

@@ -164,31 +164,46 @@ func button_menu_screen():
 				_ur.icon = ICONS.walk
 				if referenced_agent.state == referenced_agent.States.WALK:
 					_ur.icon = ICONS.halt
-				_l.icon = ICONS.stance_prone
+				if referenced_agent.can_prone():
+					_l.icon = ICONS.stance_prone
+				else:
+					_l.icon = ICONS.none
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.use_weapon
 				_dl.icon = ICONS.look
 				_d.icon = ICONS.swap_item
 				_dr.icon = ICONS.swap_weapon
 			if referenced_agent.in_crouching_state():
-				_ul.icon = ICONS.stance_stand
+				if referenced_agent.can_stand():
+					_ul.icon = ICONS.stance_stand
+				else:
+					_ul.icon = ICONS.none
 				_u.icon = ICONS.none
 				_ur.icon = ICONS.crouch_walk
 				if referenced_agent.state == referenced_agent.States.CROUCH_WALK:
 					_ur.icon = ICONS.halt
-				_l.icon = ICONS.stance_prone
+				if referenced_agent.can_prone():
+					_l.icon = ICONS.stance_prone
+				else:
+					_l.icon = ICONS.none
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.use_weapon
 				_dl.icon = ICONS.look
 				_d.icon = ICONS.swap_item
 				_dr.icon = ICONS.swap_weapon
 			if referenced_agent.in_prone_state():
-				_ul.icon = ICONS.stance_stand
+				if referenced_agent.can_stand():
+					_ul.icon = ICONS.stance_stand
+				else:
+					_ul.icon = ICONS.none
 				_u.icon = ICONS.none
 				_ur.icon = ICONS.crawl
 				if referenced_agent.state == referenced_agent.States.CRAWL:
 					_ur.icon = ICONS.halt
-				_l.icon = ICONS.stance_crouch
+				if referenced_agent.can_crouch():
+					_l.icon = ICONS.stance_crouch
+				else:
+					_l.icon = ICONS.none
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.none
 				_dl.icon = ICONS.look

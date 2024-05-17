@@ -46,8 +46,13 @@ var _outline_mat : StandardMaterial3D
 @onready var _ear_cylinder : CylinderShape3D = _ears.shape
 @onready var _body : Area3D = $Body
 @onready var _world_collide : CollisionShape3D = $WorldCollision
+@onready var _prone_ray : RayCast3D = $ProneCheck
+@onready var _crouch_ray : RayCast3D = $CrouchCheck
+@onready var _stand_ray : RayCast3D = $StandCheck
 
-
+# Actions are stored as an enum in order to make serialization much easier
+# each agent will be stored in the action timeline as an array, where the first entry is the action,
+# and any important metadata (position, rotation, selection, etc.) follows.
 enum GameActions {
 	GO_STAND, GO_CROUCH, GO_PRONE,
 	MOVE_TO_POS, SNEAK_TO_POS, PARANOID_SNEAK_TO_POS,
@@ -57,7 +62,7 @@ enum GameActions {
 	USE_ITEM, USE_WEAPON, RELOAD_WEAPON,
 	HALT,
 }
-var queued_action : GameActions
+var queued_action = []
 
 enum States {
 	STAND, CROUCH, PRONE,
@@ -85,6 +90,19 @@ func in_crouching_state() -> bool:
 
 func in_prone_state() -> bool:
 	return state in [States.PRONE, States.CRAWL]
+
+
+func can_crouch():
+	return not _crouch_ray.is_colliding()
+
+
+func can_prone():
+	return not _prone_ray.is_colliding()
+
+
+func can_stand():
+	return not _stand_ray.is_colliding()
+
 
 func perform_action():
 	match queued_action:
@@ -257,9 +275,9 @@ func _physics_process(_delta: float) -> void:
 			target_world_collide_height,
 			0.2
 	)
-	if is_multiplayer_authority():
-		var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-		position = position + Vector3(move_dir.x, 0, move_dir.y)
+	#if is_multiplayer_authority():
+		#var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+		#position = position + Vector3(move_dir.x, 0, move_dir.y)
 
 
 func _agent_clicked(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int) -> void:
