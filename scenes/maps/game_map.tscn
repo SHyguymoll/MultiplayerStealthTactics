@@ -57,43 +57,43 @@ shape = SubResource("BoxShape3D_ycwvl")
 [node name="Spawns" type="Node3D" parent="."]
 
 [node name="Server1" type="Sprite3D" parent="Spawns"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1.90223, 0.665981, -15.9336)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.90223, 0.665981, -16)
 billboard = 1
 double_sided = false
 texture = ExtResource("4_mmrrv")
 
 [node name="Server2" type="Sprite3D" parent="Spawns"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.655941, 0.665981, -15.9555)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.655941, 0.665981, -16)
 billboard = 1
 texture = ExtResource("4_mmrrv")
 
 [node name="Server3" type="Sprite3D" parent="Spawns"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.61221, 0.665981, -15.9774)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.61221, 0.665981, -16)
 billboard = 1
 texture = ExtResource("4_mmrrv")
 
 [node name="Server4" type="Sprite3D" parent="Spawns"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 1.7929, 0.665981, -15.9336)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7929, 0.665981, -16)
 billboard = 1
 texture = ExtResource("4_mmrrv")
 
 [node name="Client1" type="Sprite3D" parent="Spawns"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.53053, 0.665981, 16.6119)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1.53053, 0.665981, 16.6)
 billboard = 1
 texture = ExtResource("5_cx0bu")
 
 [node name="Client2" type="Sprite3D" parent="Spawns"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.524753, 0.665981, 16.6119)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.524753, 0.665981, 16.6)
 billboard = 1
 texture = ExtResource("5_cx0bu")
 
 [node name="Client3" type="Sprite3D" parent="Spawns"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.524752, 0.665981, 16.6556)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.524752, 0.665981, 16.6)
 billboard = 1
 texture = ExtResource("5_cx0bu")
 
 [node name="Client4" type="Sprite3D" parent="Spawns"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.53053, 0.665981, 16.6119)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 1.53053, 0.665981, 16.6)
 billboard = 1
 texture = ExtResource("5_cx0bu")
 
