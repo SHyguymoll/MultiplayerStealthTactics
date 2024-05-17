@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=6 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
 [ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
 [ext_resource type="PackedScene" uid="uid://mr6n3d2nksvr" path="res://scenes/maps/game_map.tscn" id="2_ow13f"]
 [ext_resource type="PackedScene" uid="uid://d4hiq2jbaabj5" path="res://scenes/hud_radial_menu.tscn" id="2_xp2mg"]
+[ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="5_b0o1h"]
 
 [node name="Game" type="Node3D" node_paths=PackedStringArray("game_map")]
 script = ExtResource("1_re23i")
@@ -22,6 +23,8 @@ script = ExtResource("2_f2a8t")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 
+[node name="MovementOrders" type="Node3D" parent="."]
+
 [node name="HUDBase" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
 
@@ -29,12 +32,47 @@ follow_viewport_enabled = true
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -189.0
-offset_right = 822.0
+offset_top = -196.0
+offset_right = 612.0
 grow_vertical = 0
+
+[node name="Execute" type="Button" parent="HUDBase"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+offset_top = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 60
+text = "EXECUTE INSTRUCTIONS"
+alignment = 2
+
+[node name="AgentInstructions" type="Label" parent="HUDBase"]
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -553.0
+offset_top = -111.0
+offset_bottom = 389.0
+grow_horizontal = 0
+grow_vertical = 2
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 48
+horizontal_alignment = 2
+autowrap_mode = 2
+clip_text = true
 
 [node name="HUDSelected" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
 
 [node name="RadialMenu" parent="HUDSelected" instance=ExtResource("2_xp2mg")]
 position = Vector2(-60, -60)
+
+[node name="HUDPopups" type="CanvasLayer" parent="."]
+follow_viewport_enabled = true
