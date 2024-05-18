@@ -95,6 +95,19 @@ func create_sound_effect() -> void: #TODO
 	pass
 
 
+func update_text() -> void:
+	$HUDBase/AgentInstructions.text = ""
+	if multiplayer.multiplayer_peer.get_unique_id() == 1:
+		for agent in server_agents:
+			$HUDBase/AgentInstructions.text += server_agents[agent]["text"]
+			$HUDBase/AgentInstructions.text += "\n"
+
+	else:
+		for agent in server_agents:
+			$HUDBase/AgentInstructions.text += client_agents[agent]["text"]
+			$HUDBase/AgentInstructions.text += "\n"
+
+
 func _physics_process(delta: float) -> void:
 	match game_phase:
 		GamePhases.SELECTION:
@@ -204,6 +217,8 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 			server_agents[new_agent]["small_hud"].init_weapon_in(0, 0, 0)
 			server_agents[new_agent]["small_hud"].init_weapon_res(0, 0, 0)
 
+			server_agents[new_agent]["text"] = ""
+
 	else:
 		client_agents[new_agent] = {}
 		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
@@ -214,6 +229,8 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 			client_agents[new_agent]["small_hud"].update_weapon("none")
 			client_agents[new_agent]["small_hud"].init_weapon_in(0, 0, 0)
 			client_agents[new_agent]["small_hud"].init_weapon_res(0, 0, 0)
+
+			client_agents[new_agent]["text"] = ""
 	pass
 
 
@@ -266,7 +283,31 @@ func _hud_agent_details_actions(agent : Agent): #TODO
 
 
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
-	pass # Replace with function body.
+	var final_text_string := ""
+	match decision_array[1]:
+		Agent.GameActions.GO_STAND:
+			pass
+		Agent.GameActions.GO_CROUCH:
+			pass
+		Agent.GameActions.GO_PRONE:
+			pass
+		Agent.GameActions.LOOK_AROUND:
+			pass
+		Agent.GameActions.CHANGE_ITEM:
+			pass
+		Agent.GameActions.CHANGE_WEAPON:
+			pass
+		Agent.GameActions.PICK_UP_ITEM:
+			pass
+		Agent.GameActions.PICK_UP_WEAPON:
+			pass
+		Agent.GameActions.HALT:
+			pass
+	if multiplayer.multiplayer_peer.get_unique_id() == 1:
+		server_agents[decision_array[0]]["text"] = final_text_string
+	else:
+		client_agents[decision_array[0]]["text"] = final_text_string
+	update_text()
 
 
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
