@@ -254,6 +254,8 @@ func _agent_died(deceased : Agent):
 func _hud_agent_details_actions(agent : Agent): #TODO
 	if not agent.is_multiplayer_authority():
 		return
+	if agent.in_incapacitated_state() and not agent.percieved_by_friendly:
+		return
 	agent.flash_outline(Color.AQUA)
 	_radial_menu.referenced_agent = agent
 	_radial_menu.position = (
@@ -261,3 +263,15 @@ func _hud_agent_details_actions(agent : Agent): #TODO
 					agent.position).clamp(Vector2(get_window().size) - get_window().size * 0.85, get_window().size * 0.85)
 	_radial_menu.init_menu()
 	pass
+
+
+func _on_radial_menu_decision_made(decision_array: Array) -> void:
+	pass # Replace with function body.
+
+
+func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
+	pass # Replace with function body.
+
+
+func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
+	pass # Replace with function body.

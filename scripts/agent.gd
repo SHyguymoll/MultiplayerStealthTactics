@@ -85,6 +85,10 @@ var target_head_rot_off_y : float = 0.0 #rot of head in relation to body rot
 var target_world_collide_height : float
 var target_world_collide_y : float
 
+func in_incapacitated_state() -> bool:
+	return not state in [States.STUNNED, States.DEAD]
+
+
 func in_standing_state() -> bool:
 	return state in [States.STAND, States.WALK, States.RUN]
 

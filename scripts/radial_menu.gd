@@ -1,9 +1,9 @@
 class_name HUDRadialMenu
 extends Node2D
 
-signal decision_made(decision_array)
-signal movement_decision_made(decision_array)
-signal aiming_decision_made(decision_array)
+signal decision_made(decision_array : Array)
+signal movement_decision_made(decision_array : Array)
+signal aiming_decision_made(decision_array : Array)
 
 const TWEEN_TIME = 0.2
 const ICON_DIST = 32
