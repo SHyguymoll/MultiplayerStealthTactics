@@ -36,6 +36,10 @@ var percieved_by_friendly := false #determines if hud is updated
 
 @export var skin_texture : String
 
+#why isn't there a signal for when traversal ends
+var animation_finished : bool
+var anim_traversal_endpoint : StringName
+
 @onready var _anim : AnimationTree = $AnimationTree
 @onready var _anim_state : AnimationNodeStateMachinePlayback = _anim.get("parameters/playback")
 @onready var _mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Mesh
@@ -116,15 +120,52 @@ func perform_action():
 		GameActions.GO_STAND:
 			if in_crouching_state() or in_prone_state():
 				_anim_state.travel("Stand")
+				anim_traversal_endpoint = &"Stand"
 				state = States.STAND
-
 		GameActions.GO_CROUCH:
 			if in_standing_state() or in_prone_state():
 				_anim_state.travel("Crouch")
+				anim_traversal_endpoint = &"Crouch"
 				state = States.CROUCH
 		GameActions.GO_PRONE:
 			if in_standing_state() or in_crouching_state():
 				_anim_state.travel("B_Prone")
+				anim_traversal_endpoint = &"Prone"
+				state = States.PRONE
+		GameActions.RUN_TO_POS:
+			pass
+		GameActions.WALK_TO_POS:
+			pass
+		GameActions.CROUCH_WALK_TO_POS:
+			pass
+		GameActions.CRAWL_TO_POS:
+			pass
+		GameActions.LOOK_AROUND:
+			pass
+		GameActions.CHANGE_ITEM:
+			pass
+		GameActions.CHANGE_WEAPON:
+			pass
+		GameActions.PICK_UP_ITEM:
+			pass
+		GameActions.PICK_UP_WEAPON:
+			pass
+		GameActions.USE_WEAPON:
+			pass
+		GameActions.RELOAD_WEAPON:
+			pass
+		GameActions.HALT:
+			if state in [States.RUN, States.WALK]:
+				_anim_state.travel("Stand")
+				anim_traversal_endpoint = &"Stand"
+				state = States.STAND
+			if state == States.CROUCH_WALK:
+				_anim_state.travel("Crouch")
+				anim_traversal_endpoint = &"Crouch"
+				state = States.CROUCH
+			if state == States.CRAWL:
+				_anim_state.travel("B_Prone")
+				anim_traversal_endpoint = &"Prone"
 				state = States.PRONE
 
 #func _enter_tree() -> void:
@@ -224,7 +265,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	# debug_process()
-	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, 0.2)
+
 	pass
 
 
@@ -250,6 +291,10 @@ func decide_weapon_blend() -> Vector2:
 				return Vector2(1, -1)
 	else:
 		return Vector2.ONE
+
+
+func _physics_process(delta: float) -> void:
+	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, 0.2)
 
 
 func _game_step(delta: float) -> void:
@@ -284,6 +329,7 @@ func _game_step(delta: float) -> void:
 			0.2
 	)
 	_anim.advance(delta)
+	animation_finished = anim_traversal_endpoint == _anim_state.get_current_node()
 	#if is_multiplayer_authority():
 		#var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		#position = position + Vector3(move_dir.x, 0, move_dir.y)
