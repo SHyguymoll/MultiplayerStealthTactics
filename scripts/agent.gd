@@ -55,6 +55,7 @@ var _outline_mat : StandardMaterial3D
 @onready var _prone_ray : RayCast3D = $ProneCheck
 @onready var _crouch_ray : RayCast3D = $CrouchCheck
 @onready var _stand_ray : RayCast3D = $StandCheck
+@onready var _active_item_icon : Sprite2D = $ActiveItem
 
 # Actions are stored as an enum in order to make serialization much easier
 # each agent will be stored in the action timeline as an array, where the first entry is the action,
@@ -144,8 +145,18 @@ func perform_action():
 		GameActions.LOOK_AROUND:
 			pass
 		GameActions.CHANGE_ITEM:
-			selected_item = held_items.find(queued_action[2])
-
+			if queued_action[2] == GameIcons.ITM.none:
+				selected_item = -1
+			else:
+				selected_item = held_items.find(queued_action[2])
+			if not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly):
+				_active_item_icon.visible = false
+				return
+			if selected_item > -1:
+				_active_item_icon.texture = GameIcons.ITM[held_items[selected_item]]
+				_active_item_icon.visible = true
+			else:
+				_active_item_icon.visible = false
 		GameActions.CHANGE_WEAPON:
 			pass
 		GameActions.PICK_UP_ITEM:
