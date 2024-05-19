@@ -68,6 +68,7 @@ enum GameActions {
 	USE_WEAPON, RELOAD_WEAPON,
 	HALT,
 }
+#format is [Agent (holdover from radial menu), GameActions, ... (game action parameters)]
 var queued_action = []
 
 enum States {
@@ -116,7 +117,7 @@ func can_stand():
 
 
 func perform_action():
-	match queued_action[0]:
+	match queued_action[1]:
 		GameActions.GO_STAND:
 			if in_crouching_state() or in_prone_state():
 				_anim_state.travel("Stand")
@@ -143,7 +144,8 @@ func perform_action():
 		GameActions.LOOK_AROUND:
 			pass
 		GameActions.CHANGE_ITEM:
-			pass
+			selected_item = held_items.find(queued_action[2])
+
 		GameActions.CHANGE_WEAPON:
 			pass
 		GameActions.PICK_UP_ITEM:

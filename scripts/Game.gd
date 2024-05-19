@@ -286,27 +286,139 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	var final_text_string := ""
 	match decision_array[1]:
 		Agent.GameActions.GO_STAND:
-			pass
+			final_text_string = "{0}: Stand Up".format([decision_array[0].name])
 		Agent.GameActions.GO_CROUCH:
-			pass
+			final_text_string = "{0}: Crouch".format([decision_array[0].name])
 		Agent.GameActions.GO_PRONE:
-			pass
+			final_text_string = "{0}: Go Prone".format([decision_array[0].name])
 		Agent.GameActions.LOOK_AROUND:
-			pass
+			final_text_string = "{0}: Survey Area".format([decision_array[0].name])
 		Agent.GameActions.CHANGE_ITEM:
-			pass
+			final_text_string = "{0}: Equip ".format([decision_array[0].name])
+			match decision_array[2]:
+				GameIcons.ITM.none:
+					final_text_string = "{0}: Unequip Item".format([decision_array[0].name])
+				GameIcons.ITM.box:
+					final_text_string += "Cardboard Box"
+				GameIcons.ITM.cigar:
+					final_text_string += "Cigar"
+				GameIcons.ITM.analyzer:
+					final_text_string += "Kit Analyzer"
+				GameIcons.ITM.body_armor:
+					final_text_string += "Body Armor"
+				GameIcons.ITM.reflex_enhancer:
+					final_text_string += "Reflex Pill"
+				GameIcons.ITM.fake_death:
+					final_text_string += "False Death Pill"
 		Agent.GameActions.CHANGE_WEAPON:
-			pass
+			final_text_string = "{0}: Switch to ".format([decision_array[0].name])
+			match decision_array[2]:
+				GameIcons.WEP.fist:
+					final_text_string += "Hand to Hand"
+				GameIcons.WEP.pistol:
+					final_text_string += "Sidearm"
+				GameIcons.WEP.rifle:
+					final_text_string += "Rifle"
+				GameIcons.WEP.shotgun:
+					final_text_string += "Shotugn"
+				GameIcons.WEP.grenade_frag:
+					final_text_string += "Fragmentation Grenade"
+				GameIcons.WEP.grenade_smoke:
+					final_text_string += "Smoke Grenade"
+				GameIcons.WEP.noise_maker:
+					final_text_string += "Audio Disturber"
+				GameIcons.WEP.middle_flag:
+					final_text_string += "Flag (player should not see this)"
+				GameIcons.WEP.enemy_flag:
+					final_text_string += "Flag (player should not see this)"
 		Agent.GameActions.PICK_UP_ITEM:
-			pass
+			final_text_string = "{0}: Pick up ".format([decision_array[0].name])
+			match decision_array[2]:
+				GameIcons.ITM.none:
+					final_text_string = "{0}: Unequip Item".format([decision_array[0].name])
+				GameIcons.ITM.box:
+					final_text_string += "Cardboard Box"
+				GameIcons.ITM.cigar:
+					final_text_string += "Cigar"
+				GameIcons.ITM.analyzer:
+					final_text_string += "Kit Analyzer"
+				GameIcons.ITM.body_armor:
+					final_text_string += "Body Armor"
+				GameIcons.ITM.reflex_enhancer:
+					final_text_string += "Reflex Pill"
+				GameIcons.ITM.fake_death:
+					final_text_string += "False Death Pill"
+			if len(decision_array) == 3:
+				final_text_string += " and drop "
+				match GameIcons.ITM.find_key(decision_array[2]):
+					GameIcons.ITM.box:
+						final_text_string += "Cardboard Box"
+					GameIcons.ITM.cigar:
+						final_text_string += "Cigar"
+					GameIcons.ITM.analyzer:
+						final_text_string += "Kit Analyzer"
+					GameIcons.ITM.body_armor:
+						final_text_string += "Body Armor"
+					GameIcons.ITM.reflex_enhancer:
+						final_text_string += "Reflex Pill"
+					GameIcons.ITM.fake_death:
+						final_text_string += "False Death Pill"
 		Agent.GameActions.PICK_UP_WEAPON:
-			pass
+			final_text_string = "{0}: Pick up ".format([decision_array[0].name])
+			match decision_array[2]:
+				GameIcons.WEP.fist:
+					final_text_string += "Hand to Hand (how would they even do this???)"
+				GameIcons.WEP.pistol:
+					final_text_string += "Sidearm"
+				GameIcons.WEP.rifle:
+					final_text_string += "Rifle"
+				GameIcons.WEP.shotgun:
+					final_text_string += "Shotugn"
+				GameIcons.WEP.grenade_frag:
+					final_text_string += "Fragmentation Grenade"
+				GameIcons.WEP.grenade_smoke:
+					final_text_string += "Smoke Grenade"
+				GameIcons.WEP.noise_maker:
+					final_text_string += "Audio Disturber"
+				GameIcons.WEP.middle_flag:
+					final_text_string += "Flag"
+				GameIcons.WEP.enemy_flag:
+					final_text_string += "Flag"
+			if len(decision_array) == 3:
+				final_text_string += " and drop "
+				match GameIcons.WEP.find_key(decision_array[2]):
+					GameIcons.WEP.pistol:
+						final_text_string += "Sidearm"
+					GameIcons.WEP.rifle:
+						final_text_string += "Rifle"
+					GameIcons.WEP.shotgun:
+						final_text_string += "Shotugn"
+					GameIcons.WEP.grenade_frag:
+						final_text_string += "Fragmentation Grenade"
+					GameIcons.WEP.grenade_smoke:
+						final_text_string += "Smoke Grenade"
+					GameIcons.WEP.noise_maker:
+						final_text_string += "Audio Disturber"
+					GameIcons.WEP.middle_flag:
+						final_text_string += "Flag"
+					GameIcons.WEP.enemy_flag:
+						final_text_string += "Flag"
 		Agent.GameActions.HALT:
-			pass
+			final_text_string = "{0}: Stop ".format([decision_array[0].name])
+			match (decision_array[0] as Agent).state:
+				Agent.States.RUN:
+					final_text_string += "Running"
+				Agent.States.WALK:
+					final_text_string += "Walking"
+				Agent.States.CROUCH_WALK:
+					final_text_string += "Sneaking"
+				Agent.States.CRAWL:
+					final_text_string += "Crawling"
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[decision_array[0]]["text"] = final_text_string
 	else:
 		client_agents[decision_array[0]]["text"] = final_text_string
+	_radial_menu.referenced_agent.queued_action = decision_array
 	update_text()
 
 
