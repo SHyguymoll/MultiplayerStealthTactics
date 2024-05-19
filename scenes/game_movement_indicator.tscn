@@ -1,0 +1,138 @@
+[gd_scene load_steps=9 format=3 uid="uid://byiuauwlgaakv"]
+
+[ext_resource type="Texture2D" uid="uid://c1a4tc5047oxv" path="res://assets/sprites/game_popups/animated/movement/0.png" id="1_d3kem"]
+[ext_resource type="Script" path="res://scripts/game_movement_indicator.gd" id="1_rfasu"]
+[ext_resource type="Texture2D" uid="uid://cbu4ew2tpkhhj" path="res://assets/sprites/game_popups/animated/movement/1.png" id="2_ww7n4"]
+[ext_resource type="Texture2D" uid="uid://d21ti3n06sn3m" path="res://assets/sprites/game_popups/animated/movement/2.png" id="3_xy1ew"]
+[ext_resource type="Texture2D" uid="uid://bd8lmi6lsyims" path="res://assets/sprites/game_popups/animated/movement/3.png" id="4_gup6x"]
+[ext_resource type="Texture2D" uid="uid://o1e60rw5jlih" path="res://assets/sprites/game_popups/animated/movement/fail.png" id="5_osgha"]
+[ext_resource type="Texture2D" uid="uid://86gycgkrmhxo" path="res://assets/sprites/game_popups/animated/movement/checkmark.png" id="6_sfetn"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vjpas"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_ww7n4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_xy1ew")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_gup6x")
+}],
+"loop": true,
+"name": &"crawl",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_ww7n4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_xy1ew")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_gup6x")
+}],
+"loop": true,
+"name": &"crouch_walk",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_osgha")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_osgha")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_osgha")
+}, {
+"duration": 1.0,
+"texture": null
+}],
+"loop": false,
+"name": &"movement_fail",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_sfetn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_sfetn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": null
+}],
+"loop": false,
+"name": &"movement_success",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_ww7n4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_xy1ew")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_gup6x")
+}],
+"loop": true,
+"name": &"run",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_ww7n4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_xy1ew")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_gup6x")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}]
+
+[node name="GameMovementIndicator" type="AnimatedSprite3D"]
+billboard = 1
+double_sided = false
+no_depth_test = true
+sprite_frames = SubResource("SpriteFrames_vjpas")
+animation = &"movement_success"
+frame = 4
+frame_progress = 1.0
+script = ExtResource("1_rfasu")
+
+[connection signal="animation_changed" from="." to="." method="_on_animation_changed"]
