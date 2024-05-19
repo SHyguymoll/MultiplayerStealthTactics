@@ -7,6 +7,9 @@ var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 var server_agents : Dictionary
 var client_agents : Dictionary
 
+var server_ready_bool := false
+var client_ready_bool := false
+
 var action_timeline := {
 
 }
@@ -21,6 +24,7 @@ var game_phase : GamePhases = GamePhases.SELECTION
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu
+@onready var _execute_button = $HUDBase/Execute
 
 func _ready():
 	#debug_game()
@@ -108,12 +112,17 @@ func update_text() -> void:
 			$HUDBase/AgentInstructions.text += "\n"
 
 
+func get_agents() -> Array[Agent]:
+	return $Agents.get_children() as Array[Agent]
+
+
 func _physics_process(delta: float) -> void:
 	match game_phase:
 		GamePhases.SELECTION:
-			pass
+			if server_ready_bool and client_ready_bool:
+				pass
 		GamePhases.EXECUTION:
-			for agent in $Agents.get_children() as Array[Agent]:
+			for agent in get_agents():
 				agent._game_step(delta)
 		GamePhases.RESOLUTION:
 			pass
@@ -422,9 +431,41 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	update_text()
 
 
+@rpc("authority", "call_local", "reliable")
+func _update_game_phase(new_phase: GamePhases):
+	game_phase = new_phase
+	match new_phase:
+		GamePhases.SELECTION:
+			_execute_button.set_pressed_no_signal(false)
+		GamePhases.EXECUTION:
+			for agent in get_agents():
+				agent.perform_action()
+			pass
+		GamePhases.RESOLUTION:
+			_execute_button.disabled = false
+
+
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	pass # Replace with function body.
 
 
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	pass # Replace with function body.
+
+
+@rpc("authority", "call_local", "reliable")
+func server_is_ready():
+	server_ready_bool = true
+
+
+@rpc("any_peer", "call_local", "reliable")
+func client_is_ready():
+	client_ready_bool = true
+
+
+func _on_execute_toggled(toggled_on: bool) -> void:
+	_execute_button.disabled = true
+	if multiplayer.is_server():
+		server_is_ready.rpc()
+	else:
+		client_is_ready.rpc()

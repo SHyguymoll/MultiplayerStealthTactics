@@ -51,6 +51,7 @@ grow_horizontal = 0
 grow_vertical = 0
 theme = ExtResource("5_b0o1h")
 theme_override_font_sizes/font_size = 60
+toggle_mode = true
 text = "EXECUTE INSTRUCTIONS"
 alignment = 2
 
@@ -80,6 +81,7 @@ position = Vector2(-60, -60)
 [node name="HUDPopups" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
 
+[connection signal="toggled" from="HUDBase/Execute" to="." method="_on_execute_toggled"]
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
 [connection signal="decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
 [connection signal="movement_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_movement_decision_made"]
