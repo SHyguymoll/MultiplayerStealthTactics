@@ -10,6 +10,7 @@ enum Types {
 var reserve_ammo : int
 var ammo_capacity : int
 var loaded_ammo : int = 0
+var reload_time : int
 var type : Types
 var icon : Texture2D
 

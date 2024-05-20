@@ -4,6 +4,7 @@ var drag_enabled := false
 var last_position := Vector2.ZERO
 var final_position := Vector2.ZERO
 var cutscene_mode := false
+var custscene_camera_pos := Vector3.ZERO
 var sensitivity := 10.5
 var quickness := 0.3
 var fov_target := 75.0
@@ -16,7 +17,7 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_MIDDLE:
-			print("PRESSED" if event.pressed else "UNPRESSED")
+			#print("PRESSED" if event.pressed else "UNPRESSED")
 			drag_enabled = event.pressed
 			if event.pressed:
 				last_position = event.position

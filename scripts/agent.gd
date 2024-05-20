@@ -55,7 +55,7 @@ var _outline_mat : StandardMaterial3D
 @onready var _prone_ray : RayCast3D = $ProneCheck
 @onready var _crouch_ray : RayCast3D = $CrouchCheck
 @onready var _stand_ray : RayCast3D = $StandCheck
-@onready var _active_item_icon : Sprite2D = $ActiveItem
+@onready var _active_item_icon : Sprite3D = $ActiveItem
 
 # Actions are stored as an enum in order to make serialization much easier
 # each agent will be stored in the action timeline as an array, where the first entry is the action,
@@ -92,7 +92,7 @@ var target_world_collide_height : float
 var target_world_collide_y : float
 
 func in_incapacitated_state() -> bool:
-	return not state in [States.STUNNED, States.DEAD]
+	return state in [States.STUNNED, States.DEAD]
 
 
 func in_standing_state() -> bool:

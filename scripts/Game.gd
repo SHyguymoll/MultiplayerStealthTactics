@@ -108,7 +108,7 @@ func update_text() -> void:
 			$HUDBase/AgentInstructions.text += "\n"
 
 	else:
-		for agent in server_agents:
+		for agent in client_agents:
 			$HUDBase/AgentInstructions.text += client_agents[agent]["text"]
 			$HUDBase/AgentInstructions.text += "\n"
 
@@ -248,7 +248,7 @@ func _agent_sees_agent(spotter : Agent, spottee : Agent):
 	if not spotter.is_multiplayer_authority():
 		return
 	var dist = spotter.position.distance_to(spottee.position)
-	var sight_chance = dist * (spotter.eye_strength^dist) / (spottee.camo_level)
+	var sight_chance = dist * (spotter.eye_strength**dist) / (spottee.camo_level)
 	if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority():
 		pass
 
