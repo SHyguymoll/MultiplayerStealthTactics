@@ -208,6 +208,10 @@ func update_ear_radius(mult : float):
 	_ear_cylinder.radius = hearing_dist * mult
 
 
+func set_clickable(clickable : bool):
+	($MouseClick as Area3D).input_ray_pickable = clickable
+
+
 func debug_setup():
 	# states
 	$DebugValues/DuringGame/StateScroll.min_value = 0

@@ -3,6 +3,7 @@ extends Node3D
 
 var agent_scene = preload("res://scenes/agent.tscn")
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
+var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 
 var server_agents : Dictionary
 var client_agents : Dictionary
@@ -292,6 +293,8 @@ func _hud_agent_details_actions(agent : Agent): #TODO
 
 
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
+	_radial_menu.referenced_agent.queued_action = decision_array
+	_radial_menu.referenced_agent = null
 	var final_text_string := ""
 	match decision_array[1]:
 		Agent.GameActions.GO_STAND:
@@ -427,7 +430,6 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 		server_agents[decision_array[0]]["text"] = final_text_string
 	else:
 		client_agents[decision_array[0]]["text"] = final_text_string
-	_radial_menu.referenced_agent.queued_action = decision_array
 	update_text()
 
 
@@ -446,7 +448,32 @@ func _update_game_phase(new_phase: GamePhases):
 
 
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
-	pass # Replace with function body.
+	_radial_menu.referenced_agent.queued_action = decision_array
+	_radial_menu.referenced_agent = null
+	for agent in get_agents():
+		agent.set_clickable(false)
+	var new_indicator = movement_icon_scene.instantiate()
+	new_indicator.referenced_agent = decision_array[0]
+	$MovementOrders.add_child(new_indicator)
+	await new_indicator.indicator_placed
+	for agent in get_agents():
+		agent.set_clickable(true)
+	var final_text_string := ""
+	match decision_array[1]:
+		Agent.GameActions.RUN_TO_POS:
+			final_text_string = "{0}: Run ".format([decision_array[0].name])
+		Agent.GameActions.WALK_TO_POS:
+			final_text_string = "{0}: Walk ".format([decision_array[0].name])
+		Agent.GameActions.CROUCH_WALK_TO_POS:
+			final_text_string = "{0}: Sneak ".format([decision_array[0].name])
+		Agent.GameActions.CRAWL_TO_POS:
+			final_text_string = "{0}: Crawl ".format([decision_array[0].name])
+	final_text_string += "to New Position"
+	if multiplayer.multiplayer_peer.get_unique_id() == 1:
+		server_agents[decision_array[0]]["text"] = final_text_string
+	else:
+		client_agents[decision_array[0]]["text"] = final_text_string
+	update_text()
 
 
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:

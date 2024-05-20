@@ -15234,6 +15234,7 @@ shape = SubResource("BoxShape3D_a4h6i")
 
 [node name="MouseClick" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.492155, 0)
+collision_mask = 0
 monitoring = false
 monitorable = false
 

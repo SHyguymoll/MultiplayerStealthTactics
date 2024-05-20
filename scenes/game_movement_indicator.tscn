@@ -46,9 +46,6 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_d3kem")
-}, {
-"duration": 1.0,
 "texture": ExtResource("5_osgha")
 }, {
 "duration": 1.0,
@@ -62,13 +59,36 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": ExtResource("5_osgha")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
 }, {
 "duration": 1.0,
 "texture": null
 }],
 "loop": false,
-"name": &"movement_fail",
+"name": &"movement_end_fail",
 "speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": null
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}, {
+"duration": 1.0,
+"texture": null
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_d3kem")
+}],
+"loop": true,
+"name": &"movement_end_neutral",
+"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -87,7 +107,7 @@ animations = [{
 "texture": null
 }],
 "loop": false,
-"name": &"movement_success",
+"name": &"movement_end_success",
 "speed": 7.0
 }, {
 "frames": [{
@@ -130,9 +150,7 @@ billboard = 1
 double_sided = false
 no_depth_test = true
 sprite_frames = SubResource("SpriteFrames_vjpas")
-animation = &"movement_success"
-frame = 4
-frame_progress = 1.0
+animation = &"movement_end_fail"
 script = ExtResource("1_rfasu")
 
 [connection signal="animation_changed" from="." to="." method="_on_animation_changed"]
