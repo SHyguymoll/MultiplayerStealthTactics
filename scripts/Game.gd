@@ -37,6 +37,7 @@ func _ready():
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 
+
 func debug_game():
 	Lobby.players = {
 		1:
@@ -113,17 +114,13 @@ func update_text() -> void:
 			$HUDBase/AgentInstructions.text += "\n"
 
 
-func get_agents() -> Array[Agent]:
-	return $Agents.get_children() as Array[Agent]
-
-
 func _physics_process(delta: float) -> void:
 	match game_phase:
 		GamePhases.SELECTION:
 			if server_ready_bool and client_ready_bool:
 				pass
 		GamePhases.EXECUTION:
-			for agent in get_agents():
+			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
 		GamePhases.RESOLUTION:
 			pass
@@ -278,6 +275,7 @@ func _agent_died(deceased : Agent):
 			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameIcons.STE.unknown)
 	pass
 
+
 func _hud_agent_details_actions(agent : Agent): #TODO
 	if not agent.is_multiplayer_authority():
 		return
@@ -296,6 +294,13 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	_radial_menu.referenced_agent.queued_action = decision_array
 	_radial_menu.referenced_agent = null
 	var final_text_string := ""
+	if len(decision_array) < 2:
+		if multiplayer.multiplayer_peer.get_unique_id() == 1:
+			server_agents[decision_array[0]]["text"] = final_text_string
+		else:
+			client_agents[decision_array[0]]["text"] = final_text_string
+		update_text()
+		return
 	match decision_array[1]:
 		Agent.GameActions.GO_STAND:
 			final_text_string = "{0}: Stand Up".format([decision_array[0].name])
@@ -433,30 +438,16 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	update_text()
 
 
-@rpc("authority", "call_local", "reliable")
-func _update_game_phase(new_phase: GamePhases):
-	game_phase = new_phase
-	match new_phase:
-		GamePhases.SELECTION:
-			_execute_button.set_pressed_no_signal(false)
-		GamePhases.EXECUTION:
-			for agent in get_agents():
-				agent.perform_action()
-			pass
-		GamePhases.RESOLUTION:
-			_execute_button.disabled = false
-
-
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	_radial_menu.referenced_agent.queued_action = decision_array
 	_radial_menu.referenced_agent = null
-	for agent in get_agents():
+	for agent in ($Agents.get_children() as Array[Agent]):
 		agent.set_clickable(false)
 	var new_indicator = movement_icon_scene.instantiate()
 	new_indicator.referenced_agent = decision_array[0]
 	$MovementOrders.add_child(new_indicator)
 	await new_indicator.indicator_placed
-	for agent in get_agents():
+	for agent in ($Agents.get_children() as Array[Agent]):
 		agent.set_clickable(true)
 	var final_text_string := ""
 	match decision_array[1]:
@@ -478,6 +469,20 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	pass # Replace with function body.
+
+
+@rpc("authority", "call_local", "reliable")
+func _update_game_phase(new_phase: GamePhases):
+	game_phase = new_phase
+	match new_phase:
+		GamePhases.SELECTION:
+			_execute_button.set_pressed_no_signal(false)
+		GamePhases.EXECUTION:
+			for agent in ($Agents.get_children() as Array[Agent]):
+				agent.perform_action()
+			pass
+		GamePhases.RESOLUTION:
+			_execute_button.disabled = false
 
 
 @rpc("authority", "call_local", "reliable")
