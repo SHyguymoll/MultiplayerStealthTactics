@@ -12,6 +12,7 @@ const DIST_CIRCLE_ADD = 40
 const ICONS := {
 	none = preload("res://assets/sprites/radial_menu/none.png"),
 	cancel_back = preload("res://assets/sprites/radial_menu/cancel.png"),
+	no_action = preload("res://assets/sprites/radial_menu/no_action.png"),
 	halt = preload("res://assets/sprites/radial_menu/halt.png"),
 	look = preload("res://assets/sprites/radial_menu/look.png"),
 	stance_stand = preload("res://assets/sprites/radial_menu/stand.png"),
@@ -157,67 +158,78 @@ func determine_weapons():
 		_ur.icon = candidates[1].icon
 
 
+# the action is available unless it was already selected,
+# in which case a no action button replaces the action.
+func a_o_na(icon, action : Agent.GameActions):
+	if len(referenced_agent.queued_action) < 2:
+		return icon
+	if referenced_agent.queued_action[1] != action:
+		return icon
+	else:
+		return ICONS.no_action
+
+
 func button_menu_screen():
 	match current_screen:
 		"top":
 			if referenced_agent.in_standing_state():
-				_ul.icon = ICONS.stance_crouch
-				_u.icon = ICONS.run
+				_ul.icon = a_o_na(ICONS.stance_crouch, Agent.GameActions.GO_CROUCH)
+				_u.icon = a_o_na(ICONS.run, Agent.GameActions.RUN_TO_POS)
 				if referenced_agent.state == referenced_agent.States.RUN:
 					_u.icon = ICONS.halt
-				_ur.icon = ICONS.walk
+				_ur.icon = a_o_na(ICONS.walk, Agent.GameActions.WALK_TO_POS)
 				if referenced_agent.state == referenced_agent.States.WALK:
 					_ur.icon = ICONS.halt
 				if referenced_agent.can_prone():
-					_l.icon = ICONS.stance_prone
+					_l.icon = a_o_na(ICONS.stance_prone, Agent.GameActions.GO_PRONE)
 				else:
 					_l.icon = ICONS.none
 				#_l.icon = ICONS.stance_prone
 				_m.icon = ICONS.cancel_back
-				_r.icon = ICONS.use_weapon
-				_dl.icon = ICONS.look
-				_d.icon = ICONS.swap_item
-				_dr.icon = ICONS.swap_weapon
+				_r.icon = a_o_na(ICONS.use_weapon, Agent.GameActions.USE_WEAPON)
+				_dl.icon = a_o_na(ICONS.look, Agent.GameActions.LOOK_AROUND)
+				_d.icon = a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM)
+				_dr.icon = a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON)
 			if referenced_agent.in_crouching_state():
 				if referenced_agent.can_stand():
-					_ul.icon = ICONS.stance_stand
+					_ul.icon = a_o_na(ICONS.stance_stand, Agent.GameActions.GO_STAND)
 				else:
 					_ul.icon = ICONS.none
 				#_ul.icon = ICONS.stance_stand
 				_u.icon = ICONS.none
-				_ur.icon = ICONS.crouch_walk
+				_ur.icon = a_o_na(ICONS.crouch_walk, Agent.GameActions.CROUCH_WALK_TO_POS)
 				if referenced_agent.state == referenced_agent.States.CROUCH_WALK:
 					_ur.icon = ICONS.halt
 				if referenced_agent.can_prone():
-					_l.icon = ICONS.stance_prone
+					_l.icon = a_o_na(ICONS.stance_prone, Agent.GameActions.GO_PRONE)
 				else:
 					_l.icon = ICONS.none
 				#_l.icon = ICONS.stance_prone
 				_m.icon = ICONS.cancel_back
-				_r.icon = ICONS.use_weapon
-				_dl.icon = ICONS.look
-				_d.icon = ICONS.swap_item
-				_dr.icon = ICONS.swap_weapon
+				_r.icon = a_o_na(ICONS.use_weapon, Agent.GameActions.USE_WEAPON)
+				_dl.icon = a_o_na(ICONS.look, Agent.GameActions.LOOK_AROUND)
+				_d.icon = a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM)
+				_dr.icon = a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON)
 			if referenced_agent.in_prone_state():
 				if referenced_agent.can_stand():
-					_ul.icon = ICONS.stance_stand
+					_ul.icon = a_o_na(ICONS.stance_stand, Agent.GameActions.GO_STAND)
 				else:
 					_ul.icon = ICONS.none
 				#_ul.icon = ICONS.stance_stand
 				_u.icon = ICONS.none
-				_ur.icon = ICONS.crawl
+				_ur.icon = a_o_na(ICONS.crawl, Agent.GameActions.CRAWL_TO_POS)
 				if referenced_agent.state == referenced_agent.States.CRAWL:
 					_ur.icon = ICONS.halt
 				if referenced_agent.can_crouch():
-					_l.icon = ICONS.stance_crouch
+					_l.icon = a_o_na(ICONS.stance_crouch, Agent.GameActions.GO_CROUCH)
 				else:
 					_l.icon = ICONS.none
 				#_l.icon = ICONS.stance_crouch
 				_m.icon = ICONS.cancel_back
 				_r.icon = ICONS.none
-				_dl.icon = ICONS.look
-				_d.icon = ICONS.swap_item
-				_dr.icon = ICONS.swap_weapon
+				_dl.icon = a_o_na(ICONS.look, Agent.GameActions.LOOK_AROUND)
+				_d.icon = a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM)
+				_dr.icon = a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON)
 		"swap_item":
 			determine_items()
 			_l.icon = ICONS.none
@@ -266,6 +278,9 @@ func _button_pressed_metadata(button_texture : Texture2D):
 		ICONS.swap_weapon:
 			current_screen = "swap_weapon"
 			button_menu_screen()
+		ICONS.no_action:
+			decision_made.emit([referenced_agent])
+			button_collapse_animation()
 		ICONS.stance_stand:
 			decision_made.emit([referenced_agent, Agent.GameActions.GO_STAND])
 			button_collapse_animation()
