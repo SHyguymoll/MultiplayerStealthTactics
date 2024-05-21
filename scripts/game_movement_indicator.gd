@@ -32,6 +32,8 @@ func _game_step(delta):
 		return
 
 func _on_animation_changed() -> void:
+	if not ind_set:
+		return
 	await animation_finished
 	queue_free()
 
