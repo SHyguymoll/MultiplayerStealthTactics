@@ -18,6 +18,16 @@ game_map = NodePath("World/GameMap")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 15, 0)
 script = ExtResource("2_f2a8t")
 
+[node name="RayCast3D" type="RayCast3D" parent="World/Camera3D"]
+target_position = Vector3(0, 0, -1000)
+debug_shape_custom_color = Color(0.615686, 0.839216, 0, 1)
+debug_shape_thickness = 1
+
+[node name="Label" type="Label" parent="World/Camera3D"]
+offset_right = 40.0
+offset_bottom = 23.0
+theme = ExtResource("5_b0o1h")
+
 [node name="GameMap" parent="World" instance=ExtResource("2_ow13f")]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
