@@ -52,8 +52,8 @@ func _process(delta: float) -> void:
 
 func explode(force: float, shakes : int):
 	for shake in range(1, shakes+1):
-		h_offset = (randf() - 0.5)*force*(shakes/shake)
-		v_offset = (randf() - 0.5)*force*(shakes/shake)
+		h_offset = (randf() - 0.5)*force*(float(shakes)/shake)
+		v_offset = (randf() - 0.5)*force*(float(shakes)/shake)
 		await get_tree().create_timer(0.01).timeout
 	h_offset = 0
 	v_offset = 0

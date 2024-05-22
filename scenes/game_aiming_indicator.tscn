@@ -81,7 +81,6 @@ double_sided = false
 no_depth_test = true
 sprite_frames = SubResource("SpriteFrames_akm5w")
 animation = &"aim"
-frame_progress = 0.735398
 script = ExtResource("7_l8n8m")
 
 [node name="RayCast3D" type="RayCast3D" parent="."]
