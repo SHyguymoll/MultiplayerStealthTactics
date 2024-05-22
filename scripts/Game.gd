@@ -438,7 +438,6 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 		client_agents[decision_array[0]]["text"] = final_text_string
 		client_agents[decision_array[0]]["action_array"] = decision_array.slice(1)
 	update_text()
-	_radial_menu.referenced_agent.queued_action = decision_array
 	_radial_menu.referenced_agent = null
 
 
@@ -459,6 +458,7 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	new_indicator.referenced_agent = $Agents.get_node(str(decision_array[0]))
 	$MovementOrders.add_child(new_indicator)
 	await new_indicator.indicator_placed
+	decision_array.append(new_indicator.position)
 	for agent in ($Agents.get_children() as Array[Agent]):
 		agent.set_clickable(true)
 	var final_text_string := ""
@@ -499,10 +499,11 @@ func _update_game_phase(new_phase: GamePhases):
 		GamePhases.SELECTION:
 			_execute_button.set_pressed_no_signal(false)
 		GamePhases.EXECUTION:
-			if multiplayer.is_server(): #populate client agent actions
-				pass
-			else: #populate server agent actions
-				pass
+			# populate agents with actions
+			for ag in server_agents:
+				server_agents[ag]["agent_node"].queued_action = server_agents[ag]["action_array"]
+			for ag in client_agents:
+				client_agents[ag]["agent_node"].queued_action = client_agents[ag]["action_array"]
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.perform_action()
 			pass
@@ -512,37 +513,27 @@ func _update_game_phase(new_phase: GamePhases):
 			client_ready_bool = false
 
 
-@rpc("authority", "call_local", "reliable")
-func server_is_ready():
+@rpc("authority", "call_remote", "reliable")
+func recieve_server_insts(recieved_dict : Dictionary):
+	print("SERVER:\n" + str(recieved_dict))
+	for agent_rec in recieved_dict:
+		server_agents[agent_rec]["action_array"] = recieved_dict[agent_rec]["action_array"]
 	server_ready_bool = true
 
 
-@rpc("any_peer", "call_local", "reliable")
-func client_is_ready():
-	client_ready_bool = true
-
-
-@rpc("authority", "call_remote", "reliable")
-func recieve_server_insts(agent_name : String, agent_action : Array):
-	print("SERVER - " + agent_name + ": " + str(agent_action))
-	server_agents[agent_name]["action_array"] = agent_action
-
-
 @rpc("any_peer", "call_remote", "reliable")
-func recieve_client_insts(agent_name : String, agent_action : Array):
-	print("CLIENT - " + agent_name + ": " + str(agent_action))
-	client_agents[agent_name]["action_array"] = agent_action
+func recieve_client_insts(recieved_dict : Dictionary):
+	print("CLIENT:\n" + str(recieved_dict))
+	for agent_rec in recieved_dict:
+		client_agents[agent_rec]["action_array"] = recieved_dict[agent_rec]["action_array"]
+	client_ready_bool = true
 
 
 func _on_execute_toggled(toggled_on: bool) -> void:
 	_execute_button.disabled = true
 	if multiplayer.is_server():
-		for agent in server_agents:
-			print(server_agents[agent]["action_array"])
-			recieve_server_insts.rpc_id(GameSettings.server_client_id, agent, server_agents[agent]["action_array"])
-		server_is_ready.rpc()
+		recieve_server_insts.rpc_id(GameSettings.server_client_id, server_agents)
+		server_ready_bool = true
 	else:
-		for agent in client_agents:
-			print(client_agents[agent]["action_array"])
-			recieve_client_insts.rpc_id(1, agent, client_agents[agent]["action_array"])
-		client_is_ready.rpc()
+		recieve_client_insts.rpc_id(1, client_agents)
+		client_ready_bool = true
