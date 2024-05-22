@@ -69,7 +69,7 @@ enum GameActions {
 	USE_WEAPON, RELOAD_WEAPON,
 	HALT,
 }
-#format is [Agent (holdover from radial menu), GameActions, ... (game action parameters)]
+#format is [GameActions, ... (game action parameters)]
 var queued_action = []
 
 enum States {
@@ -118,7 +118,7 @@ func can_stand():
 
 
 func perform_action():
-	match queued_action[1]:
+	match queued_action[0]:
 		GameActions.GO_STAND:
 			if in_crouching_state() or in_prone_state():
 				_anim_state.travel("Stand")
@@ -145,10 +145,10 @@ func perform_action():
 		GameActions.LOOK_AROUND:
 			pass
 		GameActions.CHANGE_ITEM:
-			if queued_action[2] == GameIcons.ITM.none:
+			if queued_action[1] == GameIcons.ITM.none:
 				selected_item = -1
 			else:
-				selected_item = held_items.find(queued_action[2])
+				selected_item = held_items.find(queued_action[1])
 			if not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly):
 				_active_item_icon.visible = false
 				return
