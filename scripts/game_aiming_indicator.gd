@@ -13,27 +13,17 @@ var ray_position : Vector3
 var position_valid : bool
 
 func _ready() -> void:
-	match referenced_agent.queued_action[1]:
-		Agent.GameActions.WALK_TO_POS:
-			play("walk")
-		Agent.GameActions.RUN_TO_POS:
-			play("run")
-		Agent.GameActions.CROUCH_WALK_TO_POS:
-			play("crouch_walk")
-		Agent.GameActions.CRAWL_TO_POS:
-			play("crawl")
+	play("aim")
 
 
 func _game_step(delta):
-	if referenced_agent.queued_action[1] == Agent.GameActions.HALT and referenced_agent.position.distance_to(position) <= CLOSENESS:
-		play("movement_end_success")
-		return
-	else:
-		play("movement_end_neutral")
-		return
-	if referenced_agent.in_incapacitated_state():
-		play("movement_end_fail")
-		return
+	if referenced_agent.state != Agent.States.USING_WEAPON:
+		if referenced_agent.state == Agent.States.RELOADING_WEAPON:
+			return
+		if referenced_agent.state != Agent.States.HURT and referenced_agent.in_incapacitated_state():
+			play("success")
+		else:
+			play("fail")
 
 
 func _on_animation_changed() -> void:

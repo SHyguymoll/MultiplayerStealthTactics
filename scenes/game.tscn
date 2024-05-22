@@ -39,6 +39,8 @@ directional_shadow_mode = 0
 
 [node name="MovementOrders" type="Node3D" parent="."]
 
+[node name="AimingOrders" type="Node3D" parent="."]
+
 [node name="HUDBase" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
 

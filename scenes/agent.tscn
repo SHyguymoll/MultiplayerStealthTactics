@@ -15638,6 +15638,8 @@ collide_with_bodies = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.18837, 0)
 billboard = 1
 
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+
 [connection signal="area_entered" from="Eyes" to="." method="_on_eyes_area_entered"]
 [connection signal="area_exited" from="Eyes" to="." method="_on_eyes_area_exited"]
 [connection signal="area_entered" from="Ears" to="." method="_on_ears_area_entered"]

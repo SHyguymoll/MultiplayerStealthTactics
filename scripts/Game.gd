@@ -118,7 +118,7 @@ func _physics_process(delta: float) -> void:
 	match game_phase:
 		GamePhases.SELECTION:
 			if server_ready_bool and client_ready_bool:
-				pass
+				_update_game_phase(GamePhases.EXECUTION)
 		GamePhases.EXECUTION:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
@@ -193,8 +193,8 @@ func ping():
 
 @rpc("authority", "call_local", "reliable")
 func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
-	print("{0}: attempting to spawn agent".format([player_id]))
-	print(agent_stats)
+	#print("{0}: attempting to spawn agent".format([player_id]))
+	#print(agent_stats)
 	var new_agent = agent_scene.instantiate()
 	new_agent.name = str(player_id) + "_" + str(agent_stats.name)
 	new_agent.agent_selected.connect(_hud_agent_details_actions)
@@ -214,31 +214,31 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 	$Agents.add_child(new_agent)
 
 	if player_id == 1:
-		server_agents[new_agent] = {}
+		server_agents[new_agent.name] = {agent_node=new_agent, action_array=[]}
 		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
-			server_agents[new_agent]["small_hud"] = hud_agent_small_scene.instantiate()
-			_quick_views.add_child(server_agents[new_agent]["small_hud"])
-			server_agents[new_agent]["small_hud"].update_state("active")
-			server_agents[new_agent]["small_hud"].update_item("none")
-			server_agents[new_agent]["small_hud"].update_weapon("none")
-			server_agents[new_agent]["small_hud"].init_weapon_in(0, 0, 0)
-			server_agents[new_agent]["small_hud"].init_weapon_res(0, 0, 0)
+			server_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
+			_quick_views.add_child(server_agents[new_agent.name]["small_hud"])
+			server_agents[new_agent.name]["small_hud"].update_state("active")
+			server_agents[new_agent.name]["small_hud"].update_item("none")
+			server_agents[new_agent.name]["small_hud"].update_weapon("none")
+			server_agents[new_agent.name]["small_hud"].init_weapon_in(0, 0, 0)
+			server_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
 
-			server_agents[new_agent]["text"] = ""
+			server_agents[new_agent.name]["text"] = ""
 
 	else:
-		client_agents[new_agent] = {}
+		client_agents[new_agent.name] = {agent_node=new_agent, action_array=[]}
 		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
-			client_agents[new_agent]["small_hud"] = hud_agent_small_scene.instantiate()
-			_quick_views.add_child(client_agents[new_agent]["small_hud"])
-			client_agents[new_agent]["small_hud"].update_state("active")
-			client_agents[new_agent]["small_hud"].update_item("none")
-			client_agents[new_agent]["small_hud"].update_weapon("none")
-			client_agents[new_agent]["small_hud"].init_weapon_in(0, 0, 0)
-			client_agents[new_agent]["small_hud"].init_weapon_res(0, 0, 0)
+			client_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
+			_quick_views.add_child(client_agents[new_agent.name]["small_hud"])
+			client_agents[new_agent.name]["small_hud"].update_state("active")
+			client_agents[new_agent.name]["small_hud"].update_item("none")
+			client_agents[new_agent.name]["small_hud"].update_weapon("none")
+			client_agents[new_agent.name]["small_hud"].init_weapon_in(0, 0, 0)
+			client_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
 
-			client_agents[new_agent]["text"] = ""
-	pass
+			client_agents[new_agent.name]["text"] = ""
+	print("{0}\n--------------\nSERVER = {1}\nCLIENT = {2}".format([multiplayer.multiplayer_peer.get_unique_id(), server_agents, client_agents]))
 
 
 func _agent_sees_agent(spotter : Agent, spottee : Agent):
@@ -291,30 +291,29 @@ func _hud_agent_details_actions(agent : Agent): #TODO
 
 
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
-	_radial_menu.referenced_agent.queued_action = decision_array
-	_radial_menu.referenced_agent = null
+	# need to remove movement indicator if created
+	for indicator in $MovementOrders.get_children():
+		if indicator.referenced_agent == _radial_menu.referenced_agent:
+			indicator.queue_free()
+	# ditto with aiming indicator
+	for indicator in $AimingOrders.get_children():
+		if indicator.referenced_agent == _radial_menu.referenced_agent:
+			indicator.queue_free()
 	var final_text_string := ""
-	if len(decision_array) < 2:
-		if multiplayer.multiplayer_peer.get_unique_id() == 1:
-			server_agents[decision_array[0]]["text"] = final_text_string
-		else:
-			client_agents[decision_array[0]]["text"] = final_text_string
-		update_text()
-		return
 	match decision_array[1]:
 		Agent.GameActions.GO_STAND:
-			final_text_string = "{0}: Stand Up".format([decision_array[0].name])
+			final_text_string = "{0}: Stand Up".format([decision_array[0]])
 		Agent.GameActions.GO_CROUCH:
-			final_text_string = "{0}: Crouch".format([decision_array[0].name])
+			final_text_string = "{0}: Crouch".format([decision_array[0]])
 		Agent.GameActions.GO_PRONE:
-			final_text_string = "{0}: Go Prone".format([decision_array[0].name])
+			final_text_string = "{0}: Go Prone".format([decision_array[0]])
 		Agent.GameActions.LOOK_AROUND:
-			final_text_string = "{0}: Survey Area".format([decision_array[0].name])
+			final_text_string = "{0}: Survey Area".format([decision_array[0]])
 		Agent.GameActions.CHANGE_ITEM:
-			final_text_string = "{0}: Equip ".format([decision_array[0].name])
+			final_text_string = "{0}: Equip ".format([decision_array[0]])
 			match decision_array[2]:
 				GameIcons.ITM.none:
-					final_text_string = "{0}: Unequip Item".format([decision_array[0].name])
+					final_text_string = "{0}: Unequip Item".format([decision_array[0]])
 				GameIcons.ITM.box:
 					final_text_string += "Cardboard Box"
 				GameIcons.ITM.cigar:
@@ -328,7 +327,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 				GameIcons.ITM.fake_death:
 					final_text_string += "False Death Pill"
 		Agent.GameActions.CHANGE_WEAPON:
-			final_text_string = "{0}: Switch to ".format([decision_array[0].name])
+			final_text_string = "{0}: Switch to ".format([decision_array[0]])
 			match decision_array[2]:
 				GameIcons.WEP.fist:
 					final_text_string += "Hand to Hand"
@@ -349,10 +348,10 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 				GameIcons.WEP.enemy_flag:
 					final_text_string += "Flag (player should not see this)"
 		Agent.GameActions.PICK_UP_ITEM:
-			final_text_string = "{0}: Pick up ".format([decision_array[0].name])
+			final_text_string = "{0}: Pick up ".format([decision_array[0]])
 			match decision_array[2]:
 				GameIcons.ITM.none:
-					final_text_string = "{0}: Unequip Item".format([decision_array[0].name])
+					final_text_string = "{0}: Unequip Item".format([decision_array[0]])
 				GameIcons.ITM.box:
 					final_text_string += "Cardboard Box"
 				GameIcons.ITM.cigar:
@@ -381,7 +380,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					GameIcons.ITM.fake_death:
 						final_text_string += "False Death Pill"
 		Agent.GameActions.PICK_UP_WEAPON:
-			final_text_string = "{0}: Pick up ".format([decision_array[0].name])
+			final_text_string = "{0}: Pick up ".format([decision_array[0]])
 			match decision_array[2]:
 				GameIcons.WEP.fist:
 					final_text_string += "Hand to Hand (how would they even do this???)"
@@ -421,7 +420,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					GameIcons.WEP.enemy_flag:
 						final_text_string += "Flag"
 		Agent.GameActions.HALT:
-			final_text_string = "{0}: Stop ".format([decision_array[0].name])
+			final_text_string = "{0}: Stop ".format([decision_array[0]])
 			match (decision_array[0] as Agent).state:
 				Agent.States.RUN:
 					final_text_string += "Running"
@@ -431,20 +430,33 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Sneaking"
 				Agent.States.CRAWL:
 					final_text_string += "Crawling"
+
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[decision_array[0]]["text"] = final_text_string
+		server_agents[decision_array[0]]["action_array"] = decision_array.slice(1)
 	else:
 		client_agents[decision_array[0]]["text"] = final_text_string
+		client_agents[decision_array[0]]["action_array"] = decision_array.slice(1)
 	update_text()
+	_radial_menu.referenced_agent.queued_action = decision_array
+	_radial_menu.referenced_agent = null
 
 
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
+	# need to remove previous movement indicator if created
+	for indicator in $MovementOrders.get_children():
+		if indicator.referenced_agent == _radial_menu.referenced_agent:
+			indicator.queue_free()
+	# ditto with aiming indicator
+	for indicator in $AimingOrders.get_children():
+		if indicator.referenced_agent == _radial_menu.referenced_agent:
+			indicator.queue_free()
 	_radial_menu.referenced_agent.queued_action = decision_array
 	_radial_menu.referenced_agent = null
 	for agent in ($Agents.get_children() as Array[Agent]):
 		agent.set_clickable(false)
 	var new_indicator = movement_icon_scene.instantiate()
-	new_indicator.referenced_agent = decision_array[0]
+	new_indicator.referenced_agent = $Agents.get_node(str(decision_array[0]))
 	$MovementOrders.add_child(new_indicator)
 	await new_indicator.indicator_placed
 	for agent in ($Agents.get_children() as Array[Agent]):
@@ -452,23 +464,32 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	var final_text_string := ""
 	match decision_array[1]:
 		Agent.GameActions.RUN_TO_POS:
-			final_text_string = "{0}: Run ".format([decision_array[0].name])
+			final_text_string = "{0}: Run ".format([decision_array[0]])
 		Agent.GameActions.WALK_TO_POS:
-			final_text_string = "{0}: Walk ".format([decision_array[0].name])
+			final_text_string = "{0}: Walk ".format([decision_array[0]])
 		Agent.GameActions.CROUCH_WALK_TO_POS:
-			final_text_string = "{0}: Sneak ".format([decision_array[0].name])
+			final_text_string = "{0}: Sneak ".format([decision_array[0]])
 		Agent.GameActions.CRAWL_TO_POS:
-			final_text_string = "{0}: Crawl ".format([decision_array[0].name])
+			final_text_string = "{0}: Crawl ".format([decision_array[0]])
 	final_text_string += "to New Position"
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[decision_array[0]]["text"] = final_text_string
+		server_agents[decision_array[0]]["action_array"] = decision_array.slice(1)
 	else:
 		client_agents[decision_array[0]]["text"] = final_text_string
+		client_agents[decision_array[0]]["action_array"] = decision_array.slice(1)
 	update_text()
 
 
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
-	pass # Replace with function body.
+	# need to remove movement indicator if created
+	for indicator in $MovementOrders.get_children():
+		if indicator.referenced_agent == _radial_menu.referenced_agent:
+			indicator.queue_free()
+	# ditto with aiming indicator
+	for indicator in $AimingOrders.get_children():
+		if indicator.referenced_agent == _radial_menu.referenced_agent:
+			indicator.queue_free()
 
 
 @rpc("authority", "call_local", "reliable")
@@ -478,11 +499,17 @@ func _update_game_phase(new_phase: GamePhases):
 		GamePhases.SELECTION:
 			_execute_button.set_pressed_no_signal(false)
 		GamePhases.EXECUTION:
+			if multiplayer.is_server(): #populate client agent actions
+				pass
+			else: #populate server agent actions
+				pass
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.perform_action()
 			pass
 		GamePhases.RESOLUTION:
 			_execute_button.disabled = false
+			server_ready_bool = false
+			client_ready_bool = false
 
 
 @rpc("authority", "call_local", "reliable")
@@ -495,9 +522,27 @@ func client_is_ready():
 	client_ready_bool = true
 
 
+@rpc("authority", "call_remote", "reliable")
+func recieve_server_insts(agent_name : String, agent_action : Array):
+	print("SERVER - " + agent_name + ": " + str(agent_action))
+	server_agents[agent_name]["action_array"] = agent_action
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func recieve_client_insts(agent_name : String, agent_action : Array):
+	print("CLIENT - " + agent_name + ": " + str(agent_action))
+	client_agents[agent_name]["action_array"] = agent_action
+
+
 func _on_execute_toggled(toggled_on: bool) -> void:
 	_execute_button.disabled = true
 	if multiplayer.is_server():
+		for agent in server_agents:
+			print(server_agents[agent]["action_array"])
+			recieve_server_insts.rpc_id(GameSettings.server_client_id, agent, server_agents[agent]["action_array"])
 		server_is_ready.rpc()
 	else:
+		for agent in client_agents:
+			print(client_agents[agent]["action_array"])
+			recieve_client_insts.rpc_id(1, agent, client_agents[agent]["action_array"])
 		client_is_ready.rpc()

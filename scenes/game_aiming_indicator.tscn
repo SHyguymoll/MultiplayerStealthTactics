@@ -1,0 +1,89 @@
+[gd_scene load_steps=10 format=3 uid="uid://d1dvxf4seilib"]
+
+[ext_resource type="Texture2D" uid="uid://c1a4tc5047oxv" path="res://assets/sprites/game_popups/animated/movement/0.png" id="1_5l8v0"]
+[ext_resource type="Texture2D" uid="uid://lmk7bdkq0y5s" path="res://assets/sprites/game_popups/animated/aiming/0.png" id="1_e0v7f"]
+[ext_resource type="Texture2D" uid="uid://crk2wyl1qxpig" path="res://assets/sprites/game_popups/animated/aiming/1.png" id="2_gklpb"]
+[ext_resource type="Texture2D" uid="uid://ck58n3o1ic6kw" path="res://assets/sprites/game_popups/animated/aiming/2.png" id="3_hws3b"]
+[ext_resource type="Texture2D" uid="uid://dfphyu7r7m07o" path="res://assets/sprites/game_popups/animated/aiming/3.png" id="4_42jvv"]
+[ext_resource type="Texture2D" uid="uid://o1e60rw5jlih" path="res://assets/sprites/game_popups/animated/movement/fail.png" id="5_tmjgr"]
+[ext_resource type="Texture2D" uid="uid://86gycgkrmhxo" path="res://assets/sprites/game_popups/animated/movement/checkmark.png" id="6_o8ddq"]
+[ext_resource type="Script" path="res://scripts/game_aiming_indicator.gd" id="7_l8n8m"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_akm5w"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_e0v7f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_gklpb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_hws3b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_42jvv")
+}],
+"loop": true,
+"name": &"aim",
+"speed": 15.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_tmjgr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_5l8v0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_tmjgr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_5l8v0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_tmjgr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_5l8v0")
+}, {
+"duration": 1.0,
+"texture": null
+}],
+"loop": false,
+"name": &"fail",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_o8ddq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_5l8v0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_o8ddq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_5l8v0")
+}, {
+"duration": 1.0,
+"texture": null
+}],
+"loop": false,
+"name": &"success",
+"speed": 7.0
+}]
+
+[node name="GameMovementIndicator" type="AnimatedSprite3D"]
+billboard = 1
+double_sided = false
+no_depth_test = true
+sprite_frames = SubResource("SpriteFrames_akm5w")
+animation = &"aim"
+frame_progress = 0.735398
+script = ExtResource("7_l8n8m")
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+
+[connection signal="animation_changed" from="." to="." method="_on_animation_changed"]
