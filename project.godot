@@ -58,12 +58,14 @@ fov_change={
 
 [layer_names]
 
-3d_physics/layer_1="world_collisions"
+3d_physics/layer_1="world_base_collisions"
 3d_physics/layer_2="agent_sight"
 3d_physics/layer_3="agent_ears"
 3d_physics/layer_4="server_player_clickable"
 3d_physics/layer_5="client_player_clickable"
 3d_physics/layer_6="nav_raycasts"
+3d_physics/layer_7="world_prone_forcing"
+3d_physics/layer_8="world_crouch_forcing"
 3d_physics/layer_12="attack_hitboxes"
 3d_physics/layer_13="server_agent_exfil"
 3d_physics/layer_14="client_agent_exfil"

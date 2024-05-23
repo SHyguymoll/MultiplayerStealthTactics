@@ -333,12 +333,15 @@ func _game_step(delta: float) -> void:
 	if in_standing_state():
 		target_world_collide_height = 0.962
 		target_world_collide_y = 0.499
+		collision_mask = 1 + 64 + 128
 	if in_crouching_state():
 		target_world_collide_height = 0.666
 		target_world_collide_y = 0.35
+		collision_mask = 1 + 64
 	if in_prone_state():
 		target_world_collide_height = 0.264
 		target_world_collide_y = 0.15
+		collision_mask = 1
 	_world_collide.position.y = lerpf(_world_collide.position.y, target_world_collide_y, 0.2)
 	(_world_collide.get_shape() as BoxShape3D).size.y = lerpf(
 			(_world_collide.get_shape() as BoxShape3D).size.y,
