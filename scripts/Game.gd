@@ -14,6 +14,7 @@ var client_ready_bool := false
 var action_timeline := {
 
 }
+var current_game_step := 0
 
 enum GamePhases {
 	SELECTION,
@@ -78,7 +79,7 @@ func debug_game():
 # Called only on the server.
 func start_game():
 	# All peers are ready to receive RPCs in this scene.
-	await get_tree().create_timer(0.25).timeout
+	await get_tree().create_timer(0.25).timeout #...after waiting for them to completely load in
 	ping.rpc()
 	server_populate_variables()
 	#send_populated_dictionaries.rpc_id(other_player)
@@ -98,6 +99,10 @@ func force_camera(new_pos, new_fov = -1.0):
 
 
 func create_sound_effect() -> void: #TODO
+	pass
+
+
+func create_popup() -> void: #TODO
 	pass
 
 
@@ -122,6 +127,7 @@ func _physics_process(delta: float) -> void:
 		GamePhases.EXECUTION:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
+			current_game_step += 1
 		GamePhases.RESOLUTION:
 			pass
 
@@ -177,9 +183,9 @@ func server_populate_variables(): #TODO
 				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
 
 
-@rpc("authority", "call_remote", "reliable")
-func append_action_timeline(timeline_entry, actions):
-	action_timeline[timeline_entry] = actions
+@rpc("authority", "call_local", "reliable")
+func append_action_timeline(agent, actions):
+	action_timeline[current_game_step][agent] = actions
 
 
 @rpc("call_local")
@@ -498,17 +504,19 @@ func _update_game_phase(new_phase: GamePhases):
 	match new_phase:
 		GamePhases.SELECTION:
 			_execute_button.set_pressed_no_signal(false)
+			_execute_button.disabled = false
 		GamePhases.EXECUTION:
-			# populate agents with actions
+			# populate agents with actions, as well as action_timeline
 			for ag in server_agents:
 				server_agents[ag]["agent_node"].queued_action = server_agents[ag]["action_array"]
+				append_action_timeline.rpc(ag, server_agents[ag]["action_array"])
 			for ag in client_agents:
 				client_agents[ag]["agent_node"].queued_action = client_agents[ag]["action_array"]
+				append_action_timeline.rpc(ag, client_agents[ag]["action_array"])
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.perform_action()
 			pass
 		GamePhases.RESOLUTION:
-			_execute_button.disabled = false
 			server_ready_bool = false
 			client_ready_bool = false
 
