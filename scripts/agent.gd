@@ -55,6 +55,7 @@ var _outline_mat : StandardMaterial3D
 @onready var _prone_ray : RayCast3D = $ProneCheck
 @onready var _crouch_ray : RayCast3D = $CrouchCheck
 @onready var _stand_ray : RayCast3D = $StandCheck
+@onready var _nav_agent : NavigationAgent3D = $NavigationAgent3D
 @onready var _active_item_icon : Sprite3D = $ActiveItem
 
 # Actions are stored as an enum in order to make serialization much easier
@@ -80,7 +81,6 @@ enum States {
 }
 @export var state : States = States.STAND
 
-var target_position : Vector2
 var target_direction : float
 var stun_time : int = 0
 var health : int = 10
@@ -98,11 +98,17 @@ func in_incapacitated_state() -> bool:
 func in_standing_state() -> bool:
 	return state in [States.STAND, States.WALK, States.RUN]
 
+
 func in_crouching_state() -> bool:
 	return state in [States.CROUCH, States.CROUCH_WALK]
 
+
 func in_prone_state() -> bool:
 	return state in [States.PRONE, States.CRAWL]
+
+
+func in_moving_state() -> bool:
+	return state in [States.WALK, States.RUN, States.CROUCH_WALK, States.CRAWL]
 
 
 func can_crouch():
@@ -135,15 +141,19 @@ func perform_action():
 				anim_traversal_endpoint = &"Prone"
 				state = States.PRONE
 		GameActions.RUN_TO_POS:
-			pass
+			_nav_agent.target_position = queued_action[1]
+			state = States.RUN
 		GameActions.WALK_TO_POS:
-			pass
+			_nav_agent.target_position = queued_action[1]
+			state = States.WALK
 		GameActions.CROUCH_WALK_TO_POS:
-			pass
+			_nav_agent.target_position = queued_action[1]
+			state = States.CROUCH_WALK
 		GameActions.CRAWL_TO_POS:
-			pass
+			_nav_agent.target_position = queued_action[1]
+			state = States.CRAWL
 		GameActions.LOOK_AROUND:
-			pass
+			target_direction = queued_action[1]
 		GameActions.CHANGE_ITEM:
 			if queued_action[1] == GameIcons.ITM.none:
 				selected_item = -1
@@ -315,9 +325,14 @@ func _physics_process(delta: float) -> void:
 
 
 func _game_step(delta: float) -> void:
-	weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), 0.2)
-	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
-	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
+	if in_moving_state():
+		velocity = (global_position - _nav_agent.get_next_path_position()).normalized()
+		velocity *= movement_speed
+		match state:
+			States.WALK, States.CROUCH_WALK:
+				velocity /= 2.0
+			States.CRAWL:
+				velocity /= 2.5
 	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
 	_eyes.rotation.y = lerpf(_eyes.rotation.y, target_head_rot_off_y, 0.2)
 	update_eye_cone(eye_strength)
@@ -348,6 +363,9 @@ func _game_step(delta: float) -> void:
 			target_world_collide_height,
 			0.2
 	)
+	weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), 0.2)
+	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
+	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_anim.advance(delta)
 	animation_finished = anim_traversal_endpoint == _anim_state.get_current_node()
 	#if is_multiplayer_authority():
