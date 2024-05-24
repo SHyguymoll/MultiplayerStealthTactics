@@ -15639,6 +15639,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.18837, 0)
 billboard = 1
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+avoidance_enabled = true
+debug_enabled = true
 
 [connection signal="area_entered" from="Eyes" to="." method="_on_eyes_area_entered"]
 [connection signal="area_exited" from="Eyes" to="." method="_on_eyes_area_exited"]
