@@ -124,6 +124,9 @@ func can_stand():
 
 
 func perform_action():
+	if len(queued_action) == 0:
+		action_completed.emit(self)
+		return
 	match queued_action[0]:
 		GameActions.GO_STAND:
 			if in_crouching_state() or in_prone_state():
@@ -326,13 +329,24 @@ func _physics_process(delta: float) -> void:
 
 func _game_step(delta: float) -> void:
 	if in_moving_state():
-		velocity = (global_position - _nav_agent.get_next_path_position()).normalized()
+		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
+		look_at(_nav_agent.get_next_path_position())
+		if _nav_agent.is_target_reached() and _nav_agent.is_target_reachable():
+			match state:
+				States.WALK, States.RUN:
+					state = States.STAND
+				States.CROUCH_WALK:
+					state = States.CROUCH
+				States.CRAWL:
+					state = States.PRONE
+			action_completed.emit(self)
 		velocity *= movement_speed
 		match state:
 			States.WALK, States.CROUCH_WALK:
 				velocity /= 2.0
 			States.CRAWL:
 				velocity /= 2.5
+		move_and_slide()
 	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
 	_eyes.rotation.y = lerpf(_eyes.rotation.y, target_head_rot_off_y, 0.2)
 	update_eye_cone(eye_strength)

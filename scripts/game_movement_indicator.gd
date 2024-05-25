@@ -13,7 +13,7 @@ var ray_position : Vector3
 var position_valid : bool
 
 func _ready() -> void:
-	match referenced_agent.queued_action[1]:
+	match referenced_agent.queued_action[0]:
 		Agent.GameActions.WALK_TO_POS:
 			play("walk")
 		Agent.GameActions.RUN_TO_POS:
@@ -25,7 +25,7 @@ func _ready() -> void:
 
 
 func _game_step(delta):
-	if referenced_agent.queued_action[1] == Agent.GameActions.HALT and referenced_agent.position.distance_to(position) <= CLOSENESS:
+	if referenced_agent.queued_action[0] == Agent.GameActions.HALT and referenced_agent.position.distance_to(position) <= CLOSENESS:
 		play("movement_end_success")
 		return
 	else:

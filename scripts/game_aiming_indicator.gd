@@ -33,7 +33,7 @@ func _on_animation_changed() -> void:
 	queue_free()
 
 
-func _check_position() -> bool:
+func _check_position() -> bool: #TODO
 	# height check
 	if global_position.y > 1:
 		return false
@@ -47,7 +47,7 @@ func _check_position() -> bool:
 	return true
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(delta: float) -> void: #TODO
 	if not ind_set:
 		flat_position.x = _game_camera.position.x
 		flat_position.y = _game_camera.position.z

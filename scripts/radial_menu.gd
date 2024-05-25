@@ -279,39 +279,39 @@ func _button_pressed_metadata(button_texture : Texture2D):
 			current_screen = "swap_weapon"
 			button_menu_screen()
 		ICONS.no_action:
-			decision_made.emit([referenced_agent.name, null])
+			decision_made.emit([null])
 			button_collapse_animation()
 		ICONS.stance_stand:
-			decision_made.emit([referenced_agent.name, Agent.GameActions.GO_STAND])
+			decision_made.emit([Agent.GameActions.GO_STAND])
 			button_collapse_animation()
 		ICONS.stance_crouch:
-			decision_made.emit([referenced_agent.name, Agent.GameActions.GO_CROUCH])
+			decision_made.emit([Agent.GameActions.GO_CROUCH])
 			button_collapse_animation()
 		ICONS.stance_prone:
-			decision_made.emit([referenced_agent.name, Agent.GameActions.GO_PRONE])
+			decision_made.emit([Agent.GameActions.GO_PRONE])
 			button_collapse_animation()
 		ICONS.run:
-			movement_decision_made.emit([referenced_agent.name, Agent.GameActions.RUN_TO_POS])
+			movement_decision_made.emit([Agent.GameActions.RUN_TO_POS])
 			button_collapse_animation()
 		ICONS.walk:
-			movement_decision_made.emit([referenced_agent.name, Agent.GameActions.WALK_TO_POS])
+			movement_decision_made.emit([Agent.GameActions.WALK_TO_POS])
 			button_collapse_animation()
 		ICONS.crouch_walk:
-			movement_decision_made.emit([referenced_agent.name, Agent.GameActions.CROUCH_WALK_TO_POS])
+			movement_decision_made.emit([Agent.GameActions.CROUCH_WALK_TO_POS])
 			button_collapse_animation()
 		ICONS.crawl:
-			movement_decision_made.emit([referenced_agent.name, Agent.GameActions.CRAWL_TO_POS])
+			movement_decision_made.emit([Agent.GameActions.CRAWL_TO_POS])
 			button_collapse_animation()
 		ICONS.use_weapon:
-			aiming_decision_made.emit([referenced_agent.name, Agent.GameActions.USE_WEAPON])
+			aiming_decision_made.emit([Agent.GameActions.USE_WEAPON])
 			button_collapse_animation()
 	if button_texture in GameIcons.WEP:
 		var wep_in_question = GameIcons.WEP.find_key(button_texture)
-		decision_made.emit([referenced_agent.name, Agent.GameActions.CHANGE_WEAPON, wep_in_question])
+		decision_made.emit([Agent.GameActions.CHANGE_WEAPON, wep_in_question])
 		button_collapse_animation()
 	if button_texture in GameIcons.ITM:
 		var itm_in_question = GameIcons.ITM.find_key(button_texture)
-		decision_made.emit([referenced_agent.name, Agent.GameActions.CHANGE_ITEM, itm_in_question])
+		decision_made.emit([Agent.GameActions.CHANGE_ITEM, itm_in_question])
 		button_collapse_animation()
 
 
