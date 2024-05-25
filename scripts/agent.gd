@@ -331,7 +331,7 @@ func _game_step(delta: float) -> void:
 	if in_moving_state():
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
 		look_at(_nav_agent.get_next_path_position())
-		rotation *= Vector3.UP
+		rotation *= Vector3.DOWN
 		#velocity *= min(movement_speed, global_position.distance_to(_nav_agent.get_next_path_position()))
 		velocity *= movement_speed
 		match state:
@@ -339,7 +339,7 @@ func _game_step(delta: float) -> void:
 				velocity /= 2.0
 			States.CRAWL:
 				velocity /= 2.5
-		$DebugLabel3D.text = str(velocity) + "\n" + str(_nav_agent.target_position) + "\n" + str(global_position.distance_to(_nav_agent.get_next_path_position()))
+		#$DebugLabel3D.text = str(velocity) + "\n" + str(_nav_agent.target_position) + "\n" + str(global_position.distance_to(_nav_agent.get_next_path_position()))
 		move_and_slide()
 		if global_position.distance_to(_nav_agent.get_next_path_position()) < 0.5:
 			match state:
@@ -385,6 +385,10 @@ func _game_step(delta: float) -> void:
 	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_anim.advance(delta)
 	animation_finished = anim_traversal_endpoint == _anim_state.get_current_node()
+	if animation_finished:
+		action_completed.emit(self)
+	#if len(queued_action) > 0:
+		#pass
 	#if is_multiplayer_authority():
 		#var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		#position = position + Vector3(move_dir.x, 0, move_dir.y)
