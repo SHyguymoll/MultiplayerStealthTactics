@@ -19,7 +19,6 @@ var current_game_step := 0
 enum GamePhases {
 	SELECTION,
 	EXECUTION,
-	RESOLUTION,
 }
 var game_phase : GamePhases = GamePhases.SELECTION
 @export var game_map : GameMap
@@ -134,11 +133,9 @@ func _physics_process(delta: float) -> void:
 				if server_agents[age]["action_done"] == false:
 					return
 			for age in client_agents:
-				if server_agents[age]["action_done"] == false:
+				if client_agents[age]["action_done"] == false:
 					return
-			_update_game_phase(GamePhases.RESOLUTION)
-		GamePhases.RESOLUTION:
-			pass
+			_update_game_phase(GamePhases.SELECTION)
 
 
 func server_populate_variables(): #TODO
@@ -538,12 +535,13 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func _update_game_phase(new_phase: GamePhases):
-	game_phase = new_phase
 	match new_phase:
 		GamePhases.SELECTION:
 			_execute_button.set_pressed_no_signal(false)
 			_execute_button.disabled = false
 		GamePhases.EXECUTION:
+			server_ready_bool = false
+			client_ready_bool = false
 			# populate agents with actions, as well as action_timeline
 			for ag in server_agents:
 				server_agents[ag]["agent_node"].queued_action = server_agents[ag]["action_array"]
@@ -557,10 +555,7 @@ func _update_game_phase(new_phase: GamePhases):
 					append_action_timeline.rpc(ag, client_agents[ag]["action_array"])
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.perform_action()
-			pass
-		GamePhases.RESOLUTION:
-			server_ready_bool = false
-			client_ready_bool = false
+	game_phase = new_phase
 
 
 @rpc("authority", "call_remote", "reliable")

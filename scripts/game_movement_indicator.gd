@@ -25,11 +25,8 @@ func _ready() -> void:
 
 
 func _game_step(delta):
-	if referenced_agent.queued_action[0] == Agent.GameActions.HALT and referenced_agent.position.distance_to(position) <= CLOSENESS:
+	if referenced_agent.state in [Agent.States.STAND, Agent.States.CROUCH, Agent.States.PRONE] and referenced_agent.position.distance_to(position) <= CLOSENESS:
 		play("movement_end_success")
-		return
-	else:
-		play("movement_end_neutral")
 		return
 	if referenced_agent.in_incapacitated_state():
 		play("movement_end_fail")

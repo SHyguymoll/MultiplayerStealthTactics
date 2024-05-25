@@ -331,7 +331,17 @@ func _game_step(delta: float) -> void:
 	if in_moving_state():
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
 		look_at(_nav_agent.get_next_path_position())
-		if _nav_agent.is_target_reached() and _nav_agent.is_target_reachable():
+		rotation *= Vector3.UP
+		#velocity *= min(movement_speed, global_position.distance_to(_nav_agent.get_next_path_position()))
+		velocity *= movement_speed
+		match state:
+			States.WALK, States.CROUCH_WALK:
+				velocity /= 2.0
+			States.CRAWL:
+				velocity /= 2.5
+		$DebugLabel3D.text = str(velocity) + "\n" + str(_nav_agent.target_position) + "\n" + str(global_position.distance_to(_nav_agent.get_next_path_position()))
+		move_and_slide()
+		if global_position.distance_to(_nav_agent.get_next_path_position()) < 0.5:
 			match state:
 				States.WALK, States.RUN:
 					state = States.STAND
@@ -340,13 +350,6 @@ func _game_step(delta: float) -> void:
 				States.CRAWL:
 					state = States.PRONE
 			action_completed.emit(self)
-		velocity *= movement_speed
-		match state:
-			States.WALK, States.CROUCH_WALK:
-				velocity /= 2.0
-			States.CRAWL:
-				velocity /= 2.5
-		move_and_slide()
 	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
 	_eyes.rotation.y = lerpf(_eyes.rotation.y, target_head_rot_off_y, 0.2)
 	update_eye_cone(eye_strength)

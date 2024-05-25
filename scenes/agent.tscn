@@ -1,7 +1,8 @@
-[gd_scene load_steps=120 format=3 uid="uid://oitco668lkwj"]
+[gd_scene load_steps=121 format=3 uid="uid://oitco668lkwj"]
 
 [ext_resource type="Script" path="res://scripts/agent.gd" id="1_qe0u1"]
 [ext_resource type="Texture2D" uid="uid://upv1f37lxrmo" path="res://assets/models/exports/textures/AgentUVs.png" id="3_0opq5"]
+[ext_resource type="FontFile" uid="uid://50pgbui3omif" path="res://assets/fonts/Jersey_25/Jersey25-Regular.ttf" id="3_iugk5"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_fpakf"]
 points = PackedVector3Array(0, 0, 0, -1, 1, 3, 1, 1, 3, 1, -1, 3, -1, -1, 3)
@@ -15203,7 +15204,6 @@ edge_fade = 1e-05
 [node name="Agent" type="CharacterBody3D"]
 collision_layer = 0
 axis_lock_angular_x = true
-axis_lock_angular_y = true
 axis_lock_angular_z = true
 platform_floor_layers = 4294901761
 script = ExtResource("1_qe0u1")
@@ -15610,6 +15610,13 @@ horizontal_alignment = 1
 layout_mode = 2
 max_value = 1.0
 
+[node name="DebugLabel3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.24062, 0)
+billboard = 1
+font = ExtResource("3_iugk5")
+font_size = 64
+outline_size = 11
+
 [node name="FogVolume" type="FogVolume" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.78547, 1.33114)
 size = Vector3(2.10769, 3.38925, 5.58683)
@@ -15638,6 +15645,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.18837, 0)
 billboard = 1
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 3.0
 avoidance_enabled = true
 debug_enabled = true
 
