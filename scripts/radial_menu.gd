@@ -161,9 +161,9 @@ func determine_weapons():
 # the action is available unless it was already selected,
 # in which case a no action button replaces the action.
 func a_o_na(icon, action : Agent.GameActions):
-	if len(referenced_agent.queued_action) < 2:
+	if len(referenced_agent.queued_action) == 0:
 		return icon
-	if referenced_agent.queued_action[1] != action:
+	if referenced_agent.queued_action[0] != action:
 		return icon
 	else:
 		return ICONS.no_action

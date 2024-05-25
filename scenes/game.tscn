@@ -28,6 +28,7 @@ debug_shape_thickness = 1
 offset_right = 40.0
 offset_bottom = 23.0
 theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 32
 
 [node name="GameMap" parent="World" instance=ExtResource("2_ow13f")]
 
@@ -40,6 +41,8 @@ directional_shadow_mode = 0
 [node name="MovementOrders" type="Node3D" parent="."]
 
 [node name="AimingOrders" type="Node3D" parent="."]
+
+[node name="Popups" type="Node3D" parent="."]
 
 [node name="HUDBase" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
@@ -85,14 +88,21 @@ horizontal_alignment = 2
 autowrap_mode = 2
 clip_text = true
 
+[node name="CurrentPhase" type="Label" parent="HUDBase"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 48
+horizontal_alignment = 1
+autowrap_mode = 2
+
 [node name="HUDSelected" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
 
 [node name="RadialMenu" parent="HUDSelected" instance=ExtResource("2_xp2mg")]
 position = Vector2(-60, -60)
-
-[node name="HUDPopups" type="CanvasLayer" parent="."]
-follow_viewport_enabled = true
 
 [connection signal="toggled" from="HUDBase/Execute" to="." method="_on_execute_toggled"]
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]

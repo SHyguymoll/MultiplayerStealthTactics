@@ -25,7 +25,8 @@ var game_phase : GamePhases = GamePhases.SELECTION
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu
-@onready var _execute_button = $HUDBase/Execute
+@onready var _execute_button : Button = $HUDBase/Execute
+@onready var _phase_label : Label = $HUDBase/CurrentPhase
 
 func _ready():
 	#debug_game()
@@ -36,6 +37,7 @@ func _ready():
 	_radial_menu.visible = false
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
+	_update_game_phase(GamePhases.SELECTION)
 
 
 func debug_game():
@@ -292,6 +294,8 @@ func _agent_died(deceased : Agent):
 
 
 func _hud_agent_details_actions(agent : Agent): #TODO
+	if game_phase != GamePhases.SELECTION:
+		return
 	if not agent.is_multiplayer_authority():
 		return
 	if agent.in_incapacitated_state() and not agent.percieved_by_friendly:
@@ -537,9 +541,11 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 func _update_game_phase(new_phase: GamePhases):
 	match new_phase:
 		GamePhases.SELECTION:
+			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.set_pressed_no_signal(false)
 			_execute_button.disabled = false
 		GamePhases.EXECUTION:
+			_phase_label.text = "EXECUTING ACTIONS..."
 			server_ready_bool = false
 			client_ready_bool = false
 			# populate agents with actions, as well as action_timeline
