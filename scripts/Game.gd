@@ -336,29 +336,31 @@ func _agent_interrupted(agent : Agent): #TODO
 
 
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
+	var ref_ag : Agent = _radial_menu.referenced_agent
+	_radial_menu.referenced_agent = null
 	# need to remove movement indicator if created
 	for indicator in $MovementOrders.get_children():
-		if indicator.referenced_agent == _radial_menu.referenced_agent:
+		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
 	# ditto with aiming indicator
 	for indicator in $AimingOrders.get_children():
-		if indicator.referenced_agent == _radial_menu.referenced_agent:
+		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
 	var final_text_string := ""
 	match decision_array[0]:
 		Agent.GameActions.GO_STAND:
-			final_text_string = "{0}: Stand Up".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Stand Up".format([ref_ag.name])
 		Agent.GameActions.GO_CROUCH:
-			final_text_string = "{0}: Crouch".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Crouch".format([ref_ag.name])
 		Agent.GameActions.GO_PRONE:
-			final_text_string = "{0}: Go Prone".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Go Prone".format([ref_ag.name])
 		Agent.GameActions.LOOK_AROUND:
-			final_text_string = "{0}: Survey Area".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Survey Area".format([ref_ag.name])
 		Agent.GameActions.CHANGE_ITEM:
-			final_text_string = "{0}: Equip ".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Equip ".format([ref_ag.name])
 			match decision_array[1]:
 				GameIcons.ITM.none:
-					final_text_string = "{0}: Unequip Item".format([_radial_menu.referenced_agent.name])
+					final_text_string = "{0}: Unequip Item".format([ref_ag.name])
 				GameIcons.ITM.box:
 					final_text_string += "Cardboard Box"
 				GameIcons.ITM.cigar:
@@ -372,7 +374,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 				GameIcons.ITM.fake_death:
 					final_text_string += "False Death Pill"
 		Agent.GameActions.CHANGE_WEAPON:
-			final_text_string = "{0}: Switch to ".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Switch to ".format([ref_ag.name])
 			match decision_array[1]:
 				GameIcons.WEP.fist:
 					final_text_string += "Hand to Hand"
@@ -393,10 +395,10 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 				GameIcons.WEP.enemy_flag:
 					final_text_string += "Flag (player should not see this)"
 		Agent.GameActions.PICK_UP_ITEM:
-			final_text_string = "{0}: Pick up ".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Pick up ".format([ref_ag.name])
 			match decision_array[1]:
 				GameIcons.ITM.none:
-					final_text_string = "{0}: Unequip Item".format([_radial_menu.referenced_agent.name])
+					final_text_string = "{0}: Unequip Item".format([ref_ag.name])
 				GameIcons.ITM.box:
 					final_text_string += "Cardboard Box"
 				GameIcons.ITM.cigar:
@@ -425,7 +427,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					GameIcons.ITM.fake_death:
 						final_text_string += "False Death Pill"
 		Agent.GameActions.PICK_UP_WEAPON:
-			final_text_string = "{0}: Pick up ".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Pick up ".format([ref_ag.name])
 			match decision_array[1]:
 				GameIcons.WEP.fist:
 					final_text_string += "Hand to Hand (how would they even do this???)"
@@ -465,8 +467,8 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					GameIcons.WEP.enemy_flag:
 						final_text_string += "Flag"
 		Agent.GameActions.HALT:
-			final_text_string = "{0}: Stop ".format([_radial_menu.referenced_agent.name])
-			match _radial_menu.referenced_agent.state:
+			final_text_string = "{0}: Stop ".format([ref_ag.name])
+			match ref_ag.state:
 				Agent.States.RUN:
 					final_text_string += "Running"
 				Agent.States.WALK:
@@ -477,29 +479,30 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Crawling"
 
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
-		server_agents[_radial_menu.referenced_agent.name]["text"] = final_text_string
-		server_agents[_radial_menu.referenced_agent.name]["action_array"] = decision_array
+		server_agents[ref_ag.name]["text"] = final_text_string
+		server_agents[ref_ag.name]["action_array"] = decision_array
 	else:
-		client_agents[_radial_menu.referenced_agent.name]["text"] = final_text_string
-		client_agents[_radial_menu.referenced_agent.name]["action_array"] = decision_array
+		client_agents[ref_ag.name]["text"] = final_text_string
+		client_agents[ref_ag.name]["action_array"] = decision_array
 	update_text()
-	_radial_menu.referenced_agent = null
 
 
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
+	var ref_ag : Agent = _radial_menu.referenced_agent
+	_radial_menu.referenced_agent = null
 	# need to remove previous movement indicator if created
 	for indicator in $MovementOrders.get_children():
-		if indicator.referenced_agent == _radial_menu.referenced_agent:
+		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
 	# ditto with aiming indicator
 	for indicator in $AimingOrders.get_children():
-		if indicator.referenced_agent == _radial_menu.referenced_agent:
+		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
-	_radial_menu.referenced_agent.queued_action = decision_array
+	ref_ag.queued_action = decision_array
 	for agent in ($Agents.get_children() as Array[Agent]):
 		agent.set_clickable(false)
 	var new_indicator = movement_icon_scene.instantiate()
-	new_indicator.referenced_agent = _radial_menu.referenced_agent
+	new_indicator.referenced_agent = ref_ag
 	$MovementOrders.add_child(new_indicator)
 	await new_indicator.indicator_placed
 	decision_array.append(new_indicator.position)
@@ -508,32 +511,33 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	var final_text_string := ""
 	match decision_array[0]:
 		Agent.GameActions.RUN_TO_POS:
-			final_text_string = "{0}: Run ".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Run ".format([ref_ag.name])
 		Agent.GameActions.WALK_TO_POS:
-			final_text_string = "{0}: Walk ".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Walk ".format([ref_ag.name])
 		Agent.GameActions.CROUCH_WALK_TO_POS:
-			final_text_string = "{0}: Sneak ".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Sneak ".format([ref_ag.name])
 		Agent.GameActions.CRAWL_TO_POS:
-			final_text_string = "{0}: Crawl ".format([_radial_menu.referenced_agent.name])
+			final_text_string = "{0}: Crawl ".format([ref_ag.name])
 	final_text_string += "to New Position"
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
-		server_agents[_radial_menu.referenced_agent.name]["text"] = final_text_string
-		server_agents[_radial_menu.referenced_agent.name]["action_array"] = decision_array
+		server_agents[ref_ag.name]["text"] = final_text_string
+		server_agents[ref_ag.name]["action_array"] = decision_array
 	else:
-		client_agents[_radial_menu.referenced_agent.name]["text"] = final_text_string
-		client_agents[_radial_menu.referenced_agent.name]["action_array"] = decision_array
+		client_agents[ref_ag.name]["text"] = final_text_string
+		client_agents[ref_ag.name]["action_array"] = decision_array
 	update_text()
-	_radial_menu.referenced_agent = null
 
 
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
+	var ref_ag : Agent = _radial_menu.referenced_agent
+	_radial_menu.referenced_agent = null
 	# need to remove movement indicator if created
 	for indicator in $MovementOrders.get_children():
-		if indicator.referenced_agent == _radial_menu.referenced_agent:
+		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
 	# ditto with aiming indicator
 	for indicator in $AimingOrders.get_children():
-		if indicator.referenced_agent == _radial_menu.referenced_agent:
+		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
 
 
