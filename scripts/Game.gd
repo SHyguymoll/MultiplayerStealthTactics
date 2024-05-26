@@ -196,6 +196,7 @@ func append_action_timeline(agent, actions):
 	if not action_timeline.has(current_game_step):
 		action_timeline[current_game_step] = {}
 	action_timeline[current_game_step][agent] = actions
+	print(action_timeline)
 
 
 @rpc("call_local")
@@ -318,7 +319,6 @@ func _agent_completed_action(agent : Agent): #TODO
 		return
 	if len(agent.queued_action) == 0:
 		return
-	agent.queued_action = []
 	agent.flash_outline(Color.GREEN)
 
 
@@ -331,7 +331,6 @@ func _agent_interrupted(agent : Agent): #TODO
 		return
 	if len(agent.queued_action) == 0:
 		return
-	agent.queued_action = []
 	agent.flash_outline(Color.RED)
 
 
@@ -548,6 +547,12 @@ func _update_game_phase(new_phase: GamePhases):
 			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.set_pressed_no_signal(false)
 			_execute_button.disabled = false
+			for ag in server_agents:
+				server_agents[ag]["agent_node"].queued_action = []
+				server_agents[ag]["action_array"] = []
+			for ag in client_agents:
+				client_agents[ag]["agent_node"].queued_action = []
+				client_agents[ag]["action_array"] = []
 		GamePhases.EXECUTION:
 			_phase_label.text = "EXECUTING ACTIONS..."
 			server_ready_bool = false
