@@ -36,10 +36,6 @@ var percieved_by_friendly := false #determines if hud is updated
 
 @export var skin_texture : String
 
-#why isn't there a signal for when traversal ends
-var animation_finished : bool
-var anim_traversal_endpoint : StringName
-
 @onready var _anim : AnimationTree = $AnimationTree
 @onready var _anim_state : AnimationNodeStateMachinePlayback = _anim.get("parameters/playback")
 @onready var _mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Mesh
@@ -129,24 +125,28 @@ func perform_action():
 		return
 	match queued_action[0]:
 		GameActions.GO_STAND:
-			anim_traversal_endpoint = &"Stand"
+			_anim_state.travel("Stand")
 			state = States.STAND
 		GameActions.GO_CROUCH:
-			anim_traversal_endpoint = &"Crouch"
+			_anim_state.travel("Crouch")
 			state = States.CROUCH
 		GameActions.GO_PRONE:
-			anim_traversal_endpoint = &"Prone"
+			_anim_state.travel("B_Prone")
 			state = States.PRONE
 		GameActions.RUN_TO_POS:
+			_anim_state.travel("B_Run")
 			_nav_agent.target_position = queued_action[1]
 			state = States.RUN
 		GameActions.WALK_TO_POS:
+			_anim_state.travel("B_Walk")
 			_nav_agent.target_position = queued_action[1]
 			state = States.WALK
 		GameActions.CROUCH_WALK_TO_POS:
+			_anim_state.travel("B_Crouch_Walk")
 			_nav_agent.target_position = queued_action[1]
 			state = States.CROUCH_WALK
 		GameActions.CRAWL_TO_POS:
+			_anim_state.travel("B_Crawl")
 			_nav_agent.target_position = queued_action[1]
 			state = States.CRAWL
 		GameActions.LOOK_AROUND:
@@ -195,15 +195,12 @@ func perform_action():
 		GameActions.HALT:
 			if state in [States.RUN, States.WALK]:
 				_anim_state.travel("Stand")
-				anim_traversal_endpoint = &"Stand"
 				state = States.STAND
 			if state == States.CROUCH_WALK:
 				_anim_state.travel("Crouch")
-				anim_traversal_endpoint = &"Crouch"
 				state = States.CROUCH
 			if state == States.CRAWL:
 				_anim_state.travel("B_Prone")
-				anim_traversal_endpoint = &"Prone"
 				state = States.PRONE
 
 #func _enter_tree() -> void:
@@ -301,7 +298,7 @@ func _ready() -> void:
 	_outline_mat = _outline_mat_base.duplicate()
 	_mesh.set_surface_override_material(1, _outline_mat)
 	# other visuals
-	_anim_state.travel("Stand")
+	_anim_state.start("Stand")
 	_anim.advance(0)
 	_active_item_icon.texture = null
 	# debug
