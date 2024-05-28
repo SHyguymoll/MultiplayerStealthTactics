@@ -129,20 +129,14 @@ func perform_action():
 		return
 	match queued_action[0]:
 		GameActions.GO_STAND:
-			if in_crouching_state() or in_prone_state():
-				_anim_state.travel("Stand")
-				anim_traversal_endpoint = &"Stand"
-				state = States.STAND
+			anim_traversal_endpoint = &"Stand"
+			state = States.STAND
 		GameActions.GO_CROUCH:
-			if in_standing_state() or in_prone_state():
-				_anim_state.travel("Crouch")
-				anim_traversal_endpoint = &"Crouch"
-				state = States.CROUCH
+			anim_traversal_endpoint = &"Crouch"
+			state = States.CROUCH
 		GameActions.GO_PRONE:
-			if in_standing_state() or in_crouching_state():
-				_anim_state.travel("B_Prone")
-				anim_traversal_endpoint = &"Prone"
-				state = States.PRONE
+			anim_traversal_endpoint = &"Prone"
+			state = States.PRONE
 		GameActions.RUN_TO_POS:
 			_nav_agent.target_position = queued_action[1]
 			state = States.RUN
@@ -162,14 +156,6 @@ func perform_action():
 				selected_item = -1
 			else:
 				selected_item = held_items.find(queued_action[1])
-			if not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly):
-				_active_item_icon.visible = false
-				return
-			if selected_item > -1:
-				_active_item_icon.texture = GameIcons.ITM[held_items[selected_item]]
-				_active_item_icon.visible = true
-			else:
-				_active_item_icon.visible = false
 		GameActions.CHANGE_WEAPON:
 			pass
 		GameActions.PICK_UP_ITEM:
@@ -177,7 +163,33 @@ func perform_action():
 		GameActions.PICK_UP_WEAPON:
 			pass
 		GameActions.USE_WEAPON:
-			pass
+			if in_standing_state():
+				if selected_weapon == -1:
+					pass
+					return
+				match held_weapons[selected_weapon].type:
+					GameWeapon.Types.SMALL:
+						_anim_state.travel("B_Stand_Attack_SmallArms")
+					GameWeapon.Types.BIG:
+						_anim_state.travel("B_Stand_Attack_BigArms")
+					GameWeapon.Types.THROWN:
+						_anim_state.travel("B_Stand_Attack_Grenade")
+					GameWeapon.Types.PLACED:
+						_anim_state.travel("Crouch")
+			elif in_crouching_state():
+				if selected_weapon == -1:
+					return
+				match held_weapons[selected_weapon].type:
+					GameWeapon.Types.SMALL:
+						_anim_state.travel("B_Stand_Attack_SmallArms")
+					GameWeapon.Types.BIG:
+						_anim_state.travel("B_Stand_Attack_BigArms")
+					GameWeapon.Types.THROWN:
+						_anim_state.travel("B_Stand_Attack_Grenade")
+					GameWeapon.Types.PLACED:
+						pass
+						#_anim_state.travel("B_Crouch_Grenade")
+			state = States.USING_WEAPON
 		GameActions.RELOAD_WEAPON:
 			pass
 		GameActions.HALT:
@@ -288,7 +300,10 @@ func _ready() -> void:
 	# outline shader
 	_outline_mat = _outline_mat_base.duplicate()
 	_mesh.set_surface_override_material(1, _outline_mat)
-
+	# other visuals
+	_anim_state.travel("Stand")
+	_anim.advance(0)
+	_active_item_icon.texture = null
 	# debug
 	# debug_setup()
 
@@ -328,30 +343,14 @@ func _physics_process(delta: float) -> void:
 
 
 func _game_step(delta: float) -> void:
-	if in_moving_state():
-		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
-		look_at(_nav_agent.get_next_path_position())
-		rotation *= Vector3.DOWN
-		#velocity *= min(movement_speed, global_position.distance_to(_nav_agent.get_next_path_position()))
-		velocity *= movement_speed
-		match state:
-			States.WALK, States.CROUCH_WALK:
-				velocity /= 2.0
-			States.CRAWL:
-				velocity /= 2.5
-		#$DebugLabel3D.text = str(velocity) + "\n" + str(_nav_agent.target_position) + "\n" + str(global_position.distance_to(_nav_agent.get_next_path_position()))
-		move_and_slide()
-		if global_position.distance_to(_nav_agent.get_next_path_position()) < 0.5:
-			match state:
-				States.WALK, States.RUN:
-					state = States.STAND
-				States.CROUCH_WALK:
-					state = States.CROUCH
-				States.CRAWL:
-					state = States.PRONE
-			action_completed.emit(self)
+	# update agent generally
+	if not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly) or selected_item == -1:
+		_active_item_icon.visible = false
+	elif selected_item > -1:
+		_active_item_icon.texture = GameIcons.ITM[held_items[selected_item]]
+		_active_item_icon.visible = true
 	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
-	_eyes.rotation.y = lerpf(_eyes.rotation.y, target_head_rot_off_y, 0.2)
+	_eyes.rotation.y = target_head_rot_off_y
 	update_eye_cone(eye_strength)
 	update_ear_radius(ear_strength)
 	if in_standing_state() or in_crouching_state():
@@ -384,11 +383,49 @@ func _game_step(delta: float) -> void:
 	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
 	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_anim.advance(delta)
-	animation_finished = anim_traversal_endpoint == _anim_state.get_current_node()
-	if animation_finished:
-		action_completed.emit(self)
-	#if len(queued_action) > 0:
-		#pass
+	#animation_finished = anim_traversal_endpoint == _anim_state.get_current_node()
+	#if animation_finished:
+		#action_completed.emit(self)
+	# update agent specifically
+	if len(queued_action) == 0:
+		return
+	if in_moving_state():
+		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
+		look_at(_nav_agent.get_next_path_position())
+		rotation *= Vector3.DOWN
+		#velocity *= min(movement_speed, global_position.distance_to(_nav_agent.get_next_path_position()))
+		velocity *= movement_speed
+		match state:
+			States.WALK, States.CROUCH_WALK:
+				velocity /= 2.0
+			States.CRAWL:
+				velocity /= 2.5
+		#$DebugLabel3D.text = str(velocity) + "\n" + str(_nav_agent.target_position) + "\n" + str(global_position.distance_to(_nav_agent.get_next_path_position()))
+		move_and_slide()
+		if global_position.distance_to(_nav_agent.get_next_path_position()) < 0.5:
+			match state:
+				States.WALK, States.RUN:
+					state = States.STAND
+				States.CROUCH_WALK:
+					state = States.CROUCH
+				States.CRAWL:
+					state = States.PRONE
+			#action_completed.emit(self)
+	match queued_action[0]:
+		GameActions.LOOK_AROUND:
+			target_head_rot_off_y = lerpf(target_head_rot_off_y, target_direction, 0.2)
+			if target_head_rot_off_y == target_direction:
+				pass
+			elif abs(target_direction - target_head_rot_off_y) < 0.01:
+				target_head_rot_off_y = target_direction
+				action_completed.emit(self)
+		GameActions.USE_WEAPON:
+			target_head_rot_off_y = lerpf(target_head_rot_off_y, target_direction, 0.2)
+			if target_head_rot_off_y == target_direction:
+				pass
+			elif abs(target_direction - target_head_rot_off_y) < 0.01:
+				target_head_rot_off_y = target_direction
+				action_completed.emit(self)
 	#if is_multiplayer_authority():
 		#var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		#position = position + Vector3(move_dir.x, 0, move_dir.y)
@@ -422,3 +459,40 @@ func _on_eyes_area_exited(area: Area3D) -> void:
 
 func _on_ears_area_entered(area: Area3D) -> void:
 	heard_sound.emit(area.get_parent())
+
+
+func _on_animation_finished(anim_name: StringName) -> void:
+	print(name, ": ", anim_name)
+	if anim_name.begins_with("B_Hurt"):
+		action_interrupted.emit(self)
+	if len(queued_action) == 0:
+		return
+	match queued_action[0]:
+		GameActions.GO_STAND when anim_name == "B_CrouchToStand":
+			action_completed.emit(self)
+		GameActions.GO_CROUCH when anim_name == "B_StandToCrouch":
+			action_completed.emit(self)
+		GameActions.GO_CROUCH when anim_name == "B_ProneToCrouch":
+			action_completed.emit(self)
+		GameActions.GO_PRONE when anim_name == "B_CrouchToProne":
+			action_completed.emit(self)
+		GameActions.USE_WEAPON when anim_name in ["B_Stand_Attack_SmallArms", "B_Stand_Attack_BigArms", "B_Stand_Attack_Grenade", "B_Stand_Attack_Slam"]:
+			action_completed.emit(self)
+		GameActions.USE_WEAPON when anim_name in ["B_Crouch_Attack_SmallArms", "B_Crouch_Attack_BigArms", "B_Crouch_Attack_Grenade"]:
+			action_completed.emit(self)
+
+
+func _on_animation_started(anim_name: StringName) -> void:
+	print(name, ": ", anim_name)
+	if anim_name == "B_Dead":
+		agent_died.emit(self)
+	if len(queued_action) == 0:
+		return
+	#if queued_action[0] in [GameActions.GO_STAND, GameActions.RUN_TO_POS, GameActions.WALK_TO_POS, GameActions.HALT, GameActions.USE_WEAPON] and anim_name in ["B_Stand_Unarmed", "B_Stand_SmallArms", "B_Stand_BigArms", "B_Stand_Grenade"]:
+		#action_completed.emit(self)
+	#if queued_action[0] in [GameActions.GO_CROUCH, GameActions.CROUCH_WALK_TO_POS, GameActions.HALT, GameActions.USE_WEAPON] and anim_name in ["B_Crouch_Unarmed", "B_Crouch_SmallArms", "B_Crouch_BigArms", "B_Crouch_Grenade"]:
+		#action_completed.emit(self)
+	#if queued_action[0] in [GameActions.GO_PRONE, GameActions.CRAWL_TO_POS, GameActions.HALT] and anim_name in ["B_Prone"]:
+		#action_completed.emit(self)
+	#if anim_name.begins_with("B_Hurt_"):
+		#action_interrupted.emit(self)
