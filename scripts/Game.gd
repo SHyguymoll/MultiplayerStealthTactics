@@ -29,8 +29,6 @@ var game_phase : GamePhases = GamePhases.SELECTION
 @onready var _phase_label : Label = $HUDBase/CurrentPhase
 
 func _ready():
-	#debug_game()
-	#return
 	# Preconfigure game.
 	server_agents = {}
 	client_agents = {}
@@ -39,43 +37,6 @@ func _ready():
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 	_update_game_phase(GamePhases.SELECTION)
 
-
-func debug_game():
-	Lobby.players = {
-		1:
-			{name="test",
-		agents=[
-			{
-				name="agent 1",
-				mission_count=0,
-				hp=10,
-				view_dist=1.0,
-				view_arc=1.0,
-				items=[],
-				weapons=[],
-			},
-		]},
-		2:
-			{name="test",
-		agents=[
-			{
-				name="agent 1",
-				mission_count=0,
-				hp=10,
-				view_dist=1.0,
-				view_arc=1.0,
-				items=[],
-				weapons=[],
-			},
-		]}
-	}
-	GameSettings.server_client_id = 2
-	GameSettings.selected_agents = [0]
-	GameSettings.selected_agents = [0]
-	var peer = ENetMultiplayerPeer.new()
-	peer.create_server(7000, 2)
-	multiplayer.multiplayer_peer = peer
-	start_game()
 
 # Called only on the server.
 func start_game():
