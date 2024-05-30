@@ -66,6 +66,7 @@ fov_change={
 3d_physics/layer_6="nav_raycasts"
 3d_physics/layer_7="world_prone_forcing"
 3d_physics/layer_8="world_crouch_forcing"
+3d_physics/layer_9="mouse_clickable"
 3d_physics/layer_12="attack_hitboxes"
 3d_physics/layer_13="server_agent_exfil"
 3d_physics/layer_14="client_agent_exfil"
