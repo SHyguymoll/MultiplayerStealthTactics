@@ -33,6 +33,7 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 @onready var _radial_menu = $HUDSelected/RadialMenu
 @onready var _execute_button : Button = $HUDBase/Execute
 @onready var _phase_label : Label = $HUDBase/CurrentPhase
+@onready var _ag_insts : Label = $HUDBase/AgentInstructions
 
 func _ready():
 	# Preconfigure game.
@@ -75,16 +76,16 @@ func create_popup() -> void: #TODO
 
 
 func update_text() -> void:
-	$HUDBase/AgentInstructions.text = ""
+	_ag_insts.text = ""
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		for agent in server_agents:
-			$HUDBase/AgentInstructions.text += server_agents[agent]["text"]
-			$HUDBase/AgentInstructions.text += "\n"
+			_ag_insts.text += server_agents[agent]["text"]
+			_ag_insts.text += "\n"
 
 	else:
 		for agent in client_agents:
-			$HUDBase/AgentInstructions.text += client_agents[agent]["text"]
-			$HUDBase/AgentInstructions.text += "\n"
+			_ag_insts.text += client_agents[agent]["text"]
+			_ag_insts.text += "\n"
 
 
 func _physics_process(delta: float) -> void:
