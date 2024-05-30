@@ -297,6 +297,9 @@ func _ready() -> void:
 	_anim_state.start("Stand")
 	_anim.advance(0)
 	_active_item_icon.texture = null
+	# other other stuff
+	_nav_agent.target_desired_distance = movement_speed*1.01
+	print(name, ": ", movement_speed, " ", _nav_agent.target_desired_distance)
 	# debug
 	# debug_setup()
 
@@ -386,24 +389,29 @@ func _game_step(delta: float) -> void:
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
 		look_at(_nav_agent.get_next_path_position())
 		rotation *= Vector3.DOWN
-		#velocity *= min(movement_speed, global_position.distance_to(_nav_agent.get_next_path_position()))
 		velocity *= movement_speed
 		match state:
 			States.WALK, States.CROUCH_WALK:
 				velocity /= 2.0
 			States.CRAWL:
 				velocity /= 2.5
+		if _nav_agent.distance_to_target() < velocity.length(): # to always land on target
+			velocity = velocity.normalized() * _nav_agent.distance_to_target()
 		#$DebugLabel3D.text = str(velocity) + "\n" + str(_nav_agent.target_position) + "\n" + str(global_position.distance_to(_nav_agent.get_next_path_position()))
 		move_and_slide()
-		if global_position.distance_to(_nav_agent.get_next_path_position()) < 0.5:
+		if _nav_agent.get_final_position().distance_to(global_position) < movement_speed/10:
+			print(name, ": ", _nav_agent.get_final_position().distance_to(global_position), " ", movement_speed)
 			match state:
 				States.WALK, States.RUN:
+					_anim_state.travel("Stand")
 					state = States.STAND
 				States.CROUCH_WALK:
+					_anim_state.travel("Crouch")
 					state = States.CROUCH
 				States.CRAWL:
+					_anim_state.travel("B_Prone")
 					state = States.PRONE
-			#action_completed.emit(self)
+			action_completed.emit(self)
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
 			target_head_rot_off_y = lerpf(target_head_rot_off_y, target_direction, 0.2)
@@ -412,7 +420,7 @@ func _game_step(delta: float) -> void:
 			elif abs(target_direction - target_head_rot_off_y) < 0.01:
 				target_head_rot_off_y = target_direction
 				action_completed.emit(self)
-		GameActions.USE_WEAPON:
+		GameActions.USE_WEAPON: #TODO
 			target_head_rot_off_y = lerpf(target_head_rot_off_y, target_direction, 0.2)
 			if target_head_rot_off_y == target_direction:
 				pass
@@ -425,9 +433,8 @@ func _game_step(delta: float) -> void:
 
 
 func _agent_clicked(camera: Node, event: InputEvent, _position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
-	if event is InputEventMouse:
-		if event.button_mask == MOUSE_BUTTON_MASK_LEFT:
-			agent_selected.emit(self)
+	if event is InputEventMouse and event.button_mask == MOUSE_BUTTON_MASK_LEFT:
+		agent_selected.emit(self)
 
 
 func flash_outline(color : Color):
