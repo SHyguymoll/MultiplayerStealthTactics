@@ -21,7 +21,7 @@ func get_agents(): #TODO: replace with loading from a file later
 		name="test",
 		agents=[
 			{
-				name="agent 1",
+				name="basic agent",
 				mission_count=0,
 				hp=10,
 				view_dist=2.5,
@@ -38,6 +38,7 @@ func get_agents(): #TODO: replace with loading from a file later
 
 func _on_join_pressed() -> void:
 	$HostScreen/Label.text = "Waiting for Host..."
+	$HostScreen/ButtonsHbox/Ready.visible = true
 	$HostScreen/ButtonsHbox/Start.visible = false
 	GameSettings.server_client_id = 1
 	GameSettings.local_mode = false
@@ -48,8 +49,10 @@ func _on_join_pressed() -> void:
 
 
 func _on_host_pressed() -> void:
+	$HostScreen/Label.text = "Waiting for Opponent..."
 	$MainMenu.visible = false
 	$HostScreen/ButtonsHbox/Ready.visible = false
+	$HostScreen/ButtonsHbox/Start.visible = true
 	GameSettings.local_mode = false
 	Lobby.create_game()
 	$HostScreen.visible = true
@@ -60,6 +63,7 @@ func _on_singleplayer_pressed() -> void:
 	$MainMenu.visible = false
 	$HostScreen/Label.text = "SINGLEPLAYER MODE"
 	$HostScreen/ButtonsHbox/Ready.visible = false
+	$HostScreen/ButtonsHbox/Start.visible = true
 	$HostScreen/ButtonsHbox/Start.disabled = false
 	GameSettings.local_mode = true
 	Lobby.create_game(1)
@@ -137,4 +141,7 @@ func _on_start_pressed() -> void: # server-only
 
 
 func _on_quit_pressed() -> void:
-	pass # Replace with function body.
+	$HostScreen.visible = false
+	$SettingsScreen.visible = false
+	$MainMenu.visible = true
+	Lobby.remove_multiplayer_peer()
