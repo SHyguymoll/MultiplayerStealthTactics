@@ -21,6 +21,12 @@ enum GamePhases {
 	EXECUTION,
 }
 var game_phase : GamePhases = GamePhases.SELECTION
+enum SelectionSteps {
+	BASE,
+	MOVEMENT,
+	AIMING,
+}
+var selection_step : SelectionSteps = SelectionSteps.BASE
 @export var game_map : GameMap
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
@@ -204,6 +210,7 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 
 			server_agents[new_agent.name]["text"] = ""
 
+
 	else:
 		client_agents[new_agent.name] = {agent_node=new_agent, action_array=[], action_done=true}
 		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
@@ -257,6 +264,8 @@ func _agent_died(deceased : Agent):
 
 func _hud_agent_details_actions(agent : Agent): #TODO
 	if game_phase != GamePhases.SELECTION:
+		return
+	if selection_step != SelectionSteps.BASE:
 		return
 	if not agent.is_multiplayer_authority():
 		return
@@ -459,15 +468,13 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
 	ref_ag.queued_action = decision_array
-	for agent in ($Agents.get_children() as Array[Agent]):
-		agent.set_clickable(false)
+	selection_step = SelectionSteps.MOVEMENT
 	var new_indicator = movement_icon_scene.instantiate()
 	new_indicator.referenced_agent = ref_ag
 	$MovementOrders.add_child(new_indicator)
 	await new_indicator.indicator_placed
+	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator.position)
-	for agent in ($Agents.get_children() as Array[Agent]):
-		agent.set_clickable(true)
 	var final_text_string := ""
 	match decision_array[0]:
 		Agent.GameActions.RUN_TO_POS:
@@ -499,6 +506,8 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	for indicator in $AimingOrders.get_children():
 		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
+	selection_step = SelectionSteps.AIMING
+	selection_step = SelectionSteps.BASE
 
 
 @rpc("authority", "call_local", "reliable")
