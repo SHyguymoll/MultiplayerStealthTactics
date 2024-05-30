@@ -25,6 +25,7 @@ GameIcons="*res://scripts/game_icons.gd"
 
 window/size/viewport_width=1612
 window/size/viewport_height=908
+window/stretch/mode="canvas_items"
 
 [importer_defaults]
 

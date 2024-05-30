@@ -45,7 +45,6 @@ directional_shadow_mode = 0
 [node name="Popups" type="Node3D" parent="."]
 
 [node name="HUDBase" type="CanvasLayer" parent="."]
-follow_viewport_enabled = true
 
 [node name="QuickViews" type="HBoxContainer" parent="HUDBase"]
 anchors_preset = 2
