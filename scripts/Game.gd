@@ -561,11 +561,14 @@ func _update_game_phase(new_phase: GamePhases):
 				server_agents[ag]["action_done"] = false
 				if multiplayer.is_server():
 					append_action_timeline.rpc(ag, server_agents[ag]["action_array"])
+					#await get_tree().create_timer(0.10).timeout
 			for ag in client_agents:
 				client_agents[ag]["agent_node"].queued_action = client_agents[ag]["action_array"]
 				client_agents[ag]["action_done"] = false
 				if multiplayer.is_server():
 					append_action_timeline.rpc(ag, client_agents[ag]["action_array"])
+					#await get_tree().create_timer(0.10).timeout
+			await get_tree().create_timer(0.10).timeout
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.perform_action()
 	game_phase = new_phase
@@ -594,6 +597,8 @@ func _on_execute_toggled(toggled_on: bool) -> void:
 	if multiplayer.is_server():
 		recieve_server_insts.rpc_id(GameSettings.server_client_id, server_agents)
 		server_ready_bool = true
+		await get_tree().create_timer(0.10).timeout
 	else:
 		recieve_client_insts.rpc_id(1, client_agents)
 		client_ready_bool = true
+		await get_tree().create_timer(0.10).timeout
