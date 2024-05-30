@@ -45,9 +45,14 @@ func _check_position() -> bool:
 	if global_position.y > 1:
 		return false
 	# sightline check
-	_ray.global_position = referenced_agent.global_position + Vector3.UP * 0.5
-	_ray.target_position = (global_position - referenced_agent.global_position) + Vector3.UP * 0.5
+	_ray.global_position = referenced_agent.global_position + Vector3.UP * 0.1
+	_ray.target_position = (global_position - referenced_agent.global_position) + Vector3.UP * 0.1
 	_ray.target_position.y = maxf(_ray.target_position.y, 0.5)
+	_ray.collision_mask = 1 + 64 + 128
+	if referenced_agent.in_prone_state():
+		_ray.collision_mask = 1
+	elif referenced_agent.in_crouching_state():
+		_ray.collision_mask = 1 + 64
 	_ray.force_raycast_update()
 	if _ray.get_collider():
 		return false
@@ -58,7 +63,7 @@ func _physics_process(delta: float) -> void:
 	if not ind_set:
 		flat_position.x = _game_camera.position.x
 		flat_position.y = _game_camera.position.z
-		ray_position = Vector3(flat_position.x, _game_camera.ground_height + 0.5, flat_position.y)
+		ray_position = Vector3(flat_position.x, _game_camera.ground_height, flat_position.y)
 		#distance clamp
 		var ref_ag_move_dist = referenced_agent.movement_dist
 		var ray_to_ag = ray_position - referenced_agent.global_position
