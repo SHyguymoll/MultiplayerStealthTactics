@@ -93,6 +93,13 @@ func _physics_process(delta: float) -> void:
 		GamePhases.SELECTION:
 			if server_ready_bool and client_ready_bool:
 				_update_game_phase(GamePhases.EXECUTION)
+				if multiplayer.is_server():
+					for age in server_agents:
+						server_agents[age]["text"] = ""
+				else:
+					for age in client_agents:
+						client_agents[age]["text"] = ""
+				update_text()
 		GamePhases.EXECUTION:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
@@ -303,6 +310,24 @@ func _agent_interrupted(agent : Agent): #TODO
 	if len(agent.queued_action) == 0:
 		return
 	agent.flash_outline(Color.RED)
+
+
+func hide_hud():
+	var twe = create_tween()
+	twe.set_parallel(true)
+	twe.set_trans(Tween.TRANS_CUBIC)
+	twe.tween_property(_execute_button, "position:y", 970, 0.25).from(825)
+	twe.tween_property(_quick_views, "position:y", 920, 0.25).from(712)
+	twe.tween_property(_ag_insts, "position:x", 1638, 0.25).from(1059)
+
+
+func show_hud():
+	var twe = create_tween()
+	twe.set_parallel(true)
+	twe.set_trans(Tween.TRANS_SINE)
+	twe.tween_property(_execute_button, "position:y", 825, 0.25).from(970)
+	twe.tween_property(_quick_views, "position:y", 712, 0.25).from(920)
+	twe.tween_property(_ag_insts, "position:x", 1059, 0.25).from(1638)
 
 
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
