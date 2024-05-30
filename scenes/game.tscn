@@ -61,14 +61,13 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -8.0
-offset_top = -8.0
+offset_left = -756.0
+offset_top = -83.0
 grow_horizontal = 0
 grow_vertical = 0
 theme = ExtResource("5_b0o1h")
-theme_override_font_sizes/font_size = 132
-toggle_mode = true
-text = "EXECUTE"
+theme_override_font_sizes/font_size = 82
+text = "EXECUTE INSTRUCTIONS"
 alignment = 2
 
 [node name="AgentInstructions" type="Label" parent="HUDBase"]
@@ -104,7 +103,7 @@ follow_viewport_enabled = true
 [node name="RadialMenu" parent="HUDSelected" instance=ExtResource("2_xp2mg")]
 position = Vector2(-60, -60)
 
-[connection signal="toggled" from="HUDBase/Execute" to="." method="_on_execute_toggled"]
+[connection signal="pressed" from="HUDBase/Execute" to="." method="_on_execute_pressed"]
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
 [connection signal="decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
 [connection signal="movement_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_movement_decision_made"]

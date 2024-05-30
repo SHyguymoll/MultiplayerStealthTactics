@@ -543,14 +543,15 @@ func _update_game_phase(new_phase: GamePhases):
 	match new_phase:
 		GamePhases.SELECTION:
 			_phase_label.text = "SELECT ACTIONS"
-			_execute_button.set_pressed_no_signal(false)
 			_execute_button.disabled = false
+			_execute_button.text = "EXECUTE INSTRUCTIONS"
 			for ag in server_agents:
 				server_agents[ag]["agent_node"].queued_action = []
 				server_agents[ag]["action_array"] = []
 			for ag in client_agents:
 				client_agents[ag]["agent_node"].queued_action = []
 				client_agents[ag]["action_array"] = []
+			show_hud()
 		GamePhases.EXECUTION:
 			_phase_label.text = "EXECUTING ACTIONS..."
 			server_ready_bool = false
@@ -592,8 +593,10 @@ func recieve_client_insts(recieved_dict : Dictionary):
 	client_ready_bool = true
 
 
-func _on_execute_toggled(toggled_on: bool) -> void:
+func _on_execute_pressed() -> void:
 	_execute_button.disabled = true
+	_execute_button.text = "WAITING FOR OPPONENT"
+	hide_hud()
 	if multiplayer.is_server():
 		recieve_server_insts.rpc_id(GameSettings.server_client_id, server_agents)
 		server_ready_bool = true
