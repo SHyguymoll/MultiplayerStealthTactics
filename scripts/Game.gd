@@ -446,6 +446,8 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Sneaking"
 				Agent.States.CRAWL:
 					final_text_string += "Crawling"
+		_:
+			ref_ag.queued_action = []
 
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string

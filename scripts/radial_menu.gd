@@ -278,7 +278,7 @@ func _button_pressed_metadata(button_texture : Texture2D):
 		ICONS.swap_weapon:
 			current_screen = "swap_weapon"
 			button_menu_screen()
-		ICONS.no_action:
+		ICONS.no_action, ICONS.halt:
 			decision_made.emit([null])
 			button_collapse_animation()
 		ICONS.stance_stand:
