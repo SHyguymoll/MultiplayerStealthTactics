@@ -366,11 +366,11 @@ func _game_step(delta: float) -> void:
 	if in_standing_state():
 		target_world_collide_height = 0.962
 		target_world_collide_y = 0.499
-		collision_mask = 1 + 64 + 128
+		collision_mask = 1 + 2 + 4
 	if in_crouching_state():
 		target_world_collide_height = 0.666
 		target_world_collide_y = 0.35
-		collision_mask = 1 + 64
+		collision_mask = 1 + 2
 	if in_prone_state():
 		target_world_collide_height = 0.264
 		target_world_collide_y = 0.15

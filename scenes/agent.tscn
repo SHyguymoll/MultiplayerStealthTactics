@@ -17449,7 +17449,7 @@ script = ExtResource("1_qe0u1")
 
 [node name="Eyes" type="Area3D" parent="."]
 collision_layer = 0
-collision_mask = 2
+collision_mask = 32
 input_ray_pickable = false
 monitorable = false
 
@@ -17459,7 +17459,7 @@ shape = SubResource("ConvexPolygonShape3D_fpakf")
 [node name="Ears" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 collision_layer = 0
-collision_mask = 4
+collision_mask = 64
 input_ray_pickable = false
 monitorable = false
 
@@ -17472,7 +17472,7 @@ shape = SubResource("BoxShape3D_a4h6i")
 
 [node name="MouseClick" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.502775, 0)
-collision_layer = 256
+collision_layer = 8
 collision_mask = 0
 monitorable = false
 

@@ -49,7 +49,7 @@ client_exfiltrate_zone = NodePath("ClientExfil")
 shape = SubResource("ConcavePolygonShape3D_uy25r")
 
 [node name="ProneForcingCollisions" type="StaticBody3D" parent="map_basic/World" index="1"]
-collision_layer = 64
+collision_layer = 4
 collision_mask = 0
 
 [node name="HidingSquareServerSide" type="CollisionShape3D" parent="map_basic/World/ProneForcingCollisions"]
@@ -72,7 +72,7 @@ shape = SubResource("BoxShape3D_tbfxx")
 visible = false
 
 [node name="StaticBody3D" type="StaticBody3D" parent="map_basic_nav/Nav" index="0"]
-collision_layer = 32
+collision_layer = 128
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="map_basic_nav/Nav/StaticBody3D"]
@@ -83,12 +83,16 @@ navigation_mesh = SubResource("NavigationMesh_vqaf1")
 
 [node name="ServerExfil" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.806054, -15.7481)
+collision_layer = 8
+collision_mask = 8
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ServerExfil"]
 shape = SubResource("BoxShape3D_ycwvl")
 
 [node name="ClientExfil" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.806, 16.607)
+collision_layer = 16
+collision_mask = 16
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="ClientExfil"]
 shape = SubResource("BoxShape3D_ycwvl")
