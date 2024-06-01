@@ -53,9 +53,13 @@ var _outline_mat : StandardMaterial3D
 @onready var _stand_ray : RayCast3D = $StandCheck
 @onready var _nav_agent : NavigationAgent3D = $NavigationAgent3D
 @onready var _active_item_icon : Sprite3D = $ActiveItem
-@onready var _held_pistol_mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Pistol/Pistol
-@onready var _held_rifle_mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Rifle/Rifle
-@onready var _held_shotgun_mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Shotgun/Shotgun
+@onready var _held_weapon_meshes = {
+	pistol = $Agent/game_rig/Skeleton3D/Pistol/Pistol,
+	rifle = $Agent/game_rig/Skeleton3D/Rifle/Rifle,
+	shotgun = $Agent/game_rig/Skeleton3D/Shotgun/Shotgun,
+	grenade_frag = $Agent/game_rig/Skeleton3D/GrenadeFrag/GrenadeFrag,
+	grenade_smoke = $Agent/game_rig/Skeleton3D/GrenadeSmoke/GrenadeSmoke,
+}
 
 # Actions are stored as an enum in order to make serialization much easier
 # each agent will be stored in the action timeline as an array, where the first entry is the action,
@@ -300,9 +304,8 @@ func _ready() -> void:
 	_anim_state.start("Stand")
 	_anim.advance(0)
 	_active_item_icon.texture = null
-	_held_pistol_mesh.visible = false
-	_held_rifle_mesh.visible = false
-	_held_shotgun_mesh.visible = false
+	for weapon_mesh in _held_weapon_meshes:
+		_held_weapon_meshes[weapon_mesh].visible = false
 	# other other stuff
 	_nav_agent.target_desired_distance = movement_speed*1.01
 	print(name, ": ", movement_speed, " ", _nav_agent.target_desired_distance)
