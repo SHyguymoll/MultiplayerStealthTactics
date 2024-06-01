@@ -11,6 +11,7 @@ var reserve_ammo : int
 var ammo_capacity : int
 var loaded_ammo : int = 0
 var reload_time : int
+var wep_name : String # Refer to GameRefs.WEP for valid string names
 var type : Types
 var icon : Texture2D
 

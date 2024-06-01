@@ -259,14 +259,14 @@ func _agent_died(deceased : Agent):
 	print(deceased.name, " has died, big f")
 	if deceased.get_multiplayer_authority() == 1:
 		if deceased.percieved_by_friendly:
-			(server_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameIcons.STE.dead)
+			(server_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.dead)
 		else:
-			(server_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameIcons.STE.unknown)
+			(server_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.unknown)
 	else:
 		if deceased.percieved_by_friendly:
-			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameIcons.STE.dead)
+			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.dead)
 		else:
-			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameIcons.STE.unknown)
+			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.unknown)
 	pass
 
 
@@ -353,114 +353,26 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 			final_text_string = "{0}: Survey Area".format([ref_ag.name])
 		Agent.GameActions.CHANGE_ITEM:
 			final_text_string = "{0}: Equip ".format([ref_ag.name])
-			match decision_array[1]:
-				GameIcons.ITM.none:
-					final_text_string = "{0}: Unequip Item".format([ref_ag.name])
-				GameIcons.ITM.box:
-					final_text_string += "Cardboard Box"
-				GameIcons.ITM.cigar:
-					final_text_string += "Cigar"
-				GameIcons.ITM.analyzer:
-					final_text_string += "Kit Analyzer"
-				GameIcons.ITM.body_armor:
-					final_text_string += "Body Armor"
-				GameIcons.ITM.reflex_enhancer:
-					final_text_string += "Reflex Pill"
-				GameIcons.ITM.fake_death:
-					final_text_string += "False Death Pill"
+			if decision_array[1] == GameRefs.ITM.none.name:
+				final_text_string = "{0}: Unequip Item".format([ref_ag.name])
+			else:
+				final_text_string += GameRefs.ITM[decision_array[1]].name
 		Agent.GameActions.CHANGE_WEAPON:
-			final_text_string = "{0}: Switch to ".format([ref_ag.name])
-			match decision_array[1]:
-				GameIcons.WEP.fist:
-					final_text_string += "Hand to Hand"
-				GameIcons.WEP.pistol:
-					final_text_string += "Sidearm"
-				GameIcons.WEP.rifle:
-					final_text_string += "Rifle"
-				GameIcons.WEP.shotgun:
-					final_text_string += "Shotugn"
-				GameIcons.WEP.grenade_frag:
-					final_text_string += "Fragmentation Grenade"
-				GameIcons.WEP.grenade_smoke:
-					final_text_string += "Smoke Grenade"
-				GameIcons.WEP.noise_maker:
-					final_text_string += "Audio Disturber"
-				GameIcons.WEP.middle_flag:
-					final_text_string += "Flag (player should not see this)"
-				GameIcons.WEP.enemy_flag:
-					final_text_string += "Flag (player should not see this)"
+			final_text_string = "{0}: Switch to {1}".format([
+				ref_ag.name,
+				GameRefs.ITM[decision_array[1]].name])
 		Agent.GameActions.PICK_UP_ITEM:
-			final_text_string = "{0}: Pick up ".format([ref_ag.name])
-			match decision_array[1]:
-				GameIcons.ITM.none:
-					final_text_string = "{0}: Unequip Item".format([ref_ag.name])
-				GameIcons.ITM.box:
-					final_text_string += "Cardboard Box"
-				GameIcons.ITM.cigar:
-					final_text_string += "Cigar"
-				GameIcons.ITM.analyzer:
-					final_text_string += "Kit Analyzer"
-				GameIcons.ITM.body_armor:
-					final_text_string += "Body Armor"
-				GameIcons.ITM.reflex_enhancer:
-					final_text_string += "Reflex Pill"
-				GameIcons.ITM.fake_death:
-					final_text_string += "False Death Pill"
-			if len(decision_array) == 2:
-				final_text_string += " and drop "
-				match GameIcons.ITM.find_key(decision_array[1]):
-					GameIcons.ITM.box:
-						final_text_string += "Cardboard Box"
-					GameIcons.ITM.cigar:
-						final_text_string += "Cigar"
-					GameIcons.ITM.analyzer:
-						final_text_string += "Kit Analyzer"
-					GameIcons.ITM.body_armor:
-						final_text_string += "Body Armor"
-					GameIcons.ITM.reflex_enhancer:
-						final_text_string += "Reflex Pill"
-					GameIcons.ITM.fake_death:
-						final_text_string += "False Death Pill"
+			final_text_string = "{0}: Pick up {1}".format([
+				ref_ag.name,
+				GameRefs.ITM[decision_array[1]].name])
+			if len(decision_array) == 3:
+				final_text_string += " and drop {0}".format([GameRefs.ITM[decision_array[2]].name])
 		Agent.GameActions.PICK_UP_WEAPON:
-			final_text_string = "{0}: Pick up ".format([ref_ag.name])
-			match decision_array[1]:
-				GameIcons.WEP.fist:
-					final_text_string += "Hand to Hand (how would they even do this???)"
-				GameIcons.WEP.pistol:
-					final_text_string += "Sidearm"
-				GameIcons.WEP.rifle:
-					final_text_string += "Rifle"
-				GameIcons.WEP.shotgun:
-					final_text_string += "Shotugn"
-				GameIcons.WEP.grenade_frag:
-					final_text_string += "Fragmentation Grenade"
-				GameIcons.WEP.grenade_smoke:
-					final_text_string += "Smoke Grenade"
-				GameIcons.WEP.noise_maker:
-					final_text_string += "Audio Disturber"
-				GameIcons.WEP.middle_flag:
-					final_text_string += "Flag"
-				GameIcons.WEP.enemy_flag:
-					final_text_string += "Flag"
-			if len(decision_array) == 2:
-				final_text_string += " and drop "
-				match GameIcons.WEP.find_key(decision_array[1]):
-					GameIcons.WEP.pistol:
-						final_text_string += "Sidearm"
-					GameIcons.WEP.rifle:
-						final_text_string += "Rifle"
-					GameIcons.WEP.shotgun:
-						final_text_string += "Shotugn"
-					GameIcons.WEP.grenade_frag:
-						final_text_string += "Fragmentation Grenade"
-					GameIcons.WEP.grenade_smoke:
-						final_text_string += "Smoke Grenade"
-					GameIcons.WEP.noise_maker:
-						final_text_string += "Audio Disturber"
-					GameIcons.WEP.middle_flag:
-						final_text_string += "Flag"
-					GameIcons.WEP.enemy_flag:
-						final_text_string += "Flag"
+			final_text_string = "{0}: Pick up {1}".format([
+				ref_ag.name,
+				GameRefs.WEP[decision_array[1]].name])
+			if len(decision_array) == 3:
+				final_text_string += " and drop {0}".format([GameRefs.WEP[decision_array[2]].name])
 		Agent.GameActions.HALT:
 			final_text_string = "{0}: Stop ".format([ref_ag.name])
 			match ref_ag.state:
