@@ -14,15 +14,15 @@ var _wep_in_mod_dir = 1
 var _wep_res_mod_dir = 1
 
 func update_state(new_state):
-	_state_tex.texture = GameIcons.STE.get(new_state, GameIcons.STE.unknown)
+	_state_tex.texture = GameRefs.STE.get(new_state, GameRefs.STE.unknown)
 
 
 func update_weapon(new_weapon):
-	_wep_tex.texture = GameIcons.WEP.get(new_weapon, GameIcons.WEP.fist)
+	_wep_tex.texture = GameRefs.WEP.get(new_weapon, GameRefs.WEP.fist).icon
 
 
 func update_item(new_item):
-	_itm_tex.texture = GameIcons.ITM.get(new_item, GameIcons.ITM.none)
+	_itm_tex.texture = GameRefs.ITM.get(new_item, GameRefs.ITM.none).icon
 
 
 func init_weapon_in(min_val, max_val, cur_val):

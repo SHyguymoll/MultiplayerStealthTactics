@@ -361,12 +361,6 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 			final_text_string = "{0}: Switch to {1}".format([
 				ref_ag.name,
 				GameRefs.ITM[decision_array[1]].name])
-		Agent.GameActions.PICK_UP_ITEM:
-			final_text_string = "{0}: Pick up {1}".format([
-				ref_ag.name,
-				GameRefs.ITM[decision_array[1]].name])
-			if len(decision_array) == 3:
-				final_text_string += " and drop {0}".format([GameRefs.ITM[decision_array[2]].name])
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
 				ref_ag.name,
