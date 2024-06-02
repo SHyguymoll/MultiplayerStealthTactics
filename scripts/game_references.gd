@@ -1,41 +1,85 @@
 extends Node
 
+enum WeaponTypes {
+	CQC,
+	SMALL,
+	BIG,
+	THROWN,
+	PLACED,
+}
 const WEP := {
 	fist = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/fist.png"),
 		name = "Hand to Hand",
+		type = WeaponTypes.CQC,
+		cooldown_time = 5,
+		reload_time = 0,
+		ammo = -1,
+		damage = 0,
 		},
 	pistol = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/pistol.png"),
 		name = "Sidearm",
+		type = WeaponTypes.SMALL,
+		cooldown_time = 30,
+		reload_time = 75,
+		ammo = 9,
+		damage = 1,
 		},
 	rifle = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/rifle.png"),
 		name = "Rifle",
+		type = WeaponTypes.BIG,
+		cooldown_time = 7,
+		reload_time = 170,
+		ammo = 15,
+		damage = 2,
 		},
 	shotgun = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/shotgun.png"),
 		name = "Shotgun",
+		type = WeaponTypes.BIG,
+		cooldown_time = 40,
+		reload_time = 250,
+		ammo = 6,
+		damage = 5,
 		},
 	grenade_smoke = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/grenade_smoke.png"),
 		name = "Smoke Grenade",
+		type = WeaponTypes.THROWN,
+		cooldown_time = 30,
+		reload_time = 5,
+		ammo = 1,
+		damage = 0,
 		},
 	grenade_frag = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/grenade_frag.png"),
 		name = "Fragmentation Grenade",
+		type = WeaponTypes.THROWN,
+		cooldown_time = 30,
+		reload_time = 5,
+		ammo = 1,
+		damage = 4,
 		},
 	noise_maker = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/noise_maker.png"),
 		name = "Audio Disturber",
+		type = WeaponTypes.THROWN,
+		cooldown_time = 30,
+		reload_time = 10,
+		ammo = 1,
+		damage = 0,
 		},
 	middle_flag = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/flag.png"),
 		name = "Flag",
+		type = WeaponTypes.CQC,
 		},
 	enemy_flag = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/flag.png"),
 		name = "Enemy Flag",
+		type = WeaponTypes.CQC,
 		},
 }
 

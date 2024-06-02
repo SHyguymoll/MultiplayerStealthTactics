@@ -27,10 +27,10 @@ var camo_level : int #bounded from 0 to 100, based on current state
 var weapon_accuracy : float #bounded from 0.00 to 1.00, based on movement and weapon usage
 
 var held_items : Array[String] = [] #max length should be 3
-var held_weapons : Array[GameWeapon] = [] #max length should be 2
+var held_weapons : Array[GameWeapon] = [GameWeapon.new("fist")] #max length should be 3 (including fist)
 
 var selected_item : int = -1 #index for item (-1 for no item)
-var selected_weapon : int = -1 #index for weapon (-1 for no weapon)
+var selected_weapon : int = 0 #index for weapon (0 for fist)
 
 var percieved_by_friendly := false #determines if hud is updated
 
@@ -171,29 +171,28 @@ func perform_action():
 			pass
 		GameActions.USE_WEAPON:
 			if in_standing_state():
-				if selected_weapon == -1:
-					pass
-					return
 				match held_weapons[selected_weapon].type:
-					GameWeapon.Types.SMALL:
+					GameRefs.WeaponTypes.CQC:
+						pass
+					GameRefs.WeaponTypes.SMALL:
 						_anim_state.travel("B_Stand_Attack_SmallArms")
-					GameWeapon.Types.BIG:
+					GameRefs.WeaponTypes.BIG:
 						_anim_state.travel("B_Stand_Attack_BigArms")
-					GameWeapon.Types.THROWN:
+					GameRefs.WeaponTypes.THROWN:
 						_anim_state.travel("B_Stand_Attack_Grenade")
-					GameWeapon.Types.PLACED:
+					GameRefs.WeaponTypes.PLACED:
 						_anim_state.travel("Crouch")
 			elif in_crouching_state():
 				if selected_weapon == -1:
 					return
 				match held_weapons[selected_weapon].type:
-					GameWeapon.Types.SMALL:
+					GameRefs.WeaponTypes.SMALL:
 						_anim_state.travel("B_Stand_Attack_SmallArms")
-					GameWeapon.Types.BIG:
+					GameRefs.WeaponTypes.BIG:
 						_anim_state.travel("B_Stand_Attack_BigArms")
-					GameWeapon.Types.THROWN:
+					GameRefs.WeaponTypes.THROWN:
 						_anim_state.travel("B_Stand_Attack_Grenade")
-					GameWeapon.Types.PLACED:
+					GameRefs.WeaponTypes.PLACED:
 						pass
 						#_anim_state.travel("B_Crouch_Grenade")
 			state = States.USING_WEAPON
@@ -331,16 +330,15 @@ func decide_head_position() -> Vector3:
 
 
 func decide_weapon_blend() -> Vector2:
-	if selected_weapon > -1:
-		match held_weapons[selected_weapon].type:
-			GameWeapon.Types.SMALL:
-				return Vector2(-1, 1)
-			GameWeapon.Types.BIG:
-				return Vector2(-1, -1)
-			_:
-				return Vector2(1, -1)
-	else:
-		return Vector2.ONE
+	match held_weapons[selected_weapon].type:
+		GameRefs.WeaponTypes.CQC:
+			return Vector2(1, 1)
+		GameRefs.WeaponTypes.SMALL:
+			return Vector2(-1, 1)
+		GameRefs.WeaponTypes.BIG:
+			return Vector2(-1, -1)
+		_:
+			return Vector2(1, -1)
 
 
 func _physics_process(delta: float) -> void:

@@ -1,27 +1,23 @@
 class_name GameWeapon
 extends Node
 
-enum Types {
-	SMALL,
-	BIG,
-	THROWN,
-	PLACED,
-}
-var reserve_ammo : int
-var ammo_capacity : int
+var reserve_ammo : int = 0
 var loaded_ammo : int = 0
 var reload_time : int
+var cooldown_time : int
 var wep_name : String # Refer to GameRefs.WEP for valid string names
-var type : Types
-var icon : Texture2D
 
-func _ready():
-	reload_weapon()
+
+func _init(weapon_name : String) -> void:
+	wep_name = weapon_name
+	loaded_ammo = GameRefs.WEP[wep_name].ammo
+	reserve_ammo = loaded_ammo * 3
+
 
 func reload_weapon() -> bool:
-	if ammo_capacity <= reserve_ammo:
-		loaded_ammo = ammo_capacity
-		reserve_ammo -= ammo_capacity
+	if GameRefs.WEP[wep_name].ammo <= reserve_ammo:
+		loaded_ammo = GameRefs.WEP[wep_name].ammo
+		reserve_ammo -= GameRefs.WEP[wep_name].ammo
 		return true
 	elif reserve_ammo > 0:
 		loaded_ammo = reserve_ammo
@@ -32,7 +28,15 @@ func reload_weapon() -> bool:
 
 func weapon_subroutine() -> void:
 	loaded_ammo -= 1
-	pass
+	match GameRefs.WEP[wep_name].type:
+		GameRefs.WeaponTypes.CQC:
+			pass
+		GameRefs.WeaponTypes.SMALL, GameRefs.WeaponTypes.BIG:
+			pass
+		GameRefs.WeaponTypes.THROWN:
+			pass
+		GameRefs.WeaponTypes.PLACED:
+			pass
 
 func use_weapon() -> bool:
 	if loaded_ammo == 0:

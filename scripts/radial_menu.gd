@@ -24,6 +24,8 @@ const ICONS := {
 	crawl = preload("res://assets/sprites/radial_menu/crawl.png"),
 	swap_item = preload("res://assets/sprites/radial_menu/swap_item.png"),
 	swap_weapon = preload("res://assets/sprites/radial_menu/swap_weapon.png"),
+	drop_weapon = preload("res://assets/sprites/radial_menu/drop_weapon.png"),
+	acquire_weapon = preload("res://assets/sprites/radial_menu/pick_up_weapon.png"),
 	use_weapon = preload("res://assets/sprites/radial_menu/use_weapon.png"),
 }
 
@@ -112,12 +114,7 @@ func debug_agent():
 	referenced_agent = Agent.new()
 	referenced_agent.state = Agent.States.CRAWL
 	referenced_agent.held_items = ["cigar", "analyzer", "box"]
-	referenced_agent.held_weapons = [GameWeapon.new(), GameWeapon.new()]
-	referenced_agent.held_weapons[0].icon = GameIcons.WEP.rifle
-	referenced_agent.held_weapons[0].type = GameWeapon.Types.BIG
-	referenced_agent.held_weapons[1].icon = GameIcons.WEP.noise_maker
-	referenced_agent.held_weapons[1].type = GameWeapon.Types.THROWN
-	referenced_agent.held_weapons[1].reserve_ammo = 5
+	referenced_agent.held_weapons = [GameWeapon.new("rifle"), GameWeapon.new("noise_maker")]
 
 
 #func _ready() -> void:
@@ -136,13 +133,13 @@ func determine_items():
 	var candidates := referenced_agent.held_items.duplicate()
 	if referenced_agent.selected_item > -1:
 		candidates.remove_at(referenced_agent.selected_item)
-		candidates.insert(referenced_agent.selected_item, GameIcons.ITM.none)
+		candidates.insert(referenced_agent.selected_item, GameRefs.ITM.none.icon)
 	if len(candidates) > 0:
-		_ul.icon = GameIcons.ITM[candidates[0]]
+		_ul.icon = GameRefs.ITM[candidates[0]].icon
 	if len(candidates) > 1:
-		_u.icon = GameIcons.ITM[candidates[1]]
+		_u.icon = GameRefs.ITM[candidates[1]].icon
 	if len(candidates) > 2:
-		_ur.icon = GameIcons.ITM[candidates[2]]
+		_ur.icon = GameRefs.ITM[candidates[2]].icon
 
 
 func determine_weapons():
@@ -151,7 +148,7 @@ func determine_weapons():
 	var candidates : Array[GameWeapon] = referenced_agent.held_weapons.duplicate()
 	if referenced_agent.selected_weapon > -1:
 		candidates.remove_at(referenced_agent.selected_weapon)
-		candidates.insert(referenced_agent.selected_weapon, GameIcons.WEP.fist)
+		candidates.insert(referenced_agent.selected_weapon, GameWeapon.new("fist"))
 	if len(candidates) > 0:
 		_ul.icon = candidates[0].icon
 	if len(candidates) > 1:
@@ -170,8 +167,23 @@ func a_o_na(icon, action : Agent.GameActions):
 
 
 func button_menu_screen():
+	var buttons = []
+
 	match current_screen:
 		"top":
+			match referenced_agent.state:
+				Agent.States.STAND:
+					buttons = [
+						a_o_na(ICONS.stance_crouch, Agent.GameActions.GO_CROUCH),
+						a_o_na(ICONS.run, Agent.GameActions.RUN_TO_POS),
+						a_o_na(ICONS.walk, Agent.GameActions.WALK_TO_POS),
+						a_o_na(ICONS.stance_prone, Agent.GameActions.GO_PRONE) if referenced_agent.can_prone() else ICONS.none,
+						ICONS.cancel_back,
+						a_o_na(ICONS.use_weapon, Agent.GameActions.USE_WEAPON),
+						a_o_na(ICONS.look, Agent.GameActions.LOOK_AROUND),
+						a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM),
+						a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON),
+					]
 			if referenced_agent.in_standing_state():
 				_ul.icon = a_o_na(ICONS.stance_crouch, Agent.GameActions.GO_CROUCH)
 				_u.icon = a_o_na(ICONS.run, Agent.GameActions.RUN_TO_POS)
@@ -305,14 +317,19 @@ func _button_pressed_metadata(button_texture : Texture2D):
 		ICONS.use_weapon:
 			aiming_decision_made.emit([Agent.GameActions.USE_WEAPON])
 			button_collapse_animation()
-	if button_texture in GameIcons.WEP:
-		var wep_in_question = GameIcons.WEP.find_key(button_texture)
-		decision_made.emit([Agent.GameActions.CHANGE_WEAPON, wep_in_question])
-		button_collapse_animation()
-	if button_texture in GameIcons.ITM:
-		var itm_in_question = GameIcons.ITM.find_key(button_texture)
-		decision_made.emit([Agent.GameActions.CHANGE_ITEM, itm_in_question])
-		button_collapse_animation()
+	for possible in GameRefs.ITM:
+		if button_texture == GameRefs.ITM[possible].icon:
+			decision_made.emit([Agent.GameActions.CHANGE_ITEM, possible])
+			button_collapse_animation()
+	for possible in GameRefs.WEP:
+		if button_texture == GameRefs.WEP[possible].icon:
+			var new_ind = 0
+			for ag_possible in referenced_agent.held_weapons:
+				if button_texture == GameRefs.WEP[ag_possible.wep_name].icon:
+					decision_made.emit([Agent.GameActions.CHANGE_WEAPON, new_ind])
+					button_collapse_animation()
+					return
+				new_ind += 1
 
 
 func _on_ul_pressed() -> void:
