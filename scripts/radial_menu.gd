@@ -25,8 +25,10 @@ const ICONS := {
 	swap_item = preload("res://assets/sprites/radial_menu/swap_item.png"),
 	swap_weapon = preload("res://assets/sprites/radial_menu/swap_weapon.png"),
 	drop_weapon = preload("res://assets/sprites/radial_menu/drop_weapon.png"),
-	acquire_weapon = preload("res://assets/sprites/radial_menu/pick_up_weapon.png"),
+	pick_up_weapon = preload("res://assets/sprites/radial_menu/pick_up_weapon.png"),
 	use_weapon = preload("res://assets/sprites/radial_menu/use_weapon.png"),
+	reload_weapon = preload("res://assets/sprites/radial_menu/use_weapon.png"),
+	menu_weapon = preload("res://assets/sprites/radial_menu/use_weapon.png"),
 }
 
 var referenced_agent : Agent
