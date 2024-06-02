@@ -328,7 +328,7 @@ func decide_head_position() -> Vector3:
 
 
 func decide_weapon_blend() -> Vector2:
-	match held_weapons[selected_weapon].type:
+	match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 		GameRefs.WeaponTypes.CQC:
 			return Vector2(1, 1)
 		GameRefs.WeaponTypes.SMALL:
