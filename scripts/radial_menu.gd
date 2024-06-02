@@ -145,16 +145,17 @@ func determine_items():
 
 
 func determine_weapons():
-	_ul.icon = ICONS.none
-	_ur.icon = ICONS.none
+	_u.icon = ICONS.none
+	_dl.icon = ICONS.none
+	_dr.icon = ICONS.none
 	var candidates : Array[GameWeapon] = referenced_agent.held_weapons.duplicate()
-	if referenced_agent.selected_weapon > -1:
-		candidates.remove_at(referenced_agent.selected_weapon)
-		candidates.insert(referenced_agent.selected_weapon, GameWeapon.new("fist"))
-	if len(candidates) > 0:
-		_ul.icon = candidates[0].icon
+	if referenced_agent.selected_weapon > 0:
+		candidates[referenced_agent.selected_weapon] = candidates[0]
+	_u.icon = GameRefs.WEP[candidates[0].wep_name].icon
 	if len(candidates) > 1:
-		_ur.icon = candidates[1].icon
+		_dl.icon = GameRefs.WEP[candidates[1].wep_name].icon
+	if len(candidates) > 2:
+		_dr.icon = GameRefs.WEP[candidates[2].wep_name].icon
 
 
 # the action is available unless it was already selected,
@@ -169,81 +170,59 @@ func a_o_na(icon, action : Agent.GameActions):
 
 
 func button_menu_screen():
-	var buttons = []
-
 	match current_screen:
 		"top":
-			match referenced_agent.state:
-				Agent.States.STAND:
-					buttons = [
-						a_o_na(ICONS.stance_crouch, Agent.GameActions.GO_CROUCH),
-						a_o_na(ICONS.run, Agent.GameActions.RUN_TO_POS),
-						a_o_na(ICONS.walk, Agent.GameActions.WALK_TO_POS),
-						a_o_na(ICONS.stance_prone, Agent.GameActions.GO_PRONE) if referenced_agent.can_prone() else ICONS.none,
-						ICONS.cancel_back,
-						a_o_na(ICONS.use_weapon, Agent.GameActions.USE_WEAPON),
-						a_o_na(ICONS.look, Agent.GameActions.LOOK_AROUND),
-						a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM),
-						a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON),
-					]
+			var buttons = [
+				a_o_na(ICONS.stance_crouch, Agent.GameActions.GO_CROUCH), #0: ul
+				a_o_na(ICONS.run, Agent.GameActions.RUN_TO_POS), #1: u
+				a_o_na(ICONS.walk, Agent.GameActions.WALK_TO_POS), #2: ur
+				a_o_na(ICONS.stance_prone, Agent.GameActions.GO_PRONE), #3: l
+				ICONS.cancel_back, #4: m (shouldn't ever change, here for consistency)
+				a_o_na(ICONS.use_weapon, Agent.GameActions.USE_WEAPON), #5: r
+				a_o_na(ICONS.look, Agent.GameActions.LOOK_AROUND), #6: dl
+				a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM), #7: d
+				ICONS.menu_weapon, #8: dr
+			]
 			if referenced_agent.in_standing_state():
-				_ul.icon = a_o_na(ICONS.stance_crouch, Agent.GameActions.GO_CROUCH)
-				_u.icon = a_o_na(ICONS.run, Agent.GameActions.RUN_TO_POS)
+				if not referenced_agent.can_prone():
+					buttons[3] = ICONS.none
 				if referenced_agent.state == referenced_agent.States.RUN:
-					_u.icon = ICONS.halt
-				_ur.icon = a_o_na(ICONS.walk, Agent.GameActions.WALK_TO_POS)
+					buttons[1] = ICONS.halt
 				if referenced_agent.state == referenced_agent.States.WALK:
-					_ur.icon = ICONS.halt
-				if referenced_agent.can_prone():
-					_l.icon = a_o_na(ICONS.stance_prone, Agent.GameActions.GO_PRONE)
-				else:
-					_l.icon = ICONS.none
-				#_l.icon = ICONS.stance_prone
-				_m.icon = ICONS.cancel_back
-				_r.icon = a_o_na(ICONS.use_weapon, Agent.GameActions.USE_WEAPON)
-				_dl.icon = a_o_na(ICONS.look, Agent.GameActions.LOOK_AROUND)
-				_d.icon = a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM)
-				_dr.icon = a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON)
-			if referenced_agent.in_crouching_state():
-				if referenced_agent.can_stand():
-					_ul.icon = a_o_na(ICONS.stance_stand, Agent.GameActions.GO_STAND)
-				else:
-					_ul.icon = ICONS.none
-				#_ul.icon = ICONS.stance_stand
-				_u.icon = ICONS.none
-				_ur.icon = a_o_na(ICONS.crouch_walk, Agent.GameActions.CROUCH_WALK_TO_POS)
+					buttons[2] = ICONS.halt
+
+			elif referenced_agent.in_crouching_state():
+				buttons[0] = a_o_na(ICONS.stance_stand, Agent.GameActions.GO_STAND)
+				if not referenced_agent.can_stand():
+					buttons[0] = ICONS.none
+				buttons[1] = ICONS.none
+				buttons[2] = a_o_na(ICONS.crouch_walk, Agent.GameActions.CROUCH_WALK_TO_POS)
 				if referenced_agent.state == referenced_agent.States.CROUCH_WALK:
-					_ur.icon = ICONS.halt
-				if referenced_agent.can_prone():
-					_l.icon = a_o_na(ICONS.stance_prone, Agent.GameActions.GO_PRONE)
-				else:
-					_l.icon = ICONS.none
-				#_l.icon = ICONS.stance_prone
-				_m.icon = ICONS.cancel_back
-				_r.icon = a_o_na(ICONS.use_weapon, Agent.GameActions.USE_WEAPON)
-				_dl.icon = a_o_na(ICONS.look, Agent.GameActions.LOOK_AROUND)
-				_d.icon = a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM)
-				_dr.icon = a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON)
-			if referenced_agent.in_prone_state():
-				if referenced_agent.can_stand():
-					_ul.icon = a_o_na(ICONS.stance_stand, Agent.GameActions.GO_STAND)
-				else:
-					_ul.icon = ICONS.none
-				#_ul.icon = ICONS.stance_stand
-				_u.icon = ICONS.none
-				_ur.icon = a_o_na(ICONS.crawl, Agent.GameActions.CRAWL_TO_POS)
+					buttons[2] = ICONS.halt
+				if not referenced_agent.can_prone():
+					buttons[3] = ICONS.none
+
+			elif referenced_agent.in_prone_state():
+				buttons[0] = a_o_na(ICONS.stance_stand, Agent.GameActions.GO_STAND)
+				if not referenced_agent.can_stand():
+					buttons[0] = ICONS.none
+				buttons[1] = ICONS.none
+				buttons[2] = a_o_na(ICONS.crawl, Agent.GameActions.CRAWL_TO_POS)
 				if referenced_agent.state == referenced_agent.States.CRAWL:
-					_ur.icon = ICONS.halt
-				if referenced_agent.can_crouch():
-					_l.icon = a_o_na(ICONS.stance_crouch, Agent.GameActions.GO_CROUCH)
-				else:
-					_l.icon = ICONS.none
-				#_l.icon = ICONS.stance_crouch
-				_m.icon = ICONS.cancel_back
-				_r.icon = ICONS.none
-				_dl.icon = a_o_na(ICONS.look, Agent.GameActions.LOOK_AROUND)
-				_d.icon = a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM)
-				_dr.icon = a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON)
+					buttons[2] = ICONS.halt
+				buttons[3] = a_o_na(ICONS.stance_crouch, Agent.GameActions.GO_CROUCH)
+				if not referenced_agent.can_crouch():
+					buttons[3] = ICONS.none
+				buttons[5] = ICONS.none
+			_ul.icon = buttons[0]
+			_u.icon = buttons[1]
+			_ur.icon = buttons[2]
+			_l.icon = buttons[3]
+			_m.icon = buttons[4]
+			_r.icon = buttons[5]
+			_dl.icon = buttons[6]
+			_d.icon = buttons[7]
+			_dr.icon = buttons[8]
 		"swap_item":
 			determine_items()
 			_l.icon = ICONS.none
@@ -252,15 +231,24 @@ func button_menu_screen():
 			_dl.icon = ICONS.none
 			_d.icon = ICONS.none
 			_dr.icon = ICONS.none
-		"swap_weapon":
-			determine_weapons()
-			_u.icon = ICONS.none
+		"menu_weapon":
+			_ul.icon = ICONS.drop_weapon
+			_u.icon = ICONS.swap_weapon
+			_ur.icon = ICONS.pick_up_weapon
 			_l.icon = ICONS.none
 			_m.icon = ICONS.cancel_back
 			_r.icon = ICONS.none
 			_dl.icon = ICONS.none
 			_d.icon = ICONS.none
 			_dr.icon = ICONS.none
+		"swap_weapon", "drop_weapon":
+			determine_weapons()
+			_ul.icon = ICONS.none
+			_ur.icon = ICONS.none
+			_l.icon = ICONS.none
+			_m.icon = ICONS.cancel_back
+			_r.icon = ICONS.none
+			_d.icon = ICONS.none
 	_ul.visible = _ul.icon != ICONS.none
 	_u.visible = _u.icon != ICONS.none
 	_ur.visible = _ur.icon != ICONS.none
@@ -274,13 +262,19 @@ func button_menu_screen():
 	button_spread_animation()
 
 
-func _button_pressed_metadata(button_texture : Texture2D):
+func _button_pressed_metadata(button : Button):
+	var button_texture = button.icon
 	match button_texture:
 		ICONS.none:
 			button_collapse_animation()
 		ICONS.cancel_back:
-			if current_screen in ["swap_item", "swap_weapon"]:
+			if current_screen in ["swap_item", "weapon_menu"]:
 				current_screen = "top"
+				button_menu_screen()
+				button_collapse_animation(true)
+				button_spread_animation()
+			elif current_screen in ["swap_weapon", "drop_weapon", "pick_up_weapon"]:
+				current_screen = "menu_weapon"
 				button_menu_screen()
 				button_collapse_animation(true)
 				button_spread_animation()
@@ -289,8 +283,17 @@ func _button_pressed_metadata(button_texture : Texture2D):
 		ICONS.swap_item:
 			current_screen = "swap_item"
 			button_menu_screen()
+		ICONS.menu_weapon:
+			current_screen = "menu_weapon"
+			button_menu_screen()
 		ICONS.swap_weapon:
 			current_screen = "swap_weapon"
+			button_menu_screen()
+		ICONS.drop_weapon:
+			current_screen = "drop_weapon"
+			button_menu_screen()
+		ICONS.pick_up_weapon:
+			current_screen = "pick_up_weapon"
 			button_menu_screen()
 		ICONS.no_action, ICONS.halt:
 			decision_made.emit([null])
@@ -325,46 +328,53 @@ func _button_pressed_metadata(button_texture : Texture2D):
 			button_collapse_animation()
 	for possible in GameRefs.WEP:
 		if button_texture == GameRefs.WEP[possible].icon:
-			var new_ind = 0
-			for ag_possible in referenced_agent.held_weapons:
-				if button_texture == GameRefs.WEP[ag_possible.wep_name].icon:
-					decision_made.emit([Agent.GameActions.CHANGE_WEAPON, new_ind])
-					button_collapse_animation()
-					return
-				new_ind += 1
+			if current_screen != "pick_up_weapon":
+				var new_ind = 0
+				for ag_possible in referenced_agent.held_weapons:
+					if button_texture == GameRefs.WEP[ag_possible.wep_name].icon:
+						match current_screen:
+							"swap_weapon":
+								decision_made.emit([Agent.GameActions.CHANGE_WEAPON, new_ind])
+							"drop_weapon":
+								decision_made.emit([Agent.GameActions.DROP_WEAPON, new_ind])
+						button_collapse_animation()
+						return
+					new_ind += 1
+			else:
+				pass #TODO: for weapon around agent, needs method
 
 
 func _on_ul_pressed() -> void:
-	_button_pressed_metadata(_ul.icon)
+	_button_pressed_metadata(_ul)
 
 
 func _on_u_pressed() -> void:
-	_button_pressed_metadata(_u.icon)
+	_button_pressed_metadata(_u)
 
 
 func _on_ur_pressed() -> void:
-	_button_pressed_metadata(_ur.icon)
+	_button_pressed_metadata(_ur)
 
 
 func _on_l_pressed() -> void:
-	_button_pressed_metadata(_l.icon)
+	_button_pressed_metadata(_l)
 
 
 func _on_m_pressed() -> void:
-	_button_pressed_metadata(_m.icon)
+	_button_pressed_metadata(_m)
 
 
 func _on_r_pressed() -> void:
-	_button_pressed_metadata(_r.icon)
+	_button_pressed_metadata(_r)
 
 
 func _on_dl_pressed() -> void:
-	_button_pressed_metadata(_dl.icon)
+	_button_pressed_metadata(_dl)
 
 
 func _on_d_pressed() -> void:
-	_button_pressed_metadata(_d.icon)
+	_button_pressed_metadata(_d)
 
 
 func _on_dr_pressed() -> void:
-	_button_pressed_metadata(_dr.icon)
+	_button_pressed_metadata(_dr)

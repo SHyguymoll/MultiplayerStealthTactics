@@ -69,7 +69,7 @@ enum GameActions {
 	RUN_TO_POS, WALK_TO_POS, CROUCH_WALK_TO_POS, CRAWL_TO_POS,
 	LOOK_AROUND,
 	CHANGE_ITEM, CHANGE_WEAPON,
-	PICK_UP_ITEM, PICK_UP_WEAPON,
+	PICK_UP_WEAPON, DROP_WEAPON,
 	USE_WEAPON, RELOAD_WEAPON,
 	HALT,
 }
@@ -159,13 +159,11 @@ func perform_action():
 		GameActions.LOOK_AROUND:
 			target_direction = queued_action[1]
 		GameActions.CHANGE_ITEM:
-			if queued_action[1] == GameIcons.ITM.none:
+			if queued_action[1] == "none":
 				selected_item = -1
 			else:
 				selected_item = held_items.find(queued_action[1])
 		GameActions.CHANGE_WEAPON:
-			pass
-		GameActions.PICK_UP_ITEM:
 			pass
 		GameActions.PICK_UP_WEAPON:
 			pass
@@ -350,7 +348,7 @@ func _game_step(delta: float) -> void:
 	if not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly) or selected_item == -1:
 		_active_item_icon.visible = false
 	elif selected_item > -1:
-		_active_item_icon.texture = GameIcons.ITM[held_items[selected_item]]
+		_active_item_icon.texture = GameRefs.ITM[held_items[selected_item]].icon
 		_active_item_icon.visible = true
 	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
 	_eyes.rotation.y = target_head_rot_off_y
