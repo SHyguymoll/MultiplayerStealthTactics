@@ -25,10 +25,10 @@ const ICONS := {
 	swap_item = preload("res://assets/sprites/radial_menu/swap_item.png"),
 	swap_weapon = preload("res://assets/sprites/radial_menu/swap_weapon.png"),
 	drop_weapon = preload("res://assets/sprites/radial_menu/drop_weapon.png"),
+	menu_weapon = preload("res://assets/sprites/radial_menu/menu_weapon.png"),
 	pick_up_weapon = preload("res://assets/sprites/radial_menu/pick_up_weapon.png"),
 	use_weapon = preload("res://assets/sprites/radial_menu/use_weapon.png"),
-	reload_weapon = preload("res://assets/sprites/radial_menu/use_weapon.png"),
-	menu_weapon = preload("res://assets/sprites/radial_menu/use_weapon.png"),
+	reload_weapon = preload("res://assets/sprites/radial_menu/reload_weapon.png"),
 }
 
 var referenced_agent : Agent
@@ -183,6 +183,7 @@ func button_menu_screen():
 				a_o_na(ICONS.swap_item, Agent.GameActions.CHANGE_ITEM), #7: d
 				ICONS.menu_weapon, #8: dr
 			]
+
 			if referenced_agent.in_standing_state():
 				if not referenced_agent.can_prone():
 					buttons[3] = ICONS.none
@@ -214,6 +215,12 @@ func button_menu_screen():
 				if not referenced_agent.can_crouch():
 					buttons[3] = ICONS.none
 				buttons[5] = ICONS.none
+
+			if referenced_agent.selected_weapon > 0:
+				if referenced_agent.held_weapons[
+						referenced_agent.selected_weapon].loaded_ammo == 0:
+					buttons[5] = ICONS.reload_weapon
+
 			_ul.icon = buttons[0]
 			_u.icon = buttons[1]
 			_ur.icon = buttons[2]
