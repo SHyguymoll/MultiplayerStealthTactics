@@ -275,7 +275,7 @@ func _button_pressed_metadata(button : Button):
 		ICONS.none:
 			button_collapse_animation()
 		ICONS.cancel_back:
-			if current_screen in ["swap_item", "weapon_menu"]:
+			if current_screen in ["swap_item", "menu_weapon"]:
 				current_screen = "top"
 				button_menu_screen()
 				button_collapse_animation(true)
