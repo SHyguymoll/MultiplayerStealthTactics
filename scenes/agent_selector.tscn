@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://l182pgc6da32"]
+
+[ext_resource type="Script" path="res://scripts/agent_selector.gd" id="1_uc08v"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uwmpa"]
+size = Vector2(70, 70)
+
+[node name="AgentSelector" type="Area2D"]
+collision_mask = 0
+script = ExtResource("1_uc08v")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_uwmpa")
+
+[connection signal="input_event" from="." to="." method="_on_input_event"]

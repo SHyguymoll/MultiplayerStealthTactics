@@ -102,6 +102,8 @@ follow_viewport_enabled = true
 [node name="RadialMenu" parent="HUDSelected" instance=ExtResource("2_xp2mg")]
 position = Vector2(-60, -60)
 
+[node name="HUDSelectors" type="CanvasLayer" parent="."]
+
 [connection signal="pressed" from="HUDBase/Execute" to="." method="_on_execute_pressed"]
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
 [connection signal="decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]

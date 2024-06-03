@@ -1,4 +1,4 @@
-[gd_scene load_steps=118 format=3 uid="uid://oitco668lkwj"]
+[gd_scene load_steps=117 format=3 uid="uid://oitco668lkwj"]
 
 [ext_resource type="Script" path="res://scripts/agent.gd" id="1_qe0u1"]
 [ext_resource type="PackedScene" uid="uid://c2d2uqv4wgbv7" path="res://assets/models/exports/Agent.gltf" id="2_bu3bb"]
@@ -13,9 +13,6 @@ radius = 1.625
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_a4h6i"]
 size = Vector3(0.711, 0.1, 0.711)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_epbj5"]
-size = Vector3(1, 1.116, 1)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_vbwd1"]
 height = 0.332327
@@ -17470,15 +17467,6 @@ shape = SubResource("CylinderShape3D_bpqx0")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0433259, 0)
 shape = SubResource("BoxShape3D_a4h6i")
 
-[node name="MouseClick" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.502775, 0)
-collision_layer = 8
-collision_mask = 0
-monitorable = false
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="MouseClick"]
-shape = SubResource("BoxShape3D_epbj5")
-
 [node name="Body" type="Area3D" parent="."]
 collision_layer = 2050
 collision_mask = 0
@@ -17509,13 +17497,11 @@ bones/6/rotation = Quaternion(-0.0937119, -8.51281e-21, -8.20358e-22, 0.995599)
 bones/7/rotation = Quaternion(-0.0659627, -0.751441, -0.402991, 0.518251)
 bones/8/rotation = Quaternion(-0.0659627, 0.751441, 0.402991, 0.518251)
 bones/9/rotation = Quaternion(0.998533, 0, 0, 0.0541513)
-bones/9/scale = Vector3(1, 1, 1)
 bones/11/rotation = Quaternion(0.12642, 1.18253e-07, 1.50705e-08, 0.991977)
 bones/13/rotation = Quaternion(-0.56951, -0.000401065, 0.000277741, 0.821985)
 bones/14/rotation = Quaternion(-0.000164726, 0.968398, -0.24941, -0.000305186)
 bones/14/scale = Vector3(1, 1, 1)
 bones/15/rotation = Quaternion(0.998533, 0, 0, 0.0541513)
-bones/15/scale = Vector3(1, 1, 1)
 bones/17/rotation = Quaternion(0.12642, -1.18253e-07, -1.50705e-08, 0.991977)
 bones/19/rotation = Quaternion(-0.56951, -0.000401654, 0.00027842, 0.821985)
 bones/20/rotation = Quaternion(-0.000164934, 0.968398, -0.24941, -0.000306225)
@@ -17542,19 +17528,19 @@ bones/38/rotation = Quaternion(5.33851e-08, 0.707107, 0.707107, 5.33851e-08)
 bones/39/rotation = Quaternion(-5.33851e-08, 0.707107, 0.707107, -5.33851e-08)
 
 [node name="GrenadeFrag" parent="Agent/game_rig/Skeleton3D" index="0"]
-transform = Transform3D(0.913519, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923298, -0.497084, 0.721662, -0.00860332)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860368)
 
 [node name="GrenadeSmoke" parent="Agent/game_rig/Skeleton3D" index="1"]
-transform = Transform3D(0.913519, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923298, -0.497084, 0.721662, -0.00860332)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860368)
 
 [node name="Pistol" parent="Agent/game_rig/Skeleton3D" index="2"]
-transform = Transform3D(0.0725085, -0.0240099, -0.997079, -0.994007, -0.0837581, -0.0702679, -0.0818263, 0.996198, -0.029939, -0.488474, 0.714853, -0.0269331)
+transform = Transform3D(0.0725079, -0.0240108, -0.997079, -0.994006, -0.0837585, -0.0702675, -0.0818267, 0.996197, -0.02994, -0.488474, 0.714853, -0.0269335)
 
 [node name="Rifle" parent="Agent/game_rig/Skeleton3D" index="3"]
-transform = Transform3D(0.177585, 0.00944588, -0.984059, -0.974037, -0.140983, -0.177129, -0.140409, 0.989967, -0.0158358, -0.494218, 0.701634, -0.0300946)
+transform = Transform3D(0.177585, 0.00944401, -0.984059, -0.974038, -0.140984, -0.177129, -0.14041, 0.989967, -0.0158379, -0.494218, 0.701635, -0.030095)
 
 [node name="Shotgun" parent="Agent/game_rig/Skeleton3D" index="4"]
-transform = Transform3D(0.198861, -0.0394144, -0.979234, -0.979479, 0.0254327, -0.199934, 0.0327848, 0.9989, -0.033548, -0.495614, 0.700998, -0.0373763)
+transform = Transform3D(0.198861, -0.0394157, -0.979234, -0.97948, 0.0254319, -0.199934, 0.0327843, 0.9989, -0.0335497, -0.495614, 0.700998, -0.0373767)
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_no7tm")
@@ -17693,7 +17679,6 @@ debug_enabled = true
 [connection signal="area_entered" from="Eyes" to="." method="_on_eyes_area_entered"]
 [connection signal="area_exited" from="Eyes" to="." method="_on_eyes_area_exited"]
 [connection signal="area_entered" from="Ears" to="." method="_on_ears_area_entered"]
-[connection signal="input_event" from="MouseClick" to="." method="_agent_clicked"]
 [connection signal="animation_finished" from="AnimationTree" to="." method="_on_animation_finished"]
 [connection signal="animation_started" from="AnimationTree" to="." method="_on_animation_started"]
 

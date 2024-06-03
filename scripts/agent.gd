@@ -384,9 +384,6 @@ func _game_step(delta: float) -> void:
 	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
 	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_anim.advance(delta)
-	#animation_finished = anim_traversal_endpoint == _anim_state.get_current_node()
-	#if animation_finished:
-		#action_completed.emit(self)
 	# update agent specifically
 	if len(queued_action) == 0:
 		return
@@ -435,11 +432,6 @@ func _game_step(delta: float) -> void:
 	#if is_multiplayer_authority():
 		#var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 		#position = position + Vector3(move_dir.x, 0, move_dir.y)
-
-
-func _agent_clicked(camera: Node, event: InputEvent, _position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
-	if event is InputEventMouse and event.button_mask == MOUSE_BUTTON_MASK_LEFT:
-		agent_selected.emit(self)
 
 
 func flash_outline(color : Color):

@@ -2,6 +2,7 @@ class_name Game
 extends Node3D
 
 var agent_scene = preload("res://scenes/agent.tscn")
+var agent_selector_scene = preload("res://scenes/agent_selector.tscn")
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 
@@ -91,6 +92,10 @@ func update_text() -> void:
 func _physics_process(delta: float) -> void:
 	match game_phase:
 		GamePhases.SELECTION:
+			for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
+				selector.position = (
+			$World/Camera3D as Camera3D).unproject_position(
+					selector.referenced_agent.position)#.clamp(Vector2(get_viewport().size) - get_viewport().size * 0.85, get_viewport().size * 0.85)
 			if server_ready_bool and client_ready_bool:
 				_update_game_phase(GamePhases.EXECUTION)
 				if multiplayer.is_server():
@@ -189,7 +194,6 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 	#print(agent_stats)
 	var new_agent = agent_scene.instantiate()
 	new_agent.name = str(player_id) + "_" + str(agent_stats.name)
-	new_agent.agent_selected.connect(_hud_agent_details_actions)
 	new_agent.action_completed.connect(_agent_completed_action)
 	new_agent.action_interrupted.connect(_agent_interrupted)
 
@@ -217,7 +221,8 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 			server_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
 
 			server_agents[new_agent.name]["text"] = ""
-
+			server_agents[new_agent.name]["action_done"] = true
+			create_agent_selector(new_agent)
 
 	else:
 		client_agents[new_agent.name] = {agent_node=new_agent, action_array=[], action_done=true}
@@ -232,7 +237,15 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 
 			client_agents[new_agent.name]["text"] = ""
 			client_agents[new_agent.name]["action_done"] = true
+			create_agent_selector(new_agent)
 	print("{0}\n--------------\nSERVER = {1}\nCLIENT = {2}".format([multiplayer.multiplayer_peer.get_unique_id(), server_agents, client_agents]))
+
+
+func create_agent_selector(agent : Agent):
+	var new_selector = agent_selector_scene.instantiate()
+	new_selector.referenced_agent = agent
+	new_selector.agent_selected.connect(_hud_agent_details_actions)
+	$HUDSelectors.add_child(new_selector)
 
 
 func _agent_sees_agent(spotter : Agent, spottee : Agent):
@@ -267,23 +280,27 @@ func _agent_died(deceased : Agent):
 			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.dead)
 		else:
 			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.unknown)
+	for agent_selector in $HUDSelectors.get_children() as Array[AgentSelector]:
+		if agent_selector.referenced_agent == deceased:
+			agent_selector.queue_free()
+			break
 	pass
 
 
-func _hud_agent_details_actions(agent : Agent): #TODO
+func _hud_agent_details_actions(agent_selector : AgentSelector): #TODO
 	if game_phase != GamePhases.SELECTION:
+		print(multiplayer.get_unique_id(), ": not in SELECTION MODE")
 		return
 	if selection_step != SelectionSteps.BASE:
+		print(multiplayer.get_unique_id(), ": not on SelectionStep.BASE")
 		return
-	if not agent.is_multiplayer_authority():
-		return
+	var agent = agent_selector.referenced_agent
 	if agent.in_incapacitated_state() and not agent.percieved_by_friendly:
+		print(multiplayer.get_unique_id(), ": agent is knocked out with no eyes on them")
 		return
 	agent.flash_outline(Color.AQUA)
 	_radial_menu.referenced_agent = agent
-	_radial_menu.position = (
-			$World/Camera3D as Camera3D).unproject_position(
-					agent.position).clamp(Vector2(get_window().size) - get_window().size * 0.85, get_window().size * 0.85)
+	_radial_menu.position = agent_selector.position
 	_radial_menu.init_menu()
 	pass
 
@@ -360,13 +377,21 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.CHANGE_WEAPON:
 			final_text_string = "{0}: Switch to {1}".format([
 				ref_ag.name,
-				GameRefs.ITM[decision_array[1]].name])
+				GameRefs.WEP[decision_array[1]].name])
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
 				ref_ag.name,
 				GameRefs.WEP[decision_array[1]].name])
-			if len(decision_array) == 3:
-				final_text_string += " and drop {0}".format([GameRefs.WEP[decision_array[2]].name])
+			#if len(decision_array) == 3:
+				#final_text_string += " and drop {0}".format([GameRefs.WEP[decision_array[2]].name])
+		Agent.GameActions.DROP_WEAPON:
+			final_text_string = "{0}: Drop {1}".format([
+				ref_ag.name,
+				GameRefs.WEP[decision_array[1]].name])
+		Agent.GameActions.RELOAD_WEAPON:
+			final_text_string = "{0}: Reload {1}".format([
+				ref_ag.name,
+				GameRefs.WEP[ref_ag.held_weapons[ref_ag.selected_weapon].wep_name].name])
 		Agent.GameActions.HALT:
 			final_text_string = "{0}: Stop ".format([ref_ag.name])
 			match ref_ag.state:
@@ -378,7 +403,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Sneaking"
 				Agent.States.CRAWL:
 					final_text_string += "Crawling"
-		_:
+		null:
 			ref_ag.queued_action = []
 
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
