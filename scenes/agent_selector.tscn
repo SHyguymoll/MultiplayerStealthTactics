@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/agent_selector.gd" id="1_uc08v"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uwmpa"]
-size = Vector2(70, 70)
+size = Vector2(69, 69)
 
 [node name="AgentSelector" type="Area2D"]
 collision_mask = 0
