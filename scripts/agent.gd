@@ -375,8 +375,8 @@ func _game_step(delta: float) -> void:
 		target_world_collide_y = 0.15
 		collision_mask = 1
 	_world_collide.position.y = lerpf(_world_collide.position.y, target_world_collide_y, 0.2)
-	(_world_collide.get_shape() as BoxShape3D).size.y = lerpf(
-			(_world_collide.get_shape() as BoxShape3D).size.y,
+	(_world_collide.get_shape() as CylinderShape3D).height = lerpf(
+			(_world_collide.get_shape() as CylinderShape3D).height,
 			target_world_collide_height,
 			0.2
 	)
