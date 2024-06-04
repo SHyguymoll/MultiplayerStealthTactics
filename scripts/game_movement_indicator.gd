@@ -4,7 +4,9 @@ signal indicator_placed(indicator)
 const CLOSENESS := 2.0
 
 @onready var _game_camera : GameCamera = $"../../World/Camera3D"
-@onready var _ray : RayCast3D = $RayCast3D
+@onready var _ray_left : RayCast3D = $LeftCast
+@onready var _ray_middle : RayCast3D = $MiddleCast
+@onready var _ray_right : RayCast3D = $RightCast
 var referenced_agent : Agent
 var ind_set := false
 
@@ -45,16 +47,33 @@ func _check_position() -> bool:
 	if global_position.y > 1:
 		return false
 	# sightline check
-	_ray.global_position = referenced_agent.global_position + Vector3.UP * 0.1
-	_ray.target_position = (global_position - referenced_agent.global_position) + Vector3.UP * 0.1
-	_ray.target_position.y = maxf(_ray.target_position.y, 0.5)
-	_ray.collision_mask = 1 + 64 + 128
+	var center_start = referenced_agent.global_position + Vector3.UP * 0.1
+	var center_target = (global_position - referenced_agent.global_position) + Vector3.UP * 0.1
+	center_target.y = maxf(center_target.y, 0.5)
+	var final_col_mask = 1 + 64 + 128
 	if referenced_agent.in_prone_state():
-		_ray.collision_mask = 1
+		final_col_mask = 1
 	elif referenced_agent.in_crouching_state():
-		_ray.collision_mask = 1 + 64
-	_ray.force_raycast_update()
-	if _ray.get_collider():
+		final_col_mask = 1 + 64
+
+	var angled_left = (center_target.normalized() * 0.3).rotated(
+					Vector3.UP, deg_to_rad(-90))
+	var angled_right = (center_target.normalized() * 0.3).rotated(
+					Vector3.UP, deg_to_rad(90))
+
+	_ray_left.global_position = center_start + angled_left
+	_ray_middle.global_position = center_start
+	_ray_right.global_position = center_start + angled_right
+	_ray_left.target_position = center_target
+	_ray_middle.target_position = center_target
+	_ray_right.target_position = center_target
+	_ray_left.collision_mask = final_col_mask
+	_ray_middle.collision_mask = final_col_mask
+	_ray_right.collision_mask = final_col_mask
+	_ray_left.force_raycast_update()
+	_ray_middle.force_raycast_update()
+	_ray_right.force_raycast_update()
+	if _ray_left.get_collider() or _ray_middle.get_collider() or _ray_right.get_collider():
 		return false
 	return true
 

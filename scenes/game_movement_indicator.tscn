@@ -153,6 +153,10 @@ sprite_frames = SubResource("SpriteFrames_vjpas")
 animation = &"movement_end_fail"
 script = ExtResource("1_rfasu")
 
-[node name="RayCast3D" type="RayCast3D" parent="."]
+[node name="LeftCast" type="RayCast3D" parent="."]
+
+[node name="MiddleCast" type="RayCast3D" parent="."]
+
+[node name="RightCast" type="RayCast3D" parent="."]
 
 [connection signal="animation_changed" from="." to="." method="_on_animation_changed"]
