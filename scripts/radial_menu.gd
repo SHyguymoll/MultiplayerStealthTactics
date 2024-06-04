@@ -116,7 +116,7 @@ func debug_agent():
 	referenced_agent = Agent.new()
 	referenced_agent.state = Agent.States.CRAWL
 	referenced_agent.held_items = ["cigar", "analyzer", "box"]
-	referenced_agent.held_weapons = [GameWeapon.new("rifle"), GameWeapon.new("noise_maker")]
+	referenced_agent.held_weapons = [GameWeapon.new("rifle", "debug_rifle"), GameWeapon.new("noise_maker", "debug_noise_maker")]
 
 
 #func _ready() -> void:

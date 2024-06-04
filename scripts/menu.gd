@@ -23,14 +23,16 @@ func get_agents(): #TODO: replace with loading from a file later
 			{
 				name="basic agent",
 				mission_count=0,
-				hp=10,
+				health=10,
 				view_dist=2.5,
-				view_arc=1.0,
+				view_across=1.0,
 				eye_strength=0.8,
+				hearing_dist=1.5,
+				ear_strength=1,
 				movement_dist=7.0,
 				movement_speed=2.75,
-				items=["cigar", "box"],
-				weapons=["pistol", "grenade_smoke"],
+				held_items=["cigar", "box"],
+				held_weapons=["pistol", "grenade_smoke"],
 			},
 		]
 	}
