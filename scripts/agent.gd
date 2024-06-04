@@ -207,9 +207,6 @@ func perform_action():
 				_anim_state.travel("B_Prone")
 				state = States.PRONE
 
-#func _enter_tree() -> void:
-	#set_multiplayer_authority(name.split("_")[0].to_int())
-
 
 func update_eye_cone(dist_mult : float):
 	_eye_cone.points[1] = Vector3(
@@ -399,10 +396,9 @@ func _game_step(delta: float) -> void:
 				velocity /= 2.5
 		if _nav_agent.distance_to_target() < velocity.length(): # to always land on target
 			velocity = velocity.normalized() * _nav_agent.distance_to_target()
-		#$DebugLabel3D.text = str(velocity) + "\n" + str(_nav_agent.target_position) + "\n" + str(global_position.distance_to(_nav_agent.get_next_path_position()))
 		move_and_slide()
-		if _nav_agent.get_final_position().distance_to(global_position) < movement_speed/10:
-			print(name, ": ", _nav_agent.get_final_position().distance_to(global_position), " ", movement_speed)
+		if position.distance_to(queued_action[1]) < 0.2:
+			position = _nav_agent.target_position
 			match state:
 				States.WALK, States.RUN:
 					_anim_state.travel("Stand")
@@ -429,9 +425,6 @@ func _game_step(delta: float) -> void:
 			elif abs(target_direction - target_head_rot_off_y) < 0.01:
 				target_head_rot_off_y = target_direction
 				action_completed.emit(self)
-	#if is_multiplayer_authority():
-		#var move_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-		#position = position + Vector3(move_dir.x, 0, move_dir.y)
 
 
 func flash_outline(color : Color):
@@ -459,7 +452,7 @@ func _on_ears_area_entered(area: Area3D) -> void:
 
 
 func _on_animation_finished(anim_name: StringName) -> void:
-	print(name, ": ", anim_name)
+	#print(name, ": ", anim_name)
 	if anim_name.begins_with("B_Hurt"):
 		action_interrupted.emit(self)
 	if len(queued_action) == 0:
@@ -480,16 +473,8 @@ func _on_animation_finished(anim_name: StringName) -> void:
 
 
 func _on_animation_started(anim_name: StringName) -> void:
-	print(name, ": ", anim_name)
+	#print(name, ": ", anim_name)
 	if anim_name == "B_Dead":
 		agent_died.emit(self)
 	if len(queued_action) == 0:
 		return
-	#if queued_action[0] in [GameActions.GO_STAND, GameActions.RUN_TO_POS, GameActions.WALK_TO_POS, GameActions.HALT, GameActions.USE_WEAPON] and anim_name in ["B_Stand_Unarmed", "B_Stand_SmallArms", "B_Stand_BigArms", "B_Stand_Grenade"]:
-		#action_completed.emit(self)
-	#if queued_action[0] in [GameActions.GO_CROUCH, GameActions.CROUCH_WALK_TO_POS, GameActions.HALT, GameActions.USE_WEAPON] and anim_name in ["B_Crouch_Unarmed", "B_Crouch_SmallArms", "B_Crouch_BigArms", "B_Crouch_Grenade"]:
-		#action_completed.emit(self)
-	#if queued_action[0] in [GameActions.GO_PRONE, GameActions.CRAWL_TO_POS, GameActions.HALT] and anim_name in ["B_Prone"]:
-		#action_completed.emit(self)
-	#if anim_name.begins_with("B_Hurt_"):
-		#action_interrupted.emit(self)
