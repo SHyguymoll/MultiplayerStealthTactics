@@ -193,7 +193,7 @@ func ping():
 func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 	#print("{0}: attempting to spawn agent".format([player_id]))
 	#print(agent_stats)
-	var new_agent = agent_scene.instantiate()
+	var new_agent : Agent = agent_scene.instantiate()
 	new_agent.name = str(player_id) + "_" + str(agent_stats.name)
 	new_agent.action_completed.connect(_agent_completed_action)
 	new_agent.action_interrupted.connect(_agent_interrupted)
@@ -208,6 +208,16 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 	new_agent.position = Vector3(pos_x, pos_y, pos_z)
 	new_agent.rotation.y = rot_y
 	new_agent.set_multiplayer_authority(player_id)
+	new_agent.health = agent_stats.health
+	new_agent.view_dist = agent_stats.view_dist
+	new_agent.view_across = agent_stats.view_across
+	new_agent.eye_strength = agent_stats.eye_strength
+	new_agent.hearing_dist = agent_stats.hearing_dist
+	new_agent.ear_strength = agent_stats.ear_strength
+	new_agent.held_items = agent_stats.held_items
+	new_agent.held_weapons.append(GameWeapon.new("fist", new_agent.name + "_fist"))
+	for weapon in agent_stats.held_weapons:
+		new_agent.held_weapons.append(GameWeapon.new(weapon, new_agent.name + "_" + weapon))
 	$Agents.add_child(new_agent)
 
 	if player_id == 1:

@@ -29,8 +29,8 @@ func get_agents(): #TODO: replace with loading from a file later
 				eye_strength=0.8,
 				movement_dist=7.0,
 				movement_speed=2.75,
-				items=[],
-				weapons=[],
+				items=["cigar", "box"],
+				weapons=["pistol", "grenade_smoke"],
 			},
 		]
 	}
