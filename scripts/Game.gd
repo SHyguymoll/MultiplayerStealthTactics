@@ -5,6 +5,7 @@ var agent_scene = preload("res://scenes/agent.tscn")
 var agent_selector_scene = preload("res://scenes/agent_selector.tscn")
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
+var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
 
 var server_agents : Dictionary
 var client_agents : Dictionary
@@ -466,7 +467,28 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
 	selection_step = SelectionSteps.AIMING
+	var new_indicator = aiming_icon_scene.instantiate()
+	new_indicator.referenced_agent = ref_ag
+	$MovementOrders.add_child(new_indicator)
+	await new_indicator.indicator_placed
 	selection_step = SelectionSteps.BASE
+	decision_array.append(new_indicator.position)
+	var final_text_string := ""
+	match decision_array[0]:
+		Agent.GameActions.LOOK_AROUND:
+			final_text_string = "{0}: Look at Position".format([ref_ag.name])
+		Agent.GameActions.USE_WEAPON:
+			final_text_string = "{0}: Use {1} at Position".format(
+				[ref_ag.name,
+				GameRefs.WEP[ref_ag.held_weapons[ref_ag.selected_weapon].wep_name].name])
+
+	if multiplayer.multiplayer_peer.get_unique_id() == 1:
+		server_agents[ref_ag.name]["text"] = final_text_string
+		server_agents[ref_ag.name]["action_array"] = decision_array
+	else:
+		client_agents[ref_ag.name]["text"] = final_text_string
+		client_agents[ref_ag.name]["action_array"] = decision_array
+	update_text()
 
 
 @rpc("authority", "call_local", "reliable")

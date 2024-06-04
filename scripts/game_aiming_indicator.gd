@@ -1,3 +1,4 @@
+class_name AimingIndicator
 extends AnimatedSprite3D
 
 signal indicator_placed(indicator)
@@ -53,11 +54,10 @@ func _physics_process(delta: float) -> void: #TODO
 		flat_position.y = _game_camera.position.z
 		ray_position = Vector3(flat_position.x, _game_camera.ground_height + 0.5, flat_position.y)
 		#distance clamp
-		var ref_ag_move_dist = referenced_agent.movement_dist
 		var ray_to_ag = ray_position - referenced_agent.global_position
-		if ray_to_ag.length() > ref_ag_move_dist:
+		if ray_to_ag.length() > 1:
 			var col_norm = ray_to_ag / ray_to_ag.length()
-			ray_position = referenced_agent.global_position + (col_norm * ref_ag_move_dist)
+			ray_position = referenced_agent.global_position + col_norm
 		global_position = ray_position
 		position_valid = _check_position()
 	modulate = Color.WHITE if position_valid else Color.RED
