@@ -6,10 +6,12 @@ var loaded_ammo : int = 0
 var reload_time : int
 var cooldown_time : int
 var wep_name : String # Refer to GameRefs.WEP for valid string names
+var wep_id : String # set when loading game for unique weapons
 
 
-func _init(weapon_name : String) -> void:
+func _init(weapon_name : String, weapon_id : String) -> void:
 	wep_name = weapon_name
+	wep_id = weapon_id
 	loaded_ammo = GameRefs.WEP[wep_name].ammo
 	reserve_ammo = loaded_ammo * 3
 

@@ -27,7 +27,7 @@ var camo_level : int #bounded from 0 to 100, based on current state
 var weapon_accuracy : float #bounded from 0.00 to 1.00, based on movement and weapon usage
 
 var held_items : Array[String] = [] #max length should be 3
-var held_weapons : Array[GameWeapon] = [GameWeapon.new("fist")] #max length should be 3 (including fist)
+var held_weapons : Array[GameWeapon] = [] #max length should be 3 (including fist)
 
 var selected_item : int = -1 #index for item (-1 for no item)
 var selected_weapon : int = 0 #index for weapon (0 for fist)
@@ -169,7 +169,7 @@ func perform_action():
 			pass
 		GameActions.USE_WEAPON:
 			if in_standing_state():
-				match held_weapons[selected_weapon].type:
+				match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 					GameRefs.WeaponTypes.CQC:
 						pass
 					GameRefs.WeaponTypes.SMALL:
@@ -386,7 +386,7 @@ func _game_step(delta: float) -> void:
 		return
 	if in_moving_state():
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
-		look_at(_nav_agent.get_next_path_position())
+		look_at(queued_action[1])
 		rotation *= Vector3.DOWN
 		velocity *= movement_speed
 		match state:
