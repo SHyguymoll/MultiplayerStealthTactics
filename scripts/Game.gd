@@ -369,6 +369,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	for indicator in $AimingOrders.get_children():
 		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
+	ref_ag.queued_action = decision_array
 	var final_text_string := ""
 	match decision_array[0]:
 		Agent.GameActions.GO_STAND:
@@ -388,7 +389,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.CHANGE_WEAPON:
 			final_text_string = "{0}: Switch to {1}".format([
 				ref_ag.name,
-				GameRefs.WEP[decision_array[1]].name])
+				GameRefs.WEP[ref_ag.held_weapons[decision_array[1]].wep_name].name])
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
 				ref_ag.name,
@@ -398,7 +399,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
 				ref_ag.name,
-				GameRefs.WEP[decision_array[1]].name])
+				GameRefs.WEP[ref_ag.held_weapons[decision_array[1]].wep_name].name])
 		Agent.GameActions.RELOAD_WEAPON:
 			final_text_string = "{0}: Reload {1}".format([
 				ref_ag.name,
@@ -416,7 +417,6 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Crawling"
 		null:
 			ref_ag.queued_action = []
-
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
 		server_agents[ref_ag.name]["action_array"] = decision_array
@@ -476,6 +476,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	for indicator in $AimingOrders.get_children():
 		if indicator.referenced_agent == ref_ag:
 			indicator.queue_free()
+	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.AIMING
 	var new_indicator = aiming_icon_scene.instantiate()
 	new_indicator.referenced_agent = ref_ag

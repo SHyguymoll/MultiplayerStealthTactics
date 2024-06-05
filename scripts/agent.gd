@@ -164,7 +164,11 @@ func perform_action():
 			else:
 				selected_item = held_items.find(queued_action[1])
 		GameActions.CHANGE_WEAPON:
-			pass
+			selected_weapon = queued_action[1]
+			for weapon_mesh in _held_weapon_meshes:
+				_held_weapon_meshes[weapon_mesh].visible = false
+			if held_weapons[selected_weapon].wep_name != "fist":
+				_held_weapon_meshes[held_weapons[selected_weapon].wep_name].visible = true
 		GameActions.PICK_UP_WEAPON:
 			pass
 		GameActions.USE_WEAPON:
@@ -418,6 +422,13 @@ func _game_step(delta: float) -> void:
 			elif abs(target_direction - target_head_rot_off_y) < 0.01:
 				target_head_rot_off_y = target_direction
 				action_completed.emit(self)
+		GameActions.CHANGE_WEAPON:
+			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) == 0:
+				pass
+			elif weapons_animation_blend.distance_squared_to(decide_weapon_blend()) < 0.01:
+				weapons_animation_blend = decide_weapon_blend()
+				action_completed.emit(self)
+				queued_action.clear()
 		GameActions.USE_WEAPON: #TODO
 			target_head_rot_off_y = lerpf(target_head_rot_off_y, target_direction, 0.2)
 			if target_head_rot_off_y == target_direction:

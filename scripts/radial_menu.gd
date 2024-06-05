@@ -149,13 +149,19 @@ func determine_weapons():
 	_dl.icon = ICONS.none
 	_dr.icon = ICONS.none
 	var candidates : Array[GameWeapon] = referenced_agent.held_weapons.duplicate()
-	if referenced_agent.selected_weapon > 0:
-		candidates[referenced_agent.selected_weapon] = candidates[0]
-	_u.icon = GameRefs.WEP[candidates[0].wep_name].icon
+	if current_screen == "swap_weapon":
+		_u.icon = GameRefs.WEP[candidates[0].wep_name].icon
 	if len(candidates) > 1:
 		_dl.icon = GameRefs.WEP[candidates[1].wep_name].icon
 	if len(candidates) > 2:
 		_dr.icon = GameRefs.WEP[candidates[2].wep_name].icon
+	match referenced_agent.selected_weapon:
+		0:
+			_u.icon = ICONS.none
+		1:
+			_dl.icon = ICONS.none
+		2:
+			_dr.icon = ICONS.none
 
 
 # the action is available unless it was already selected,
@@ -239,9 +245,9 @@ func button_menu_screen():
 			_d.icon = ICONS.none
 			_dr.icon = ICONS.none
 		"menu_weapon":
-			_ul.icon = ICONS.drop_weapon
-			_u.icon = ICONS.swap_weapon
-			_ur.icon = ICONS.pick_up_weapon
+			_ul.icon = a_o_na(ICONS.drop_weapon, Agent.GameActions.DROP_WEAPON)
+			_u.icon = a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON)
+			_ur.icon = a_o_na(ICONS.pick_up_weapon, Agent.GameActions.PICK_UP_WEAPON)
 			_l.icon = ICONS.none
 			_m.icon = ICONS.cancel_back
 			_r.icon = ICONS.none
