@@ -335,6 +335,9 @@ func _button_pressed_metadata(button : Button):
 		ICONS.use_weapon:
 			aiming_decision_made.emit([Agent.GameActions.USE_WEAPON])
 			button_collapse_animation()
+		ICONS.look:
+			aiming_decision_made.emit([Agent.GameActions.LOOK_AROUND])
+			button_collapse_animation()
 	for possible in GameRefs.ITM:
 		if button_texture == GameRefs.ITM[possible].icon:
 			decision_made.emit([Agent.GameActions.CHANGE_ITEM, possible])

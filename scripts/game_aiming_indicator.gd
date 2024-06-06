@@ -55,9 +55,9 @@ func _physics_process(delta: float) -> void: #TODO
 		ray_position = Vector3(flat_position.x, _game_camera.ground_height + 0.5, flat_position.y)
 		#distance clamp
 		var ray_to_ag = ray_position - referenced_agent.global_position
-		if ray_to_ag.length() > 1:
-			var col_norm = ray_to_ag / ray_to_ag.length()
-			ray_position = referenced_agent.global_position + col_norm
+		ray_to_ag = Vector2(ray_to_ag.x, ray_to_ag.z).normalized()
+		ray_to_ag = Vector3(ray_to_ag.x, 0, ray_to_ag.y)
+		ray_position = referenced_agent.global_position + ray_to_ag
 		global_position = ray_position
 		position_valid = _check_position()
 	modulate = Color.WHITE if position_valid else Color.RED
