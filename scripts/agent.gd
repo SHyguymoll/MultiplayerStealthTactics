@@ -84,13 +84,12 @@ enum States {
 }
 @export var state : States = States.STAND
 
-var target_direction : float
+var target_direction : Vector3
 var stun_time : int = 0
 var health : int = 10
 var target_camo_level : int
 var target_accuracy : float
 var weapons_animation_blend := Vector2.ONE
-var target_head_rot_off_y : float = 0.0 #rot of head in relation to body rot
 var target_world_collide_height : float
 var target_world_collide_y : float
 
@@ -143,21 +142,29 @@ func perform_action():
 		GameActions.RUN_TO_POS:
 			_anim_state.travel("B_Run")
 			_nav_agent.target_position = queued_action[1]
+			look_at(queued_action[1])
 			state = States.RUN
 		GameActions.WALK_TO_POS:
 			_anim_state.travel("B_Walk")
 			_nav_agent.target_position = queued_action[1]
+			look_at(queued_action[1])
 			state = States.WALK
 		GameActions.CROUCH_WALK_TO_POS:
 			_anim_state.travel("B_Crouch_Walk")
 			_nav_agent.target_position = queued_action[1]
+			look_at(queued_action[1])
 			state = States.CROUCH_WALK
 		GameActions.CRAWL_TO_POS:
 			_anim_state.travel("B_Crawl")
 			_nav_agent.target_position = queued_action[1]
+			look_at(queued_action[1])
 			state = States.CRAWL
-		GameActions.LOOK_AROUND:
-			target_direction = queued_action[1]
+		GameActions.LOOK_AROUND: #TODO
+			var current_direction = rotation + rotation.normalized()
+			var wanted_direction = global_position.direction_to(queued_action[1])
+			print(current_direction, " ", wanted_direction)
+			#target_direction = queued_action[1]
+			print(target_direction)
 		GameActions.CHANGE_ITEM:
 			if queued_action[1] == "none":
 				selected_item = -1
@@ -274,7 +281,7 @@ func debug_process():
 
 	eye_strength = $DebugValues/DuringGame/EyeScroll.value
 	ear_strength = $DebugValues/DuringGame/EarScroll.value
-	target_head_rot_off_y = $DebugValues/DuringGame/HeadScroll.value
+	#target_head_rot_off_y = $DebugValues/DuringGame/HeadScroll.value
 	$DebugCamera.position = lerp(
 			Vector3(1.56, 0.553, 0.802),
 			Vector3(0.969, 3.016, 0.634),
@@ -305,8 +312,8 @@ func _ready() -> void:
 	for weapon_mesh in _held_weapon_meshes:
 		_held_weapon_meshes[weapon_mesh].visible = false
 	# other other stuff
-	_nav_agent.target_desired_distance = movement_speed*1.01
-	print(name, ": ", movement_speed, " ", _nav_agent.target_desired_distance)
+	#_nav_agent.target_desired_distance = movement_speed*1.01
+	#print(name, ": ", movement_speed, " ", _nav_agent.target_desired_distance)
 	# debug
 	# debug_setup()
 
@@ -352,7 +359,7 @@ func _game_step(delta: float) -> void:
 		_active_item_icon.texture = GameRefs.ITM[held_items[selected_item]].icon
 		_active_item_icon.visible = true
 	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
-	_eyes.rotation.y = target_head_rot_off_y
+	#_eyes.rotation.y = target_head_rot_off_y
 	update_eye_cone(eye_strength)
 	update_ear_radius(ear_strength)
 	if in_standing_state() or in_crouching_state():
@@ -390,7 +397,7 @@ func _game_step(delta: float) -> void:
 		return
 	if in_moving_state():
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
-		look_at(queued_action[1])
+		#look_at(queued_action[1])
 		rotation *= Vector3.DOWN
 		velocity *= movement_speed
 		match state:
@@ -416,26 +423,29 @@ func _game_step(delta: float) -> void:
 			action_completed.emit(self)
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
-			target_head_rot_off_y = lerpf(target_head_rot_off_y, target_direction, 0.2)
-			if target_head_rot_off_y == target_direction:
-				pass
-			elif abs(target_direction - target_head_rot_off_y) < 0.01:
-				target_head_rot_off_y = target_direction
+			rotation.slerp(target_direction, 0.2)
+			#rotation.y = lerpf(rotation.y, 3, 0.2) #TODO
+			if rotation == target_direction:
+				action_completed.emit(self)
+				queued_action.clear()
+			elif rotation.distance_squared_to(target_direction) < 0.01:
+				rotation = target_direction
 				action_completed.emit(self)
 		GameActions.CHANGE_WEAPON:
 			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) == 0:
-				pass
+				action_completed.emit(self)
+				queued_action.clear()
 			elif weapons_animation_blend.distance_squared_to(decide_weapon_blend()) < 0.01:
 				weapons_animation_blend = decide_weapon_blend()
 				action_completed.emit(self)
 				queued_action.clear()
-		GameActions.USE_WEAPON: #TODO
-			target_head_rot_off_y = lerpf(target_head_rot_off_y, target_direction, 0.2)
-			if target_head_rot_off_y == target_direction:
-				pass
-			elif abs(target_direction - target_head_rot_off_y) < 0.01:
-				target_head_rot_off_y = target_direction
-				action_completed.emit(self)
+		#GameActions.USE_WEAPON: #TODO
+			#target_head_rot_off_y = lerpf(target_head_rot_off_y, target_direction, 0.2)
+			#if target_head_rot_off_y == target_direction:
+				#pass
+			#elif abs(target_direction - target_head_rot_off_y) < 0.01:
+				#target_head_rot_off_y = target_direction
+				#action_completed.emit(self)
 
 
 func flash_outline(color : Color):
