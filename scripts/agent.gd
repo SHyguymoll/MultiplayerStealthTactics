@@ -84,7 +84,7 @@ enum States {
 }
 @export var state : States = States.STAND
 
-var target_direction : Vector3
+var target_direction : float
 var stun_time : int = 0
 var health : int = 10
 var target_camo_level : int
@@ -160,11 +160,15 @@ func perform_action():
 			look_at(queued_action[1])
 			state = States.CRAWL
 		GameActions.LOOK_AROUND: #TODO
-			var current_direction = rotation + rotation.normalized()
-			var wanted_direction = global_position.direction_to(queued_action[1])
-			print(current_direction, " ", wanted_direction)
+			var initial_dir = global_position.direction_to(queued_action[1])
+			var two_d_target = Vector2(initial_dir.x, initial_dir.z).normalized()
+			var two_d_difference = two_d_target.angle_to(Vector2.DOWN)
+			print(two_d_target, " ", " ", two_d_difference)
+			#if two_d_target.dot(Vector2.DOWN) < 0:
+				#print("negative dot product")
+			target_direction = two_d_difference
+			#print(current_direction, " ", wanted_direction)
 			#target_direction = queued_action[1]
-			print(target_direction)
 		GameActions.CHANGE_ITEM:
 			if queued_action[1] == "none":
 				selected_item = -1
@@ -423,13 +427,13 @@ func _game_step(delta: float) -> void:
 			action_completed.emit(self)
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
-			rotation.slerp(target_direction, 0.2)
+			rotation.y = lerp_angle(rotation.y, target_direction, 0.2)
 			#rotation.y = lerpf(rotation.y, 3, 0.2) #TODO
-			if rotation == target_direction:
+			if rotation.y == target_direction:
 				action_completed.emit(self)
 				queued_action.clear()
-			elif rotation.distance_squared_to(target_direction) < 0.01:
-				rotation = target_direction
+			elif abs(rotation.y - target_direction) < 0.1:
+				rotation.y = target_direction
 				action_completed.emit(self)
 		GameActions.CHANGE_WEAPON:
 			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) == 0:
