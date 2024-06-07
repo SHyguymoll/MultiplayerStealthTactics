@@ -96,7 +96,7 @@ func _physics_process(delta: float) -> void:
 			for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
 				selector.position = (
 			$World/Camera3D as Camera3D).unproject_position(
-					selector.referenced_agent.position)#.clamp(Vector2(get_viewport().size) - get_viewport().size * 0.85, get_viewport().size * 0.85)
+					selector.referenced_agent.position) - selector.size/2
 			if server_ready_bool and client_ready_bool:
 				_update_game_phase(GamePhases.EXECUTION)
 				if multiplayer.is_server():
@@ -558,6 +558,7 @@ func recieve_client_insts(recieved_dict : Dictionary):
 func _on_execute_pressed() -> void:
 	_execute_button.disabled = true
 	_execute_button.text = "WAITING FOR OPPONENT"
+	_radial_menu.button_collapse_animation()
 	hide_hud()
 	if multiplayer.is_server():
 		recieve_server_insts.rpc_id(GameSettings.server_client_id, server_agents)
