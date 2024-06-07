@@ -125,6 +125,12 @@ func can_stand():
 	return not _stand_ray.is_colliding()
 
 
+func get_required_y_rotation(aimed_position) -> float:
+	var initial_dir = global_position.direction_to(aimed_position)
+	var two_d_target = Vector2(initial_dir.x, initial_dir.z).normalized()
+	return two_d_target.angle_to(Vector2.DOWN)
+
+
 func perform_action():
 	if len(queued_action) == 0:
 		action_completed.emit(self)
@@ -142,31 +148,25 @@ func perform_action():
 		GameActions.RUN_TO_POS:
 			_anim_state.travel("B_Run")
 			_nav_agent.target_position = queued_action[1]
-			look_at(queued_action[1])
+			rotation.y = get_required_y_rotation(queued_action[1])
 			state = States.RUN
 		GameActions.WALK_TO_POS:
 			_anim_state.travel("B_Walk")
 			_nav_agent.target_position = queued_action[1]
-			look_at(queued_action[1])
+			rotation.y = get_required_y_rotation(queued_action[1])
 			state = States.WALK
 		GameActions.CROUCH_WALK_TO_POS:
 			_anim_state.travel("B_Crouch_Walk")
 			_nav_agent.target_position = queued_action[1]
-			look_at(queued_action[1])
+			rotation.y = get_required_y_rotation(queued_action[1])
 			state = States.CROUCH_WALK
 		GameActions.CRAWL_TO_POS:
 			_anim_state.travel("B_Crawl")
 			_nav_agent.target_position = queued_action[1]
-			look_at(queued_action[1])
+			rotation.y = get_required_y_rotation(queued_action[1])
 			state = States.CRAWL
-		GameActions.LOOK_AROUND: #TODO
-			var initial_dir = global_position.direction_to(queued_action[1])
-			var two_d_target = Vector2(initial_dir.x, initial_dir.z).normalized()
-			var two_d_difference = two_d_target.angle_to(Vector2.DOWN)
-			print(two_d_target, " ", " ", two_d_difference)
-			#if two_d_target.dot(Vector2.DOWN) < 0:
-				#print("negative dot product")
-			target_direction = two_d_difference
+		GameActions.LOOK_AROUND:
+			target_direction = get_required_y_rotation(queued_action[1])
 			#print(current_direction, " ", wanted_direction)
 			#target_direction = queued_action[1]
 		GameActions.CHANGE_ITEM:
@@ -402,7 +402,6 @@ func _game_step(delta: float) -> void:
 	if in_moving_state():
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
 		#look_at(queued_action[1])
-		rotation *= Vector3.DOWN
 		velocity *= movement_speed
 		match state:
 			States.WALK, States.CROUCH_WALK:
@@ -425,6 +424,8 @@ func _game_step(delta: float) -> void:
 					_anim_state.travel("B_Prone")
 					state = States.PRONE
 			action_completed.emit(self)
+			queued_action.clear()
+			return
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
 			rotation.y = lerp_angle(rotation.y, target_direction, 0.2)
