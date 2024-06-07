@@ -109,8 +109,6 @@ func _physics_process(delta: float) -> void:
 		GamePhases.EXECUTION:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
-			for indicator in ($MovementOrders.get_children() + $AimingOrders.get_children()):
-				indicator._game_step(delta)
 			current_game_step += 1
 			for age in server_agents:
 				if server_agents[age]["action_done"] == false:
@@ -364,11 +362,11 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	# need to remove movement indicator if created
 	for indicator in $MovementOrders.get_children():
 		if indicator.referenced_agent == ref_ag:
-			indicator.queue_free()
+			indicator._neutral()
 	# ditto with aiming indicator
 	for indicator in $AimingOrders.get_children():
 		if indicator.referenced_agent == ref_ag:
-			indicator.queue_free()
+			indicator._neutral()
 	ref_ag.queued_action = decision_array
 	var final_text_string := ""
 	match decision_array[0]:
@@ -432,11 +430,11 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	# need to remove previous movement indicator if created
 	for indicator in $MovementOrders.get_children():
 		if indicator.referenced_agent == ref_ag:
-			indicator.queue_free()
+			indicator._neutral()
 	# ditto with aiming indicator
 	for indicator in $AimingOrders.get_children():
 		if indicator.referenced_agent == ref_ag:
-			indicator.queue_free()
+			indicator._neutral()
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.MOVEMENT
 	var new_indicator = movement_icon_scene.instantiate()
@@ -471,11 +469,11 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	# need to remove movement indicator if created
 	for indicator in $MovementOrders.get_children():
 		if indicator.referenced_agent == ref_ag:
-			indicator.queue_free()
+			indicator._neutral()
 	# ditto with aiming indicator
 	for indicator in $AimingOrders.get_children():
 		if indicator.referenced_agent == ref_ag:
-			indicator.queue_free()
+			indicator._neutral()
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.AIMING
 	var new_indicator = aiming_icon_scene.instantiate()

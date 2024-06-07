@@ -56,6 +56,26 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": ExtResource("1_5l8v0")
+}, {
+"duration": 1.0,
+"texture": null
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_5l8v0")
+}, {
+"duration": 1.0,
+"texture": null
+}, {
+"duration": 1.0,
+"texture": ExtResource("1_5l8v0")
+}],
+"loop": true,
+"name": &"neutral",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": ExtResource("6_o8ddq")
 }, {
 "duration": 1.0,
@@ -80,7 +100,7 @@ billboard = 1
 double_sided = false
 no_depth_test = true
 sprite_frames = SubResource("SpriteFrames_akm5w")
-animation = &"aim"
+animation = &"neutral"
 script = ExtResource("7_l8n8m")
 
 [node name="RayCast3D" type="RayCast3D" parent="."]

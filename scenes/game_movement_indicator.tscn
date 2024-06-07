@@ -150,7 +150,7 @@ billboard = 1
 double_sided = false
 no_depth_test = true
 sprite_frames = SubResource("SpriteFrames_vjpas")
-animation = &"movement_end_fail"
+animation = &"movement_end_neutral"
 script = ExtResource("1_rfasu")
 
 [node name="LeftCast" type="RayCast3D" parent="."]

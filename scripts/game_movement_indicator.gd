@@ -24,15 +24,20 @@ func _ready() -> void:
 			play("crouch_walk")
 		Agent.GameActions.CRAWL_TO_POS:
 			play("crawl")
+	referenced_agent.action_completed.connect(_succeed)
+	referenced_agent.action_interrupted.connect(_fail)
 
 
-func _game_step(delta):
-	if referenced_agent.state in [Agent.States.STAND, Agent.States.CROUCH, Agent.States.PRONE] and referenced_agent.position.distance_to(position) <= CLOSENESS:
-		play("movement_end_success")
-		return
-	if referenced_agent.in_incapacitated_state():
-		play("movement_end_fail")
-		return
+func _succeed(_agent):
+	play("movement_end_success")
+
+
+func _fail(_agent):
+	play("movement_end_fail")
+
+
+func _neutral():
+	play("movement_end_neutral")
 
 
 func _on_animation_changed() -> void:

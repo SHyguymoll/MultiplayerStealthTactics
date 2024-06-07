@@ -15,16 +15,20 @@ var position_valid : bool
 
 func _ready() -> void:
 	play("aim")
+	referenced_agent.action_completed.connect(_succeed)
+	referenced_agent.action_interrupted.connect(_fail)
 
 
-func _game_step(delta):
-	if referenced_agent.state != Agent.States.USING_WEAPON:
-		if referenced_agent.state == Agent.States.RELOADING_WEAPON:
-			return
-		if referenced_agent.state != Agent.States.HURT and referenced_agent.in_incapacitated_state():
-			play("success")
-		else:
-			play("fail")
+func _succeed(_agent):
+	play("success")
+
+
+func _neutral():
+	play("neutral")
+
+
+func _fail(_agent):
+	play("fail")
 
 
 func _on_animation_changed() -> void:
@@ -56,6 +60,7 @@ func _physics_process(delta: float) -> void: #TODO
 		#distance clamp
 		var ray_to_ag = referenced_agent.global_position.direction_to(ray_position)
 		ray_to_ag.y = 0
+		ray_to_ag = ray_to_ag.normalized()
 		ray_position = referenced_agent.global_position + ray_to_ag
 		global_position = ray_position
 		position_valid = _check_position() and ray_to_ag.length() > .9
