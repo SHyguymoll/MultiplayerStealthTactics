@@ -70,9 +70,9 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("1_5l8v0")
 }],
-"loop": true,
+"loop": false,
 "name": &"neutral",
-"speed": 5.0
+"speed": 15.0
 }, {
 "frames": [{
 "duration": 1.0,

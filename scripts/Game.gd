@@ -96,7 +96,7 @@ func _physics_process(delta: float) -> void:
 			for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
 				selector.position = (
 			$World/Camera3D as Camera3D).unproject_position(
-					selector.referenced_agent.position) - selector.size/2
+					selector.referenced_agent.position)# - selector.get_size()/2
 			if server_ready_bool and client_ready_bool:
 				_update_game_phase(GamePhases.EXECUTION)
 				if multiplayer.is_server():
