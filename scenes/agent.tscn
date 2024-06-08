@@ -20,7 +20,7 @@ height = 0.332327
 radius = 0.20322
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ceyum"]
-size = Vector3(0.5, 0.25, 0.405)
+size = Vector3(0.59, 0.25, 0.405)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_no7tm"]
 properties/0/path = NodePath(".:position")
@@ -18419,7 +18419,7 @@ states/Stand/node = SubResource("AnimationNodeBlendSpace2D_8rdds")
 states/Stand/position = Vector2(524.941, 183)
 states/Start/position = Vector2(334.941, 183)
 transitions = ["Start", "Stand", SubResource("AnimationNodeStateMachineTransition_re2qw"), "B_CrouchToStand", "Stand", SubResource("AnimationNodeStateMachineTransition_uriyk"), "B_StandToCrouch", "Crouch", SubResource("AnimationNodeStateMachineTransition_5xtmj"), "Stand", "B_StandToCrouch", SubResource("AnimationNodeStateMachineTransition_1081g"), "Crouch", "B_CrouchToStand", SubResource("AnimationNodeStateMachineTransition_3pn76"), "Crouch", "B_CrouchToProne", SubResource("AnimationNodeStateMachineTransition_1ig5k"), "B_Prone", "B_ProneToCrouch", SubResource("AnimationNodeStateMachineTransition_7dsht"), "B_CrouchToProne", "B_Prone", SubResource("AnimationNodeStateMachineTransition_aplwg"), "B_ProneToCrouch", "Crouch", SubResource("AnimationNodeStateMachineTransition_rp88q"), "B_Hurt_Standing", "Stand", SubResource("AnimationNodeStateMachineTransition_tdotm"), "B_Hurt_Crouching", "Crouch", SubResource("AnimationNodeStateMachineTransition_023ix"), "B_Hurt_Prone", "B_Prone", SubResource("AnimationNodeStateMachineTransition_170e3"), "B_Hurt_Slammed", "B_Hurt_Stunned", SubResource("AnimationNodeStateMachineTransition_yk4rl"), "B_Hurt_WakeUp", "Crouch", SubResource("AnimationNodeStateMachineTransition_ujfix"), "Stand", "B_Walk", SubResource("AnimationNodeStateMachineTransition_qvgd4"), "Stand", "B_Run", SubResource("AnimationNodeStateMachineTransition_lrg28"), "B_Walk", "Stand", SubResource("AnimationNodeStateMachineTransition_nqr8r"), "B_Run", "Stand", SubResource("AnimationNodeStateMachineTransition_mgswt"), "Crouch", "B_Crouch_Walk", SubResource("AnimationNodeStateMachineTransition_bbtuh"), "B_Crouch_Walk", "Crouch", SubResource("AnimationNodeStateMachineTransition_o87xr"), "B_Prone", "B_Crawl", SubResource("AnimationNodeStateMachineTransition_t4wvm"), "B_Crawl", "B_Prone", SubResource("AnimationNodeStateMachineTransition_8d62v"), "B_Walk", "B_Run", SubResource("AnimationNodeStateMachineTransition_ccrt2"), "B_Run", "B_Walk", SubResource("AnimationNodeStateMachineTransition_3v5w0"), "B_Stand_Attack_Slam", "Stand", SubResource("AnimationNodeStateMachineTransition_xrym2"), "B_Stand_Attack_SmallArms", "Stand", SubResource("AnimationNodeStateMachineTransition_ura3s"), "B_Stand_Attack_BigArms", "Stand", SubResource("AnimationNodeStateMachineTransition_k2iyl"), "B_Stand_Attack_Grenade", "Stand", SubResource("AnimationNodeStateMachineTransition_l3tuf"), "B_Crouch_Attack_SmallArms", "Crouch", SubResource("AnimationNodeStateMachineTransition_lp682"), "B_Crouch_Attack_BigArms", "Crouch", SubResource("AnimationNodeStateMachineTransition_c4ndx"), "B_Crouch_Attack_Grenade", "Crouch", SubResource("AnimationNodeStateMachineTransition_rt335"), "B_Hurt_Stunned", "B_Hurt_WakeUp", SubResource("AnimationNodeStateMachineTransition_cm1ny"), "B_Hurt_Collapse", "B_Hurt_Stunned", SubResource("AnimationNodeStateMachineTransition_dhynq"), "B_Hurt_Explosion", "B_Hurt_Stunned", SubResource("AnimationNodeStateMachineTransition_24pjm"), "B_Stand_Attack_Whiff", "Stand", SubResource("AnimationNodeStateMachineTransition_41j13")]
-graph_offset = Vector2(182.941, 72)
+graph_offset = Vector2(86.941, 88)
 
 [sub_resource type="FogMaterial" id="FogMaterial_aomne"]
 density = -100.0
@@ -18473,9 +18473,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.811409, 0)
 shape = SubResource("CylinderShape3D_vbwd1")
 
 [node name="CQCGrabRange" type="ShapeCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.67, 0.437346)
 shape = SubResource("BoxShape3D_ceyum")
-target_position = Vector3(0, 0.67, 0.485)
+target_position = Vector3(0, 0, 0)
 collision_mask = 256
+collide_with_areas = true
+collide_with_bodies = false
 
 [node name="Agent" parent="." instance=ExtResource("2_bu3bb")]
 
@@ -18491,13 +18494,11 @@ bones/6/rotation = Quaternion(-0.0937119, -8.51281e-21, -8.20358e-22, 0.995599)
 bones/7/rotation = Quaternion(-0.0659627, -0.751441, -0.402991, 0.518251)
 bones/8/rotation = Quaternion(-0.0659627, 0.751441, 0.402991, 0.518251)
 bones/9/rotation = Quaternion(0.998533, 0, 0, 0.0541513)
-bones/9/scale = Vector3(1, 1, 1)
 bones/11/rotation = Quaternion(0.12642, 1.18253e-07, 1.50705e-08, 0.991977)
 bones/13/rotation = Quaternion(-0.56951, -0.000401065, 0.000277741, 0.821985)
 bones/14/rotation = Quaternion(-0.000164726, 0.968398, -0.24941, -0.000305186)
 bones/14/scale = Vector3(1, 1, 1)
 bones/15/rotation = Quaternion(0.998533, 0, 0, 0.0541513)
-bones/15/scale = Vector3(1, 1, 1)
 bones/17/rotation = Quaternion(0.12642, -1.18253e-07, -1.50705e-08, 0.991977)
 bones/19/rotation = Quaternion(-0.56951, -0.000401654, 0.00027842, 0.821985)
 bones/20/rotation = Quaternion(-0.000164934, 0.968398, -0.24941, -0.000306225)
@@ -18525,23 +18526,23 @@ bones/38/rotation = Quaternion(5.33851e-08, 0.707107, 0.707107, 5.33851e-08)
 bones/39/rotation = Quaternion(-5.33851e-08, 0.707107, 0.707107, -5.33851e-08)
 
 [node name="GrenadeFrag" parent="Agent/game_rig/Skeleton3D" index="0"]
-transform = Transform3D(0.913519, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923299, -0.497084, 0.721662, -0.00860327)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860364)
 visible = false
 
 [node name="GrenadeSmoke" parent="Agent/game_rig/Skeleton3D" index="1"]
-transform = Transform3D(0.913519, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923299, -0.497084, 0.721662, -0.00860327)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860364)
 visible = false
 
 [node name="Pistol" parent="Agent/game_rig/Skeleton3D" index="2"]
-transform = Transform3D(0.0725086, -0.0240099, -0.997079, -0.994007, -0.0837581, -0.070268, -0.0818263, 0.996199, -0.0299391, -0.488474, 0.714853, -0.0269331)
+transform = Transform3D(0.0725081, -0.0240108, -0.997079, -0.994006, -0.0837587, -0.0702677, -0.0818268, 0.996197, -0.02994, -0.488474, 0.714853, -0.0269335)
 visible = false
 
 [node name="Rifle" parent="Agent/game_rig/Skeleton3D" index="3"]
-transform = Transform3D(0.177585, 0.00944585, -0.984059, -0.974037, -0.140983, -0.17713, -0.140409, 0.989967, -0.0158358, -0.494218, 0.701634, -0.0300946)
+transform = Transform3D(0.177585, 0.00944398, -0.984059, -0.974038, -0.140984, -0.177129, -0.140409, 0.989967, -0.0158379, -0.494218, 0.701635, -0.030095)
 visible = false
 
 [node name="Shotgun" parent="Agent/game_rig/Skeleton3D" index="4"]
-transform = Transform3D(0.198861, -0.0394144, -0.979234, -0.979479, 0.0254328, -0.199934, 0.0327849, 0.998899, -0.033548, -0.495614, 0.700998, -0.0373763)
+transform = Transform3D(0.198861, -0.0394157, -0.979234, -0.97948, 0.0254319, -0.199934, 0.0327843, 0.998899, -0.0335497, -0.495614, 0.700998, -0.0373767)
 visible = false
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
