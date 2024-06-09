@@ -7,6 +7,8 @@ signal agent_selected(agent : Agent)
 
 signal spotted_agent(spotter : Agent, spottee : Agent)
 signal unspotted_agent(unspotter : Agent, unspottee : Agent)
+signal grabbed_agent(grabber : Agent, grabbee : Agent)
+signal released_agent(releaser : Agent, releasee : Agent)
 signal spotted_element(element : Node3D)
 signal unspotted_element(element : Node3D)
 signal heard_sound(listener : Agent, sound : Node3D)
@@ -464,18 +466,7 @@ func _attack_orient_transition():
 	if _anim_state.get_current_node() == "Stand":
 		match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 			GameRefs.WeaponTypes.CQC:
-				_cqc_collision.force_shapecast_update()
-				if _cqc_collision.is_colliding():
-					for col_ind in range(_cqc_collision.get_collision_count()):
-						var collision = _cqc_collision.get_collider(0)
-						var col_parent = collision.get_parent()
-						if col_parent == self:
-							continue
-						if col_parent is Agent:
-							if col_parent.get_multiplayer_authority() == get_multiplayer_authority():
-								continue # skip same team
-				else:
-					_anim_state.travel("B_Stand_Attack_Whiff")
+				try_cqc()
 			GameRefs.WeaponTypes.SMALL:
 				_anim_state.travel("B_Stand_Attack_SmallArms")
 			GameRefs.WeaponTypes.BIG:
@@ -489,6 +480,7 @@ func _attack_orient_transition():
 			GameRefs.WeaponTypes.CQC:
 				_anim_state.travel("Stand")
 				await _anim.animation_finished
+				try_cqc()
 
 			GameRefs.WeaponTypes.SMALL:
 				_anim_state.travel("B_Crouch_Attack_SmallArms")
@@ -498,6 +490,24 @@ func _attack_orient_transition():
 				_anim_state.travel("B_Crouch_Attack_Grenade")
 			GameRefs.WeaponTypes.PLACED:
 				pass
+
+
+func try_cqc():
+	_cqc_collision.force_shapecast_update()
+	if _cqc_collision.is_colliding():
+		for col_ind in range(_cqc_collision.get_collision_count()):
+			var collision = _cqc_collision.get_collider(0)
+			var col_parent = collision.get_parent()
+			if col_parent == self:
+				continue
+			if col_parent is Agent:
+				if col_parent.get_multiplayer_authority() == get_multiplayer_authority():
+					continue # skip same team
+				grabbed_agent.emit(self, col_parent)
+				return
+		_anim_state.travel("B_Stand_Attack_Whiff")
+	else:
+		_anim_state.travel("B_Stand_Attack_Whiff")
 
 
 func _on_eyes_area_entered(area: Area3D) -> void:

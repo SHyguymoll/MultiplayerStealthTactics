@@ -109,6 +109,7 @@ func _physics_process(delta: float) -> void:
 		GamePhases.EXECUTION:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
+
 			current_game_step += 1
 			for age in server_agents:
 				if server_agents[age]["action_done"] == false:
@@ -198,6 +199,9 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 
 	new_agent.spotted_agent.connect(_agent_sees_agent)
 	new_agent.unspotted_agent.connect(_agent_lost_agent)
+	new_agent.grabbed_agent.connect(_agent_grabs_agent)
+	new_agent.released_agent.connect(_agent_drops_agent)
+
 	new_agent.spotted_element
 	new_agent.unspotted_element
 	new_agent.heard_sound
@@ -271,6 +275,14 @@ func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
 		return
 	if unspotter.get_multiplayer_authority() != unspottee.get_multiplayer_authority():
 		pass
+
+
+func _agent_grabs_agent(grabber : Agent, grabbee : Agent):
+	pass
+
+
+func _agent_drops_agent(grabber : Agent, grabbee : Agent):
+	pass
 
 
 func _agent_heard_something(listener : Agent, sound : Node3D):
