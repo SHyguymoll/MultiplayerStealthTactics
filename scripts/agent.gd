@@ -83,19 +83,21 @@ enum States {
 	STAND, CROUCH, PRONE,
 	RUN, WALK, CROUCH_WALK, CRAWL,
 	USING_ITEM, USING_WEAPON, RELOADING_WEAPON,
-	HURT, STUNNED, DEAD,
+	HURT, GRABBED, STUNNED, DEAD,
 }
 @export var state : States = States.STAND
 
 var target_direction : float
 var stun_time : int = 0
 var health : int = 10
+var stun_health : int = 10
 var target_camo_level : int
 var target_accuracy : float
 var weapons_animation_blend := Vector2.ONE
 var target_world_collide_height : float
 var target_world_collide_y : float
 var game_steps_since_execute : int
+var grabbing_agent : Agent
 
 enum AttackStep {
 	ORIENTING,
@@ -104,7 +106,7 @@ enum AttackStep {
 var attack_step := AttackStep.ORIENTING
 
 func in_incapacitated_state() -> bool:
-	return state in [States.STUNNED, States.DEAD]
+	return state in [States.GRABBED, States.STUNNED, States.DEAD]
 
 
 func in_standing_state() -> bool:
@@ -343,6 +345,13 @@ func decide_weapon_blend() -> Vector2:
 			return Vector2(1, -1)
 
 
+func take_damage(amount : int, is_stun : bool = false):
+	if is_stun:
+		stun_health = max(0, stun_health - amount)
+	else:
+		health = max(0, health - amount)
+
+
 func flash_outline(color : Color):
 	_outline_mat.albedo_color = color
 
@@ -394,8 +403,6 @@ func _game_step(delta: float) -> void:
 	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_anim.advance(delta)
 	# update agent specifically
-	if len(queued_action) == 0:
-		return
 	if in_moving_state():
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
 		#look_at(queued_action[1])
@@ -423,6 +430,13 @@ func _game_step(delta: float) -> void:
 			action_completed.emit(self)
 			queued_action.clear()
 			return
+	if state == States.STUNNED:
+		stun_time = max(0, stun_time - 1)
+		if stun_time == 0:
+			_anim_state.travel("Crouch")
+			state = States.CROUCH
+	if len(queued_action) == 0:
+		return
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
 			rotation.y = lerp_angle(rotation.y, target_direction, 0.2)
@@ -532,7 +546,7 @@ func _on_ears_area_entered(area: Area3D) -> void:
 
 func _on_animation_finished(anim_name: StringName) -> void:
 	#print(name, ": ", anim_name)
-	if anim_name.begins_with("B_Hurt"):
+	if anim_name.begins_with("B_Hurt") and not anim_name == "B_Hurt_Stunned":
 		action_interrupted.emit(self)
 	if len(queued_action) == 0:
 		return
@@ -549,6 +563,7 @@ func _on_animation_finished(anim_name: StringName) -> void:
 			action_completed.emit(self)
 		GameActions.USE_WEAPON when anim_name in ["B_Crouch_Attack_SmallArms", "B_Crouch_Attack_BigArms", "B_Crouch_Attack_Grenade"]:
 			action_completed.emit(self)
+
 
 
 func _on_animation_started(anim_name: StringName) -> void:

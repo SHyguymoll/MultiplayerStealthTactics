@@ -29,6 +29,9 @@ enum SelectionSteps {
 	AIMING,
 }
 var selection_step : SelectionSteps = SelectionSteps.BASE
+
+var cqc_actors = {}
+
 @export var game_map : GameMap
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
@@ -109,7 +112,7 @@ func _physics_process(delta: float) -> void:
 		GamePhases.EXECUTION:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
-
+			determine_cqc_events()
 			current_game_step += 1
 			for age in server_agents:
 				if server_agents[age]["action_done"] == false:
@@ -277,12 +280,28 @@ func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
 		pass
 
 
+func determine_cqc_events(): # assumes that the grabber is on a different team than the grabbee
+	for grabber in (cqc_actors.keys() as Array[Agent]):
+		if grabber.state != Agent.States.USING_WEAPON:
+			continue
+		var grabbee : Agent = cqc_actors[grabber]
+		if grabbee in cqc_actors and grabber.get_multiplayer_authority() == 1: #client wins tiebreakers
+			continue
+		grabber._anim_state.travel("B_Stand_Attack_Slam")
+		grabbee.state = Agent.States.GRABBED
+		grabbee.take_damage(3, true)
+		grabbee.stun_time = 10 if grabbee.stun_health > 0 else 300
+		grabbee._anim_state.travel("B_Hurt_Slammed")
+		pass
+	cqc_actors.clear()
+
+
 func _agent_grabs_agent(grabber : Agent, grabbee : Agent):
-	pass
+	cqc_actors[grabber] = grabbee
 
 
 func _agent_drops_agent(grabber : Agent, grabbee : Agent):
-	pass
+	cqc_actors.erase(grabber)
 
 
 func _agent_heard_something(listener : Agent, sound : Node3D):
