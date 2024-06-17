@@ -30,7 +30,6 @@ enum SelectionSteps {
 }
 var selection_step : SelectionSteps = SelectionSteps.BASE
 
-var cqc_actors = {}
 
 @export var game_map : GameMap
 
@@ -202,8 +201,6 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 
 	new_agent.spotted_agent.connect(_agent_sees_agent)
 	new_agent.unspotted_agent.connect(_agent_lost_agent)
-	new_agent.grabbed_agent.connect(_agent_grabs_agent)
-	new_agent.released_agent.connect(_agent_drops_agent)
 
 	new_agent.spotted_element
 	new_agent.unspotted_element
@@ -281,27 +278,40 @@ func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
 
 
 func determine_cqc_events(): # assumes that the grabber is on a different team than the grabbee
-	for grabber in (cqc_actors.keys() as Array[Agent]):
-		if grabber.state != Agent.States.USING_WEAPON:
+	var cqc_actors = {}
+
+	for grabber_name in server_agents.keys():
+		if server_agents[grabber_name].agent_node.state != Agent.States.USING_WEAPON:
+			continue # check correct state
+		var try : Agent = server_agents[grabber_name].agent_node
+		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
+			continue # check correct weapon
+		if try.grabbed_agent == null:
+			continue # check if we haven't already resolved this in the previous step
+		cqc_actors[try] = try.grabbed_agent
+
+	for grabber_name in client_agents.keys():
+		if client_agents[grabber_name].agent_node.state != Agent.States.USING_WEAPON:
 			continue
-		var grabbee : Agent = cqc_actors[grabber]
+		var try : Agent = client_agents[grabber_name].agent_node
+		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
+			continue
+		if try.grabbed_agent == null:
+			continue
+		cqc_actors[try] = try.grabbed_agent
+	for grabber in (cqc_actors.keys() as Array[Agent]):
+		var grabbee : Agent = grabber.grabbed_agent
+		grabber.grabbed_agent = null
 		if grabbee in cqc_actors and grabber.get_multiplayer_authority() == 1: #client wins tiebreakers
+			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
-		grabbee.state = Agent.States.GRABBED
+		grabbee.grabbing_agent = grabber
 		grabbee.take_damage(3, true)
 		grabbee.stun_time = 10 if grabbee.stun_health > 0 else 300
 		grabbee._anim_state.travel("B_Hurt_Slammed")
+		grabbee.state = Agent.States.GRABBED
 		pass
-	cqc_actors.clear()
-
-
-func _agent_grabs_agent(grabber : Agent, grabbee : Agent):
-	cqc_actors[grabber] = grabbee
-
-
-func _agent_drops_agent(grabber : Agent, grabbee : Agent):
-	cqc_actors.erase(grabber)
 
 
 func _agent_heard_something(listener : Agent, sound : Node3D):
@@ -533,18 +543,30 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func _update_game_phase(new_phase: GamePhases):
+	game_phase = new_phase
 	match new_phase:
 		GamePhases.SELECTION:
 			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
+			var all_agents_incap = true
 			for ag in server_agents:
 				server_agents[ag]["agent_node"].queued_action = []
 				server_agents[ag]["action_array"] = []
+				if not multiplayer.is_server():
+					continue
+				if not server_agents[ag]["agent_node"].in_incapacitated_state():
+					all_agents_incap = false
 			for ag in client_agents:
 				client_agents[ag]["agent_node"].queued_action = []
 				client_agents[ag]["action_array"] = []
+				if multiplayer.is_server():
+					continue
+				if not client_agents[ag]["agent_node"].in_incapacitated_state():
+					all_agents_incap = false
 			show_hud()
+			if all_agents_incap and len(server_agents) + len(client_agents) > 0:
+				_on_execute_pressed() # run the execute function since the player can't do anything
 		GamePhases.EXECUTION:
 			_phase_label.text = "EXECUTING ACTIONS..."
 			server_ready_bool = false
@@ -565,7 +587,6 @@ func _update_game_phase(new_phase: GamePhases):
 			await get_tree().create_timer(0.10).timeout
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.perform_action()
-	game_phase = new_phase
 
 
 @rpc("authority", "call_remote", "reliable")

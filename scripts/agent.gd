@@ -7,12 +7,13 @@ signal agent_selected(agent : Agent)
 
 signal spotted_agent(spotter : Agent, spottee : Agent)
 signal unspotted_agent(unspotter : Agent, unspottee : Agent)
-signal grabbed_agent(grabber : Agent, grabbee : Agent)
-signal released_agent(releaser : Agent, releasee : Agent)
 signal spotted_element(element : Node3D)
 signal unspotted_element(element : Node3D)
 signal heard_sound(listener : Agent, sound : Node3D)
 signal agent_died(deceased : Agent)
+
+const CQC_START = Vector3(0, 0, 0.48)
+const CQC_END = Vector3(0.545, 0, 0)
 
 var view_dist : float = 2.5 #length of vision "cone" (really a pyramid)
 var view_across : float = 1 #size of vision pyramid base
@@ -54,6 +55,7 @@ var _outline_mat : StandardMaterial3D
 @onready var _crouch_ray : RayCast3D = $CrouchCheck
 @onready var _stand_ray : RayCast3D = $StandCheck
 @onready var _cqc_collision : ShapeCast3D = $CQCGrabRange
+@onready var _cqc_anim_helper : Node3D = $CQCAnimationHelper
 @onready var _nav_agent : NavigationAgent3D = $NavigationAgent3D
 @onready var _active_item_icon : Sprite3D = $ActiveItem
 @onready var _held_weapon_meshes = {
@@ -97,6 +99,7 @@ var weapons_animation_blend := Vector2.ONE
 var target_world_collide_height : float
 var target_world_collide_y : float
 var game_steps_since_execute : int
+var grabbed_agent : Agent
 var grabbing_agent : Agent
 
 enum AttackStep {
@@ -435,6 +438,9 @@ func _game_step(delta: float) -> void:
 		if stun_time == 0:
 			_anim_state.travel("Crouch")
 			state = States.CROUCH
+	if state == States.GRABBED:
+		global_position = grabbing_agent._cqc_anim_helper.global_position
+		global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
 	if len(queued_action) == 0:
 		return
 	match queued_action[0]:
@@ -469,6 +475,10 @@ func _game_step(delta: float) -> void:
 						GameRefs.WeaponTypes.PLACED:
 							if game_steps_since_execute == 20:
 								_anim_state.travel("Stand")
+						GameRefs.WeaponTypes.CQC:
+							var cqc_lerp_value = float(clamp(max(game_steps_since_execute - 20, 0)/60.0, 0.0, 1.0))
+							_cqc_anim_helper.position = CQC_START.lerp(CQC_END, cqc_lerp_value)
+							_cqc_anim_helper.rotation.y = lerp_angle(-PI/2, 0, cqc_lerp_value)
 						GameRefs.WeaponTypes.SMALL, GameRefs.WeaponTypes.BIG, GameRefs.WeaponTypes.CQC:
 							pass
 
@@ -476,8 +486,8 @@ func _game_step(delta: float) -> void:
 func _attack_orient_transition():
 	rotation.y = target_direction
 	game_steps_since_execute = 0
-	attack_step = AttackStep.ATTACKING
 	if _anim_state.get_current_node() == "Stand":
+		attack_step = AttackStep.ATTACKING
 		match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 			GameRefs.WeaponTypes.CQC:
 				try_cqc()
@@ -493,14 +503,14 @@ func _attack_orient_transition():
 		match held_weapons[selected_weapon].type:
 			GameRefs.WeaponTypes.CQC:
 				_anim_state.travel("Stand")
-				await _anim.animation_finished
-				try_cqc()
-
 			GameRefs.WeaponTypes.SMALL:
+				attack_step = AttackStep.ATTACKING
 				_anim_state.travel("B_Crouch_Attack_SmallArms")
 			GameRefs.WeaponTypes.BIG:
+				attack_step = AttackStep.ATTACKING
 				_anim_state.travel("B_Crouch_Attack_BigArms")
 			GameRefs.WeaponTypes.THROWN:
+				attack_step = AttackStep.ATTACKING
 				_anim_state.travel("B_Crouch_Attack_Grenade")
 			GameRefs.WeaponTypes.PLACED:
 				pass
@@ -517,7 +527,7 @@ func try_cqc():
 			if col_parent is Agent:
 				if col_parent.get_multiplayer_authority() == get_multiplayer_authority():
 					continue # skip same team
-				grabbed_agent.emit(self, col_parent)
+				grabbed_agent = col_parent
 				return
 		_anim_state.travel("B_Stand_Attack_Whiff")
 	else:
@@ -548,6 +558,8 @@ func _on_animation_finished(anim_name: StringName) -> void:
 	#print(name, ": ", anim_name)
 	if anim_name.begins_with("B_Hurt") and not anim_name == "B_Hurt_Stunned":
 		action_interrupted.emit(self)
+	if state == States.GRABBED:
+		state = States.STUNNED
 	if len(queued_action) == 0:
 		return
 	match queued_action[0]:
