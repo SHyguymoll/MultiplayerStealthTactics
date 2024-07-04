@@ -299,6 +299,7 @@ func determine_cqc_events(): # assumes that the grabber is on a different team t
 		if try.grabbed_agent == null:
 			continue
 		cqc_actors[try] = try.grabbed_agent
+
 	for grabber in (cqc_actors.keys() as Array[Agent]):
 		var grabbee : Agent = grabber.grabbed_agent
 		grabber.grabbed_agent = null
@@ -458,10 +459,10 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 			ref_ag.queued_action = []
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
-		server_agents[ref_ag.name]["action_array"] = decision_array
+		client_recieve_single_action.rpc(ref_ag.name, decision_array)
 	else:
 		client_agents[ref_ag.name]["text"] = final_text_string
-		client_agents[ref_ag.name]["action_array"] = decision_array
+		server_recieve_single_action.rpc(ref_ag.name, decision_array)
 	update_text()
 
 
@@ -497,10 +498,10 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	final_text_string += "to New Position"
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
-		server_agents[ref_ag.name]["action_array"] = decision_array
+		client_recieve_single_action.rpc(ref_ag.name, decision_array)
 	else:
 		client_agents[ref_ag.name]["text"] = final_text_string
-		client_agents[ref_ag.name]["action_array"] = decision_array
+		server_recieve_single_action.rpc(ref_ag.name, decision_array)
 	update_text()
 
 
@@ -534,10 +535,10 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
-		server_agents[ref_ag.name]["action_array"] = decision_array
+		client_recieve_single_action.rpc(ref_ag.name, decision_array)
 	else:
 		client_agents[ref_ag.name]["text"] = final_text_string
-		client_agents[ref_ag.name]["action_array"] = decision_array
+		server_recieve_single_action.rpc(ref_ag.name, decision_array)
 	update_text()
 
 
@@ -589,34 +590,28 @@ func _update_game_phase(new_phase: GamePhases):
 				agent.perform_action()
 
 
-@rpc("authority", "call_remote", "reliable")
-func recieve_server_insts(recieved_dict : Dictionary):
-	print("SERVER:\n" + str(recieved_dict))
-	for agent_rec in recieved_dict:
-		server_agents[agent_rec]["action_array"] = recieved_dict[agent_rec]["action_array"]
-		server_agents[agent_rec]["action_done"] = recieved_dict[agent_rec]["action_done"]
-	server_ready_bool = true
+@rpc("any_peer", "call_local", "reliable")
+func client_recieve_single_action(agent_name, action):
+	server_agents[agent_name]["action_array"] = action
+	server_agents[agent_name]["action_done"] = false
 
 
-@rpc("any_peer", "call_remote", "reliable")
-func recieve_client_insts(recieved_dict : Dictionary):
-	print("CLIENT:\n" + str(recieved_dict))
-	for agent_rec in recieved_dict:
-		client_agents[agent_rec]["action_array"] = recieved_dict[agent_rec]["action_array"]
-		client_agents[agent_rec]["action_done"] = recieved_dict[agent_rec]["action_done"]
-	client_ready_bool = true
+@rpc("any_peer", "call_local", "reliable")
+func server_recieve_single_action(agent_name, action):
+	client_agents[agent_name]["action_array"] = action
+	client_agents[agent_name]["action_done"] = false
 
+
+@rpc("any_peer", "call_local", "reliable")
+func player_is_ready(id):
+	if id == 1:
+		server_ready_bool = true
+	else:
+		client_ready_bool = true
 
 func _on_execute_pressed() -> void:
 	_execute_button.disabled = true
 	_execute_button.text = "WAITING FOR OPPONENT"
 	_radial_menu.button_collapse_animation()
 	hide_hud()
-	if multiplayer.is_server():
-		recieve_server_insts.rpc_id(GameSettings.server_client_id, server_agents)
-		server_ready_bool = true
-		await get_tree().create_timer(0.10).timeout
-	else:
-		recieve_client_insts.rpc_id(1, client_agents)
-		client_ready_bool = true
-		await get_tree().create_timer(0.10).timeout
+	player_is_ready.rpc(multiplayer.get_unique_id())
