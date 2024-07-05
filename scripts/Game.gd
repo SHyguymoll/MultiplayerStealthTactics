@@ -446,10 +446,10 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 			ref_ag.queued_action = []
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
-		client_recieve_single_action.rpc(ref_ag.name, decision_array)
+		client_recieve_single_action.rpc(ref_ag.name, decision_array, server_agents[ref_ag.name]["action_done"])
 	else:
 		client_agents[ref_ag.name]["text"] = final_text_string
-		server_recieve_single_action.rpc(ref_ag.name, decision_array)
+		server_recieve_single_action.rpc(ref_ag.name, decision_array, client_agents[ref_ag.name]["action_done"])
 	update_text()
 
 
@@ -485,10 +485,10 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	final_text_string += "to New Position"
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
-		client_recieve_single_action.rpc(ref_ag.name, decision_array)
+		client_recieve_single_action.rpc(ref_ag.name, decision_array, server_agents[ref_ag.name]["action_done"])
 	else:
 		client_agents[ref_ag.name]["text"] = final_text_string
-		server_recieve_single_action.rpc(ref_ag.name, decision_array)
+		server_recieve_single_action.rpc(ref_ag.name, decision_array, client_agents[ref_ag.name]["action_done"])
 	update_text()
 
 
@@ -522,10 +522,10 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
-		client_recieve_single_action.rpc(ref_ag.name, decision_array)
+		client_recieve_single_action.rpc(ref_ag.name, decision_array, server_agents[ref_ag.name]["action_done"])
 	else:
 		client_agents[ref_ag.name]["text"] = final_text_string
-		server_recieve_single_action.rpc(ref_ag.name, decision_array)
+		server_recieve_single_action.rpc(ref_ag.name, decision_array, client_agents[ref_ag.name]["action_done"])
 	update_text()
 
 
