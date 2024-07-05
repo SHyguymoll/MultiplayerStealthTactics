@@ -291,12 +291,14 @@ func determine_cqc_events(): # assumes that the grabber is on a different team t
 
 	for grabber in (cqc_actors.keys() as Array[Agent]):
 		var grabbee : Agent = grabber.grabbed_agent
+		print([grabber, grabbee, grabber.grabbed_agent, grabbee.grabbing_agent])
 		grabber.grabbed_agent = null
 		if grabbee in cqc_actors and grabber.get_multiplayer_authority() == 1: #client wins tiebreakers
 			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
+		print([grabber, grabbee, grabber.grabbed_agent, grabbee.grabbing_agent])
 		grabbee.take_damage(3, true)
 		grabbee.stun_time = 10 if grabbee.stun_health > 0 else 300
 		grabbee._anim_state.travel("B_Hurt_Slammed")
