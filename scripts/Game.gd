@@ -178,22 +178,14 @@ func append_action_timeline(agent, actions):
 	if not action_timeline.has(current_game_step):
 		action_timeline[current_game_step] = {}
 	action_timeline[current_game_step][agent] = actions
-	print(action_timeline)
 
 
 @rpc("call_local")
 func ping():
 	print("{0}: pong!".format([multiplayer.multiplayer_peer.get_unique_id()]))
 
-#func _add_player(id = 1):
-	#var new_player = player_scene.instantiate()
-	#new_player.name = str(id)
-	#call_deferred("add_child", new_player)
-
 @rpc("authority", "call_local", "reliable")
 func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
-	#print("{0}: attempting to spawn agent".format([player_id]))
-	#print(agent_stats)
 	var new_agent : Agent = agent_scene.instantiate()
 	new_agent.name = str(player_id) + "_" + str(agent_stats.name)
 	new_agent.action_completed.connect(_agent_completed_action)
@@ -251,7 +243,6 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 			client_agents[new_agent.name]["text"] = ""
 			client_agents[new_agent.name]["action_done"] = true
 			create_agent_selector(new_agent)
-	print("{0}\n--------------\nSERVER = {1}\nCLIENT = {2}".format([multiplayer.multiplayer_peer.get_unique_id(), server_agents, client_agents]))
 
 
 func create_agent_selector(agent : Agent):
@@ -281,9 +272,9 @@ func determine_cqc_events(): # assumes that the grabber is on a different team t
 	var cqc_actors = {}
 
 	for grabber_name in server_agents.keys():
-		if server_agents[grabber_name].agent_node.state != Agent.States.USING_WEAPON:
-			continue # check correct state
 		var try : Agent = server_agents[grabber_name].agent_node
+		if try.state != Agent.States.USING_WEAPON:
+			continue # check correct state
 		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
 			continue # check correct weapon
 		if try.grabbed_agent == null:
@@ -291,9 +282,9 @@ func determine_cqc_events(): # assumes that the grabber is on a different team t
 		cqc_actors[try] = try.grabbed_agent
 
 	for grabber_name in client_agents.keys():
-		if client_agents[grabber_name].agent_node.state != Agent.States.USING_WEAPON:
-			continue
 		var try : Agent = client_agents[grabber_name].agent_node
+		if try.state != Agent.States.USING_WEAPON:
+			continue
 		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
 			continue
 		if try.grabbed_agent == null:
@@ -363,8 +354,6 @@ func _agent_completed_action(agent : Agent): #TODO
 		client_agents[agent.name]["action_done"] = true
 	if not agent.is_multiplayer_authority():
 		return
-	if len(agent.queued_action) == 0:
-		return
 	agent.flash_outline(Color.GREEN)
 
 
@@ -374,8 +363,6 @@ func _agent_interrupted(agent : Agent): #TODO
 	else:
 		client_agents[agent.name]["action_done"] = true
 	if not agent.is_multiplayer_authority():
-		return
-	if len(agent.queued_action) == 0:
 		return
 	agent.flash_outline(Color.RED)
 
@@ -578,28 +565,26 @@ func _update_game_phase(new_phase: GamePhases):
 				server_agents[ag]["action_done"] = false
 				if multiplayer.is_server():
 					append_action_timeline.rpc(ag, server_agents[ag]["action_array"])
-					#await get_tree().create_timer(0.10).timeout
 			for ag in client_agents:
 				client_agents[ag]["agent_node"].queued_action = client_agents[ag]["action_array"]
 				client_agents[ag]["action_done"] = false
 				if multiplayer.is_server():
 					append_action_timeline.rpc(ag, client_agents[ag]["action_array"])
-					#await get_tree().create_timer(0.10).timeout
 			await get_tree().create_timer(0.10).timeout
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.perform_action()
 
 
 @rpc("any_peer", "call_local", "reliable")
-func client_recieve_single_action(agent_name, action):
+func client_recieve_single_action(agent_name, action, done):
 	server_agents[agent_name]["action_array"] = action
-	server_agents[agent_name]["action_done"] = false
+	server_agents[agent_name]["action_done"] = done
 
 
 @rpc("any_peer", "call_local", "reliable")
-func server_recieve_single_action(agent_name, action):
+func server_recieve_single_action(agent_name, action, done):
 	client_agents[agent_name]["action_array"] = action
-	client_agents[agent_name]["action_done"] = false
+	client_agents[agent_name]["action_done"] = done
 
 
 @rpc("any_peer", "call_local", "reliable")

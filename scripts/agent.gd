@@ -183,8 +183,6 @@ func perform_action():
 			state = States.CRAWL
 		GameActions.LOOK_AROUND:
 			target_direction = get_required_y_rotation(queued_action[1])
-			#print(current_direction, " ", wanted_direction)
-			#target_direction = queued_action[1]
 		GameActions.CHANGE_ITEM:
 			if queued_action[1] == "none":
 				selected_item = -1
@@ -408,7 +406,6 @@ func _game_step(delta: float) -> void:
 	# update agent specifically
 	if in_moving_state():
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
-		#look_at(queued_action[1])
 		velocity *= movement_speed
 		match state:
 			States.WALK, States.CROUCH_WALK:
@@ -451,21 +448,19 @@ func _game_step(delta: float) -> void:
 				queued_action.clear()
 			elif abs(rotation.y - target_direction) < 0.1:
 				rotation.y = target_direction
-				action_completed.emit(self)
 		GameActions.CHANGE_WEAPON:
 			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) == 0:
 				action_completed.emit(self)
 				queued_action.clear()
 			elif weapons_animation_blend.distance_squared_to(decide_weapon_blend()) < 0.01:
 				weapons_animation_blend = decide_weapon_blend()
-				action_completed.emit(self)
-				queued_action.clear()
 		GameActions.USE_WEAPON: #TODO
 			match attack_step:
 				AttackStep.ORIENTING:
 					rotation.y = lerp_angle(rotation.y, target_direction, 0.2)
 					if abs(rotation.y - target_direction) > 0.1:
 						return
+					rotation.y = target_direction
 					_attack_orient_transition()
 				AttackStep.ATTACKING:
 					match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
@@ -484,7 +479,6 @@ func _game_step(delta: float) -> void:
 
 
 func _attack_orient_transition():
-	rotation.y = target_direction
 	game_steps_since_execute = 0
 	if _anim_state.get_current_node() == "Stand":
 		attack_step = AttackStep.ATTACKING
@@ -529,7 +523,7 @@ func try_cqc():
 					continue # skip same team
 				grabbed_agent = col_parent
 				return
-		_anim_state.travel("B_Stand_Attack_Whiff")
+		#_anim_state.travel("B_Stand_Attack_Whiff")
 	else:
 		_anim_state.travel("B_Stand_Attack_Whiff")
 
@@ -560,6 +554,7 @@ func _on_animation_finished(anim_name: StringName) -> void:
 		action_interrupted.emit(self)
 	if state == States.GRABBED:
 		state = States.STUNNED
+		queued_action.clear()
 	if len(queued_action) == 0:
 		return
 	match queued_action[0]:
