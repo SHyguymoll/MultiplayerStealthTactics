@@ -46,7 +46,7 @@ func _ready():
 	_radial_menu.visible = false
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
-	_update_game_phase(GamePhases.SELECTION)
+
 
 
 # Called only on the server.
@@ -227,7 +227,6 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 
 			server_agents[new_agent.name]["text"] = ""
 			server_agents[new_agent.name]["action_done"] = true
-			create_agent_selector(new_agent)
 
 	else:
 		client_agents[new_agent.name] = {agent_node=new_agent, action_array=[], action_done=true}
@@ -242,7 +241,6 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 
 			client_agents[new_agent.name]["text"] = ""
 			client_agents[new_agent.name]["action_done"] = true
-			create_agent_selector(new_agent)
 
 
 func create_agent_selector(agent : Agent):
@@ -530,32 +528,29 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 
 
 @rpc("authority", "call_local", "reliable")
-func _update_game_phase(new_phase: GamePhases):
+func _update_game_phase(new_phase: GamePhases, check_incap := true):
 	game_phase = new_phase
 	match new_phase:
 		GamePhases.SELECTION:
 			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
-			var all_agents_incap = true
-			for ag in server_agents:
-				server_agents[ag]["agent_node"].queued_action = []
-				server_agents[ag]["action_array"] = []
-				if not multiplayer.is_server():
-					continue
-				if not server_agents[ag]["agent_node"].in_incapacitated_state():
-					all_agents_incap = false
-			for ag in client_agents:
-				client_agents[ag]["agent_node"].queued_action = []
-				client_agents[ag]["action_array"] = []
-				if multiplayer.is_server():
-					continue
-				if not client_agents[ag]["agent_node"].in_incapacitated_state():
-					all_agents_incap = false
+			if multiplayer.is_server():
+				for ag in server_agents:
+					var checked_agent = server_agents[ag]["agent_node"]
+					if not checked_agent.in_incapacitated_state():
+						create_agent_selector(checked_agent)
+			else:
+				for ag in client_agents:
+					var checked_agent = client_agents[ag]["agent_node"]
+					if not checked_agent.in_incapacitated_state():
+						create_agent_selector(checked_agent)
 			show_hud()
-			if all_agents_incap and len(server_agents) + len(client_agents) > 0:
+			if $HUDSelectors.get_child_count() == 0 and check_incap:
 				_on_execute_pressed() # run the execute function since the player can't do anything
 		GamePhases.EXECUTION:
+			for selector in $HUDSelectors.get_children(): # remove previous selectors
+				selector.queue_free()
 			_phase_label.text = "EXECUTING ACTIONS..."
 			server_ready_bool = false
 			client_ready_bool = false
@@ -600,3 +595,7 @@ func _on_execute_pressed() -> void:
 	_radial_menu.button_collapse_animation()
 	hide_hud()
 	player_is_ready.rpc(multiplayer.get_unique_id())
+
+
+func _on_cold_boot_timer_timeout() -> void:
+	_update_game_phase(GamePhases.SELECTION, false)

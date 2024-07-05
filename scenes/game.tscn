@@ -103,7 +103,12 @@ position = Vector2(-60, -60)
 
 [node name="HUDSelectors" type="CanvasLayer" parent="."]
 
+[node name="ColdBootTimer" type="Timer" parent="."]
+one_shot = true
+autostart = true
+
 [connection signal="pressed" from="HUDBase/Execute" to="." method="_on_execute_pressed"]
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
 [connection signal="decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
 [connection signal="movement_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_movement_decision_made"]
+[connection signal="timeout" from="ColdBootTimer" to="." method="_on_cold_boot_timer_timeout"]
