@@ -474,7 +474,7 @@ func _game_step(delta: float) -> void:
 							var cqc_lerp_value = float(clamp(max(game_steps_since_execute - 20, 0)/60.0, 0.0, 1.0))
 							_cqc_anim_helper.position = CQC_START.lerp(CQC_END, cqc_lerp_value)
 							_cqc_anim_helper.rotation.y = lerp_angle(-PI/2, 0, cqc_lerp_value)
-						GameRefs.WeaponTypes.SMALL, GameRefs.WeaponTypes.BIG, GameRefs.WeaponTypes.CQC:
+						GameRefs.WeaponTypes.SMALL, GameRefs.WeaponTypes.BIG:
 							pass
 
 
@@ -494,9 +494,7 @@ func _attack_orient_transition():
 			GameRefs.WeaponTypes.PLACED:
 				_anim_state.travel("Crouch")
 	elif _anim_state.get_current_node() == "Crouch":
-		match held_weapons[selected_weapon].type:
-			GameRefs.WeaponTypes.CQC:
-				_anim_state.travel("Stand")
+		match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 			GameRefs.WeaponTypes.SMALL:
 				attack_step = AttackStep.ATTACKING
 				_anim_state.travel("B_Crouch_Attack_SmallArms")
@@ -523,7 +521,6 @@ func try_cqc():
 					continue # skip same team
 				grabbed_agent = col_parent
 				return
-		#_anim_state.travel("B_Stand_Attack_Whiff")
 	else:
 		_anim_state.travel("B_Stand_Attack_Whiff")
 

@@ -208,6 +208,8 @@ func button_menu_screen():
 					buttons[2] = ICONS.halt
 				if not referenced_agent.can_prone():
 					buttons[3] = ICONS.none
+				if GameRefs.WEP[referenced_agent.held_weapons[referenced_agent.selected_weapon].wep_name].type == GameRefs.WeaponTypes.CQC:
+					buttons[5] = ICONS.none
 
 			elif referenced_agent.in_prone_state():
 				buttons[0] = a_o_na(ICONS.stance_stand, Agent.GameActions.GO_STAND)
