@@ -300,9 +300,10 @@ func determine_cqc_events(): # assumes that the grabber is on a different team t
 		grabbee.grabbing_agent = grabber
 		print([grabber, grabbee, grabber.grabbed_agent, grabbee.grabbing_agent])
 		grabbee.take_damage(3, true)
-		grabbee.stun_time = 10 if grabbee.stun_health > 0 else 300
+		grabbee.stun_time = 30 if grabbee.stun_health > 0 else 300
 		grabbee._anim_state.travel("B_Hurt_Slammed")
 		grabbee.state = Agent.States.GRABBED
+		grabbee.queued_action.clear()
 		pass
 
 
