@@ -84,7 +84,7 @@ var queued_action = []
 enum States {
 	STAND, CROUCH, PRONE,
 	RUN, WALK, CROUCH_WALK, CRAWL,
-	USING_ITEM, USING_WEAPON, RELOADING_WEAPON,
+	USING_ITEM, USING_WEAPON, THROWING, RELOADING_WEAPON,
 	HURT, GRABBED, STUNNED, DEAD,
 }
 @export var state : States = States.STAND
@@ -443,11 +443,10 @@ func _game_step(delta: float) -> void:
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
 			rotation.y = lerp_angle(rotation.y, target_direction, 0.2)
-			if rotation.y == target_direction:
+			if abs(rotation.y - target_direction) < 0.1:
+				rotation.y = target_direction
 				action_completed.emit(self)
 				queued_action.clear()
-			elif abs(rotation.y - target_direction) < 0.1:
-				rotation.y = target_direction
 		GameActions.CHANGE_WEAPON:
 			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) == 0:
 				action_completed.emit(self)
@@ -457,11 +456,11 @@ func _game_step(delta: float) -> void:
 		GameActions.USE_WEAPON: #TODO
 			match attack_step:
 				AttackStep.ORIENTING:
-					rotation.y = lerp_angle(rotation.y, target_direction, 0.2)
-					if abs(rotation.y - target_direction) > 0.1:
-						return
-					rotation.y = target_direction
-					_attack_orient_transition()
+					#print(rotation.y, " ", target_direction, " ", lerp_angle(rotation.y, target_direction, 0.2))
+					rotation.y = lerpf(rotation.y, target_direction, 0.2)
+					if abs(abs(rotation.y) - abs(target_direction)) < 0.1:
+						rotation.y = target_direction
+						_attack_orient_transition()
 				AttackStep.ATTACKING:
 					match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 						GameRefs.WeaponTypes.THROWN:

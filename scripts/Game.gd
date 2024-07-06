@@ -275,7 +275,7 @@ func determine_cqc_events(): # assumes that the grabber is on a different team t
 			continue # check correct state
 		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
 			continue # check correct weapon
-		if try.grabbed_agent == null:
+		if try.state == Agent.States.THROWING or try.grabbed_agent == null:
 			continue # check if we haven't already resolved this in the previous step
 		cqc_actors[try] = try.grabbed_agent
 
@@ -285,7 +285,7 @@ func determine_cqc_events(): # assumes that the grabber is on a different team t
 			continue
 		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
 			continue
-		if try.grabbed_agent == null:
+		if try.state == Agent.States.THROWING or try.grabbed_agent == null:
 			continue
 		cqc_actors[try] = try.grabbed_agent
 
@@ -299,6 +299,7 @@ func determine_cqc_events(): # assumes that the grabber is on a different team t
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
 		print([grabber, grabbee, grabber.grabbed_agent, grabbee.grabbing_agent])
+		grabber.state = Agent.States.THROWING
 		grabbee.take_damage(3, true)
 		grabbee.stun_time = 30 if grabbee.stun_health > 0 else 300
 		grabbee._anim_state.travel("B_Hurt_Slammed")
@@ -568,9 +569,9 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				client_agents[ag]["action_done"] = false
 				if multiplayer.is_server():
 					append_action_timeline.rpc(ag, client_agents[ag]["action_array"])
-			await get_tree().create_timer(0.10).timeout
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.perform_action()
+			await get_tree().create_timer(0.10).timeout
 
 
 @rpc("any_peer", "call_local", "reliable")
