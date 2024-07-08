@@ -390,14 +390,10 @@ func show_hud():
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = _radial_menu.referenced_agent
 	_radial_menu.referenced_agent = null
-	# need to remove movement indicator if created
-	for indicator in $MovementOrders.get_children():
-		if indicator.referenced_agent == ref_ag:
-			indicator._neutral()
-	# ditto with aiming indicator
-	for indicator in $AimingOrders.get_children():
-		if indicator.referenced_agent == ref_ag:
-			indicator._neutral()
+	# need to remove indicator if created
+	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
+		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
+		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
 	ref_ag.queued_action = decision_array
 	var final_text_string := ""
 	match decision_array[0]:
@@ -458,19 +454,16 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = _radial_menu.referenced_agent
 	_radial_menu.referenced_agent = null
-	# need to remove previous movement indicator if created
-	for indicator in $MovementOrders.get_children():
-		if indicator.referenced_agent == ref_ag:
-			indicator._neutral()
-	# ditto with aiming indicator
-	for indicator in $AimingOrders.get_children():
-		if indicator.referenced_agent == ref_ag:
-			indicator._neutral()
+	# need to remove indicator if created
+	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
+		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
+		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.MOVEMENT
 	var new_indicator = movement_icon_scene.instantiate()
 	new_indicator.referenced_agent = ref_ag
-	$MovementOrders.add_child(new_indicator)
+	new_indicator.name = ref_ag.name
+	$ClientsideIndicators.add_child(new_indicator)
 	await new_indicator.indicator_placed
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator.position)
@@ -497,19 +490,16 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = _radial_menu.referenced_agent
 	_radial_menu.referenced_agent = null
-	# need to remove movement indicator if created
-	for indicator in $MovementOrders.get_children():
-		if indicator.referenced_agent == ref_ag:
-			indicator._neutral()
-	# ditto with aiming indicator
-	for indicator in $AimingOrders.get_children():
-		if indicator.referenced_agent == ref_ag:
-			indicator._neutral()
+	# need to remove indicator if created
+	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
+		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
+		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.AIMING
 	var new_indicator = aiming_icon_scene.instantiate()
 	new_indicator.referenced_agent = ref_ag
-	$MovementOrders.add_child(new_indicator)
+	new_indicator.name = ref_ag.name
+	$ClientsideIndicators.add_child(new_indicator)
 	await new_indicator.indicator_placed
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator.position)

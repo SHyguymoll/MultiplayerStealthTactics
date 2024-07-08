@@ -37,9 +37,8 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 
 light_color = Color(0.317647, 0.317647, 0.317647, 1)
 directional_shadow_mode = 0
 
-[node name="MovementOrders" type="Node3D" parent="."]
+[node name="ClientsideIndicators" type="Node3D" parent="."]
 
-[node name="AimingOrders" type="Node3D" parent="."]
 
 [node name="Popups" type="Node3D" parent="."]
 
