@@ -340,17 +340,19 @@ func determine_weapon_events():
 		var try : Agent = server_agents[agent].agent_node
 		if try.state != Agent.States.FIRE_GUN:
 			continue # check correct state, and if we haven't already resolved this
-		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name == GameRefs.WEP.fist.name:
-			continue # can't use the fist here
 		attackers[try] = return_attacked(try, try.queued_action[1])
 
 	for agent in client_agents.keys():
 		var try : Agent = client_agents[agent].agent_node
 		if try.state != Agent.States.FIRE_GUN:
 			continue
-		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
-			continue
 		attackers[try] = return_attacked(try, try.queued_action[1])
+
+	for attacker in (attackers.keys() as Array[Agent]):
+		attacker.state = Agent.States.USING_WEAPON
+		if not (attackers[attacker] as Area3D).get_parent() is Agent: #hit a wall
+			pass
+		pass
 
 
 

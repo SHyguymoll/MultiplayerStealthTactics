@@ -122,3 +122,6 @@ const STE := {
 	dead = preload("res://assets/sprites/hud_agent_small/state/dead.png"),
 	unknown = preload("res://assets/sprites/hud_agent_small/state/unknown.png"),
 }
+
+func compare_wep_type(agent : Agent, wep_type : WeaponTypes):
+	return WEP[agent.held_weapons[agent.selected_weapon].wep_name].type == wep_type
