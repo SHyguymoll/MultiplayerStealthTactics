@@ -45,8 +45,7 @@ var percieved_by_friendly := false #determines if hud is updated
 @onready var _custom_skin_mat : StandardMaterial3D
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat : StandardMaterial3D
-@onready var _eyes : Area3D = $Eyes
-@onready var _eye_cone : ConvexPolygonShape3D = _eyes.get_node("CollisionShape3D").shape
+@onready var _eye_cone : ConvexPolygonShape3D = $Eyes/CollisionShape3D.shape
 @onready var _ears : Area3D = $Ears
 @onready var _ear_cylinder : CylinderShape3D = _ears.get_node("CollisionShape3D").shape
 @onready var _body : Area3D = $Body
@@ -321,18 +320,6 @@ func _process(_delta: float) -> void:
 
 	pass
 
-
-func decide_head_position() -> Vector3:
-	if in_standing_state():
-		return Vector3(0, 0.889, 0.06)
-	elif in_crouching_state():
-		return Vector3(0, 0.732, 0.175)
-	elif in_prone_state():
-		return Vector3(0, 0.195, 0.537)
-	else:
-		return _eyes.position
-
-
 func decide_weapon_blend() -> Vector2:
 	match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 		GameRefs.WeaponTypes.CQC:
@@ -368,8 +355,6 @@ func _game_step(delta: float) -> void:
 	elif selected_item > -1:
 		_active_item_icon.texture = GameRefs.ITM[held_items[selected_item]].icon
 		_active_item_icon.visible = true
-	_eyes.position = _eyes.position.lerp(decide_head_position(), 0.2)
-	#_eyes.rotation.y = target_head_rot_off_y
 	update_eye_cone(eye_strength)
 	update_ear_radius(ear_strength)
 	if in_standing_state():
