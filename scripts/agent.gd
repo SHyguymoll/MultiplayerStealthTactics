@@ -373,14 +373,6 @@ func _game_step(delta: float) -> void:
 	#_eyes.rotation.y = target_head_rot_off_y
 	update_eye_cone(eye_strength)
 	update_ear_radius(ear_strength)
-	if in_standing_state() or in_crouching_state():
-		(_body.get_node("Middle") as CollisionShape3D).disabled = false
-	else:
-		(_body.get_node("Middle") as CollisionShape3D).disabled = true
-	if in_standing_state():
-		(_body.get_node("Top") as CollisionShape3D).disabled = false
-	else:
-		(_body.get_node("Top") as CollisionShape3D).disabled = true
 	if in_standing_state():
 		target_world_collide_height = 0.962
 		target_world_collide_y = 0.499

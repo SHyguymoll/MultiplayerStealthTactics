@@ -1,4 +1,4 @@
-[gd_scene load_steps=123 format=3 uid="uid://oitco668lkwj"]
+[gd_scene load_steps=122 format=3 uid="uid://oitco668lkwj"]
 
 [ext_resource type="Script" path="res://scripts/agent.gd" id="1_qe0u1"]
 [ext_resource type="PackedScene" uid="uid://c2d2uqv4wgbv7" path="res://assets/models/exports/Agent.gltf" id="2_bu3bb"]
@@ -17,7 +17,7 @@ height = 0.09
 radius = 0.245
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_vbwd1"]
-height = 0.332327
+height = 0.998478
 radius = 0.20322
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ceyum"]
@@ -18461,16 +18461,8 @@ shape = SubResource("CylinderShape3D_tj67t")
 collision_layer = 256
 collision_mask = 0
 
-[node name="Bottom" type="CollisionShape3D" parent="Body"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.170201, 0)
-shape = SubResource("CylinderShape3D_vbwd1")
-
-[node name="Middle" type="CollisionShape3D" parent="Body"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.496036, 0)
-shape = SubResource("CylinderShape3D_vbwd1")
-
-[node name="Top" type="CollisionShape3D" parent="Body"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.811409, 0)
 shape = SubResource("CylinderShape3D_vbwd1")
 
 [node name="CQCGrabRange" type="ShapeCast3D" parent="."]
