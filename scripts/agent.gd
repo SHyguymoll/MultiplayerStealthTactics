@@ -54,7 +54,6 @@ var _outline_mat : StandardMaterial3D
 @onready var _prone_ray : RayCast3D = $ProneCheck
 @onready var _crouch_ray : RayCast3D = $CrouchCheck
 @onready var _stand_ray : RayCast3D = $StandCheck
-@onready var _cqc_collision : ShapeCast3D = $CQCGrabRange
 @onready var _cqc_anim_helper : Node3D = $CQCAnimationHelper
 @onready var _nav_agent : NavigationAgent3D = $NavigationAgent3D
 @onready var _active_item_icon : Sprite3D = $ActiveItem
@@ -99,7 +98,7 @@ var weapons_animation_blend := Vector2.ONE
 var target_world_collide_height : float
 var target_world_collide_y : float
 var game_steps_since_execute : int
-var grabbed_agent : Agent
+var cqc_grabbing : bool = false
 var grabbing_agent : Agent
 
 enum AttackStep {
@@ -475,7 +474,7 @@ func _attack_orient_transition():
 		attack_step = AttackStep.ATTACKING
 		match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 			GameRefs.WeaponTypes.CQC:
-				try_cqc()
+				cqc_grabbing = true
 			GameRefs.WeaponTypes.SMALL:
 				_anim_state.travel("B_Stand_Attack_SmallArms")
 			GameRefs.WeaponTypes.BIG:
@@ -498,22 +497,6 @@ func _attack_orient_transition():
 			GameRefs.WeaponTypes.PLACED:
 				pass
 
-
-func try_cqc():
-	_cqc_collision.force_shapecast_update()
-	if _cqc_collision.is_colliding():
-		for col_ind in range(_cqc_collision.get_collision_count()):
-			var collision = _cqc_collision.get_collider(0)
-			var col_parent = collision.get_parent()
-			if col_parent == self:
-				continue
-			if col_parent is Agent:
-				if col_parent.get_multiplayer_authority() == get_multiplayer_authority():
-					continue # skip same team
-				grabbed_agent = col_parent
-				return
-	else:
-		_anim_state.travel("B_Stand_Attack_Whiff")
 
 
 func _on_eyes_area_entered(area: Area3D) -> void:
@@ -558,6 +541,7 @@ func _on_animation_finished(anim_name: StringName) -> void:
 			action_completed.emit(self)
 		GameActions.USE_WEAPON when anim_name in ["B_Crouch_Attack_SmallArms", "B_Crouch_Attack_BigArms", "B_Crouch_Attack_Grenade"]:
 			action_completed.emit(self)
+	queued_action.clear()
 
 
 

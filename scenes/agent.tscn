@@ -20,9 +20,6 @@ radius = 0.245
 height = 0.998478
 radius = 0.20322
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ceyum"]
-size = Vector3(0.59, 0.25, 0.405)
-
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_no7tm"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = false
@@ -18464,14 +18461,6 @@ collision_mask = 0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Body"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.496036, 0)
 shape = SubResource("CylinderShape3D_vbwd1")
-
-[node name="CQCGrabRange" type="ShapeCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.67, 0.437346)
-shape = SubResource("BoxShape3D_ceyum")
-target_position = Vector3(0, 0, 0)
-collision_mask = 256
-collide_with_areas = true
-collide_with_bodies = false
 
 [node name="Agent" parent="." instance=ExtResource("2_bu3bb")]
 
