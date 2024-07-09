@@ -568,11 +568,13 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 					var checked_agent = server_agents[ag]["agent_node"]
 					if not checked_agent.in_incapacitated_state():
 						create_agent_selector(checked_agent)
+						checked_agent.flash_outline(Color.ORCHID)
 			else:
 				for ag in client_agents:
 					var checked_agent = client_agents[ag]["agent_node"]
 					if not checked_agent.in_incapacitated_state():
 						create_agent_selector(checked_agent)
+						checked_agent.flash_outline(Color.ORCHID)
 			show_hud()
 			if $HUDSelectors.get_child_count() == 0 and check_incap:
 				_on_execute_pressed() # run the execute function since the player can't do anything
