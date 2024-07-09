@@ -95,14 +95,16 @@ animations = [{
 "speed": 7.0
 }]
 
-[node name="GameMovementIndicator" type="AnimatedSprite3D"]
+[node name="RayCast3D" type="RayCast3D"]
+collision_mask = 513
+collide_with_areas = true
+script = ExtResource("7_l8n8m")
+
+[node name="GameMovementIndicator" type="AnimatedSprite3D" parent="."]
 billboard = 1
 double_sided = false
 no_depth_test = true
 sprite_frames = SubResource("SpriteFrames_akm5w")
 animation = &"neutral"
-script = ExtResource("7_l8n8m")
 
-[node name="RayCast3D" type="RayCast3D" parent="."]
-
-[connection signal="animation_changed" from="." to="." method="_on_animation_changed"]
+[connection signal="animation_changed" from="GameMovementIndicator" to="." method="_on_animation_changed"]

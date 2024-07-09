@@ -1,75 +1,63 @@
 class_name AimingIndicator
-extends AnimatedSprite3D
+extends RayCast3D
 
 signal indicator_placed(indicator)
 const CLOSENESS := 2.0
 
 @onready var _game_camera : GameCamera = $"../../World/Camera3D"
-@onready var _ray : RayCast3D = $RayCast3D
+@onready var _indicator : AnimatedSprite3D = $GameMovementIndicator
 var referenced_agent : Agent
 var ind_set := false
 
-var flat_position : Vector2
-var ray_position : Vector3
-var position_valid : bool
 
 func _ready() -> void:
-	play("aim")
+	_indicator.play("aim")
 	referenced_agent.action_completed.connect(_succeed)
 	referenced_agent.action_interrupted.connect(_fail)
+	global_position = referenced_agent.global_position + Vector3.UP * (_game_camera.ground_height + 0.5)
 
 
 func _succeed(_agent):
-	play("success")
+	_indicator.play("success")
 
 
 func _neutral():
-	play("neutral")
+	_indicator.play("neutral")
 
 
 func _fail(_agent):
-	play("fail")
+	_indicator.play("fail")
 
 
 func _on_animation_changed() -> void:
 	if not ind_set:
 		return
-	await animation_finished
+	await _indicator.animation_finished
 	queue_free()
-
-
-func _check_position() -> bool: #TODO
-	# height check
-	if global_position.y > 1:
-		return false
-	# sightline check
-	_ray.global_position = referenced_agent.global_position + Vector3.UP * 0.5
-	_ray.target_position = (global_position - referenced_agent.global_position) + Vector3.UP * 0.5
-	_ray.target_position.y = maxf(_ray.target_position.y, 0.5)
-	_ray.force_raycast_update()
-	if _ray.get_collider():
-		return false
-	return true
 
 
 func _physics_process(delta: float) -> void: #TODO
 	if not ind_set:
-		flat_position.x = _game_camera.position.x
-		flat_position.y = _game_camera.position.z
-		ray_position = Vector3(flat_position.x, _game_camera.ground_height + 0.5, flat_position.y)
-		#distance clamp
-		var ray_to_ag = referenced_agent.global_position.direction_to(ray_position)
-		ray_to_ag.y = 0
-		ray_to_ag = ray_to_ag.normalized()
-		ray_position = referenced_agent.global_position + ray_to_ag
-		global_position = ray_position
-		position_valid = _check_position() and ray_to_ag.length() > .9
-	modulate = Color.WHITE if position_valid else Color.RED
-
+		var ray_len = 1000
+		if GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC):
+			ray_len = 1
+		var final_position = Vector2(
+			(_game_camera.position.x - referenced_agent.global_position.x),
+			(_game_camera.position.z - referenced_agent.global_position.z)
+		).normalized() * ray_len
+		target_position.x = final_position.x
+		target_position.y = 0
+		target_position.z = final_position.y
+		force_raycast_update()
+		if get_collider():
+			_indicator.global_position = get_collision_point()
+		else:
+			_indicator.global_position = global_position + target_position
+			_indicator.global_position.y -= global_position.y
 
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed and not ind_set and position_valid:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed and not ind_set:
 			ind_set = true
 			indicator_placed.emit(self)

@@ -292,6 +292,8 @@ func return_attacked(attacker : Agent, location : Vector3):
 	query.collide_with_bodies = false
 	query.hit_from_inside = true
 	var result = space_state.intersect_ray(query)
+	if result == null:
+		return result
 	return (result.get("collider") as Area3D)
 
 
@@ -313,6 +315,8 @@ func determine_cqc_events():
 
 	for grabber in (cqc_actors.keys() as Array[Agent]):
 		grabber.state = Agent.States.USING_WEAPON
+		if cqc_actors[grabber] == null:
+			continue
 		if not (cqc_actors[grabber] as Area3D).get_parent() is Agent:
 			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
