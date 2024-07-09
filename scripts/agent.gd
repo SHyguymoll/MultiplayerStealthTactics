@@ -506,7 +506,7 @@ func _on_ears_area_entered(area: Area3D) -> void:
 
 func _on_animation_finished(anim_name: StringName) -> void:
 	#print(name, ": ", anim_name)
-	if anim_name.begins_with("B_Hurt") and not anim_name == "B_Hurt_Stunned":
+	if anim_name.begins_with("B_Hurt") and not anim_name in ["B_Hurt_Stunned", "B_Hurt_WakeUp"]:
 		action_interrupted.emit(self)
 	if state == States.GRABBED:
 		state = States.STUNNED
