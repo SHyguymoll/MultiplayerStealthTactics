@@ -6,6 +6,7 @@ var agent_selector_scene = preload("res://scenes/agent_selector.tscn")
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
+var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
 
 var server_agents : Dictionary
 var client_agents : Dictionary
@@ -171,6 +172,20 @@ func server_populate_variables(): #TODO
 				GameSettings.server_client_id,
 				Lobby.players[GameSettings.server_client_id].agents[3],
 				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+
+
+@rpc("authority", "call_local", "reliable")
+func create_all_raycasts():
+	for agent_block in server_agents.keys():
+		var agent = server_agents[agent_block]["agent_node"]
+		for cli_agent_block in client_agents.keys():
+			var cli_agent = client_agents[cli_agent_block]["agent_node"]
+			var new_tracking_ray = tracking_raycast3d_scene.instantiate()
+			new_tracking_ray.source = agent
+			new_tracking_ray.sink = cli_agent
+			new_tracking_ray.name = agent.name + "|" + cli_agent.name
+			$RayCasts.add_child(new_tracking_ray)
+			print("created ray ", new_tracking_ray)
 
 
 @rpc("authority", "call_local", "reliable")
@@ -593,3 +608,5 @@ func _on_execute_pressed() -> void:
 
 func _on_cold_boot_timer_timeout() -> void:
 	_update_game_phase(GamePhases.SELECTION, false)
+	if multiplayer.is_server():
+		create_all_raycasts.rpc()

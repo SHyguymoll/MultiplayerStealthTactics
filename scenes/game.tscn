@@ -39,6 +39,7 @@ directional_shadow_mode = 0
 
 [node name="ClientsideIndicators" type="Node3D" parent="."]
 
+[node name="RayCasts" type="Node3D" parent="."]
 
 [node name="Popups" type="Node3D" parent="."]
 
