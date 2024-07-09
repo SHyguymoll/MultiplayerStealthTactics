@@ -111,6 +111,7 @@ func _physics_process(delta: float) -> void:
 				update_text()
 		GamePhases.EXECUTION:
 			determine_cqc_events()
+			determine_weapon_events()
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
 			current_game_step += 1
@@ -291,55 +292,66 @@ func return_attacked(attacker : Agent, location : Vector3):
 	query.collide_with_bodies = false
 	query.hit_from_inside = true
 	var result = space_state.intersect_ray(query)
-	if result.get("collider"):
-		if (result.get("collider") as Area3D).get_parent() is Agent:
-			return (result.get("collider") as Area3D).get_parent()
-		else:
-			return null
+	return (result.get("collider") as Area3D)
 
 
 
-func determine_cqc_events(): # assumes that the grabber is on a different team than the grabbee
+func determine_cqc_events():
 	var cqc_actors = {}
 
 	for grabber_name in server_agents.keys():
 		var try : Agent = server_agents[grabber_name].agent_node
-		if try.state != Agent.States.USING_WEAPON:
+		if try.state != Agent.States.CQC_GRAB:
 			continue # check correct state
-		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
-			continue # check correct weapon
-		if try.state == Agent.States.THROWING or try.cqc_grabbing == false:
-			continue # check if we haven't already resolved this in the previous step
 		cqc_actors[try] = return_attacked(try, try.queued_action[1])
 
 	for grabber_name in client_agents.keys():
 		var try : Agent = client_agents[grabber_name].agent_node
-		if try.state != Agent.States.USING_WEAPON:
-			continue
-		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
-			continue
-		if try.state == Agent.States.THROWING or try.cqc_grabbing == false:
+		if try.state != Agent.States.CQC_GRAB:
 			continue
 		cqc_actors[try] = return_attacked(try, try.queued_action[1])
 
 	for grabber in (cqc_actors.keys() as Array[Agent]):
-		grabber.cqc_grabbing = false
-		if cqc_actors[grabber] == null:
+		grabber.state = Agent.States.USING_WEAPON
+		if not (cqc_actors[grabber] as Area3D).get_parent() is Agent:
 			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
-		var grabbee : Agent = cqc_actors[grabber]
+		var grabbee : Agent = (cqc_actors[grabber] as Area3D).get_parent()
 		if grabbee in cqc_actors and grabber.get_multiplayer_authority() == 1: #client wins tiebreakers
+			grabber._anim_state.travel("B_Stand_Attack_Whiff")
+			continue
+		if grabber.get_multiplayer_authority() == grabbee.get_multiplayer_authority(): # don't grab your friends
 			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
-		grabber.state = Agent.States.THROWING
 		grabbee.take_damage(3, true)
 		grabbee.stun_time = 30 if grabbee.stun_health > 0 else 300
 		grabbee._anim_state.travel("B_Hurt_Slammed")
 		grabbee.state = Agent.States.GRABBED
 		grabbee.queued_action.clear()
 		pass
+
+
+func determine_weapon_events():
+	var attackers = {}
+
+	for agent in server_agents.keys():
+		var try : Agent = server_agents[agent].agent_node
+		if try.state != Agent.States.FIRE_GUN:
+			continue # check correct state, and if we haven't already resolved this
+		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name == GameRefs.WEP.fist.name:
+			continue # can't use the fist here
+		attackers[try] = return_attacked(try, try.queued_action[1])
+
+	for agent in client_agents.keys():
+		var try : Agent = client_agents[agent].agent_node
+		if try.state != Agent.States.FIRE_GUN:
+			continue
+		if GameRefs.WEP[try.held_weapons[try.selected_weapon].wep_name].name != GameRefs.WEP.fist.name:
+			continue
+		attackers[try] = return_attacked(try, try.queued_action[1])
+
 
 
 func _agent_heard_something(listener : Agent, sound : Node3D):

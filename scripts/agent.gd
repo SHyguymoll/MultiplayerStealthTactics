@@ -82,7 +82,7 @@ var queued_action = []
 enum States {
 	STAND, CROUCH, PRONE,
 	RUN, WALK, CROUCH_WALK, CRAWL,
-	USING_ITEM, USING_WEAPON, THROWING, RELOADING_WEAPON,
+	USING_ITEM, USING_WEAPON, CQC_GRAB, FIRE_GUN, THROW_BOMB, RELOADING_WEAPON,
 	HURT, GRABBED, STUNNED, DEAD,
 }
 @export var state : States = States.STAND
@@ -97,7 +97,6 @@ var weapons_animation_blend := Vector2.ONE
 var target_world_collide_height : float
 var target_world_collide_y : float
 var game_steps_since_execute : int
-var cqc_grabbing : bool = false
 var grabbing_agent : Agent
 
 enum AttackStep {
@@ -459,12 +458,15 @@ func _attack_orient_transition():
 		attack_step = AttackStep.ATTACKING
 		match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 			GameRefs.WeaponTypes.CQC:
-				cqc_grabbing = true
+				state = States.CQC_GRAB
 			GameRefs.WeaponTypes.SMALL:
+				state = States.FIRE_GUN
 				_anim_state.travel("B_Stand_Attack_SmallArms")
 			GameRefs.WeaponTypes.BIG:
+				state = States.FIRE_GUN
 				_anim_state.travel("B_Stand_Attack_BigArms")
 			GameRefs.WeaponTypes.THROWN:
+				state = States.THROW_BOMB
 				_anim_state.travel("B_Stand_Attack_Grenade")
 			GameRefs.WeaponTypes.PLACED:
 				_anim_state.travel("Crouch")
