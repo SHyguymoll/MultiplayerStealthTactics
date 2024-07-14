@@ -1,10 +1,15 @@
-[gd_scene load_steps=6 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=7 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
 [ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
 [ext_resource type="PackedScene" uid="uid://mr6n3d2nksvr" path="res://scenes/maps/game_map.tscn" id="2_ow13f"]
 [ext_resource type="PackedScene" uid="uid://d4hiq2jbaabj5" path="res://scenes/hud_radial_menu.tscn" id="2_xp2mg"]
 [ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="5_b0o1h"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pu7ty"]
+properties/0/path = NodePath(".:action_timeline")
+properties/0/spawn = true
+properties/0/replication_mode = 1
 
 [node name="Game" type="Node3D" node_paths=PackedStringArray("game_map")]
 script = ExtResource("1_re23i")
@@ -110,6 +115,9 @@ position = Vector2(-60, -60)
 [node name="ColdBootTimer" type="Timer" parent="."]
 one_shot = true
 autostart = true
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_pu7ty")
 
 [connection signal="pressed" from="HUDBase/Execute" to="." method="_on_execute_pressed"]
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]

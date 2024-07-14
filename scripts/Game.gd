@@ -8,13 +8,13 @@ var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
 var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
 
-var server_agents : Dictionary
-var client_agents : Dictionary
+var server_agents : Dictionary = {}
+var client_agents : Dictionary = {}
 
 var server_ready_bool := false
 var client_ready_bool := false
 
-var action_timeline := {
+@export var action_timeline := {
 
 }
 var current_game_step := 0
@@ -44,13 +44,10 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 
 func _ready():
 	# Preconfigure game.
-	server_agents = {}
-	client_agents = {}
 	_radial_menu.visible = false
 	ag_spawner.spawn_function = create_agent
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
-
 
 
 # Called only on the server.
@@ -59,7 +56,6 @@ func start_game():
 	await get_tree().create_timer(0.25).timeout #...after waiting for them to completely load in
 	ping.rpc()
 	server_populate_variables()
-	#send_populated_dictionaries.rpc_id(other_player)
 	force_camera.rpc_id(GameSettings.server_client_id, (game_map.agent_spawn_client_1.position + game_map.agent_spawn_client_2.position + game_map.agent_spawn_client_3.position + game_map.agent_spawn_client_4.position)/4, 20)
 	force_camera((game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position + game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
 	pass
@@ -102,7 +98,7 @@ func _physics_process(delta: float) -> void:
 			for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
 				selector.position = (
 			$World/Camera3D as Camera3D).unproject_position(
-					selector.referenced_agent.position)# - selector.get_size()/2
+					selector.referenced_agent.position)
 			if server_ready_bool and client_ready_bool:
 				_update_game_phase(GamePhases.EXECUTION)
 				if multiplayer.is_server():
@@ -118,11 +114,8 @@ func _physics_process(delta: float) -> void:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
 			current_game_step += 1
-			for age in server_agents:
-				if server_agents[age]["action_done"] == false:
-					return
-			for age in client_agents:
-				if client_agents[age]["action_done"] == false:
+			for agent in ($Agents.get_children() as Array[Agent]):
+				if agent.action_done == false:
 					return
 			_update_game_phase(GamePhases.SELECTION)
 
@@ -206,10 +199,10 @@ func create_all_raycasts():
 
 
 @rpc("authority", "call_local", "reliable")
-func append_action_timeline(agent, actions):
+func append_action_timeline(agent : Agent):
 	if not action_timeline.has(current_game_step):
 		action_timeline[current_game_step] = {}
-	action_timeline[current_game_step][agent] = actions
+	action_timeline[current_game_step][agent.name] = agent.queued_action
 
 
 @rpc("call_local")
@@ -248,36 +241,22 @@ func create_agent(data): #TODO
 
 
 	if data.player_id == 1:
-		server_agents[new_agent.name] = {agent_node=new_agent, action_array=[], action_done=true}
+		server_agents[new_agent.name] = {agent_node=new_agent, small_hud=null, text=""}
 		if multiplayer.multiplayer_peer.get_unique_id() == data.player_id:
 			server_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
 			_quick_views.add_child(server_agents[new_agent.name]["small_hud"])
 			server_agents[new_agent.name]["small_hud"]._health_bar.max_value = data.agent_stats.health
 			server_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = data.agent_stats.health / 2
-			#server_agents[new_agent.name]["small_hud"].update_weapon("none")
-			#server_agents[new_agent.name]["small_hud"].init_weapon_in(0, 0, 0)
-			#server_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
 			server_agents[new_agent.name]["small_hud"].ref_ag = new_agent
 
-			server_agents[new_agent.name]["text"] = ""
-			server_agents[new_agent.name]["action_done"] = true
-
 	else:
-		client_agents[new_agent.name] = {agent_node=new_agent, action_array=[], action_done=true}
+		client_agents[new_agent.name] = {agent_node=new_agent, small_hud=null, text=""}
 		if multiplayer.multiplayer_peer.get_unique_id() == data.player_id:
 			client_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
 			_quick_views.add_child(client_agents[new_agent.name]["small_hud"])
 			client_agents[new_agent.name]["small_hud"]._health_bar.max_value = data.agent_stats.health
 			client_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = data.agent_stats.health / 2
-			#client_agents[new_agent.name]["small_hud"].update_state("active")
-			#client_agents[new_agent.name]["small_hud"].update_item("none")
-			#client_agents[new_agent.name]["small_hud"].update_weapon("none")
-			#client_agents[new_agent.name]["small_hud"].init_weapon_in(0, 0, 0)
-			#client_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
 			client_agents[new_agent.name]["small_hud"].ref_ag = new_agent
-
-			client_agents[new_agent.name]["text"] = ""
-			client_agents[new_agent.name]["action_done"] = true
 	return new_agent
 
 
@@ -323,17 +302,10 @@ func return_attacked(attacker : Agent, location : Vector3):
 func determine_cqc_events():
 	var cqc_actors = {}
 
-	for grabber_name in server_agents.keys():
-		var try : Agent = server_agents[grabber_name].agent_node
-		if try.state != Agent.States.CQC_GRAB:
-			continue # check correct state
-		cqc_actors[try] = return_attacked(try, try.queued_action[1])
-
-	for grabber_name in client_agents.keys():
-		var try : Agent = client_agents[grabber_name].agent_node
-		if try.state != Agent.States.CQC_GRAB:
+	for agent in ($Agents.get_children() as Array[Agent]):
+		if agent.state != Agent.States.CQC_GRAB:
 			continue
-		cqc_actors[try] = return_attacked(try, try.queued_action[1])
+		cqc_actors[agent] = return_attacked(agent, agent.queued_action[1])
 
 	for grabber in (cqc_actors.keys() as Array[Agent]):
 		grabber.state = Agent.States.USING_WEAPON
@@ -365,17 +337,10 @@ func determine_cqc_events():
 func determine_weapon_events():
 	var attackers = {}
 
-	for agent in server_agents.keys():
-		var try : Agent = server_agents[agent].agent_node
-		if try.state != Agent.States.FIRE_GUN:
-			continue # check correct state, and if we haven't already resolved this
-		attackers[try] = return_attacked(try, try.queued_action[1])
-
-	for agent in client_agents.keys():
-		var try : Agent = client_agents[agent].agent_node
-		if try.state != Agent.States.FIRE_GUN:
+	for agent in ($Agents.get_children() as Array[Agent]):
+		if agent.state != Agent.States.FIRE_GUN:
 			continue
-		attackers[try] = return_attacked(try, try.queued_action[1])
+		attackers[agent] = return_attacked(agent, agent.queued_action[1])
 
 	for attacker in (attackers.keys() as Array[Agent]):
 		attacker.state = Agent.States.USING_WEAPON
@@ -391,16 +356,6 @@ func _agent_heard_something(listener : Agent, sound : Node3D):
 
 func _agent_died(deceased : Agent):
 	print(deceased.name, " has died, big f")
-	if deceased.get_multiplayer_authority() == 1:
-		if deceased.percieved_by_friendly:
-			(server_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.dead)
-		else:
-			(server_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.unknown)
-	else:
-		if deceased.percieved_by_friendly:
-			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.dead)
-		else:
-			(client_agents[deceased]["small_hud"] as HUDAgentSmall).update_state(GameRefs.STE.unknown)
 	for agent_selector in $HUDSelectors.get_children() as Array[AgentSelector]:
 		if agent_selector.referenced_agent == deceased:
 			agent_selector.queue_free()
@@ -427,20 +382,14 @@ func _hud_agent_details_actions(agent_selector : AgentSelector): #TODO
 
 
 func _agent_completed_action(agent : Agent): #TODO
-	if agent.get_multiplayer_authority() == 1:
-		server_agents[agent.name]["action_done"] = true
-	else:
-		client_agents[agent.name]["action_done"] = true
+	agent.action_done = true
 	if not agent.is_multiplayer_authority():
 		return
 	agent.flash_outline(Color.GREEN)
 
 
 func _agent_interrupted(agent : Agent): #TODO
-	if agent.get_multiplayer_authority() == 1:
-		server_agents[agent.name]["action_done"] = true
-	else:
-		client_agents[agent.name]["action_done"] = true
+	agent.action_done = true
 	if not agent.is_multiplayer_authority():
 		return
 	agent.flash_outline(Color.RED)
@@ -496,8 +445,6 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 			final_text_string = "{0}: Pick up {1}".format([
 				ref_ag.name,
 				GameRefs.WEP[decision_array[1]].name])
-			#if len(decision_array) == 3:
-				#final_text_string += " and drop {0}".format([GameRefs.WEP[decision_array[2]].name])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
 				ref_ag.name,
@@ -521,10 +468,8 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 			ref_ag.queued_action = []
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
-		client_recieve_single_action.rpc(ref_ag.name, decision_array, server_agents[ref_ag.name]["action_done"])
 	else:
 		client_agents[ref_ag.name]["text"] = final_text_string
-		server_recieve_single_action.rpc(ref_ag.name, decision_array, client_agents[ref_ag.name]["action_done"])
 	update_text()
 
 
@@ -557,10 +502,8 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	final_text_string += "to New Position"
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
-		client_recieve_single_action.rpc(ref_ag.name, decision_array, server_agents[ref_ag.name]["action_done"])
 	else:
 		client_agents[ref_ag.name]["text"] = final_text_string
-		server_recieve_single_action.rpc(ref_ag.name, decision_array, client_agents[ref_ag.name]["action_done"])
 	update_text()
 
 
@@ -591,10 +534,8 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 
 	if multiplayer.multiplayer_peer.get_unique_id() == 1:
 		server_agents[ref_ag.name]["text"] = final_text_string
-		client_recieve_single_action.rpc(ref_ag.name, decision_array, server_agents[ref_ag.name]["action_done"])
 	else:
 		client_agents[ref_ag.name]["text"] = final_text_string
-		server_recieve_single_action.rpc(ref_ag.name, decision_array, client_agents[ref_ag.name]["action_done"])
 	update_text()
 
 
@@ -628,31 +569,12 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			server_ready_bool = false
 			client_ready_bool = false
 			# populate agents with actions, as well as action_timeline
-			for ag in server_agents:
-				server_agents[ag]["agent_node"].queued_action = server_agents[ag]["action_array"]
-				server_agents[ag]["action_done"] = false
-				if multiplayer.is_server():
-					append_action_timeline.rpc(ag, server_agents[ag]["action_array"])
-			for ag in client_agents:
-				client_agents[ag]["agent_node"].queued_action = client_agents[ag]["action_array"]
-				client_agents[ag]["action_done"] = false
-				if multiplayer.is_server():
-					append_action_timeline.rpc(ag, client_agents[ag]["action_array"])
 			for agent in ($Agents.get_children() as Array[Agent]):
+				agent.action_done = false
+				if multiplayer.is_server():
+					append_action_timeline(agent)
 				agent.perform_action()
 			await get_tree().create_timer(0.10).timeout
-
-
-@rpc("any_peer", "call_local", "reliable")
-func client_recieve_single_action(agent_name, action, done):
-	server_agents[agent_name]["action_array"] = action
-	server_agents[agent_name]["action_done"] = done
-
-
-@rpc("any_peer", "call_local", "reliable")
-func server_recieve_single_action(agent_name, action, done):
-	client_agents[agent_name]["action_array"] = action
-	client_agents[agent_name]["action_done"] = done
 
 
 @rpc("any_peer", "call_local", "reliable")
@@ -672,5 +594,3 @@ func _on_execute_pressed() -> void:
 
 func _on_cold_boot_timer_timeout() -> void:
 	_update_game_phase(GamePhases.SELECTION, false)
-	#if multiplayer.is_server():
-		#create_all_raycasts.rpc()

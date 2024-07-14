@@ -77,7 +77,8 @@ enum GameActions {
 	HALT,
 }
 #format is [GameActions, ... (game action parameters)]
-var queued_action = []
+@export var queued_action = []
+@export var action_done : bool
 
 enum States {
 	STAND, CROUCH, PRONE,
@@ -87,23 +88,23 @@ enum States {
 }
 @export var state : States = States.STAND
 
-var target_direction : float
-var stun_time : int = 0
-var health : int = 10
-var stun_health : int = 10
-var target_camo_level : int
-var target_accuracy : float
-var weapons_animation_blend := Vector2.ONE
-var target_world_collide_height : float
-var target_world_collide_y : float
-var game_steps_since_execute : int
-var grabbing_agent : Agent
+@export var target_direction : float
+@export var stun_time : int = 0
+@export var health : int = 10
+@export var stun_health : int = 10
+@export var target_camo_level : int
+@export var target_accuracy : float
+@export var weapons_animation_blend := Vector2.ONE
+@export var target_world_collide_height : float
+@export var target_world_collide_y : float
+@export var game_steps_since_execute : int
+@export var grabbing_agent : Agent
 
 enum AttackStep {
 	ORIENTING,
 	ATTACKING,
 }
-var attack_step := AttackStep.ORIENTING
+@export var attack_step := AttackStep.ORIENTING
 
 func in_incapacitated_state() -> bool:
 	return state in [States.GRABBED, States.STUNNED, States.DEAD]
@@ -515,6 +516,7 @@ func _on_animation_finished(anim_name: StringName) -> void:
 		state = States.STUNNED
 		queued_action.clear()
 	if len(queued_action) == 0:
+		action_done = true
 		return
 	match queued_action[0]:
 		GameActions.GO_STAND when anim_name == "B_CrouchToStand":
