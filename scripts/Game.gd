@@ -332,6 +332,9 @@ func determine_cqc_events():
 		if grabber.get_multiplayer_authority() == grabbee.get_multiplayer_authority(): # don't grab your friends
 			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
+		if grabbee.in_incapacitated_state(): # don't grab people who're already on the ground
+			grabber._anim_state.travel("B_Stand_Attack_Whiff")
+			continue
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
 		grabbee.take_damage(3, true)
