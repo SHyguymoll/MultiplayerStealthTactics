@@ -426,7 +426,7 @@ func hide_hud():
 	twe.set_parallel(true)
 	twe.set_trans(Tween.TRANS_CUBIC)
 	twe.tween_property(_execute_button, "position:y", 970, 0.25).from(825)
-	twe.tween_property(_quick_views, "position:y", 920, 0.25).from(712)
+	#twe.tween_property(_quick_views, "position:y", 920, 0.25).from(712)
 	twe.tween_property(_ag_insts, "position:x", 1638, 0.25).from(1059)
 
 
@@ -435,7 +435,7 @@ func show_hud():
 	twe.set_parallel(true)
 	twe.set_trans(Tween.TRANS_SINE)
 	twe.tween_property(_execute_button, "position:y", 825, 0.25).from(970)
-	twe.tween_property(_quick_views, "position:y", 712, 0.25).from(920)
+	#twe.tween_property(_quick_views, "position:y", 712, 0.25).from(920)
 	twe.tween_property(_ag_insts, "position:x", 1059, 0.25).from(1638)
 
 
