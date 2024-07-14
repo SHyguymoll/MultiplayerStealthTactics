@@ -411,8 +411,9 @@ func _game_step(delta: float) -> void:
 			_anim_state.travel("Crouch")
 			state = States.CROUCH
 	if state == States.GRABBED:
-		global_position = grabbing_agent._cqc_anim_helper.global_position
-		global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
+		if grabbing_agent != null:
+			global_position = grabbing_agent._cqc_anim_helper.global_position
+			global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
 	if len(queued_action) == 0:
 		return
 	match queued_action[0]:
