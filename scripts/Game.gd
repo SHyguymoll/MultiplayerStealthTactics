@@ -219,6 +219,7 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 	new_agent.rotation.y = rot_y
 	new_agent.set_multiplayer_authority(player_id)
 	new_agent.health = agent_stats.health
+	new_agent.stun_health = agent_stats.health / 2
 	new_agent.view_dist = agent_stats.view_dist
 	new_agent.view_across = agent_stats.view_across
 	new_agent.eye_strength = agent_stats.eye_strength
