@@ -10,6 +10,10 @@
 script = ExtResource("1_re23i")
 game_map = NodePath("World/GameMap")
 
+[node name="AgentSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
+spawn_path = NodePath("../Agents")
+
 [node name="Agents" type="Node3D" parent="."]
 
 [node name="World" type="Node3D" parent="."]

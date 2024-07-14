@@ -18565,6 +18565,7 @@ visible = false
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_no7tm")
+visibility_update_mode = 1
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
 root_node = NodePath("../Agent")

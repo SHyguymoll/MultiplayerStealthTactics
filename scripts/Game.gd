@@ -33,6 +33,7 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 
 
 @export var game_map : GameMap
+@onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu
@@ -40,11 +41,13 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 @onready var _phase_label : Label = $HUDBase/CurrentPhase
 @onready var _ag_insts : Label = $HUDBase/AgentInstructions
 
+
 func _ready():
 	# Preconfigure game.
 	server_agents = {}
 	client_agents = {}
 	_radial_menu.visible = false
+	ag_spawner.spawn_function = create_agent
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 
@@ -126,53 +129,66 @@ func _physics_process(delta: float) -> void:
 
 func server_populate_variables(): #TODO
 	# server's agents
-	var spawn = game_map.agent_spawn_server_1
-	create_agent.rpc(
-			1,
-			Lobby.players[1].agents[0],
-			spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+	var data = {
+		player_id = 1,
+		agent_stats = Lobby.players[1].agents[0],
+		pos_x = game_map.agent_spawn_server_1.position.x,
+		pos_y = game_map.agent_spawn_server_1.position.y,
+		pos_z = game_map.agent_spawn_server_1.position.z,
+		rot_y = game_map.agent_spawn_server_1.rotation.y,
+	}
+	ag_spawner.spawn(data)
 	if len(Lobby.players[1].agents) > 1:
-		spawn = game_map.agent_spawn_server_2
-		create_agent.rpc(
-				1,
-				Lobby.players[1].agents[1],
-				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+		data.agent_stats = Lobby.players[1].agents[1]
+		data.pos_x = game_map.agent_spawn_server_2.position.x
+		data.pos_y = game_map.agent_spawn_server_2.position.y
+		data.pos_z = game_map.agent_spawn_server_2.position.z
+		data.rot_y = game_map.agent_spawn_server_2.rotation.y
+		ag_spawner.spawn(data)
 	if len(Lobby.players[1].agents) > 2:
-		spawn = game_map.agent_spawn_server_3
-		create_agent.rpc(
-				1,
-				Lobby.players[1].agents[2],
-				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+		data.agent_stats = Lobby.players[1].agents[2]
+		data.pos_x = game_map.agent_spawn_server_3.position.x
+		data.pos_y = game_map.agent_spawn_server_3.position.y
+		data.pos_z = game_map.agent_spawn_server_3.position.z
+		data.rot_y = game_map.agent_spawn_server_3.rotation.y
+		ag_spawner.spawn(data)
 	if len(Lobby.players[1].agents) > 3:
-		spawn = game_map.agent_spawn_server_4
-		create_agent.rpc(
-				1,
-				Lobby.players[1].agents[3],
-				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+		data.agent_stats = Lobby.players[1].agents[3]
+		data.pos_x = game_map.agent_spawn_server_4.position.x
+		data.pos_y = game_map.agent_spawn_server_4.position.y
+		data.pos_z = game_map.agent_spawn_server_4.position.z
+		data.rot_y = game_map.agent_spawn_server_4.rotation.y
+		ag_spawner.spawn(data)
 	# client's agents
-	spawn = game_map.agent_spawn_client_1
-	create_agent.rpc(
-			GameSettings.server_client_id,
-			Lobby.players[GameSettings.server_client_id].agents[0],
-			spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+	data.player_id = GameSettings.server_client_id
+	data.agent_stats = Lobby.players[GameSettings.server_client_id].agents[0]
+	data.pos_x = game_map.agent_spawn_client_1.position.x
+	data.pos_y = game_map.agent_spawn_client_1.position.y
+	data.pos_z = game_map.agent_spawn_client_1.position.z
+	data.rot_y = game_map.agent_spawn_client_1.rotation.y
+	ag_spawner.spawn(data)
 	if len(Lobby.players[GameSettings.server_client_id].agents) > 1:
-		spawn = game_map.agent_spawn_client_2
-		create_agent.rpc(
-				GameSettings.server_client_id,
-				Lobby.players[GameSettings.server_client_id].agents[1],
-				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+		data.agent_stats = Lobby.players[GameSettings.server_client_id].agents[1]
+		data.pos_x = game_map.agent_spawn_client_2.position.x
+		data.pos_y = game_map.agent_spawn_client_2.position.y
+		data.pos_z = game_map.agent_spawn_client_2.position.z
+		data.rot_y = game_map.agent_spawn_client_2.rotation.y
+		ag_spawner.spawn(data)
 	if len(Lobby.players[GameSettings.server_client_id].agents) > 2:
-		spawn = game_map.agent_spawn_client_3
-		create_agent.rpc(
-				GameSettings.server_client_id,
-				Lobby.players[GameSettings.server_client_id].agents[2],
-				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+		data.agent_stats = Lobby.players[GameSettings.server_client_id].agents[2]
+		data.pos_x = game_map.agent_spawn_client_3.position.x
+		data.pos_y = game_map.agent_spawn_client_3.position.y
+		data.pos_z = game_map.agent_spawn_client_3.position.z
+		data.rot_y = game_map.agent_spawn_client_3.rotation.y
+		ag_spawner.spawn(data)
+
 	if len(Lobby.players[GameSettings.server_client_id].agents) > 3:
-		spawn = game_map.agent_spawn_client_4
-		create_agent.rpc(
-				GameSettings.server_client_id,
-				Lobby.players[GameSettings.server_client_id].agents[3],
-				spawn.position.x, spawn.position.y, spawn.position.z, spawn.rotation.y)
+		data.agent_stats = Lobby.players[GameSettings.server_client_id].agents[3]
+		data.pos_x = game_map.agent_spawn_client_4.position.x
+		data.pos_y = game_map.agent_spawn_client_4.position.y
+		data.pos_z = game_map.agent_spawn_client_4.position.z
+		data.rot_y = game_map.agent_spawn_client_4.rotation.y
+		ag_spawner.spawn(data)
 
 
 @rpc("authority", "call_local", "reliable")
@@ -201,9 +217,9 @@ func ping():
 	print("{0}: pong!".format([multiplayer.multiplayer_peer.get_unique_id()]))
 
 @rpc("authority", "call_local", "reliable")
-func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
+func create_agent(data): #TODO
 	var new_agent : Agent = agent_scene.instantiate()
-	new_agent.name = str(player_id) + "_" + str(agent_stats.name)
+	new_agent.name = str(data.player_id) + "_" + str(data.agent_stats.name)
 	new_agent.action_completed.connect(_agent_completed_action)
 	new_agent.action_interrupted.connect(_agent_interrupted)
 
@@ -215,29 +231,29 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 	new_agent.heard_sound
 	new_agent.agent_died.connect(_agent_died)
 
-	new_agent.position = Vector3(pos_x, pos_y, pos_z)
-	new_agent.rotation.y = rot_y
-	new_agent.set_multiplayer_authority(player_id)
-	new_agent.health = agent_stats.health
-	new_agent.stun_health = agent_stats.health / 2
-	new_agent.view_dist = agent_stats.view_dist
-	new_agent.view_across = agent_stats.view_across
-	new_agent.eye_strength = agent_stats.eye_strength
-	new_agent.hearing_dist = agent_stats.hearing_dist
-	new_agent.ear_strength = agent_stats.ear_strength
-	new_agent.held_items = agent_stats.held_items
+	new_agent.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_agent.rotation.y = data.rot_y
+	new_agent.set_multiplayer_authority(data.player_id)
+	new_agent.health = data.agent_stats.health
+	new_agent.stun_health = data.agent_stats.health / 2
+	new_agent.view_dist = data.agent_stats.view_dist
+	new_agent.view_across = data.agent_stats.view_across
+	new_agent.eye_strength = data.agent_stats.eye_strength
+	new_agent.hearing_dist = data.agent_stats.hearing_dist
+	new_agent.ear_strength = data.agent_stats.ear_strength
+	new_agent.held_items = data.agent_stats.held_items
 	new_agent.held_weapons.append(GameWeapon.new("fist", new_agent.name + "_fist"))
-	for weapon in agent_stats.held_weapons:
+	for weapon in data.agent_stats.held_weapons:
 		new_agent.held_weapons.append(GameWeapon.new(weapon, new_agent.name + "_" + weapon))
-	$Agents.add_child(new_agent)
 
-	if player_id == 1:
+
+	if data.player_id == 1:
 		server_agents[new_agent.name] = {agent_node=new_agent, action_array=[], action_done=true}
-		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
+		if multiplayer.multiplayer_peer.get_unique_id() == data.player_id:
 			server_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
 			_quick_views.add_child(server_agents[new_agent.name]["small_hud"])
-			server_agents[new_agent.name]["small_hud"]._health_bar.max_value = agent_stats.health
-			server_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = agent_stats.health / 2
+			server_agents[new_agent.name]["small_hud"]._health_bar.max_value = data.agent_stats.health
+			server_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = data.agent_stats.health / 2
 			#server_agents[new_agent.name]["small_hud"].update_weapon("none")
 			#server_agents[new_agent.name]["small_hud"].init_weapon_in(0, 0, 0)
 			#server_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
@@ -248,11 +264,11 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 
 	else:
 		client_agents[new_agent.name] = {agent_node=new_agent, action_array=[], action_done=true}
-		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
+		if multiplayer.multiplayer_peer.get_unique_id() == data.player_id:
 			client_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
 			_quick_views.add_child(client_agents[new_agent.name]["small_hud"])
-			client_agents[new_agent.name]["small_hud"]._health_bar.max_value = agent_stats.health
-			client_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = agent_stats.health / 2
+			client_agents[new_agent.name]["small_hud"]._health_bar.max_value = data.agent_stats.health
+			client_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = data.agent_stats.health / 2
 			#client_agents[new_agent.name]["small_hud"].update_state("active")
 			#client_agents[new_agent.name]["small_hud"].update_item("none")
 			#client_agents[new_agent.name]["small_hud"].update_weapon("none")
@@ -262,6 +278,7 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 
 			client_agents[new_agent.name]["text"] = ""
 			client_agents[new_agent.name]["action_done"] = true
+	return new_agent
 
 
 func create_agent_selector(agent : Agent):
@@ -655,5 +672,5 @@ func _on_execute_pressed() -> void:
 
 func _on_cold_boot_timer_timeout() -> void:
 	_update_game_phase(GamePhases.SELECTION, false)
-	if multiplayer.is_server():
-		create_all_raycasts.rpc()
+	#if multiplayer.is_server():
+		#create_all_raycasts.rpc()
