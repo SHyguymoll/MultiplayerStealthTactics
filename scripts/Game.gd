@@ -554,7 +554,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	$ClientsideIndicators.add_child(new_indicator)
 	await new_indicator.indicator_placed
 	selection_step = SelectionSteps.BASE
-	decision_array.append(new_indicator.position)
+	decision_array.append(new_indicator._indicator.global_position)
 	var final_text_string := ""
 	match decision_array[0]:
 		Agent.GameActions.LOOK_AROUND:
