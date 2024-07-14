@@ -125,3 +125,11 @@ const STE := {
 
 func compare_wep_type(agent : Agent, wep_type : WeaponTypes):
 	return WEP[agent.held_weapons[agent.selected_weapon].wep_name].type == wep_type
+
+func return_icon(agent : Agent, is_wep : bool):
+	if is_wep:
+		if WEP.get(agent.held_weapons[agent.selected_weapon].wep_name, null) == null:
+			return ITM.none.icon
+		return WEP.get(agent.held_weapons[agent.selected_weapon].wep_name).icon
+	else:
+		return ITM.get(agent.held_items[agent.selected_item]).icon

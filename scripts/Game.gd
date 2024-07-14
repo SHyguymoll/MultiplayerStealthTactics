@@ -236,11 +236,12 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
 			server_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
 			_quick_views.add_child(server_agents[new_agent.name]["small_hud"])
-			server_agents[new_agent.name]["small_hud"].update_state("active")
-			server_agents[new_agent.name]["small_hud"].update_item("none")
-			server_agents[new_agent.name]["small_hud"].update_weapon("none")
-			server_agents[new_agent.name]["small_hud"].init_weapon_in(0, 0, 0)
-			server_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
+			server_agents[new_agent.name]["small_hud"]._health_bar.max_value = agent_stats.health
+			server_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = agent_stats.health / 2
+			#server_agents[new_agent.name]["small_hud"].update_weapon("none")
+			#server_agents[new_agent.name]["small_hud"].init_weapon_in(0, 0, 0)
+			#server_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
+			server_agents[new_agent.name]["small_hud"].ref_ag = new_agent
 
 			server_agents[new_agent.name]["text"] = ""
 			server_agents[new_agent.name]["action_done"] = true
@@ -250,11 +251,14 @@ func create_agent(player_id, agent_stats, pos_x, pos_y, pos_z, rot_y): #TODO
 		if multiplayer.multiplayer_peer.get_unique_id() == player_id:
 			client_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
 			_quick_views.add_child(client_agents[new_agent.name]["small_hud"])
-			client_agents[new_agent.name]["small_hud"].update_state("active")
-			client_agents[new_agent.name]["small_hud"].update_item("none")
-			client_agents[new_agent.name]["small_hud"].update_weapon("none")
-			client_agents[new_agent.name]["small_hud"].init_weapon_in(0, 0, 0)
-			client_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
+			client_agents[new_agent.name]["small_hud"]._health_bar.max_value = agent_stats.health
+			client_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = agent_stats.health / 2
+			#client_agents[new_agent.name]["small_hud"].update_state("active")
+			#client_agents[new_agent.name]["small_hud"].update_item("none")
+			#client_agents[new_agent.name]["small_hud"].update_weapon("none")
+			#client_agents[new_agent.name]["small_hud"].init_weapon_in(0, 0, 0)
+			#client_agents[new_agent.name]["small_hud"].init_weapon_res(0, 0, 0)
+			client_agents[new_agent.name]["small_hud"].ref_ag = new_agent
 
 			client_agents[new_agent.name]["text"] = ""
 			client_agents[new_agent.name]["action_done"] = true

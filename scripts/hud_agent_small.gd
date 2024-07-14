@@ -9,21 +9,13 @@ const DELTA_DIV = 0.85
 @onready var _itm_tex : TextureRect = $Textures/Equipped/Item
 @onready var _wep_in_bar : ProgressBar = $WeaponAmmoIn
 @onready var _wep_res_bar : ProgressBar = $WeaponAmmoReserve
+@onready var _health_bar : ProgressBar = $Textures/Health
+@onready var _stun_health_bar : ProgressBar = $Textures/StunHealth
+
+var ref_ag : Agent
 
 var _wep_in_mod_dir = 1
 var _wep_res_mod_dir = 1
-
-func update_state(new_state):
-	_state_tex.texture = GameRefs.STE.get(new_state, GameRefs.STE.unknown)
-
-
-func update_weapon(new_weapon):
-	_wep_tex.texture = GameRefs.WEP.get(new_weapon, GameRefs.WEP.fist).icon
-
-
-func update_item(new_item):
-	_itm_tex.texture = GameRefs.ITM.get(new_item, GameRefs.ITM.none).icon
-
 
 func init_weapon_in(min_val, max_val, cur_val):
 	_wep_in_bar.min_value = min_val
@@ -45,7 +37,24 @@ func update_weapon_res(new_val):
 	_wep_res_bar.value = new_val
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	if ref_ag.in_incapacitated_state() and not ref_ag.percieved_by_friendly:
+		_state_tex.texture = GameRefs.STE.unknown
+		return
+	match ref_ag.state:
+		Agent.States.STAND, Agent.States.CROUCH, Agent.States.PRONE:
+			_state_tex.texture = GameRefs.STE.active
+		Agent.States.HURT, Agent.States.GRABBED:
+			_state_tex.texture = GameRefs.STE.alert
+		Agent.States.STUNNED:
+			_state_tex.texture = GameRefs.STE.stunned
+		Agent.States.DEAD:
+			_state_tex.texture = GameRefs.STE.dead
+	_wep_tex.texture = GameRefs.return_icon(ref_ag, true)
+	_itm_tex.texture = GameRefs.return_icon(ref_ag, false)
+
+	_health_bar.value = ref_ag.health
+	_stun_health_bar.value = ref_ag.stun_health
 	if _wep_in_bar.value < _wep_in_bar.max_value/REMAIN_DIV:
 		_wep_in_bar.modulate.s = clamp(_wep_in_bar.modulate.s + (delta/DELTA_DIV * _wep_in_mod_dir), 0.0, 1.0)
 		if (_wep_in_bar.modulate.s == 1.0 and _wep_in_mod_dir == 1 or
@@ -65,3 +74,4 @@ func _process(delta: float) -> void:
 	else:
 		if _wep_res_bar.modulate.s != 0.0:
 			_wep_res_bar.modulate.s = 0.0
+
