@@ -293,6 +293,8 @@ func debug_process():
 func _ready() -> void:
 	# set up sensors
 	update_eye_cone(1.0)
+	if is_multiplayer_authority():
+		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
 	update_ear_radius(1.0)
 	# custom texture
 	if skin_texture:

@@ -69,3 +69,4 @@ fov_change={
 3d_physics/layer_8="agent_navigation"
 3d_physics/layer_9="attack_hitboxes"
 3d_physics/layer_10="clickable"
+3d_physics/layer_11="agent_view_clientside"
