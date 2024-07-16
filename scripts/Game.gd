@@ -177,18 +177,18 @@ func server_populate_variables(): #TODO
 		ag_spawner.spawn(data)
 
 
-@rpc("authority", "call_local", "reliable")
-func create_all_raycasts():
-	for agent_block in server_agents.keys():
-		var agent = server_agents[agent_block]["agent_node"]
-		for cli_agent_block in client_agents.keys():
-			var cli_agent = client_agents[cli_agent_block]["agent_node"]
-			var new_tracking_ray = tracking_raycast3d_scene.instantiate()
-			new_tracking_ray.source = agent
-			new_tracking_ray.sink = cli_agent
-			new_tracking_ray.name = agent.name + "|" + cli_agent.name
-			$RayCasts.add_child(new_tracking_ray)
-			print("created ray ", new_tracking_ray)
+#@rpc("authority", "call_local", "reliable")
+#func create_all_raycasts():
+	#for agent_block in server_agents.keys():
+		#var agent = server_agents[agent_block]["agent_node"]
+		#for cli_agent_block in client_agents.keys():
+			#var cli_agent = client_agents[cli_agent_block]["agent_node"]
+			#var new_tracking_ray = tracking_raycast3d_scene.instantiate()
+			#new_tracking_ray.source = agent
+			#new_tracking_ray.sink = cli_agent
+			#new_tracking_ray.name = agent.name + "|" + cli_agent.name
+			#$RayCasts.add_child(new_tracking_ray)
+			#print("created ray ", new_tracking_ray)
 
 
 @rpc("authority", "call_local", "reliable")
