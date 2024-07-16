@@ -78,6 +78,7 @@ enum GameActions {
 }
 #format is [GameActions, ... (game action parameters)]
 @export var queued_action = []
+var action_text := ""
 @export var action_done : bool
 
 enum States {

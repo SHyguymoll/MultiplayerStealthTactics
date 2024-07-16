@@ -8,9 +8,6 @@ var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
 var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
 
-var server_agents : Dictionary = {}
-var client_agents : Dictionary = {}
-
 var server_ready_bool := false
 var client_ready_bool := false
 
@@ -81,15 +78,10 @@ func create_popup() -> void: #TODO
 
 func update_text() -> void:
 	_ag_insts.text = ""
-	if multiplayer.multiplayer_peer.get_unique_id() == 1:
-		for agent in server_agents:
-			_ag_insts.text += server_agents[agent]["text"]
-			_ag_insts.text += "\n"
+	for agent in ($Agents.get_children() as Array[Agent]):
+		if agent.is_multiplayer_authority():
+			_ag_insts.text += agent.action_text + "\n"
 
-	else:
-		for agent in client_agents:
-			_ag_insts.text += client_agents[agent]["text"]
-			_ag_insts.text += "\n"
 
 
 func _physics_process(delta: float) -> void:
@@ -101,12 +93,8 @@ func _physics_process(delta: float) -> void:
 					selector.referenced_agent.position)
 			if server_ready_bool and client_ready_bool:
 				_update_game_phase(GamePhases.EXECUTION)
-				if multiplayer.is_server():
-					for age in server_agents:
-						server_agents[age]["text"] = ""
-				else:
-					for age in client_agents:
-						client_agents[age]["text"] = ""
+				for agent in ($Agents.get_children() as Array[Agent]):
+					agent.action_text = ""
 				update_text()
 		GamePhases.EXECUTION:
 			determine_cqc_events()
@@ -238,25 +226,13 @@ func create_agent(data): #TODO
 	new_agent.held_weapons.append(GameWeapon.new("fist", new_agent.name + "_fist"))
 	for weapon in data.agent_stats.held_weapons:
 		new_agent.held_weapons.append(GameWeapon.new(weapon, new_agent.name + "_" + weapon))
+	if multiplayer.multiplayer_peer.get_unique_id() == data.player_id:
+		var new_small_hud = hud_agent_small_scene.instantiate()
+		_quick_views.add_child(new_small_hud)
+		new_small_hud._health_bar.max_value = data.agent_stats.health
+		new_small_hud._stun_health_bar.max_value = data.agent_stats.health / 2
+		new_small_hud.ref_ag = new_agent
 
-
-	if data.player_id == 1:
-		server_agents[new_agent.name] = {agent_node=new_agent, small_hud=null, text=""}
-		if multiplayer.multiplayer_peer.get_unique_id() == data.player_id:
-			server_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
-			_quick_views.add_child(server_agents[new_agent.name]["small_hud"])
-			server_agents[new_agent.name]["small_hud"]._health_bar.max_value = data.agent_stats.health
-			server_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = data.agent_stats.health / 2
-			server_agents[new_agent.name]["small_hud"].ref_ag = new_agent
-
-	else:
-		client_agents[new_agent.name] = {agent_node=new_agent, small_hud=null, text=""}
-		if multiplayer.multiplayer_peer.get_unique_id() == data.player_id:
-			client_agents[new_agent.name]["small_hud"] = hud_agent_small_scene.instantiate()
-			_quick_views.add_child(client_agents[new_agent.name]["small_hud"])
-			client_agents[new_agent.name]["small_hud"]._health_bar.max_value = data.agent_stats.health
-			client_agents[new_agent.name]["small_hud"]._stun_health_bar.max_value = data.agent_stats.health / 2
-			client_agents[new_agent.name]["small_hud"].ref_ag = new_agent
 	return new_agent
 
 
@@ -466,10 +442,8 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Crawling"
 		null:
 			ref_ag.queued_action = []
-	if multiplayer.multiplayer_peer.get_unique_id() == 1:
-		server_agents[ref_ag.name]["text"] = final_text_string
-	else:
-		client_agents[ref_ag.name]["text"] = final_text_string
+	if ref_ag.is_multiplayer_authority():
+		ref_ag.action_text = final_text_string
 	update_text()
 
 
@@ -500,10 +474,8 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.CRAWL_TO_POS:
 			final_text_string = "{0}: Crawl ".format([ref_ag.name])
 	final_text_string += "to New Position"
-	if multiplayer.multiplayer_peer.get_unique_id() == 1:
-		server_agents[ref_ag.name]["text"] = final_text_string
-	else:
-		client_agents[ref_ag.name]["text"] = final_text_string
+	if ref_ag.is_multiplayer_authority():
+		ref_ag.action_text = final_text_string
 	update_text()
 
 
@@ -531,11 +503,8 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 			final_text_string = "{0}: Use {1} at Position".format(
 				[ref_ag.name,
 				GameRefs.WEP[ref_ag.held_weapons[ref_ag.selected_weapon].wep_name].name])
-
-	if multiplayer.multiplayer_peer.get_unique_id() == 1:
-		server_agents[ref_ag.name]["text"] = final_text_string
-	else:
-		client_agents[ref_ag.name]["text"] = final_text_string
+	if ref_ag.is_multiplayer_authority():
+		ref_ag.action_text = final_text_string
 	update_text()
 
 
@@ -547,18 +516,10 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
-			if multiplayer.is_server():
-				for ag in server_agents:
-					var checked_agent = server_agents[ag]["agent_node"]
-					if not checked_agent.in_incapacitated_state():
-						create_agent_selector(checked_agent)
-						checked_agent.flash_outline(Color.ORCHID)
-			else:
-				for ag in client_agents:
-					var checked_agent = client_agents[ag]["agent_node"]
-					if not checked_agent.in_incapacitated_state():
-						create_agent_selector(checked_agent)
-						checked_agent.flash_outline(Color.ORCHID)
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
+					create_agent_selector(ag)
+					ag.flash_outline(Color.ORCHID)
 			show_hud()
 			if $HUDSelectors.get_child_count() == 0 and check_incap:
 				_on_execute_pressed() # run the execute function since the player can't do anything
