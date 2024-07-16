@@ -17,7 +17,7 @@ func _ready() -> void:
 	global_position = referenced_agent.global_position + Vector3.UP * (_game_camera.ground_height + 0.5)
 
 
-func _succeed(_agent):
+func _succeed():
 	_indicator.play("success")
 
 
@@ -25,7 +25,7 @@ func _neutral():
 	_indicator.play("neutral")
 
 
-func _fail(_agent):
+func _fail():
 	_indicator.play("fail")
 
 
@@ -54,6 +54,12 @@ func _physics_process(delta: float) -> void: #TODO
 		else:
 			_indicator.global_position = global_position + target_position
 			_indicator.global_position.y -= global_position.y
+
+		match referenced_agent.action_done:
+			Agent.ActionDoneness.SUCCESS:
+				_succeed()
+			Agent.ActionDoneness.FAIL:
+				_fail()
 
 
 func _input(event: InputEvent) -> void:

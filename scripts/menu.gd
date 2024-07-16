@@ -27,7 +27,7 @@ func get_agents(): #TODO: replace with loading from a file later
 				view_dist=2.5, # how far the view cone extends from the agent
 				view_across=1.0, # how wide the view cone base is
 				eye_strength=0.2, # the strength of the agent's vision as elements get closer
-# (note, this is within the view cone, calculated here: https://www.desmos.com/calculator/w7u017zcya)
+# (note, this is within the view cone, calculated here: https://www.desmos.com/calculator/azk19m9ik3)
 				hearing_dist=1.5, # the radius of the hearing cylinder
 				ear_strength=1, # the strength of the hearing cylinder as audio events play closer
 				# calculate this with the vision calculator by setting v to 100

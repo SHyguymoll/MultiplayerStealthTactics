@@ -105,9 +105,11 @@ func determine_sights():
 
 
 func try_see_agent(spotter : Agent, spottee : Agent):
-	var dist = spotter.position.distance_to(spottee.position)
-	var exponent = ((10.0 * dist)/(log(spottee.visible_level)/log(10)))
-	var sight_chance = 1.0/(1.0/(spotter.eye_strength))**exponent # chance to see
+	var dist = clampf(remap(spotter.position.distance_to(spottee.position), 0.0, spotter.view_dist, 0.0, 1.0), 0.0, 1.0)
+	var exponent = ((1.5 * dist)/(log(spottee.visible_level)/log(10)))
+	var inv_eye = 1.0/spotter.eye_strength
+	var sight_chance = maxf(1.0/(inv_eye**exponent), 0.01) # chance to see
+	print(sight_chance)
 	if sight_chance > 0.7: # seent it
 		spottee.visible = true
 	elif sight_chance > 1.0/3.0: # almost seent it
@@ -115,6 +117,7 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 			return
 		if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority(): # or we could just know them already
 			return
+		spotter.detected_agents.append(spottee)
 		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(randf_range(-1.0/sight_chance, 1.0/sight_chance), 0, randf_range(-3.0, 3.0)))
 
 
@@ -147,7 +150,7 @@ func _physics_process(delta: float) -> void:
 			determine_sights()
 			determine_sounds()
 			for agent in ($Agents.get_children() as Array[Agent]):
-				if agent.action_done == false:
+				if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 					return
 			_update_game_phase(GamePhases.SELECTION)
 
@@ -244,8 +247,6 @@ func ping():
 func create_agent(data) -> Agent: #TODO
 	var new_agent : Agent = agent_scene.instantiate()
 	new_agent.name = str(data.player_id) + "_" + str(data.agent_stats.name)
-	new_agent.action_completed.connect(_agent_completed_action)
-	new_agent.action_interrupted.connect(_agent_interrupted)
 	new_agent.agent_died.connect(_agent_died)
 
 	new_agent.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
@@ -393,20 +394,6 @@ func _hud_agent_details_actions(agent_selector : AgentSelector): #TODO
 	_radial_menu.position = agent_selector.position
 	_radial_menu.init_menu()
 	pass
-
-
-func _agent_completed_action(agent : Agent): #TODO
-	agent.action_done = true
-	if not agent.is_multiplayer_authority():
-		return
-	agent.flash_outline(Color.GREEN)
-
-
-func _agent_interrupted(agent : Agent): #TODO
-	agent.action_done = true
-	if not agent.is_multiplayer_authority():
-		return
-	agent.flash_outline(Color.RED)
 
 
 func hide_hud():
@@ -569,7 +556,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			client_ready_bool = false
 			# populate agents with actions, as well as action_timeline
 			for agent in ($Agents.get_children() as Array[Agent]):
-				agent.action_done = false
+				agent.action_done = Agent.ActionDoneness.NOT_DONE
 				if multiplayer.is_server():
 					append_action_timeline(agent)
 				agent.perform_action()

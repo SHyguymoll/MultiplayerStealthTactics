@@ -24,15 +24,13 @@ func _ready() -> void:
 			play("crouch_walk")
 		Agent.GameActions.CRAWL_TO_POS:
 			play("crawl")
-	referenced_agent.action_completed.connect(_succeed)
-	referenced_agent.action_interrupted.connect(_fail)
 
 
-func _succeed(_agent):
+func _succeed():
 	play("movement_end_success")
 
 
-func _fail(_agent):
+func _fail():
 	play("movement_end_fail")
 
 
@@ -97,6 +95,11 @@ func _physics_process(delta: float) -> void:
 		global_position = ray_position
 		position_valid = _check_position()
 	modulate = Color.WHITE if position_valid else Color.RED
+	match referenced_agent.action_done:
+		Agent.ActionDoneness.SUCCESS:
+			_succeed()
+		Agent.ActionDoneness.FAIL:
+			_fail()
 
 
 

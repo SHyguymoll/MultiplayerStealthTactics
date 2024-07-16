@@ -1,10 +1,7 @@
 class_name Agent
 extends CharacterBody3D
 
-signal action_completed(actor : Agent)
-signal action_interrupted(interrupted_actor : Agent)
 signal agent_selected(agent : Agent)
-
 signal agent_died(deceased : Agent)
 
 const CQC_START = Vector3(0, 0, 0.48)
@@ -75,7 +72,12 @@ enum GameActions {
 #format is [GameActions, ... (game action parameters)]
 @export var queued_action = []
 var action_text := ""
-@export var action_done : bool
+enum ActionDoneness {
+	NOT_DONE,
+	SUCCESS,
+	FAIL,
+}
+@export var action_done : ActionDoneness
 
 enum States {
 	STAND, CROUCH, PRONE,
@@ -146,7 +148,7 @@ func get_required_y_rotation(aimed_position) -> float:
 func perform_action():
 	game_steps_since_execute = 0
 	if len(queued_action) == 0:
-		action_completed.emit(self)
+		action_complete(true, false)
 		return
 	match queued_action[0]:
 		GameActions.GO_STAND:
@@ -213,6 +215,11 @@ func perform_action():
 			if state == States.CRAWL:
 				_anim_state.travel("B_Prone")
 				state = States.PRONE
+
+func action_complete(successfully : bool = true, no_flash : bool = false):
+	action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
+	if is_multiplayer_authority() and not no_flash:
+		flash_outline(Color.GREEN if successfully else Color.RED)
 
 
 func debug_setup():
@@ -390,7 +397,7 @@ func _game_step(delta: float) -> void:
 				States.CRAWL:
 					_anim_state.travel("B_Prone")
 					state = States.PRONE
-			action_completed.emit(self)
+			action_complete()
 			queued_action.clear()
 			return
 	if state == States.STUNNED:
@@ -411,11 +418,11 @@ func _game_step(delta: float) -> void:
 			rotation.y = lerp_angle(rotation.y, target_direction, 0.2)
 			if abs(rotation.y - target_direction) < 0.1:
 				rotation.y = target_direction
-				action_completed.emit(self)
+				action_complete()
 				queued_action.clear()
 		GameActions.CHANGE_WEAPON:
 			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) == 0:
-				action_completed.emit(self)
+				action_complete()
 				queued_action.clear()
 			elif weapons_animation_blend.distance_squared_to(decide_weapon_blend()) < 0.01:
 				weapons_animation_blend = decide_weapon_blend()
@@ -444,6 +451,7 @@ func _game_step(delta: float) -> void:
 							pass
 	visible_level = clamp(visible_level, 0, 100)
 	target_visible_level = lerp(target_visible_level, visible_level, 0.2)
+	$DebugLabel3D.text = str(target_visible_level)
 
 
 func _attack_orient_transition():
@@ -482,26 +490,26 @@ func _attack_orient_transition():
 func _on_animation_finished(anim_name: StringName) -> void:
 	#print(name, ": ", anim_name)
 	if anim_name.begins_with("B_Hurt") and not anim_name in ["B_Hurt_Stunned", "B_Hurt_WakeUp"]:
-		action_interrupted.emit(self)
+		action_complete(false)
 	if state == States.GRABBED:
 		state = States.STUNNED
 		queued_action.clear()
 	if len(queued_action) == 0:
-		action_done = true
+		action_complete(true, true)
 		return
 	match queued_action[0]:
 		GameActions.GO_STAND when anim_name == "B_CrouchToStand":
-			action_completed.emit(self)
+			action_complete()
 		GameActions.GO_CROUCH when anim_name == "B_StandToCrouch":
-			action_completed.emit(self)
+			action_complete()
 		GameActions.GO_CROUCH when anim_name == "B_ProneToCrouch":
-			action_completed.emit(self)
+			action_complete()
 		GameActions.GO_PRONE when anim_name == "B_CrouchToProne":
-			action_completed.emit(self)
+			action_complete()
 		GameActions.USE_WEAPON when anim_name in ["B_Stand_Attack_SmallArms", "B_Stand_Attack_BigArms", "B_Stand_Attack_Grenade", "B_Stand_Attack_Slam", "B_Stand_Attack_Whiff"]:
-			action_completed.emit(self)
+			action_complete()
 		GameActions.USE_WEAPON when anim_name in ["B_Crouch_Attack_SmallArms", "B_Crouch_Attack_BigArms", "B_Crouch_Attack_Grenade"]:
-			action_completed.emit(self)
+			action_complete()
 	queued_action.clear()
 
 
