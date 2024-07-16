@@ -92,9 +92,11 @@ func determine_sights():
 		if not agent.is_multiplayer_authority():
 			continue
 		for detected in agent._eyes.get_overlapping_areas():
-			if detected.get_parent() is Agent:
-				try_see_agent(agent, detected.get_parent())
-				agent.detected_agents.append(detected.get_parent())
+			var par = detected.get_parent()
+			if par is Agent:
+				if agent == par: # of course you can see yourself
+					continue
+				try_see_agent(agent, par)
 
 		# remove lost known
 		# add found unknown
