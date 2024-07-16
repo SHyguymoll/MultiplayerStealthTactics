@@ -20,7 +20,7 @@ var ear_strength : float = 1 #multiplier applied to ear cylinder in relation to 
 var movement_dist : float = 7.0 #distance of furthest possible movement
 var movement_speed : float = 2.75 #movement speed when running (divided by 2 for walking, 2.5 for prone)
 
-var visible_level : int #bounded from 0 to 100, based on current state
+var visible_level : int = 50 #bounded from 0 to 100, based on current state
 
 var weapon_accuracy : float #bounded from 0.00 to 1.00, based on movement and weapon usage
 
@@ -89,7 +89,7 @@ enum States {
 @export var stun_time : int = 0
 @export var health : int = 10
 @export var stun_health : int = 10
-@export var target_visible_level : int
+@export var target_visible_level : int = 50
 @export var target_accuracy : float
 @export var weapons_animation_blend := Vector2.ONE
 @export var target_world_collide_height : float
@@ -102,6 +102,8 @@ enum AttackStep {
 	ATTACKING,
 }
 @export var attack_step := AttackStep.ORIENTING
+
+var detected_agents : Array[Agent] = []
 
 func in_incapacitated_state() -> bool:
 	return state in [States.GRABBED, States.STUNNED, States.DEAD]
@@ -213,29 +215,6 @@ func perform_action():
 				state = States.PRONE
 
 
-func update_eye_cone(dist_mult : float):
-	_eye_cone.points[1] = Vector3(
-					-view_across * dist_mult * dist_mult,
-					view_across * dist_mult * dist_mult,
-					view_dist * dist_mult)
-	_eye_cone.points[2] = Vector3(
-					view_across * dist_mult * dist_mult,
-					view_across * dist_mult * dist_mult,
-					view_dist * dist_mult)
-	_eye_cone.points[3] = Vector3(
-					view_across * dist_mult * dist_mult,
-					-view_across * dist_mult * dist_mult,
-					view_dist * dist_mult)
-	_eye_cone.points[4] = Vector3(
-					-view_across * dist_mult * dist_mult,
-					-view_across * dist_mult * dist_mult,
-					view_dist * dist_mult)
-
-
-func update_ear_radius(mult : float):
-	_ear_cylinder.radius = hearing_dist * mult
-
-
 func debug_setup():
 	# states
 	$DebugValues/DuringGame/StateScroll.min_value = 0
@@ -288,10 +267,13 @@ func debug_process():
 
 func _ready() -> void:
 	# set up sensors
-	update_eye_cone(1.0)
+	_eye_cone.points[1] = Vector3(view_across, view_across, view_dist)
+	_eye_cone.points[2] = Vector3(-view_across, view_across, view_dist)
+	_eye_cone.points[3] = Vector3(view_across, -view_across, view_dist)
+	_eye_cone.points[4] = Vector3(-view_across, -view_across, view_dist)
 	if is_multiplayer_authority():
 		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
-	update_ear_radius(1.0)
+	_ear_cylinder.radius = hearing_dist
 	# custom texture
 	if skin_texture:
 		_custom_skin_mat = StandardMaterial3D.new()
@@ -354,8 +336,6 @@ func _game_step(delta: float) -> void:
 	elif selected_item > -1:
 		_active_item_icon.texture = GameRefs.ITM[held_items[selected_item]].icon
 		_active_item_icon.visible = true
-	update_eye_cone(eye_strength)
-	update_ear_radius(ear_strength)
 	visible_level = 100
 	if in_standing_state():
 		target_world_collide_height = 0.962

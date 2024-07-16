@@ -89,14 +89,37 @@ func update_text() -> void:
 
 func determine_sights():
 	for agent in ($Agents.get_children() as Array[Agent]):
-		for spotted in agent._eyes.get_overlapping_areas():
-			pass
+		if not agent.is_multiplayer_authority():
+			continue
+		for detected in agent._eyes.get_overlapping_areas():
+			if detected.get_parent() is Agent:
+				try_see_agent(agent, detected.get_parent())
+				agent.detected_agents.append(detected.get_parent())
+
+		# remove lost known
+		# add found unknown
+		# add found known
 		pass
+
+
+func try_see_agent(spotter : Agent, spottee : Agent):
+	var dist = spotter.position.distance_to(spottee.position)
+	var exponent = ((10.0 * dist)/(log(spottee.visible_level)/log(10)))
+	var sight_chance = 1.0/(1.0/(spotter.eye_strength))**exponent # chance to see
+	if sight_chance > 0.7: # seent it
+		spottee.visible = true
+	elif sight_chance > 1.0/3.0: # almost seent it
+		if spottee in spotter.detected_agents: # or they could just be leaving
+			return
+		if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority(): # or we could just know them already
+			return
+		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(randf_range(-1.0/sight_chance, 1.0/sight_chance), 0, randf_range(-3.0, 3.0)))
 
 
 func determine_sounds():
 	for agent in ($Agents.get_children() as Array[Agent]):
-		for spotted in agent._ears.get_overlapping_areas():
+		var new_detect_set = agent._ears.get_overlapping_areas()
+		for detected in agent._ears.get_overlapping_areas():
 			pass
 		pass
 
@@ -237,7 +260,9 @@ func create_agent(data) -> Agent: #TODO
 	new_agent.held_weapons.append(GameWeapon.new("fist", new_agent.name + "_fist"))
 	for weapon in data.agent_stats.held_weapons:
 		new_agent.held_weapons.append(GameWeapon.new(weapon, new_agent.name + "_" + weapon))
+	new_agent.visible = false
 	if multiplayer.multiplayer_peer.get_unique_id() == data.player_id:
+		new_agent.visible = true
 		var new_small_hud = hud_agent_small_scene.instantiate()
 		_quick_views.add_child(new_small_hud)
 		new_small_hud._health_bar.max_value = data.agent_stats.health
@@ -252,18 +277,6 @@ func create_agent_selector(agent : Agent):
 	new_selector.referenced_agent = agent
 	new_selector.agent_selected.connect(_hud_agent_details_actions)
 	$HUDSelectors.add_child(new_selector)
-
-
-func _agent_sees_agent(spotter : Agent, spottee : Agent):
-	if not spotter.is_multiplayer_authority():
-		return
-	var dist = spotter.position.distance_to(spottee.position)
-	var sight_chance = 1.0/(1.0/(spotter.eye_strength))**(dist/spottee.visible_level) # chance to see
-	if sight_chance > 0.9: # seent it
-		if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority():
-			pass
-	elif sight_chance > 2.0/3.0: # almost seent it
-		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(randf_range(-3.0, 3.0), 0, randf_range(-3.0, 3.0)))
 
 
 func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
