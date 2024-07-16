@@ -123,6 +123,12 @@ const STE := {
 	unknown = preload("res://assets/sprites/hud_agent_small/state/unknown.png"),
 }
 
+const POPUP := {
+	sight_unknown = preload("res://assets/sprites/game_popups/unknown_sight.png"),
+	sound_unknown = preload("res://assets/sprites/game_popups/unknown_sound.png"),
+	spotted = preload("res://assets/sprites/game_popups/spotted.png"),
+}
+
 func compare_wep_type(agent : Agent, wep_type : WeaponTypes):
 	return WEP[agent.held_weapons[agent.selected_weapon].wep_name].type == wep_type
 
