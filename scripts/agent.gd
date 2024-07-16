@@ -25,7 +25,7 @@ var ear_strength : float = 1 #multiplier applied to ear cylinder in relation to 
 var movement_dist : float = 7.0 #distance of furthest possible movement
 var movement_speed : float = 2.75 #movement speed when running (divided by 2 for walking, 2.5 for prone)
 
-var camo_level : int #bounded from 0 to 100, based on current state
+var visible_level : int #bounded from 0 to 100, based on current state
 
 var weapon_accuracy : float #bounded from 0.00 to 1.00, based on movement and weapon usage
 
@@ -93,7 +93,7 @@ enum States {
 @export var stun_time : int = 0
 @export var health : int = 10
 @export var stun_health : int = 10
-@export var target_camo_level : int
+@export var target_visible_level : int
 @export var target_accuracy : float
 @export var weapons_animation_blend := Vector2.ONE
 @export var target_world_collide_height : float
@@ -360,18 +360,22 @@ func _game_step(delta: float) -> void:
 		_active_item_icon.visible = true
 	update_eye_cone(eye_strength)
 	update_ear_radius(ear_strength)
+	visible_level = 100
 	if in_standing_state():
 		target_world_collide_height = 0.962
 		target_world_collide_y = 0.499
 		collision_mask = 1 + 2 + 4
+		visible_level = 50
 	if in_crouching_state():
 		target_world_collide_height = 0.666
 		target_world_collide_y = 0.35
 		collision_mask = 1 + 2
+		visible_level = 25
 	if in_prone_state():
 		target_world_collide_height = 0.264
 		target_world_collide_y = 0.15
 		collision_mask = 1
+		visible_level = 5
 	_world_collide.position.y = lerpf(_world_collide.position.y, target_world_collide_y, 0.2)
 	(_world_collide.get_shape() as CylinderShape3D).height = lerpf(
 			(_world_collide.get_shape() as CylinderShape3D).height,
@@ -387,10 +391,14 @@ func _game_step(delta: float) -> void:
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
 		velocity *= movement_speed
 		match state:
+			States.RUN:
+				visible_level += 30
 			States.WALK, States.CROUCH_WALK:
 				velocity /= 2.0
+				visible_level += 20
 			States.CRAWL:
 				velocity /= 2.5
+				visible_level += 10
 		if _nav_agent.distance_to_target() < velocity.length(): # to always land on target
 			velocity = velocity.normalized() * _nav_agent.distance_to_target()
 		move_and_slide()
@@ -410,11 +418,13 @@ func _game_step(delta: float) -> void:
 			queued_action.clear()
 			return
 	if state == States.STUNNED:
+		visible_level = 50
 		stun_time = max(0, stun_time - 1)
 		if stun_time == 0:
 			_anim_state.travel("Crouch")
 			state = States.CROUCH
 	if state == States.GRABBED:
+		visible_level = 100
 		if grabbing_agent != null:
 			global_position = grabbing_agent._cqc_anim_helper.global_position
 			global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
@@ -442,6 +452,7 @@ func _game_step(delta: float) -> void:
 						rotation.y = target_direction
 						_attack_orient_transition()
 				AttackStep.ATTACKING:
+					visible_level = 100
 					match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 						GameRefs.WeaponTypes.THROWN:
 							if game_steps_since_execute == 30:
@@ -455,6 +466,8 @@ func _game_step(delta: float) -> void:
 							_cqc_anim_helper.rotation.y = lerp_angle(-PI/2, 0, cqc_lerp_value)
 						GameRefs.WeaponTypes.SMALL, GameRefs.WeaponTypes.BIG:
 							pass
+	visible_level = clamp(visible_level, 0, 100)
+	target_visible_level = lerp(target_visible_level, visible_level, 0.2)
 
 
 func _attack_orient_transition():
