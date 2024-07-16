@@ -18,21 +18,23 @@ func _ready() -> void:
 
 func get_agents(): #TODO: replace with loading from a file later
 	return {
-		name="test",
+		name="test", # the player's name
 		agents=[
 			{
-				name="basic agent",
-				mission_count=0,
-				health=10,
-				view_dist=2.5,
-				view_across=1.0,
-				eye_strength=0.8,
-				hearing_dist=1.5,
-				ear_strength=1,
-				movement_dist=7.0,
-				movement_speed=2.75,
-				held_items=["cigar", "box"],
-				held_weapons=["pistol", "grenade_smoke"],
+				name="basic agent", # the agent's name
+				mission_count=0, # the number of missions that this agent has been used in
+				health=10, # the agent's health and stun health (div by 2 and round down for stun)
+				view_dist=2.5, # how far the view cone extends from the agent
+				view_across=1.0, # how wide the view cone base is
+				eye_strength=0.2, # the strength of the agent's vision as elements get closer
+# (note, this is within the view cone, calculated here: https://www.desmos.com/calculator/9fxksuzyez)
+				hearing_dist=1.5, # the radius of the hearing cylinder
+				ear_strength=1, # the strength of the hearing cylinder as audio events play closer
+				# calculate this with the vision calculator by setting v to 100
+				movement_dist=7.0, # how far the agent can move in a single step
+				movement_speed=2.75, # how fast the agent moves
+				held_items=["cigar", "box"], # the items that the agent starts with
+				held_weapons=["pistol", "grenade_smoke"], # the weapons that the agent starts with
 			},
 		]
 	}
@@ -147,3 +149,4 @@ func _on_quit_pressed() -> void:
 	$SettingsScreen.visible = false
 	$MainMenu.visible = true
 	Lobby.remove_multiplayer_peer()
+	get_tree().reload_current_scene()

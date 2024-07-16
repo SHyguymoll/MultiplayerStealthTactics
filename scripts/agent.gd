@@ -5,11 +5,6 @@ signal action_completed(actor : Agent)
 signal action_interrupted(interrupted_actor : Agent)
 signal agent_selected(agent : Agent)
 
-signal spotted_agent(spotter : Agent, spottee : Agent)
-signal unspotted_agent(unspotter : Agent, unspottee : Agent)
-signal spotted_element(element : Node3D)
-signal unspotted_element(element : Node3D)
-signal heard_sound(listener : Agent, sound : Node3D)
 signal agent_died(deceased : Agent)
 
 const CQC_START = Vector3(0, 0, 0.48)
@@ -17,7 +12,7 @@ const CQC_END = Vector3(0.545, 0, 0)
 
 var view_dist : float = 2.5 #length of vision "cone" (really a pyramid)
 var view_across : float = 1 #size of vision pyramid base
-var eye_strength : float = 0.8 #multiplier applied to vision pyramid in relation to view target distance
+var eye_strength : float = 0.15 #multiplier applied to vision pyramid in relation to view target distance
 
 var hearing_dist : float = 1.5 #distance of furthest possibly heard audio event
 var ear_strength : float = 1 #multiplier applied to ear cylinder in relation to audio target distance
@@ -45,6 +40,7 @@ var percieved_by_friendly := false #determines if hud is updated
 @onready var _custom_skin_mat : StandardMaterial3D
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat : StandardMaterial3D
+@onready var _eyes : Area3D = $Eyes
 @onready var _eye_cone : ConvexPolygonShape3D = $Eyes/CollisionShape3D.shape
 @onready var _ears : Area3D = $Ears
 @onready var _ear_cylinder : CylinderShape3D = _ears.get_node("CollisionShape3D").shape
@@ -501,27 +497,6 @@ func _attack_orient_transition():
 				_anim_state.travel("B_Crouch_Attack_Grenade")
 			GameRefs.WeaponTypes.PLACED:
 				pass
-
-
-
-func _on_eyes_area_entered(area: Area3D) -> void:
-	var par = area.get_parent()
-	if par is Agent:
-		spotted_agent.emit(self, par)
-	else:
-		spotted_element.emit(par)
-
-
-func _on_eyes_area_exited(area: Area3D) -> void:
-	var par = area.get_parent()
-	if par is Agent:
-		unspotted_agent.emit(self, par)
-	else:
-		unspotted_element.emit(par)
-
-
-func _on_ears_area_entered(area: Area3D) -> void:
-	heard_sound.emit(area.get_parent())
 
 
 func _on_animation_finished(anim_name: StringName) -> void:

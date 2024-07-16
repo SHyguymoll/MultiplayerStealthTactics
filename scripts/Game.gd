@@ -87,6 +87,18 @@ func update_text() -> void:
 		if agent.is_multiplayer_authority():
 			_ag_insts.text += agent.action_text + "\n"
 
+func determine_sights():
+	for agent in ($Agents.get_children() as Array[Agent]):
+		for spotted in agent._eyes.get_overlapping_areas():
+			pass
+		pass
+
+
+func determine_sounds():
+	for agent in ($Agents.get_children() as Array[Agent]):
+		for spotted in agent._ears.get_overlapping_areas():
+			pass
+		pass
 
 
 func _physics_process(delta: float) -> void:
@@ -107,6 +119,8 @@ func _physics_process(delta: float) -> void:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
 			current_game_step += 1
+			determine_sights()
+			determine_sounds()
 			for agent in ($Agents.get_children() as Array[Agent]):
 				if agent.action_done == false:
 					return
@@ -191,7 +205,6 @@ func server_populate_variables(): #TODO
 			#print("created ray ", new_tracking_ray)
 
 
-@rpc("authority", "call_local", "reliable")
 func append_action_timeline(agent : Agent):
 	if not action_timeline.has(current_game_step):
 		action_timeline[current_game_step] = {}
@@ -208,13 +221,6 @@ func create_agent(data) -> Agent: #TODO
 	new_agent.name = str(data.player_id) + "_" + str(data.agent_stats.name)
 	new_agent.action_completed.connect(_agent_completed_action)
 	new_agent.action_interrupted.connect(_agent_interrupted)
-
-	new_agent.spotted_agent.connect(_agent_sees_agent)
-	new_agent.unspotted_agent.connect(_agent_lost_agent)
-
-	new_agent.spotted_element
-	new_agent.unspotted_element
-	new_agent.heard_sound
 	new_agent.agent_died.connect(_agent_died)
 
 	new_agent.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
@@ -252,9 +258,12 @@ func _agent_sees_agent(spotter : Agent, spottee : Agent):
 	if not spotter.is_multiplayer_authority():
 		return
 	var dist = spotter.position.distance_to(spottee.position)
-	var sight_chance = dist * (spotter.eye_strength**dist) / (spottee.camo_level)
-	if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority():
-		pass
+	var sight_chance = 1.0/(1.0/(spotter.eye_strength))**(dist/spottee.visible_level) # chance to see
+	if sight_chance > 0.9: # seent it
+		if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority():
+			pass
+	elif sight_chance > 2.0/3.0: # almost seent it
+		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(randf_range(-3.0, 3.0), 0, randf_range(-3.0, 3.0)))
 
 
 func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
@@ -262,6 +271,15 @@ func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
 		return
 	if unspotter.get_multiplayer_authority() != unspottee.get_multiplayer_authority():
 		pass
+
+
+func _agent_sees_element(element : Node3D):
+	if element is GamePopup:
+		element.disappear()
+
+
+func _agent_lost_element(element : Node3D):
+	pass
 
 
 func return_attacked(attacker : Agent, location : Vector3):
