@@ -7,6 +7,7 @@ var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
 var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
+var popup_scene = preload("res://scenes/game_popup.tscn")
 
 var server_ready_bool := false
 var client_ready_bool := false
@@ -72,8 +73,12 @@ func create_sound_effect() -> void: #TODO
 	pass
 
 
-func create_popup() -> void: #TODO
-	pass
+func create_popup(texture : Texture2D, location : Vector3) -> void: #TODO
+	var new_popup : GamePopup = popup_scene.instantiate()
+	new_popup.texture = texture
+	new_popup.position = location
+	$Popups.add_child(new_popup)
+
 
 
 func update_text() -> void:
@@ -197,8 +202,8 @@ func append_action_timeline(agent : Agent):
 func ping():
 	print("{0}: pong!".format([multiplayer.multiplayer_peer.get_unique_id()]))
 
-@rpc("authority", "call_local", "reliable")
-func create_agent(data): #TODO
+#@rpc("authority", "call_local", "reliable")
+func create_agent(data) -> Agent: #TODO
 	var new_agent : Agent = agent_scene.instantiate()
 	new_agent.name = str(data.player_id) + "_" + str(data.agent_stats.name)
 	new_agent.action_completed.connect(_agent_completed_action)
