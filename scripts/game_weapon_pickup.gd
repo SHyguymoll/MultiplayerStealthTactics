@@ -10,7 +10,7 @@ func _ready():
 	for weapon_mesh in get_children():
 		if not weapon_mesh is MeshInstance3D:
 			continue
-		visible = false
+		weapon_mesh.visible = false
 	match attached_wep.wep_name:
 		"pistol":
 			$Pistol.visible = true
