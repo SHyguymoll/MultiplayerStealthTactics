@@ -134,6 +134,16 @@ func determine_sounds():
 		pass
 
 
+func determine_indicator_removals():
+	for ind in $ClientsideIndicators.get_children():
+		if ind is AimingIndicator or ind is MovementIndicator:
+			match ind.referenced_agent.action_done:
+				Agent.ActionDoneness.SUCCESS:
+					ind._succeed()
+				Agent.ActionDoneness.FAIL:
+					ind._fail()
+
+
 func _physics_process(delta: float) -> void:
 	match game_phase:
 		GamePhases.SELECTION:
@@ -142,10 +152,7 @@ func _physics_process(delta: float) -> void:
 			$World/Camera3D as Camera3D).unproject_position(
 					selector.referenced_agent.position)
 			if multiplayer.is_server() and server_ready_bool and client_ready_bool:
-				_update_game_phase(GamePhases.EXECUTION)
-				for agent in ($Agents.get_children() as Array[Agent]):
-					agent.action_text = ""
-				update_text()
+				_update_game_phase.rpc(GamePhases.EXECUTION)
 		GamePhases.EXECUTION:
 			#if multiplayer.is_server(): # server simulates everything, client watches
 			determine_cqc_events()
@@ -155,13 +162,12 @@ func _physics_process(delta: float) -> void:
 			current_game_step += 1
 			determine_sights()
 			determine_sounds()
+			determine_indicator_removals()
 			if multiplayer.is_server():
 				for agent in ($Agents.get_children() as Array[Agent]):
 					if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 						return
-				for agent in ($Agents.get_children() as Array[Agent]):
-					agent.action_done = Agent.ActionDoneness.NOT_DONE
-				_update_game_phase(GamePhases.SELECTION)
+				_update_game_phase.rpc(GamePhases.SELECTION)
 
 
 func server_populate_variables(): #TODO
@@ -430,6 +436,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
+	set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	var final_text_string := ""
 	match decision_array[0]:
@@ -488,6 +495,7 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
+	set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.MOVEMENT
 	var new_indicator = movement_icon_scene.instantiate()
@@ -520,6 +528,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
+	set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.AIMING
 	var new_indicator = aiming_icon_scene.instantiate()
@@ -551,6 +560,9 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
 			for ag in ($Agents.get_children() as Array[Agent]):
+				ag.action_done = Agent.ActionDoneness.NOT_DONE
+				if multiplayer.is_server():
+					set_agent_action.rpc(ag.name, [])
 				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
 					create_agent_selector(ag)
 					ag.flash_outline(Color.ORCHID)
@@ -560,6 +572,9 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 		GamePhases.EXECUTION:
 			for selector in $HUDSelectors.get_children(): # remove previous selectors
 				selector.queue_free()
+			for agent in ($Agents.get_children() as Array[Agent]):
+				agent.action_text = ""
+			update_text()
 			_phase_label.text = "EXECUTING ACTIONS..."
 			server_ready_bool = false
 			client_ready_bool = false
@@ -578,6 +593,10 @@ func player_is_ready(id):
 	else:
 		client_ready_bool = true
 
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_action(agent_name : String, action : Array):
+	$Agents.get_node(agent_name).queued_action = action
 
 func _on_execute_pressed() -> void:
 	_execute_button.disabled = true

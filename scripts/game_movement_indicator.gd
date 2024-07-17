@@ -1,3 +1,4 @@
+class_name MovementIndicator
 extends AnimatedSprite3D
 
 signal indicator_placed(indicator)
@@ -95,11 +96,6 @@ func _physics_process(delta: float) -> void:
 		global_position = ray_position
 		position_valid = _check_position()
 	modulate = Color.WHITE if position_valid else Color.RED
-	match referenced_agent.action_done:
-		Agent.ActionDoneness.SUCCESS:
-			_succeed()
-		Agent.ActionDoneness.FAIL:
-			_fail()
 
 
 

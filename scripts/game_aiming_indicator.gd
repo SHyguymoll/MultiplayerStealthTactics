@@ -55,12 +55,6 @@ func _physics_process(delta: float) -> void: #TODO
 		else:
 			_indicator.global_position = Vector3(global_position.x + target_position.x, global_position.y, global_position.z + target_position.z)
 
-		match referenced_agent.action_done:
-			Agent.ActionDoneness.SUCCESS:
-				_succeed()
-			Agent.ActionDoneness.FAIL:
-				_fail()
-
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
