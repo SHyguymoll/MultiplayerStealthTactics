@@ -304,9 +304,6 @@ func _ready() -> void:
 	_active_item_icon.texture = null
 	for weapon_mesh in _held_weapon_meshes:
 		_held_weapon_meshes[weapon_mesh].visible = false
-	# other other stuff
-	#_nav_agent.target_desired_distance = movement_speed*1.01
-	#print(name, ": ", movement_speed, " ", _nav_agent.target_desired_distance)
 	# debug
 	# debug_setup()
 
@@ -435,7 +432,6 @@ func _game_step(delta: float) -> void:
 		GameActions.USE_WEAPON: #TODO
 			match attack_step:
 				AttackStep.ORIENTING:
-					#print(rotation.y, " ", target_direction, " ", lerp_angle(rotation.y, target_direction, 0.2))
 					rotation.y = lerpf(rotation.y, target_direction, 0.2)
 					if abs(abs(rotation.y) - abs(target_direction)) < 0.1:
 						rotation.y = target_direction
@@ -494,7 +490,6 @@ func _attack_orient_transition():
 
 
 func _on_animation_finished(anim_name: StringName) -> void:
-	#print(name, ": ", anim_name)
 	if anim_name.begins_with("B_Hurt") and not anim_name in ["B_Hurt_Stunned", "B_Hurt_WakeUp"]:
 		action_complete(false)
 	if state == States.GRABBED:
@@ -520,7 +515,6 @@ func _on_animation_finished(anim_name: StringName) -> void:
 
 
 func _on_animation_started(anim_name: StringName) -> void:
-	#print(name, ": ", anim_name)
 	if anim_name == "B_Dead":
 		agent_died.emit(self)
 	if len(queued_action) == 0:
