@@ -9,10 +9,10 @@
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pu7ty"]
 properties/0/path = NodePath(".:action_timeline")
 properties/0/spawn = true
-properties/0/replication_mode = 1
+properties/0/replication_mode = 2
 properties/1/path = NodePath(".:game_phase")
 properties/1/spawn = true
-properties/1/replication_mode = 1
+properties/1/replication_mode = 2
 
 [node name="Game" type="Node3D" node_paths=PackedStringArray("game_map")]
 script = ExtResource("1_re23i")
