@@ -9,4 +9,4 @@ func disappear():
 	twe.set_trans(Tween.TRANS_CUBIC)
 	twe.tween_property(self, "pixel_size", 0.1, 0.25).from(0.01)
 	twe.tween_property(self, "modulate:a", 0, 0.25).from(1)
-	twe.tween_callback(queue_free)
+	twe.finished.connect(queue_free)
