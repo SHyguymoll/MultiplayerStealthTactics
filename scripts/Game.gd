@@ -21,7 +21,7 @@ enum GamePhases {
 	SELECTION,
 	EXECUTION,
 }
-var game_phase : GamePhases = GamePhases.SELECTION
+@export var game_phase : GamePhases = GamePhases.SELECTION
 enum SelectionSteps {
 	BASE,
 	MOVEMENT,
@@ -112,13 +112,18 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 	print(sight_chance)
 	if sight_chance > 0.7: # seent it
 		spottee.visible = true
+		create_popup(GameRefs.POPUP.spotted, spottee.position)
+		spotter.detected_agents.append(spottee)
 	elif sight_chance > 1.0/3.0: # almost seent it
 		if spottee in spotter.detected_agents: # or they could just be leaving
 			return
 		if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority(): # or we could just know them already
 			return
 		spotter.detected_agents.append(spottee)
-		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(randf_range(-1.0/sight_chance, 1.0/sight_chance), 0, randf_range(-3.0, 3.0)))
+		var p_offset = -0.1/sight_chance
+		var x_off = randf_range(-p_offset, p_offset)
+		var z_off = randf_range(-p_offset, p_offset)
+		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(x_off, 0, z_off))
 
 
 func determine_sounds():
@@ -136,12 +141,13 @@ func _physics_process(delta: float) -> void:
 				selector.position = (
 			$World/Camera3D as Camera3D).unproject_position(
 					selector.referenced_agent.position)
-			if server_ready_bool and client_ready_bool:
+			if multiplayer.is_server() and server_ready_bool and client_ready_bool:
 				_update_game_phase(GamePhases.EXECUTION)
 				for agent in ($Agents.get_children() as Array[Agent]):
 					agent.action_text = ""
 				update_text()
 		GamePhases.EXECUTION:
+			#if multiplayer.is_server(): # server simulates everything, client watches
 			determine_cqc_events()
 			determine_weapon_events()
 			for agent in ($Agents.get_children() as Array[Agent]):
@@ -149,10 +155,13 @@ func _physics_process(delta: float) -> void:
 			current_game_step += 1
 			determine_sights()
 			determine_sounds()
-			for agent in ($Agents.get_children() as Array[Agent]):
-				if agent.action_done == Agent.ActionDoneness.NOT_DONE:
-					return
-			_update_game_phase(GamePhases.SELECTION)
+			if multiplayer.is_server():
+				for agent in ($Agents.get_children() as Array[Agent]):
+					if agent.action_done == Agent.ActionDoneness.NOT_DONE:
+						return
+				for agent in ($Agents.get_children() as Array[Agent]):
+					agent.action_done = Agent.ActionDoneness.NOT_DONE
+				_update_game_phase(GamePhases.SELECTION)
 
 
 func server_populate_variables(): #TODO
@@ -556,7 +565,6 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			client_ready_bool = false
 			# populate agents with actions, as well as action_timeline
 			for agent in ($Agents.get_children() as Array[Agent]):
-				agent.action_done = Agent.ActionDoneness.NOT_DONE
 				if multiplayer.is_server():
 					append_action_timeline(agent)
 				agent.perform_action()
@@ -569,6 +577,7 @@ func player_is_ready(id):
 		server_ready_bool = true
 	else:
 		client_ready_bool = true
+
 
 func _on_execute_pressed() -> void:
 	_execute_button.disabled = true

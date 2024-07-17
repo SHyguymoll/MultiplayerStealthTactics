@@ -17,17 +17,17 @@ var ear_strength : float = 1 #multiplier applied to ear cylinder in relation to 
 var movement_dist : float = 7.0 #distance of furthest possible movement
 var movement_speed : float = 2.75 #movement speed when running (divided by 2 for walking, 2.5 for prone)
 
-var visible_level : int = 50 #bounded from 0 to 100, based on current state
+@export var visible_level : int = 50 #bounded from 0 to 100, based on current state
 
-var weapon_accuracy : float #bounded from 0.00 to 1.00, based on movement and weapon usage
+@export var weapon_accuracy : float #bounded from 0.00 to 1.00, based on movement and weapon usage
 
 var held_items : Array = [] #max length should be 3, only uses Strings
 var held_weapons : Array[GameWeapon] = [] #max length should be 3 (including fist)
 
-var selected_item : int = -1 #index for item (-1 for no item)
-var selected_weapon : int = 0 #index for weapon (0 for fist)
+@export var selected_item : int = -1 #index for item (-1 for no item)
+@export var selected_weapon : int = 0 #index for weapon (0 for fist)
 
-var percieved_by_friendly := false #determines if hud is updated
+@export var percieved_by_friendly := false #determines if hud is updated
 
 @export var skin_texture : String
 
@@ -105,7 +105,7 @@ enum AttackStep {
 }
 @export var attack_step := AttackStep.ORIENTING
 
-var detected_agents : Array[Agent] = []
+@export var detected_agents : Array[Agent] = []
 
 func in_incapacitated_state() -> bool:
 	return state in [States.GRABBED, States.STUNNED, States.DEAD]
@@ -216,8 +216,15 @@ func perform_action():
 				_anim_state.travel("B_Prone")
 				state = States.PRONE
 
+
+@rpc("any_peer", "call_local", "reliable")
+func agent_is_done(doneness : Agent.ActionDoneness):
+	action_done = doneness
+
+
 func action_complete(successfully : bool = true, no_flash : bool = false):
-	action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
+	agent_is_done.rpc(ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL)
+	#action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
 	queued_action.clear()
 	if is_multiplayer_authority() and not no_flash:
 		flash_outline(Color.GREEN if successfully else Color.RED)
@@ -492,7 +499,6 @@ func _on_animation_finished(anim_name: StringName) -> void:
 		action_complete(false)
 	if state == States.GRABBED:
 		state = States.STUNNED
-		queued_action.clear()
 	if len(queued_action) == 0:
 		action_complete(true, true)
 		return
