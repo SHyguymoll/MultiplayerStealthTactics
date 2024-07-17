@@ -218,6 +218,7 @@ func perform_action():
 
 func action_complete(successfully : bool = true, no_flash : bool = false):
 	action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
+	queued_action.clear()
 	if is_multiplayer_authority() and not no_flash:
 		flash_outline(Color.GREEN if successfully else Color.RED)
 
@@ -398,7 +399,6 @@ func _game_step(delta: float) -> void:
 					_anim_state.travel("B_Prone")
 					state = States.PRONE
 			action_complete()
-			queued_action.clear()
 			return
 	if state == States.STUNNED:
 		visible_level = 50
@@ -412,6 +412,7 @@ func _game_step(delta: float) -> void:
 			global_position = grabbing_agent._cqc_anim_helper.global_position
 			global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
 	if len(queued_action) == 0:
+		action_complete(true, true)
 		return
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
@@ -419,11 +420,9 @@ func _game_step(delta: float) -> void:
 			if abs(rotation.y - target_direction) < 0.1:
 				rotation.y = target_direction
 				action_complete()
-				queued_action.clear()
 		GameActions.CHANGE_WEAPON:
 			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) == 0:
 				action_complete()
-				queued_action.clear()
 			elif weapons_animation_blend.distance_squared_to(decide_weapon_blend()) < 0.01:
 				weapons_animation_blend = decide_weapon_blend()
 		GameActions.USE_WEAPON: #TODO
@@ -510,7 +509,7 @@ func _on_animation_finished(anim_name: StringName) -> void:
 			action_complete()
 		GameActions.USE_WEAPON when anim_name in ["B_Crouch_Attack_SmallArms", "B_Crouch_Attack_BigArms", "B_Crouch_Attack_Grenade"]:
 			action_complete()
-	queued_action.clear()
+
 
 
 
