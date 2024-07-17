@@ -12,8 +12,6 @@ var ind_set := false
 
 func _ready() -> void:
 	_indicator.play("aim")
-	referenced_agent.action_completed.connect(_succeed)
-	referenced_agent.action_interrupted.connect(_fail)
 	global_position = referenced_agent.global_position + Vector3.UP * (_game_camera.ground_height + 0.5)
 
 
@@ -43,17 +41,19 @@ func _physics_process(delta: float) -> void: #TODO
 			ray_len = 1
 		var final_position = Vector2(
 			(_game_camera.position.x - referenced_agent.global_position.x),
-			(_game_camera.position.z - referenced_agent.global_position.z)
-		).normalized() * ray_len
+			(_game_camera.position.z - referenced_agent.global_position.z),
+		).normalized() #* ray_len
+		if final_position.length() == 0:
+			final_position = Vector2.ONE
 		target_position.x = final_position.x
 		target_position.y = 0
 		target_position.z = final_position.y
+		target_position = target_position.normalized() * ray_len
 		force_raycast_update()
 		if get_collider():
 			_indicator.global_position = get_collision_point()
 		else:
-			_indicator.global_position = global_position + target_position
-			_indicator.global_position.y -= global_position.y
+			_indicator.global_position = Vector3(global_position.x + target_position.x, global_position.y, global_position.z + target_position.z)
 
 		match referenced_agent.action_done:
 			Agent.ActionDoneness.SUCCESS:
