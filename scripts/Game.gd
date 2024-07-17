@@ -580,6 +580,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			client_ready_bool = false
 			# populate agents with actions, as well as action_timeline
 			for agent in ($Agents.get_children() as Array[Agent]):
+				agent.agent_is_done.rpc(Agent.ActionDoneness.NOT_DONE)
 				if multiplayer.is_server():
 					append_action_timeline(agent)
 				agent.perform_action()
