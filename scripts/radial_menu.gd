@@ -342,6 +342,9 @@ func _button_pressed_metadata(button : Button):
 		ICONS.use_weapon:
 			aiming_decision_made.emit([Agent.GameActions.USE_WEAPON])
 			button_collapse_animation()
+		ICONS.reload_weapon:
+			decision_made.emit([Agent.GameActions.RELOAD_WEAPON])
+			button_collapse_animation()
 		ICONS.look:
 			aiming_decision_made.emit([Agent.GameActions.LOOK_AROUND])
 			button_collapse_animation()
