@@ -1,6 +1,5 @@
-[gd_scene load_steps=4 format=3 uid="uid://cg4d2ckwhy0bx"]
+[gd_scene load_steps=3 format=3 uid="uid://cg4d2ckwhy0bx"]
 
-[ext_resource type="Texture2D" uid="uid://c30kqmpkddeek" path="res://assets/sprites/game_popups/unknown_sight.png" id="1_texkb"]
 [ext_resource type="Script" path="res://scripts/game_popup.gd" id="1_xs4qa"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_kgyoq"]
@@ -9,7 +8,6 @@ radius = 1.0
 
 [node name="Sprite3D" type="Sprite3D"]
 billboard = 1
-texture = ExtResource("1_texkb")
 script = ExtResource("1_xs4qa")
 
 [node name="Area3D" type="Area3D" parent="."]
