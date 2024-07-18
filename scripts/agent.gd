@@ -6,6 +6,7 @@ signal agent_died(deceased : Agent)
 
 const CQC_START = Vector3(0, 0, 0.48)
 const CQC_END = Vector3(0.545, 0, 0)
+const GENERAL_LERP_VAL = 0.2
 
 var view_dist : float = 2.5 #length of vision "cone" (really a pyramid)
 var view_across : float = 1 #size of vision pyramid base
@@ -335,7 +336,7 @@ func flash_outline(color : Color):
 
 
 func _physics_process(delta: float) -> void:
-	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, 0.2)
+	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, GENERAL_LERP_VAL)
 
 
 func _game_step(delta: float) -> void:
@@ -362,13 +363,13 @@ func _game_step(delta: float) -> void:
 		target_world_collide_y = 0.15
 		collision_mask = 1
 		visible_level = 5
-	_world_collide.position.y = lerpf(_world_collide.position.y, target_world_collide_y, 0.2)
+	_world_collide.position.y = lerpf(_world_collide.position.y, target_world_collide_y, GENERAL_LERP_VAL)
 	(_world_collide.get_shape() as CylinderShape3D).height = lerpf(
 			(_world_collide.get_shape() as CylinderShape3D).height,
 			target_world_collide_height,
-			0.2
+			GENERAL_LERP_VAL
 	)
-	weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), 0.2)
+	weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), GENERAL_LERP_VAL)
 	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
 	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_anim.advance(delta)
@@ -418,7 +419,7 @@ func _game_step(delta: float) -> void:
 		return
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
-			rotation.y = lerp_angle(rotation.y, target_direction, 0.2)
+			rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
 			if abs(rotation.y - target_direction) < 0.1:
 				rotation.y = target_direction
 				action_complete()
@@ -430,7 +431,7 @@ func _game_step(delta: float) -> void:
 		GameActions.USE_WEAPON: #TODO
 			match attack_step:
 				AttackStep.ORIENTING:
-					rotation.y = lerpf(rotation.y, target_direction, 0.2)
+					rotation.y = lerpf(rotation.y, target_direction, GENERAL_LERP_VAL)
 					if abs(abs(rotation.y) - abs(target_direction)) < 0.1:
 						rotation.y = target_direction
 						_attack_orient_transition()
@@ -450,7 +451,7 @@ func _game_step(delta: float) -> void:
 						GameRefs.WeaponTypes.SMALL, GameRefs.WeaponTypes.BIG:
 							pass
 	visible_level = clamp(visible_level, 0, 100)
-	target_visible_level = lerp(target_visible_level, visible_level, 0.2)
+	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
 	$DebugLabel3D.text = str(target_visible_level)
 
 
