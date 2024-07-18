@@ -208,7 +208,7 @@ func button_menu_screen():
 					buttons[2] = ICONS.halt
 				if not referenced_agent.can_prone():
 					buttons[3] = ICONS.none
-				if GameRefs.WEP[referenced_agent.held_weapons[referenced_agent.selected_weapon].wep_name].type == GameRefs.WeaponTypes.CQC:
+				if GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC):
 					buttons[5] = ICONS.none
 
 			elif referenced_agent.in_prone_state():
@@ -224,7 +224,7 @@ func button_menu_screen():
 					buttons[3] = ICONS.none
 				buttons[5] = ICONS.none
 
-			if referenced_agent.selected_weapon > 0:
+			if not GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC):
 				if referenced_agent.held_weapons[
 						referenced_agent.selected_weapon].loaded_ammo == 0:
 					buttons[5] = ICONS.reload_weapon
