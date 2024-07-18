@@ -372,6 +372,7 @@ func determine_weapon_events():
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if agent.state != Agent.States.FIRE_GUN:
 			continue
+		agent.held_weapons[agent.selected_weapon].loaded_ammo -= 1
 		match agent.held_weapons[agent.selected_weapon].wep_name:
 			"pistol":
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
