@@ -19,8 +19,6 @@ var movement_speed : float = 2.75 #movement speed when running (divided by 2 for
 
 @export var visible_level : int = 50 #bounded from 0 to 100, based on current state
 
-@export var weapon_accuracy : float #bounded from 0.00 to 1.00, based on movement and weapon usage
-
 var held_items : Array = [] #max length should be 3, only uses Strings
 var held_weapons : Array[GameWeapon] = [] #max length should be 3 (including fist)
 

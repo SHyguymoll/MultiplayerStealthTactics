@@ -73,11 +73,13 @@ func create_sound_effect() -> void: #TODO
 	pass
 
 
-func create_popup(texture : Texture2D, location : Vector3) -> void: #TODO
+func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void: #TODO
 	var new_popup : GamePopup = popup_scene.instantiate()
 	new_popup.texture = texture
 	new_popup.position = location
 	$Popups.add_child(new_popup)
+	if fleeting:
+		new_popup.disappear()
 
 
 
@@ -323,9 +325,7 @@ func return_attacked(attacker : Agent, location : Vector3):
 	query.collide_with_bodies = false
 	query.hit_from_inside = true
 	var result = space_state.intersect_ray(query)
-	if result == null:
-		return result
-	return (result.get("collider") as Area3D)
+	return [(result.get("collider", null) as Area3D), result.get("position", location)]
 
 
 
@@ -335,7 +335,7 @@ func determine_cqc_events():
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if agent.state != Agent.States.CQC_GRAB:
 			continue
-		cqc_actors[agent] = return_attacked(agent, agent.queued_action[1])
+		cqc_actors[agent] = return_attacked(agent, agent.queued_action[1])[0]
 
 	for grabber in (cqc_actors.keys() as Array[Agent]):
 		grabber.state = Agent.States.USING_WEAPON
@@ -363,6 +363,8 @@ func determine_cqc_events():
 		grabbee.queued_action.clear()
 		pass
 
+func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
+	return end_pos + start_pos.direction_to(end_pos).rotated(Vector3.DOWN, PI/2) * change
 
 func determine_weapon_events():
 	var attackers = {}
@@ -370,13 +372,28 @@ func determine_weapon_events():
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if agent.state != Agent.States.FIRE_GUN:
 			continue
-		attackers[agent] = return_attacked(agent, agent.queued_action[1])
+		match agent.held_weapons[agent.selected_weapon].wep_name:
+			"pistol":
+				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
+			"rifle":
+				attackers[agent] = [
+	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 2.0)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -2.0)),]
+			"shotgun":
+				attackers[agent] = [
+	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 3.0)), return_attacked(agent, agent.queued_action[1]), return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -3.0)),]
+
 
 	for attacker in (attackers.keys() as Array[Agent]):
 		attacker.state = Agent.States.USING_WEAPON
-		if not (attackers[attacker] as Area3D).get_parent() is Agent: #hit a wall
-			pass
-		pass
+		for hit in attackers[attacker]:
+			create_popup(GameRefs.POPUP.spotted, hit[1], true)
+			if hit[0] == null: # hit a wall, make a sound event on the wall
+				continue
+			else:
+				if not (hit[0] as Area3D).get_parent() is Agent: # still hit a wall
+					pass
+				else: # actually hit an agent
+					pass
 
 
 
