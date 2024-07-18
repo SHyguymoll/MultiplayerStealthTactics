@@ -21,7 +21,7 @@ func get_agents(): #TODO: replace with loading from a file later
 		name="test", # the player's name
 		agents=[
 			{
-				name="basic agent", # the agent's name
+				name="stealthy", # the agent's name
 				mission_count=0, # the number of missions that this agent has been used in
 				health=10, # the agent's health and stun health (div by 2 and round down for stun)
 				view_dist=2.5, # how far the view cone extends from the agent
@@ -35,6 +35,22 @@ func get_agents(): #TODO: replace with loading from a file later
 				movement_speed=2.75, # how fast the agent moves
 				held_items=["cigar", "box"], # the items that the agent starts with
 				held_weapons=["pistol", "grenade_smoke"], # the weapons that the agent starts with
+			},
+			{
+				name="loud", # the agent's name
+				mission_count=0, # the number of missions that this agent has been used in
+				health=10, # the agent's health and stun health (div by 2 and round down for stun)
+				view_dist=2.5, # how far the view cone extends from the agent
+				view_across=1.0, # how wide the view cone base is
+				eye_strength=0.2, # the strength of the agent's vision as elements get closer
+# (note, this is within the view cone, calculated here: https://www.desmos.com/calculator/azk19m9ik3)
+				hearing_dist=1.5, # the radius of the hearing cylinder
+				ear_strength=1, # the strength of the hearing cylinder as audio events play closer
+				# calculate this with the vision calculator by setting v to 100
+				movement_dist=7.0, # how far the agent can move in a single step
+				movement_speed=2.75, # how fast the agent moves
+				held_items=["cigar", "box"], # the items that the agent starts with
+				held_weapons=["shotgun", "rifle"], # the weapons that the agent starts with
 			},
 		]
 	}
