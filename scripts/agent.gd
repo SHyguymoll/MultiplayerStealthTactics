@@ -203,7 +203,7 @@ func perform_action():
 			state = States.USING_WEAPON
 			attack_step = AttackStep.ORIENTING
 		GameActions.RELOAD_WEAPON:
-			pass
+			game_steps_since_execute = GameRefs.WEP[held_weapons[selected_weapon].wep_name].reload_time * -1
 		GameActions.HALT:
 			if state in [States.RUN, States.WALK]:
 				_anim_state.travel("Stand")
@@ -315,13 +315,13 @@ func _process(_delta: float) -> void:
 func decide_weapon_blend() -> Vector2:
 	match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
 		GameRefs.WeaponTypes.CQC:
-			return Vector2(1, 1)
+			return Vector2.ONE
 		GameRefs.WeaponTypes.SMALL:
-			return Vector2(-1, 1)
+			return Vector2.LEFT + Vector2.DOWN
 		GameRefs.WeaponTypes.BIG:
-			return Vector2(-1, -1)
+			return Vector2.ONE * -1
 		_:
-			return Vector2(1, -1)
+			return Vector2.RIGHT + Vector2.UP
 
 
 func take_damage(amount : int, is_stun : bool = false):
@@ -369,7 +369,8 @@ func _game_step(delta: float) -> void:
 			target_world_collide_height,
 			GENERAL_LERP_VAL
 	)
-	weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), GENERAL_LERP_VAL)
+	if len(queued_action) > 0 and queued_action[0] != GameActions.RELOAD_WEAPON:
+		weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), GENERAL_LERP_VAL)
 	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
 	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_anim.advance(delta)
@@ -450,6 +451,16 @@ func _game_step(delta: float) -> void:
 							_cqc_anim_helper.rotation.y = lerp_angle(-PI/2, 0, cqc_lerp_value)
 						GameRefs.WeaponTypes.SMALL, GameRefs.WeaponTypes.BIG:
 							pass
+		GameActions.RELOAD_WEAPON:
+			if game_steps_since_execute < -50:
+				weapons_animation_blend = weapons_animation_blend.lerp(Vector2.ONE, GENERAL_LERP_VAL)
+			if game_steps_since_execute == -20:
+				held_weapons[selected_weapon].reload_weapon()
+			if game_steps_since_execute > -20:
+				weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), GENERAL_LERP_VAL)
+			if game_steps_since_execute == 0:
+				weapons_animation_blend = decide_weapon_blend()
+				action_complete()
 	visible_level = clamp(visible_level, 0, 100)
 	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
 	$DebugLabel3D.text = str(target_visible_level)
