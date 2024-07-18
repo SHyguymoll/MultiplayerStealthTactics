@@ -377,10 +377,10 @@ func determine_weapon_events():
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
 			"rifle":
 				attackers[agent] = [
-	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 2.0)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -2.0)),]
+	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 0.2)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -0.2)),]
 			"shotgun":
 				attackers[agent] = [
-	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 3.0)), return_attacked(agent, agent.queued_action[1]), return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -3.0)),]
+	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 1.0)), return_attacked(agent, agent.queued_action[1]), return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)),]
 
 
 	for attacker in (attackers.keys() as Array[Agent]):
