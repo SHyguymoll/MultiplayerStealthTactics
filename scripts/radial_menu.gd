@@ -151,10 +151,15 @@ func determine_weapons():
 	var candidates : Array[GameWeapon] = referenced_agent.held_weapons.duplicate()
 	if current_screen == "swap_weapon":
 		_u.icon = GameRefs.WEP[candidates[0].wep_name].icon
-	if len(candidates) > 1:
-		_dl.icon = GameRefs.WEP[candidates[1].wep_name].icon
-	if len(candidates) > 2:
-		_dr.icon = GameRefs.WEP[candidates[2].wep_name].icon
+		if len(candidates) > 1 and candidates[1].has_ammo():
+			_dl.icon = GameRefs.WEP[candidates[1].wep_name].icon
+		if len(candidates) > 2 and candidates[2].has_ammo():
+			_dr.icon = GameRefs.WEP[candidates[2].wep_name].icon
+	else:
+		if len(candidates) > 1:
+			_dl.icon = GameRefs.WEP[candidates[1].wep_name].icon
+		if len(candidates) > 2:
+			_dr.icon = GameRefs.WEP[candidates[2].wep_name].icon
 	match referenced_agent.selected_weapon:
 		0:
 			_u.icon = ICONS.none

@@ -14,7 +14,7 @@ const WEP := {
 		type = WeaponTypes.CQC,
 		cooldown_time = 5,
 		reload_time = 0,
-		ammo = -1,
+		ammo = 1,
 		damage = 0,
 		},
 	pistol = {
@@ -75,11 +75,19 @@ const WEP := {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/flag.png"),
 		name = "Flag",
 		type = WeaponTypes.CQC,
+		cooldown_time = 5,
+		reload_time = 0,
+		ammo = 1,
+		damage = 0,
 		},
 	enemy_flag = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/flag.png"),
 		name = "Enemy Flag",
 		type = WeaponTypes.CQC,
+		cooldown_time = 5,
+		reload_time = 0,
+		ammo = 1,
+		damage = 0,
 		},
 }
 
