@@ -49,11 +49,11 @@ var _outline_mat : StandardMaterial3D
 @onready var _nav_agent : NavigationAgent3D = $NavigationAgent3D
 @onready var _active_item_icon : Sprite3D = $ActiveItem
 @onready var _held_weapon_meshes = {
-	pistol = $Agent/game_rig/Skeleton3D/Pistol/Pistol,
-	rifle = $Agent/game_rig/Skeleton3D/Rifle/Rifle,
-	shotgun = $Agent/game_rig/Skeleton3D/Shotgun/Shotgun,
-	grenade_frag = $Agent/game_rig/Skeleton3D/GrenadeFrag/GrenadeFrag,
-	grenade_smoke = $Agent/game_rig/Skeleton3D/GrenadeSmoke/GrenadeSmoke,
+	pistol = $Agent/game_rig/Skeleton3D/Pistol,
+	rifle = $Agent/game_rig/Skeleton3D/Rifle,
+	shotgun = $Agent/game_rig/Skeleton3D/Shotgun,
+	grenade_frag = $Agent/game_rig/Skeleton3D/GrenadeFrag,
+	grenade_smoke = $Agent/game_rig/Skeleton3D/GrenadeSmoke,
 }
 
 # Actions are stored as an enum in order to make serialization much easier
