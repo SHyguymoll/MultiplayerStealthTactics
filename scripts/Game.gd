@@ -93,12 +93,19 @@ func determine_sights():
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if not agent.is_multiplayer_authority():
 			continue
+		var previously_detected = agent.detected.duplicate()
 		for detected in agent._eyes.get_overlapping_areas():
 			var par = detected.get_parent()
+			if par in previously_detected:
+				previously_detected.erase(par)
 			if par is Agent:
 				if agent == par: # of course you can see yourself
 					continue
 				try_see_agent(agent, par)
+			else:
+				try_see_element(agent, par)
+		for to_remove in previously_detected:
+			pass
 
 		# remove lost known
 		# add found unknown
@@ -106,26 +113,37 @@ func determine_sights():
 		pass
 
 
-func try_see_agent(spotter : Agent, spottee : Agent):
-	var dist = clampf(remap(spotter.position.distance_to(spottee.position), 0.0, spotter.view_dist, 0.0, 1.0), 0.0, 1.0)
-	var exponent = ((1.5 * dist)/(log(spottee.visible_level)/log(10)))
+func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_level : int) -> float:
+	var dist = clampf(remap(spotter.position.distance_to(spottee_pos), 0.0, spotter.view_dist, 0.0, 1.0), 0.0, 1.0)
+	var exponent = ((1.5 * dist)/(log(visible_level)/log(10)))
 	var inv_eye = 1.0/spotter.eye_strength
-	var sight_chance = maxf(1.0/(inv_eye**exponent), 0.01) # chance to see
+	return maxf(1.0/(inv_eye**exponent), 0.01)
+
+func try_see_agent(spotter : Agent, spottee : Agent):
+	if spottee in spotter.detected:
+		return
+	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level)
 	print(sight_chance)
 	if sight_chance > 0.7: # seent it
 		spottee.visible = true
-		create_popup(GameRefs.POPUP.spotted, spottee.position)
+		create_popup(GameRefs.POPUP.spotted, spottee.position, true)
 		spotter.detected_agents.append(spottee)
 	elif sight_chance > 1.0/3.0: # almost seent it
-		if spottee in spotter.detected_agents: # or they could just be leaving
-			return
-		if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority(): # or we could just know them already
+		if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority() and not spottee.in_incapacitated_state(): # or we could just know them already
 			return
 		spotter.detected_agents.append(spottee)
 		var p_offset = -0.1/sight_chance
 		var x_off = randf_range(-p_offset, p_offset)
 		var z_off = randf_range(-p_offset, p_offset)
 		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(x_off, 0, z_off))
+
+
+func try_see_element(spotter : Agent, element : Node3D):
+	var sight_chance = calculate_sight_chance(spotter, element.position, 100)
+	if sight_chance > 0.7:
+		element.visible = true
+		if element is GamePopup:
+			element.disappear()
 
 
 func determine_sounds():
@@ -303,11 +321,6 @@ func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
 		return
 	if unspotter.get_multiplayer_authority() != unspottee.get_multiplayer_authority():
 		pass
-
-
-func _agent_sees_element(element : Node3D):
-	if element is GamePopup:
-		element.disappear()
 
 
 func _agent_lost_element(element : Node3D):

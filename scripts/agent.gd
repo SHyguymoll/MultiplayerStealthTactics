@@ -104,7 +104,7 @@ enum AttackStep {
 }
 @export var attack_step := AttackStep.ORIENTING
 
-@export var detected_agents : Array[Agent] = []
+@export var detected : Array = []
 
 func in_incapacitated_state() -> bool:
 	return state in [States.GRABBED, States.STUNNED, States.DEAD]
