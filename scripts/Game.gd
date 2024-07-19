@@ -8,6 +8,7 @@ var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
 var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
 var popup_scene = preload("res://scenes/game_popup.tscn")
+var audio_event_scene = preload("res://scenes/game_popup.tscn")
 
 var server_ready_bool := false
 var client_ready_bool := false
@@ -69,8 +70,12 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.fov_target = new_fov
 
 
-func create_sound_effect() -> void: #TODO
-	pass
+func create_sound_effect(location : Vector3, lifetime : int, min_rad : float, max_rad : float) -> void: #TODO
+	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
+	new_audio_event.max_radius = max_rad
+	new_audio_event.min_radius = min_rad
+	new_audio_event.lifetime = lifetime
+	new_audio_event.max_lifetime = lifetime
 
 
 func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void: #TODO
@@ -148,10 +153,17 @@ func try_see_element(spotter : Agent, element : Node3D):
 
 func determine_sounds():
 	for agent in ($Agents.get_children() as Array[Agent]):
-		var new_detect_set = agent._ears.get_overlapping_areas()
 		for detected in agent._ears.get_overlapping_areas():
-			pass
-		pass
+			var audio_event : GameAudioEvent = detected.get_parent()
+			var hear_chance = audio_event.radius * agent.ear_strength * clampf(remap(agent.position.distance_to(detected.position), 0.0, agent.hearing_dist, 0.0, 1.0), 0.0, 1.0)
+			if hear_chance > 0.5:
+				create_popup(GameRefs.POPUP.sound_unknown, detected.position)
+	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
+		audio_event.lifetime -= 1
+		if audio_event.lifetime == 0:
+			audio_event.queue_free()
+			continue
+		audio_event.update_radius()
 
 
 func determine_indicator_removals():

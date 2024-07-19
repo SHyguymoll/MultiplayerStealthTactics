@@ -53,6 +53,8 @@ directional_shadow_mode = 0
 
 [node name="RayCasts" type="Node3D" parent="."]
 
+[node name="AudioEvents" type="Node3D" parent="."]
+
 [node name="Popups" type="Node3D" parent="."]
 
 [node name="HUDBase" type="CanvasLayer" parent="."]
