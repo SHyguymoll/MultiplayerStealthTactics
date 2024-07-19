@@ -23,7 +23,7 @@ const WEP := {
 		type = WeaponTypes.SMALL,
 		cooldown_time = 30,
 		reload_time = 75,
-		ammo = 9,
+		ammo = 1,#ammo = 9,
 		damage = 1,
 		},
 	rifle = {
