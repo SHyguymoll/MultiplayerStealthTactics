@@ -172,11 +172,11 @@ func determine_sounds():
 				audio_event.play_sound()
 		match agent.state:
 			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.1, 0.5, "ag_step_quiet")
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.25, 2.0, "ag_step_quiet")
 			Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
 				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 13, 1.5, 2.75, "ag_step_loud")
 			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.1, 0.5, "ag_step_quiet")
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.25, 2.0, "ag_step_quiet")
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
 		audio_event.lifetime -= 1
 		if audio_event.lifetime == 0:
@@ -205,7 +205,6 @@ func _physics_process(delta: float) -> void:
 			if multiplayer.is_server() and server_ready_bool and client_ready_bool:
 				_update_game_phase.rpc(GamePhases.EXECUTION)
 		GamePhases.EXECUTION:
-			#if multiplayer.is_server(): # server simulates everything, client watches
 			determine_cqc_events()
 			determine_weapon_events()
 			for agent in ($Agents.get_children() as Array[Agent]):

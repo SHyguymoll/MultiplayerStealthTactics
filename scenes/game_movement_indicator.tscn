@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://byiuauwlgaakv"]
+[gd_scene load_steps=10 format=3 uid="uid://byiuauwlgaakv"]
 
 [ext_resource type="Texture2D" uid="uid://c1a4tc5047oxv" path="res://assets/sprites/game_popups/animated/movement/0.png" id="1_d3kem"]
 [ext_resource type="Script" path="res://scripts/game_movement_indicator.gd" id="1_rfasu"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://bd8lmi6lsyims" path="res://assets/sprites/game_popups/animated/movement/3.png" id="4_gup6x"]
 [ext_resource type="Texture2D" uid="uid://o1e60rw5jlih" path="res://assets/sprites/game_popups/animated/movement/fail.png" id="5_osgha"]
 [ext_resource type="Texture2D" uid="uid://86gycgkrmhxo" path="res://assets/sprites/game_popups/animated/movement/checkmark.png" id="6_sfetn"]
+[ext_resource type="FontFile" uid="uid://50pgbui3omif" path="res://assets/fonts/Jersey_25/Jersey25-Regular.ttf" id="8_q1ajn"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_vjpas"]
 animations = [{
@@ -158,5 +159,12 @@ script = ExtResource("1_rfasu")
 [node name="MiddleCast" type="RayCast3D" parent="."]
 
 [node name="RightCast" type="RayCast3D" parent="."]
+
+[node name="DebugLabel3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.24062, 0)
+billboard = 1
+font = ExtResource("8_q1ajn")
+font_size = 64
+outline_size = 11
 
 [connection signal="animation_changed" from="." to="." method="_on_animation_changed"]

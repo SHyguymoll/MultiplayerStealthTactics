@@ -397,10 +397,10 @@ func _game_step(delta: float) -> void:
 			States.CRAWL:
 				velocity /= 2.5
 				visible_level += 10
-		if _nav_agent.distance_to_target() < velocity.length(): # to always land on target
-			velocity = velocity.normalized() * _nav_agent.distance_to_target()
+		#if _nav_agent.distance_to_target() < velocity.length(): # to always land on target
+			#velocity = velocity.normalized() * _nav_agent.distance_to_target()
 		move_and_slide()
-		if position.distance_to(queued_action[1]) < 0.2:
+		if position.distance_to(queued_action[1]) < movement_speed / (1 if state == States.RUN else 2 if state in [States.WALK, States.CROUCH_WALK] else 2.5):
 			position = _nav_agent.target_position
 			match state:
 				States.WALK, States.RUN:

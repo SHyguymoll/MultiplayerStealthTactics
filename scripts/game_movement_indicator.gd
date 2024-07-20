@@ -96,6 +96,7 @@ func _physics_process(delta: float) -> void:
 		global_position = ray_position
 		position_valid = _check_position()
 	modulate = Color.WHITE if position_valid else Color.RED
+	#$DebugLabel3D.text = str(referenced_agent.position.distance_to(position)) + "\n" + str(position)
 
 
 
