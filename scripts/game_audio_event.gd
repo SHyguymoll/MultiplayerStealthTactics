@@ -19,9 +19,13 @@ func _ready():
 	_area_shape.shape.height = 7.0
 	_area_shape.shape.radius = min_radius
 	_audio_node.stream = GameRefs.AUDIO.get(selected_audio, null)
+	if player_id == get_multiplayer_authority():
+		play_sound()
 
 func update_radius():
 	radius = lerpf(min_radius, max_radius, float(max_lifetime - lifetime)/max_lifetime)
+	if multiplayer.is_server():
+		print(radius)
 	_area_shape.shape.radius = radius
 
 func play_sound():
