@@ -56,6 +56,10 @@ var _outline_mat : StandardMaterial3D
 	shotgun = $Agent/game_rig/Skeleton3D/Shotgun,
 	grenade_frag = $Agent/game_rig/Skeleton3D/GrenadeFrag,
 	grenade_smoke = $Agent/game_rig/Skeleton3D/GrenadeSmoke,
+	grenade_noise = $Agent/game_rig/Skeleton3D/GrenadeNoise,
+	flag_center = $Agent/game_rig/Skeleton3D/FlagCenter,
+	flag_server = $Agent/game_rig/Skeleton3D/FlagServer,
+	flag_client = $Agent/game_rig/Skeleton3D/FlagClient,
 }
 
 # Actions are stored as an enum in order to make serialization much easier

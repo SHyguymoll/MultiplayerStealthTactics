@@ -62,16 +62,16 @@ const WEP := {
 		ammo = 1,
 		damage = 4,
 		},
-	noise_maker = {
+	grenade_noise = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/noise_maker.png"),
-		name = "Audio Disturber",
+		name = "Audio Grenade",
 		type = WeaponTypes.THROWN,
 		cooldown_time = 30,
 		reload_time = 10,
 		ammo = 1,
 		damage = 0,
 		},
-	middle_flag = {
+	flag_center = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/flag.png"),
 		name = "Flag",
 		type = WeaponTypes.CQC,
@@ -80,7 +80,16 @@ const WEP := {
 		ammo = 1,
 		damage = 0,
 		},
-	enemy_flag = {
+	flag_server = {
+		icon = preload("res://assets/sprites/hud_agent_small/weapons/flag.png"),
+		name = "Enemy Flag",
+		type = WeaponTypes.CQC,
+		cooldown_time = 5,
+		reload_time = 0,
+		ammo = 1,
+		damage = 0,
+		},
+	flag_client = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/flag.png"),
 		name = "Enemy Flag",
 		type = WeaponTypes.CQC,

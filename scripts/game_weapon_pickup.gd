@@ -19,15 +19,19 @@ func _ready():
 		"shotgun":
 			$Shotgun.visible = true
 		"grenade_smoke":
-			$Pistol.visible = true
+			$GrenadeSmoke.visible = true
 		"grenade_frag":
-			$Pistol.visible = true
+			$GrenadeFrag.visible = true
+		"grenade_noise":
+			$GrenadeNoise.visible = true
 		"noise_maker":
 			$Pistol.visible = true
-		"middle_flag":
-			$Pistol.visible = true
-		"enemy_flag":
-			$Pistol.visible = true
+		"flag_center":
+			$FlagCenter.visible = true
+		"flag_server":
+			$FlagServer.visible = true
+		"flag_client":
+			$FlagClient.visible = true
 
 
 func _physics_process(delta: float) -> void:
