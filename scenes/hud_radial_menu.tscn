@@ -1,7 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://d4hiq2jbaabj5"]
+[gd_scene load_steps=6 format=3 uid="uid://d4hiq2jbaabj5"]
 
 [ext_resource type="Script" path="res://scripts/radial_menu.gd" id="1_n51wc"]
 [ext_resource type="Texture2D" uid="uid://bc6012otbs3eg" path="res://assets/sprites/radial_menu/none.png" id="2_nl0k1"]
+[ext_resource type="AudioStream" uid="uid://chc7uxln04icj" path="res://assets/sounds/menu/button_select.wav" id="3_d255f"]
+[ext_resource type="AudioStream" uid="uid://mdjtnh6lmf5q" path="res://assets/sounds/menu/action_select.wav" id="4_y355d"]
+[ext_resource type="AudioStream" uid="uid://cfy3xoqmmov7" path="res://assets/sounds/menu/action_cancelled.wav" id="5_gujrk"]
 
 [node name="RadialMenu" type="Node2D"]
 script = ExtResource("1_n51wc")
@@ -149,6 +152,15 @@ grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 icon = ExtResource("2_nl0k1")
+
+[node name="MenuNavigation" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_d255f")
+
+[node name="ActionSelected" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_y355d")
+
+[node name="ActionCancelled" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_gujrk")
 
 [connection signal="pressed" from="UL" to="." method="_on_ul_pressed"]
 [connection signal="pressed" from="U" to="." method="_on_u_pressed"]

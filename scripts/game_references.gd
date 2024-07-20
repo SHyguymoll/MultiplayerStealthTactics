@@ -137,6 +137,24 @@ const POPUP := {
 	spotted = preload("res://assets/sprites/game_popups/spotted.png"),
 }
 
+const AUDIO = {
+	ag_step_quiet = preload("res://assets/sounds/agent/footfall_slow.wav"),
+	ag_step_loud = preload("res://assets/sounds/agent/footfall_fast.wav"),
+	ag_hurt = preload("res://assets/sounds/agent/hurt.wav"),
+	ag_saw_something = preload("res://assets/sounds/agent/noticed_sight.wav"),
+	ag_detect_element = preload("res://assets/sounds/agent/detected_element.wav"),
+	ag_detect_agent = preload("res://assets/sounds/agent/detected_agent.wav"),
+	ag_exfil = preload("res://assets/sounds/agent/exfiltrated.wav"),
+
+	pistol = preload("res://assets/sounds/weapon/pistol.wav"),
+	rifle = preload("res://assets/sounds/weapon/rifle.wav"),
+	shotgun = preload("res://assets/sounds/weapon/shotgun.wav"),
+	grenade_bounce = preload("res://assets/sounds/weapon/grenade_bounce.wav"),
+	grenade_frag = preload("res://assets/sounds/weapon/grenade_frag.wav"),
+	grenade_smoke = preload("res://assets/sounds/weapon/grenade_smoke.wav"),
+
+}
+
 func compare_wep_type(agent : Agent, wep_type : WeaponTypes):
 	return WEP[agent.held_weapons[agent.selected_weapon].wep_name].type == wep_type
 

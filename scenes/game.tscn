@@ -1,10 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=11 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
 [ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
 [ext_resource type="PackedScene" uid="uid://mr6n3d2nksvr" path="res://scenes/maps/game_map.tscn" id="2_ow13f"]
 [ext_resource type="PackedScene" uid="uid://d4hiq2jbaabj5" path="res://scenes/hud_radial_menu.tscn" id="2_xp2mg"]
 [ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="5_b0o1h"]
+[ext_resource type="AudioStream" uid="uid://br780ba1a0thh" path="res://assets/sounds/objective/game_phase_switch.wav" id="6_v7k2q"]
+[ext_resource type="AudioStream" uid="uid://duphq4x6qqx0h" path="res://assets/sounds/objective/round_update.wav" id="7_t43ju"]
+[ext_resource type="AudioStream" uid="uid://dlgqsvrw4auka" path="res://assets/sounds/objective/actions_submitted.wav" id="8_ujb0t"]
+[ext_resource type="AudioStream" uid="uid://dkvuukd233rug" path="res://assets/sounds/objective/action_stepped.wav" id="9_1bflo"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pu7ty"]
 properties/0/path = NodePath(".:action_timeline")
@@ -116,6 +120,20 @@ follow_viewport_enabled = true
 position = Vector2(-60, -60)
 
 [node name="HUDSelectors" type="CanvasLayer" parent="."]
+
+[node name="SoundEffects" type="Node" parent="."]
+
+[node name="GamePhaseSwitch" type="AudioStreamPlayer" parent="SoundEffects"]
+stream = ExtResource("6_v7k2q")
+
+[node name="RoundUpdate" type="AudioStreamPlayer" parent="SoundEffects"]
+stream = ExtResource("7_t43ju")
+
+[node name="ActionsSubmitted" type="AudioStreamPlayer" parent="SoundEffects"]
+stream = ExtResource("8_ujb0t")
+
+[node name="RoundEnded" type="AudioStreamPlayer" parent="SoundEffects"]
+stream = ExtResource("9_1bflo")
 
 [node name="ColdBootTimer" type="Timer" parent="."]
 one_shot = true

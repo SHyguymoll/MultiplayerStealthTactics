@@ -44,6 +44,11 @@ var current_screen : String
 @onready var _d : Button = $D
 @onready var _dr : Button = $DR
 
+@onready var _menu_nav : AudioStreamPlayer = $MenuNavigation
+@onready var _action_sel : AudioStreamPlayer = $ActionSelected
+@onready var _action_can : AudioStreamPlayer = $ActionCancelled
+
+
 func button_spread_animation():
 	var mid = _m.size.x/-2
 	_disable_all_buttons()
@@ -61,6 +66,7 @@ func button_spread_animation():
 	twe.tween_property(_d, "position", Vector2(mid, mid + ICON_DIST*3 + DIST_CIRCLE_ADD), TWEEN_TIME)
 	twe.tween_property(_dr, "position", Vector2(mid + ICON_DIST*3, mid + ICON_DIST*3), TWEEN_TIME)
 	twe.finished.connect(_enable_all_buttons)
+	_menu_nav.play()
 
 func button_collapse_animation(instant := false):
 	_disable_all_buttons()
@@ -286,70 +292,91 @@ func _button_pressed_metadata(button : Button):
 	var button_texture = button.icon
 	match button_texture:
 		ICONS.none:
+			_action_can.play()
 			button_collapse_animation()
 		ICONS.cancel_back:
 			if current_screen in ["swap_item", "menu_weapon"]:
+				_menu_nav.play()
 				current_screen = "top"
 				button_menu_screen()
 				button_collapse_animation(true)
 				button_spread_animation()
 			elif current_screen in ["swap_weapon", "drop_weapon", "pick_up_weapon"]:
+				_menu_nav.play()
 				current_screen = "menu_weapon"
 				button_menu_screen()
 				button_collapse_animation(true)
 				button_spread_animation()
 			else:
+				_action_can.play()
 				button_collapse_animation()
 		ICONS.swap_item:
+			_menu_nav.play()
 			current_screen = "swap_item"
 			button_menu_screen()
 		ICONS.menu_weapon:
+			_menu_nav.play()
 			current_screen = "menu_weapon"
 			button_menu_screen()
 		ICONS.swap_weapon:
+			_menu_nav.play()
 			current_screen = "swap_weapon"
 			button_menu_screen()
 		ICONS.drop_weapon:
+			_menu_nav.play()
 			current_screen = "drop_weapon"
 			button_menu_screen()
 		ICONS.pick_up_weapon:
+			_menu_nav.play()
 			current_screen = "pick_up_weapon"
 			button_menu_screen()
 		ICONS.no_action, ICONS.halt:
+			_action_can.play()
 			decision_made.emit([null])
 			button_collapse_animation()
 		ICONS.stance_stand:
+			_action_sel.play()
 			decision_made.emit([Agent.GameActions.GO_STAND])
 			button_collapse_animation()
 		ICONS.stance_crouch:
+			_action_sel.play()
 			decision_made.emit([Agent.GameActions.GO_CROUCH])
 			button_collapse_animation()
 		ICONS.stance_prone:
+			_action_sel.play()
 			decision_made.emit([Agent.GameActions.GO_PRONE])
 			button_collapse_animation()
 		ICONS.run:
+			_action_sel.play()
 			movement_decision_made.emit([Agent.GameActions.RUN_TO_POS])
 			button_collapse_animation()
 		ICONS.walk:
+			_action_sel.play()
 			movement_decision_made.emit([Agent.GameActions.WALK_TO_POS])
 			button_collapse_animation()
 		ICONS.crouch_walk:
+			_action_sel.play()
 			movement_decision_made.emit([Agent.GameActions.CROUCH_WALK_TO_POS])
 			button_collapse_animation()
 		ICONS.crawl:
+			_action_sel.play()
 			movement_decision_made.emit([Agent.GameActions.CRAWL_TO_POS])
 			button_collapse_animation()
 		ICONS.use_weapon:
+			_action_sel.play()
 			aiming_decision_made.emit([Agent.GameActions.USE_WEAPON])
 			button_collapse_animation()
 		ICONS.reload_weapon:
+			_action_sel.play()
 			decision_made.emit([Agent.GameActions.RELOAD_WEAPON])
 			button_collapse_animation()
 		ICONS.look:
+			_action_sel.play()
 			aiming_decision_made.emit([Agent.GameActions.LOOK_AROUND])
 			button_collapse_animation()
 	for possible in GameRefs.ITM:
 		if button_texture == GameRefs.ITM[possible].icon:
+			_action_sel.play()
 			decision_made.emit([Agent.GameActions.CHANGE_ITEM, possible])
 			button_collapse_animation()
 	for possible in GameRefs.WEP:
@@ -360,8 +387,10 @@ func _button_pressed_metadata(button : Button):
 					if button_texture == GameRefs.WEP[ag_possible.wep_name].icon:
 						match current_screen:
 							"swap_weapon":
+								_action_sel.play()
 								decision_made.emit([Agent.GameActions.CHANGE_WEAPON, new_ind])
 							"drop_weapon":
+								_action_sel.play()
 								decision_made.emit([Agent.GameActions.DROP_WEAPON, new_ind])
 						button_collapse_animation()
 						return

@@ -40,6 +40,10 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 @onready var _phase_label : Label = $HUDBase/CurrentPhase
 @onready var _ag_insts : Label = $HUDBase/AgentInstructions
 
+@onready var _game_phase_switch : AudioStreamPlayer = $SoundEffects/GamePhaseSwitch
+@onready var _round_update : AudioStreamPlayer = $SoundEffects/RoundUpdate
+@onready var _round_ended : AudioStreamPlayer = $SoundEffects/RoundEnded
+@onready var _actions_submitted : AudioStreamPlayer = $SoundEffects/ActionsSubmitted
 
 func _ready():
 	# Preconfigure game.
@@ -596,8 +600,10 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 @rpc("authority", "call_local", "reliable")
 func _update_game_phase(new_phase: GamePhases, check_incap := true):
 	game_phase = new_phase
+	_game_phase_switch.play()
 	match new_phase:
 		GamePhases.SELECTION:
+			_round_ended.play()
 			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
@@ -609,6 +615,8 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 					create_agent_selector(ag)
 					ag.flash_outline(Color.ORCHID)
 			show_hud()
+			#if event occurred: TODO
+				#_round_update.play()
 			if $HUDSelectors.get_child_count() == 0 and check_incap:
 				_on_execute_pressed() # run the execute function since the player can't do anything
 		GamePhases.EXECUTION:
@@ -642,6 +650,7 @@ func set_agent_action(agent_name : String, action : Array):
 	$Agents.get_node(agent_name).queued_action = action
 
 func _on_execute_pressed() -> void:
+	_actions_submitted.play()
 	_execute_button.disabled = true
 	_execute_button.text = "WAITING FOR OPPONENT"
 	_radial_menu.button_collapse_animation()
