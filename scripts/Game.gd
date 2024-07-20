@@ -171,11 +171,11 @@ func determine_sounds():
 				create_popup(GameRefs.POPUP.sound_unknown, detected.position)
 				audio_event.play_sound()
 		match agent.state:
-			Agent.States.WALK when agent.game_steps_since_execute % 40:
+			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
 				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.1, 0.5, "ag_step_quiet")
-			Agent.States.RUN when agent.game_steps_since_execute % 20:
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 13, 0.25, 0.75, "ag_step_loud")
-			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50:
+			Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 13, 1.5, 2.75, "ag_step_loud")
+			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
 				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.1, 0.5, "ag_step_quiet")
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
 		audio_event.lifetime -= 1
