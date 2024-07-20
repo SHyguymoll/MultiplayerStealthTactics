@@ -18,6 +18,8 @@ var ear_strength : float = 1 #multiplier applied to ear cylinder in relation to 
 var movement_dist : float = 7.0 #distance of furthest possible movement
 var movement_speed : float = 2.75 #movement speed when running (divided by 2 for walking, 2.5 for prone)
 
+var player_id : int
+
 @export var visible_level : int = 50 #bounded from 0 to 100, based on current state
 
 var held_items : Array = [] #max length should be 3, only uses Strings
@@ -400,7 +402,7 @@ func _game_step(delta: float) -> void:
 		#if _nav_agent.distance_to_target() < velocity.length(): # to always land on target
 			#velocity = velocity.normalized() * _nav_agent.distance_to_target()
 		move_and_slide()
-		if position.distance_to(queued_action[1]) < movement_speed / (1 if state == States.RUN else 2 if state in [States.WALK, States.CROUCH_WALK] else 2.5):
+		if position.distance_to(queued_action[1]) < 0.3: #movement_speed / (1 if state == States.RUN else 2 if state in [States.WALK, States.CROUCH_WALK] else 2.5):
 			position = _nav_agent.target_position
 			match state:
 				States.WALK, States.RUN:

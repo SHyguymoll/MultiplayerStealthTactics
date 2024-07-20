@@ -19,12 +19,19 @@ func _ready():
 	_area_shape.shape.height = 7.0
 	_area_shape.shape.radius = min_radius
 	_audio_node.stream = GameRefs.AUDIO.get(selected_audio, null)
-	if player_id == get_multiplayer_authority():
+	if player_id == multiplayer.get_unique_id():
 		play_sound()
 
-func update_radius():
+
+func update():
+	lifetime = max(lifetime - 1, 0)
 	radius = lerpf(min_radius, max_radius, float(max_lifetime - lifetime)/float(max_lifetime))
 	_area_shape.shape.radius = radius
+	if lifetime == 0:
+		_area_shape.disabled = true
+		if not _audio_node.playing:
+			queue_free()
+
 
 func play_sound():
 	_audio_node.play()

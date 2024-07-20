@@ -142,7 +142,7 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 		create_popup(GameRefs.POPUP.spotted, spottee.position, true)
 		spotter.detected_agents.append(spottee)
 	elif sight_chance > 1.0/3.0: # almost seent it
-		if spotter.get_multiplayer_authority() == spottee.get_multiplayer_authority() and not spottee.in_incapacitated_state(): # or we could just know them already
+		if spotter.player_id == spottee.player_id and not spottee.in_incapacitated_state(): # or we could just know them already
 			return
 		spotter.detected_agents.append(spottee)
 		var p_offset = -0.1/sight_chance
@@ -165,7 +165,7 @@ func determine_sounds():
 			continue # incapped agents are deaf
 		for detected in agent._ears.get_overlapping_areas():
 			var audio_event : GameAudioEvent = detected.get_parent()
-			if agent.get_multiplayer_authority() == audio_event.player_id:
+			if agent.player_id == audio_event.player_id:
 				continue # skip same team sources
 			var hear_chance = audio_event.radius * agent.ear_strength * clampf(remap(agent.position.distance_to(detected.position), 0.0, agent.hearing_dist, 0.0, 1.0), 0.0, 1.0)
 			if hear_chance > 0.5:
@@ -173,17 +173,13 @@ func determine_sounds():
 				audio_event.play_sound()
 		match agent.state:
 			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.25, 2.0, "ag_step_quiet")
+				create_sound_effect(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
 			Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 13, 1.5, 2.75, "ag_step_loud")
+				create_sound_effect(agent.position, agent.player_id, 13, 1.5, 2.75, "ag_step_loud")
 			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.25, 2.0, "ag_step_quiet")
+				create_sound_effect(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
-		audio_event.lifetime -= 1
-		if audio_event.lifetime == 0:
-			audio_event.queue_free()
-			continue
-		audio_event.update_radius()
+		audio_event.update()
 
 
 func determine_indicator_removals():
@@ -318,6 +314,7 @@ func create_agent(data) -> Agent: #TODO
 	new_agent.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
 	new_agent.rotation.y = data.rot_y
 	new_agent.set_multiplayer_authority(data.player_id)
+	new_agent.player_id = data.player_id
 	new_agent.health = data.agent_stats.health
 	new_agent.stun_health = data.agent_stats.health / 2
 	new_agent.view_dist = data.agent_stats.view_dist
@@ -351,7 +348,7 @@ func create_agent_selector(agent : Agent):
 func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
 	if not unspotter.is_multiplayer_authority():
 		return
-	if unspotter.get_multiplayer_authority() != unspottee.get_multiplayer_authority():
+	if unspotter.player_id != unspottee.player_id:
 		pass
 
 
@@ -389,10 +386,10 @@ func determine_cqc_events():
 			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
 		var grabbee : Agent = (cqc_actors[grabber] as Area3D).get_parent()
-		if grabbee in cqc_actors and grabber.get_multiplayer_authority() == 1: #client wins tiebreakers
+		if grabbee in cqc_actors and grabber.player_id == 1: #client wins tiebreakers
 			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
-		if grabber.get_multiplayer_authority() == grabbee.get_multiplayer_authority(): # don't grab your friends
+		if grabber.player_id == grabbee.player_id: # don't grab your friends
 			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
 		if grabbee.in_incapacitated_state(): # don't grab people who're already on the ground
@@ -420,14 +417,14 @@ func determine_weapon_events():
 		match agent.held_weapons[agent.selected_weapon].wep_name:
 			"pistol":
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 16, 0.25, 0.5, "pistol")
+				create_sound_effect(agent.position, agent.player_id, 10, 0.25, 0.5, "pistol")
 			"rifle":
 				attackers[agent] = [return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 0.2)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -0.2)),]
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 20, 0.5, 1.5, "rifle")
+				create_sound_effect(agent.position, agent.player_id, 10, 0.5, 1.5, "rifle")
 			"shotgun":
 				attackers[agent] = [
 	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 1.0)), return_attacked(agent, agent.queued_action[1]), return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)),]
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 45, 2.25, 3.5, "shotgun")
+				create_sound_effect(agent.position, agent.player_id, 15, 2.25, 3.5, "shotgun")
 
 
 	for attacker in (attackers.keys() as Array[Agent]):
@@ -435,20 +432,20 @@ func determine_weapon_events():
 		for hit in attackers[attacker]:
 			#create_popup(GameRefs.POPUP.spotted, hit[1], true)
 			if hit[0] == null: # hit a wall, make a sound event on the wall
-				create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 7, 0.5, 2, "projectile_bounce")
+				create_sound_effect(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
 			else:
 				if not (hit[0] as Area3D).get_parent() is Agent: # still hit a wall
-					create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 7, 0.5, 2, "projectile_bounce")
+					create_sound_effect(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
 				else: # actually hit an agent
 					var attacked : Agent = (hit[0] as Area3D).get_parent()
-					if attacker.get_multiplayer_authority() == attacked.get_multiplayer_authority():
+					if attacker.player_id == attacked.player_id:
 						continue # same team can block bullets but won't take damage
 					if attacked.stun_time > 0:
 						continue # skip already attacked agents
 					if attacked.in_prone_state():
 						continue # skip prone agents
-					attacked.take_damage(GameRefs.get_weapon_attribute(attacker, "damage"))
-					create_sound_effect(attacked.position, attacked.get_multiplayer_authority(), 20, 0.75, 2.5, "ag_hurt")
+					attacked.take_damage(GameRefs.get_weapon_attribute(attacker, attacker.selected_weapon, "damage"))
+					create_sound_effect(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 					attacked.stun_time = 60 if attacked.health > 0 else 300
 					attacked.select_hurt_animation()
 					attacked.state = Agent.States.HURT
@@ -527,17 +524,17 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 				final_text_string += GameRefs.ITM[decision_array[1]].name
 		Agent.GameActions.CHANGE_WEAPON:
 			final_text_string = "{0}: Switch to {1}".format([
-				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, "name")])
+				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
 				ref_ag.name,
 				GameRefs.WEP[decision_array[1]].name])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
-				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, "name")])
+				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.RELOAD_WEAPON:
 			final_text_string = "{0}: Reload {1}".format([
-				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, "name")])
+				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.HALT:
 			final_text_string = "{0}: Stop ".format([ref_ag.name])
 			match ref_ag.state:
@@ -612,7 +609,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 			final_text_string = "{0}: Look at Position".format([ref_ag.name])
 		Agent.GameActions.USE_WEAPON:
 			final_text_string = "{0}: Use {1} at Position".format(
-				[ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, "name")])
+				[ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, decision_array[1], "name")])
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
 	update_text()
