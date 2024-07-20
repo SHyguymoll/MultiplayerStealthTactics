@@ -331,6 +331,16 @@ func take_damage(amount : int, is_stun : bool = false):
 		health = max(0, health - amount)
 
 
+func select_hurt_animation():
+	var cur_node = _anim_state.get_current_node()
+	if cur_node.begins_with("B_Stand_") or cur_node in ["B_Walk", "B_Run", "B_CrouchToStand", "B_Hurt_Standing", "Stand"]:
+		_anim_state.travel("B_Hurt_Standing")
+	elif cur_node.begins_with("B_Crouch_") or cur_node in ["B_ProneToCrouch", "B_StandToCrouch", "Crouch", "B_Crouch_Walk"]:
+		_anim_state.travel("B_Hurt_Crouching")
+	else:
+		_anim_state.travel("B_Hurt_Prone")
+
+
 func flash_outline(color : Color):
 	_outline_mat.albedo_color = color
 

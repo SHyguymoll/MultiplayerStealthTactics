@@ -426,11 +426,10 @@ func determine_weapon_events():
 				else: # actually hit an agent
 					var attacked : Agent = (hit[0] as Area3D).get_parent()
 					attacked.take_damage(GameRefs.get_weapon_attribute(attacker, "damage"))
-
-
-
-func _agent_heard_something(listener : Agent, sound : Node3D):
-	pass
+					attacked.stun_time = 60 if attacked.health > 0 else 300
+					attacked.select_hurt_animation()
+					attacked.state = Agent.States.HURT
+					attacked.queued_action.clear()
 
 
 func _agent_died(deceased : Agent):
