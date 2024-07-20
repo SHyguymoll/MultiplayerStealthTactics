@@ -32,6 +32,7 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 
 
 @export var game_map : GameMap
+@onready var _camera : GameCamera = $World/Camera3D
 @onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
@@ -202,6 +203,7 @@ func _physics_process(delta: float) -> void:
 				selector.position = (
 			$World/Camera3D as Camera3D).unproject_position(
 					selector.referenced_agent.position)
+				(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
 			if multiplayer.is_server() and server_ready_bool and client_ready_bool:
 				_update_game_phase.rpc(GamePhases.EXECUTION)
 		GamePhases.EXECUTION:

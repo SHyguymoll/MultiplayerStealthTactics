@@ -11,6 +11,8 @@ var quickness := 0.3
 var fov_target := 75.0
 var ground_height : float = 0
 
+const MAX_FOV = 75.0
+
 func _ready() -> void:
 	position = Vector3(0, 15, 0)
 	h_offset = 0
