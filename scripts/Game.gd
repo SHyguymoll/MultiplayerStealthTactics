@@ -170,11 +170,11 @@ func determine_sounds():
 				audio_event.play_sound()
 		match agent.state:
 			Agent.States.WALK when agent.game_steps_since_execute % 40:
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 4, 0.1, 0.5, "ag_step_quiet")
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.1, 0.5, "ag_step_quiet")
 			Agent.States.RUN when agent.game_steps_since_execute % 20:
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 4, 0.25, 0.75, "ag_step_loud")
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 13, 0.25, 0.75, "ag_step_loud")
 			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50:
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 4, 0.1, 0.5, "ag_step_quiet")
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 54, 0.1, 0.5, "ag_step_quiet")
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
 		audio_event.lifetime -= 1
 		if audio_event.lifetime == 0:
@@ -417,14 +417,14 @@ func determine_weapon_events():
 		match agent.held_weapons[agent.selected_weapon].wep_name:
 			"pistol":
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 3, 0.25, 0.5, "pistol")
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 16, 0.25, 0.5, "pistol")
 			"rifle":
 				attackers[agent] = [return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 0.2)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -0.2)),]
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 3, 0.5, 1.5, "rifle")
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 20, 0.5, 1.5, "rifle")
 			"shotgun":
 				attackers[agent] = [
 	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 1.0)), return_attacked(agent, agent.queued_action[1]), return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)),]
-				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 3, 2.25, 3.5, "shotgun")
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 45, 2.25, 3.5, "shotgun")
 
 
 	for attacker in (attackers.keys() as Array[Agent]):
@@ -432,10 +432,10 @@ func determine_weapon_events():
 		for hit in attackers[attacker]:
 			#create_popup(GameRefs.POPUP.spotted, hit[1], true)
 			if hit[0] == null: # hit a wall, make a sound event on the wall
-				create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2, "projectile_bounce")
+				create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 7, 0.5, 2, "projectile_bounce")
 			else:
 				if not (hit[0] as Area3D).get_parent() is Agent: # still hit a wall
-					create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2, "projectile_bounce")
+					create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 7, 0.5, 2, "projectile_bounce")
 				else: # actually hit an agent
 					var attacked : Agent = (hit[0] as Area3D).get_parent()
 					if attacker.get_multiplayer_authority() == attacked.get_multiplayer_authority():
@@ -445,7 +445,7 @@ func determine_weapon_events():
 					if attacked.in_prone_state():
 						continue # skip prone agents
 					attacked.take_damage(GameRefs.get_weapon_attribute(attacker, "damage"))
-					create_sound_effect(attacked.position, attacked.get_multiplayer_authority(), 4, 0.75, 2.5, "ag_hurt")
+					create_sound_effect(attacked.position, attacked.get_multiplayer_authority(), 20, 0.75, 2.5, "ag_hurt")
 					attacked.stun_time = 60 if attacked.health > 0 else 300
 					attacked.select_hurt_animation()
 					attacked.state = Agent.States.HURT
