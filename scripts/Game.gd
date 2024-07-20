@@ -8,7 +8,7 @@ var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
 var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
 var popup_scene = preload("res://scenes/game_popup.tscn")
-var audio_event_scene = preload("res://scenes/game_popup.tscn")
+var audio_event_scene = preload("res://scenes/game_audio_event.tscn")
 
 var server_ready_bool := false
 var client_ready_bool := false
@@ -73,13 +73,14 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.fov_target = new_fov
 
 
-func create_sound_effect(location : Vector3, player_id : int, lifetime : int, min_rad : float, max_rad : float) -> void: #TODO
+func create_sound_effect(location : Vector3, player_id : int, lifetime : int, min_rad : float, max_rad : float, sound_id : String) -> void: #TODO
 	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
 	new_audio_event.player_id = player_id
 	new_audio_event.max_radius = max_rad
 	new_audio_event.min_radius = min_rad
 	new_audio_event.lifetime = lifetime
 	new_audio_event.max_lifetime = lifetime
+	new_audio_event.selected_audio = sound_id
 
 
 func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void: #TODO
@@ -406,12 +407,14 @@ func determine_weapon_events():
 		match agent.held_weapons[agent.selected_weapon].wep_name:
 			"pistol":
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 3, 0.25, 0.5, "pistol")
 			"rifle":
-				attackers[agent] = [
-	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 0.2)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -0.2)),]
+				attackers[agent] = [return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 0.2)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -0.2)),]
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 3, 0.5, 1.5, "rifle")
 			"shotgun":
 				attackers[agent] = [
 	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 1.0)), return_attacked(agent, agent.queued_action[1]), return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)),]
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 3, 2.25, 3.5, "shotgun")
 
 
 	for attacker in (attackers.keys() as Array[Agent]):
@@ -419,10 +422,10 @@ func determine_weapon_events():
 		for hit in attackers[attacker]:
 			create_popup(GameRefs.POPUP.spotted, hit[1], true)
 			if hit[0] == null: # hit a wall, make a sound event on the wall
-				create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2)
+				create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2, "projectile_bounce")
 			else:
 				if not (hit[0] as Area3D).get_parent() is Agent: # still hit a wall
-					create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2)
+					create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2, "projectile_bounce")
 				else: # actually hit an agent
 					var attacked : Agent = (hit[0] as Area3D).get_parent()
 					attacked.take_damage(GameRefs.get_weapon_attribute(attacker, "damage"))
