@@ -158,6 +158,8 @@ func try_see_element(spotter : Agent, element : Node3D):
 
 func determine_sounds():
 	for agent in ($Agents.get_children() as Array[Agent]):
+		if agent.in_incapacitated_state():
+			continue # incapped agents are deaf
 		for detected in agent._ears.get_overlapping_areas():
 			var audio_event : GameAudioEvent = detected.get_parent()
 			if agent.get_multiplayer_authority() == audio_event.player_id:
@@ -165,6 +167,14 @@ func determine_sounds():
 			var hear_chance = audio_event.radius * agent.ear_strength * clampf(remap(agent.position.distance_to(detected.position), 0.0, agent.hearing_dist, 0.0, 1.0), 0.0, 1.0)
 			if hear_chance > 0.5:
 				create_popup(GameRefs.POPUP.sound_unknown, detected.position)
+				audio_event.play_sound()
+		match agent.state:
+			Agent.States.WALK when agent.game_steps_since_execute % 40:
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 4, 0.1, 0.5, "ag_step_quiet")
+			Agent.States.RUN when agent.game_steps_since_execute % 20:
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 4, 0.25, 0.75, "ag_step_loud")
+			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50:
+				create_sound_effect(agent.position, agent.get_multiplayer_authority(), 4, 0.1, 0.5, "ag_step_quiet")
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
 		audio_event.lifetime -= 1
 		if audio_event.lifetime == 0:
@@ -420,7 +430,7 @@ func determine_weapon_events():
 	for attacker in (attackers.keys() as Array[Agent]):
 		attacker.state = Agent.States.USING_WEAPON
 		for hit in attackers[attacker]:
-			create_popup(GameRefs.POPUP.spotted, hit[1], true)
+			#create_popup(GameRefs.POPUP.spotted, hit[1], true)
 			if hit[0] == null: # hit a wall, make a sound event on the wall
 				create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2, "projectile_bounce")
 			else:
@@ -428,7 +438,14 @@ func determine_weapon_events():
 					create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2, "projectile_bounce")
 				else: # actually hit an agent
 					var attacked : Agent = (hit[0] as Area3D).get_parent()
+					if attacker.get_multiplayer_authority() == attacked.get_multiplayer_authority():
+						continue # same team can block bullets but won't take damage
+					if attacked.stun_time > 0:
+						continue # skip already attacked agents
+					if attacked.in_prone_state():
+						continue # skip prone agents
 					attacked.take_damage(GameRefs.get_weapon_attribute(attacker, "damage"))
+					create_sound_effect(attacked.position, attacked.get_multiplayer_authority(), 4, 0.75, 2.5, "ag_hurt")
 					attacked.stun_time = 60 if attacked.health > 0 else 300
 					attacked.select_hurt_animation()
 					attacked.state = Agent.States.HURT
