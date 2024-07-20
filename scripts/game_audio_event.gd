@@ -23,7 +23,7 @@ func _ready():
 		play_sound()
 
 func update_radius():
-	radius = lerpf(min_radius, max_radius, float(max_lifetime - lifetime)/max_lifetime)
+	radius = lerpf(min_radius, max_radius, float(max_lifetime - lifetime)/float(max_lifetime))
 	if multiplayer.is_server():
 		print(radius)
 	_area_shape.shape.radius = radius
