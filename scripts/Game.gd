@@ -609,7 +609,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 			final_text_string = "{0}: Look at Position".format([ref_ag.name])
 		Agent.GameActions.USE_WEAPON:
 			final_text_string = "{0}: Use {1} at Position".format(
-				[ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, decision_array[1], "name")])
+				[ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, ref_ag.selected_weapon, "name")])
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
 	update_text()
