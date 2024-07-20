@@ -4,6 +4,7 @@ extends Sprite3D
 @onready var _area_shape : CollisionShape3D = $Area3D/CollisionShape3D
 @onready var _audio_node : AudioStreamPlayer = $AudioStreamPlayer
 
+var player_id : int
 var max_lifetime : int
 var lifetime : int
 var radius : float

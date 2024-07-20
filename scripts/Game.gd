@@ -40,7 +40,6 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 @onready var _phase_label : Label = $HUDBase/CurrentPhase
 @onready var _ag_insts : Label = $HUDBase/AgentInstructions
 
-@onready var _game_phase_switch : AudioStreamPlayer = $SoundEffects/GamePhaseSwitch
 @onready var _round_update : AudioStreamPlayer = $SoundEffects/RoundUpdate
 @onready var _round_ended : AudioStreamPlayer = $SoundEffects/RoundEnded
 @onready var _actions_submitted : AudioStreamPlayer = $SoundEffects/ActionsSubmitted
@@ -74,8 +73,9 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.fov_target = new_fov
 
 
-func create_sound_effect(location : Vector3, lifetime : int, min_rad : float, max_rad : float) -> void: #TODO
+func create_sound_effect(location : Vector3, player_id : int, lifetime : int, min_rad : float, max_rad : float) -> void: #TODO
 	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
+	new_audio_event.player_id = player_id
 	new_audio_event.max_radius = max_rad
 	new_audio_event.min_radius = min_rad
 	new_audio_event.lifetime = lifetime
@@ -159,6 +159,8 @@ func determine_sounds():
 	for agent in ($Agents.get_children() as Array[Agent]):
 		for detected in agent._ears.get_overlapping_areas():
 			var audio_event : GameAudioEvent = detected.get_parent()
+			if agent.get_multiplayer_authority() == audio_event.player_id:
+				continue # skip same team sources
 			var hear_chance = audio_event.radius * agent.ear_strength * clampf(remap(agent.position.distance_to(detected.position), 0.0, agent.hearing_dist, 0.0, 1.0), 0.0, 1.0)
 			if hear_chance > 0.5:
 				create_popup(GameRefs.POPUP.sound_unknown, detected.position)
@@ -600,7 +602,6 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 @rpc("authority", "call_local", "reliable")
 func _update_game_phase(new_phase: GamePhases, check_incap := true):
 	game_phase = new_phase
-	_game_phase_switch.play()
 	match new_phase:
 		GamePhases.SELECTION:
 			_round_ended.play()

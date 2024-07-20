@@ -152,6 +152,7 @@ const AUDIO = {
 	grenade_bounce = preload("res://assets/sounds/weapon/grenade_bounce.wav"),
 	grenade_frag = preload("res://assets/sounds/weapon/grenade_frag.wav"),
 	grenade_smoke = preload("res://assets/sounds/weapon/grenade_smoke.wav"),
+	projectile_bounce = preload("res://assets/sounds/weapon/projectile_bounce.wav"),
 
 }
 
