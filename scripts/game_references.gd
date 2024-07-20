@@ -156,8 +156,13 @@ const AUDIO = {
 
 }
 
+func get_weapon_attribute(agent : Agent, attribute : String):
+	return WEP[agent.held_weapons[agent.selected_weapon].wep_name].get(attribute)
+
+
 func compare_wep_type(agent : Agent, wep_type : WeaponTypes):
-	return WEP[agent.held_weapons[agent.selected_weapon].wep_name].type == wep_type
+	return get_weapon_attribute(agent, "type") == wep_type
+
 
 func return_icon(agent : Agent, is_wep : bool):
 	if is_wep:

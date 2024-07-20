@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=11 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
 [ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
@@ -8,6 +8,7 @@
 [ext_resource type="AudioStream" uid="uid://duphq4x6qqx0h" path="res://assets/sounds/objective/round_update.wav" id="7_t43ju"]
 [ext_resource type="AudioStream" uid="uid://dlgqsvrw4auka" path="res://assets/sounds/objective/actions_submitted.wav" id="8_ujb0t"]
 [ext_resource type="AudioStream" uid="uid://dkvuukd233rug" path="res://assets/sounds/objective/action_stepped.wav" id="9_1bflo"]
+[ext_resource type="PackedScene" uid="uid://gvwevpp5oysy" path="res://scenes/game_audio_event.tscn" id="9_ho2kn"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pu7ty"]
 properties/0/path = NodePath(".:action_timeline")
@@ -137,6 +138,9 @@ autostart = true
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_pu7ty")
+
+[node name="AudioEvent" parent="." instance=ExtResource("9_ho2kn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.536, 0, 2.365)
 
 [connection signal="pressed" from="HUDBase/Execute" to="." method="_on_execute_pressed"]
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]

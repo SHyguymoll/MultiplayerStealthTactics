@@ -419,12 +419,13 @@ func determine_weapon_events():
 		for hit in attackers[attacker]:
 			create_popup(GameRefs.POPUP.spotted, hit[1], true)
 			if hit[0] == null: # hit a wall, make a sound event on the wall
-				continue
+				create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2)
 			else:
 				if not (hit[0] as Area3D).get_parent() is Agent: # still hit a wall
-					pass
+					create_sound_effect(hit[1], attacker.get_multiplayer_authority(), 5, 0.5, 2)
 				else: # actually hit an agent
-					pass
+					var attacked : Agent = (hit[0] as Area3D).get_parent()
+					attacked.take_damage(GameRefs.get_weapon_attribute(attacker, "damage"))
 
 
 
@@ -504,20 +505,17 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 				final_text_string += GameRefs.ITM[decision_array[1]].name
 		Agent.GameActions.CHANGE_WEAPON:
 			final_text_string = "{0}: Switch to {1}".format([
-				ref_ag.name,
-				GameRefs.WEP[ref_ag.held_weapons[decision_array[1]].wep_name].name])
+				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, "name")])
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
 				ref_ag.name,
 				GameRefs.WEP[decision_array[1]].name])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
-				ref_ag.name,
-				GameRefs.WEP[ref_ag.held_weapons[decision_array[1]].wep_name].name])
+				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, "name")])
 		Agent.GameActions.RELOAD_WEAPON:
 			final_text_string = "{0}: Reload {1}".format([
-				ref_ag.name,
-				GameRefs.WEP[ref_ag.held_weapons[ref_ag.selected_weapon].wep_name].name])
+				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, "name")])
 		Agent.GameActions.HALT:
 			final_text_string = "{0}: Stop ".format([ref_ag.name])
 			match ref_ag.state:
@@ -592,8 +590,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 			final_text_string = "{0}: Look at Position".format([ref_ag.name])
 		Agent.GameActions.USE_WEAPON:
 			final_text_string = "{0}: Use {1} at Position".format(
-				[ref_ag.name,
-				GameRefs.WEP[ref_ag.held_weapons[ref_ag.selected_weapon].wep_name].name])
+				[ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, "name")])
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
 	update_text()
