@@ -141,6 +141,7 @@ const AUDIO = {
 	ag_step_quiet = preload("res://assets/sounds/agent/footfall_slow.wav"),
 	ag_step_loud = preload("res://assets/sounds/agent/footfall_fast.wav"),
 	ag_hurt = preload("res://assets/sounds/agent/hurt.wav"),
+	ag_die = preload("res://assets/sounds/agent/die.wav"),
 	ag_saw_something = preload("res://assets/sounds/agent/noticed_sight.wav"),
 	ag_detect_element = preload("res://assets/sounds/agent/detected_element.wav"),
 	ag_detect_agent = preload("res://assets/sounds/agent/detected_agent.wav"),
