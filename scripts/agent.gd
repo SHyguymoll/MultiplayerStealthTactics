@@ -13,7 +13,6 @@ var view_across : float = 1 #size of vision pyramid base
 var eye_strength : float = 0.15 #multiplier applied to vision pyramid in relation to view target distance
 
 var hearing_dist : float = 1.5 #distance of furthest possibly heard audio event
-var ear_strength : float = 1 #multiplier applied to ear cylinder in relation to audio target distance
 
 var movement_dist : float = 7.0 #distance of furthest possible movement
 var movement_speed : float = 2.75 #movement speed when running (divided by 2 for walking, 2.5 for prone)
@@ -110,7 +109,10 @@ enum AttackStep {
 }
 @export var attack_step := AttackStep.ORIENTING
 
-@export var detected : Array = []
+@export var detected : Dictionary = {
+	glanced=[],
+	spotted=[],
+}
 
 func in_incapacitated_state() -> bool:
 	return state in [States.GRABBED, States.STUNNED, States.DEAD]
@@ -273,7 +275,6 @@ func debug_process():
 	hearing_dist = $DebugValues/GameSetup/EarScroll.value
 
 	eye_strength = $DebugValues/DuringGame/EyeScroll.value
-	ear_strength = $DebugValues/DuringGame/EarScroll.value
 	#target_head_rot_off_y = $DebugValues/DuringGame/HeadScroll.value
 	$DebugCamera.position = lerp(
 			Vector3(1.56, 0.553, 0.802),

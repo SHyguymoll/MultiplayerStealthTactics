@@ -87,6 +87,7 @@ func create_sound_effect(location : Vector3, player_id : int, lifetime : int, mi
 
 
 func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void: #TODO
+	location.y = 3.0
 	var new_popup : GamePopup = popup_scene.instantiate()
 	new_popup.texture = texture
 	new_popup.position = location
@@ -106,19 +107,21 @@ func determine_sights():
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if not agent.is_multiplayer_authority():
 			continue
-		var previously_detected = agent.detected.duplicate()
+		var previously_detected = agent.detected.duplicate(true)
 		for detected in agent._eyes.get_overlapping_areas():
 			var par = detected.get_parent()
-			if par in previously_detected:
-				previously_detected.erase(par)
+			if par in previously_detected.glanced:
+				previously_detected.glanced.erase(par)
+			if par in previously_detected.spotted:
+				previously_detected.spotted.erase(par)
 			if par is Agent:
 				if agent == par: # of course you can see yourself
 					continue
 				try_see_agent(agent, par)
 			else:
 				try_see_element(agent, par)
-		for to_remove in previously_detected:
-			pass
+		for to_remove in previously_detected.spotted:
+			create_popup(GameRefs.POPUP.sight_unknown, to_remove.position)
 
 		# remove lost known
 		# add found unknown
@@ -135,16 +138,15 @@ func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_leve
 func try_see_agent(spotter : Agent, spottee : Agent):
 	if spottee in spotter.detected:
 		return
+	if spotter.player_id == spottee.player_id and not spottee.in_incapacitated_state(): # that's your team, and they're fine
+		return
 	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level)
-	print(sight_chance)
 	if sight_chance > 0.7: # seent it
 		spottee.visible = true
 		create_popup(GameRefs.POPUP.spotted, spottee.position, true)
-		spotter.detected_agents.append(spottee)
+		spotter.detected.spotted.append(spottee)
 	elif sight_chance > 1.0/3.0: # almost seent it
-		if spotter.player_id == spottee.player_id and not spottee.in_incapacitated_state(): # or we could just know them already
-			return
-		spotter.detected_agents.append(spottee)
+		spotter.detected.glanced.append(spottee)
 		var p_offset = -0.1/sight_chance
 		var x_off = randf_range(-p_offset, p_offset)
 		var z_off = randf_range(-p_offset, p_offset)
@@ -152,11 +154,9 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 
 
 func try_see_element(spotter : Agent, element : Node3D):
-	var sight_chance = calculate_sight_chance(spotter, element.position, 100)
-	if sight_chance > 0.7:
-		element.visible = true
-		if element is GamePopup:
-			element.disappear()
+	element.visible = true
+	if element is GamePopup:
+		element.disappear()
 
 
 func determine_sounds():
@@ -167,10 +167,11 @@ func determine_sounds():
 			var audio_event : GameAudioEvent = detected.get_parent()
 			if agent.player_id == audio_event.player_id:
 				continue # skip same team sources
-			var hear_chance = audio_event.radius * agent.ear_strength * clampf(remap(agent.position.distance_to(detected.position), 0.0, agent.hearing_dist, 0.0, 1.0), 0.0, 1.0)
-			if hear_chance > 0.5:
-				create_popup(GameRefs.POPUP.sound_unknown, detected.position)
-				audio_event.play_sound()
+			if audio_event.heard:
+				continue # skip already heard sounds
+			create_popup(GameRefs.POPUP.sound_unknown, audio_event.global_position)
+			audio_event.play_sound()
+
 		match agent.state:
 			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
 				create_sound_effect(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
@@ -321,7 +322,6 @@ func create_agent(data) -> Agent: #TODO
 	new_agent.view_across = data.agent_stats.view_across
 	new_agent.eye_strength = data.agent_stats.eye_strength
 	new_agent.hearing_dist = data.agent_stats.hearing_dist
-	new_agent.ear_strength = data.agent_stats.ear_strength
 	new_agent.held_items = data.agent_stats.held_items
 	new_agent.held_weapons.append(GameWeapon.new("fist", new_agent.name + "_fist"))
 	for weapon in data.agent_stats.held_weapons:
@@ -461,7 +461,7 @@ func _agent_died(deceased : Agent):
 	pass
 
 
-func _hud_agent_details_actions(agent_selector : AgentSelector): #TODO
+func _hud_agent_details_actions(agent_selector : AgentSelector):
 	if game_phase != GamePhases.SELECTION:
 		print(multiplayer.get_unique_id(), ": not in SELECTION MODE")
 		return

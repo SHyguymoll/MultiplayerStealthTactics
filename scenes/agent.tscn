@@ -18506,13 +18506,11 @@ bones/6/rotation = Quaternion(-0.0937119, -8.51281e-21, -8.20358e-22, 0.995599)
 bones/7/rotation = Quaternion(-0.0659627, -0.751441, -0.402991, 0.518251)
 bones/8/rotation = Quaternion(-0.0659627, 0.751441, 0.402991, 0.518251)
 bones/9/rotation = Quaternion(0.998533, 0, 0, 0.0541513)
-bones/9/scale = Vector3(1, 1, 1)
 bones/11/rotation = Quaternion(0.12642, 1.18253e-07, 1.50705e-08, 0.991977)
 bones/13/rotation = Quaternion(-0.56951, -0.000401065, 0.000277741, 0.821985)
 bones/14/rotation = Quaternion(-0.000164726, 0.968398, -0.24941, -0.000305186)
 bones/14/scale = Vector3(1, 1, 1)
 bones/15/rotation = Quaternion(0.998533, 0, 0, 0.0541513)
-bones/15/scale = Vector3(1, 1, 1)
 bones/17/rotation = Quaternion(0.12642, -1.18253e-07, -1.50705e-08, 0.991977)
 bones/19/rotation = Quaternion(-0.56951, -0.000401654, 0.00027842, 0.821985)
 bones/20/rotation = Quaternion(-0.000164934, 0.968398, -0.24941, -0.000306225)
@@ -18549,39 +18547,39 @@ bones/42/rotation = Quaternion(5.33851e-08, 0.707107, 0.707107, 5.33851e-08)
 bones/43/rotation = Quaternion(-5.33851e-08, 0.707107, 0.707107, -5.33851e-08)
 
 [node name="FlagCenter" parent="Agent/game_rig/Skeleton3D" index="0"]
-transform = Transform3D(0.913518, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923298, -0.497084, 0.721662, -0.0086033)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860366)
 visible = false
 
 [node name="FlagClient" parent="Agent/game_rig/Skeleton3D" index="1"]
-transform = Transform3D(0.913518, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923298, -0.497084, 0.721662, -0.0086033)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860366)
 visible = false
 
 [node name="FlagServer" parent="Agent/game_rig/Skeleton3D" index="2"]
-transform = Transform3D(0.913518, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923298, -0.497084, 0.721662, -0.0086033)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860366)
 visible = false
 
 [node name="GrenadeFrag" parent="Agent/game_rig/Skeleton3D" index="3"]
-transform = Transform3D(0.913518, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923298, -0.497084, 0.721662, -0.0086033)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860366)
 visible = false
 
 [node name="GrenadeNoise" parent="Agent/game_rig/Skeleton3D" index="4"]
-transform = Transform3D(0.913518, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923298, -0.497084, 0.721662, -0.0086033)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860366)
 visible = false
 
 [node name="GrenadeSmoke" parent="Agent/game_rig/Skeleton3D" index="5"]
-transform = Transform3D(0.913518, -0.199429, -0.354558, 0.1559, 0.976672, -0.147674, 0.375738, 0.0796269, 0.923298, -0.497084, 0.721662, -0.0086033)
+transform = Transform3D(0.913518, -0.199429, -0.35456, 0.1559, 0.976672, -0.147674, 0.375739, 0.0796273, 0.923298, -0.497084, 0.721663, -0.00860366)
 visible = false
 
 [node name="Pistol" parent="Agent/game_rig/Skeleton3D" index="6"]
-transform = Transform3D(0.0725085, -0.0240099, -0.997078, -0.994007, -0.0837581, -0.0702679, -0.0818263, 0.996198, -0.0299391, -0.488474, 0.714853, -0.0269331)
+transform = Transform3D(0.0725081, -0.0240108, -0.997079, -0.994006, -0.0837587, -0.0702677, -0.0818268, 0.996197, -0.02994, -0.488474, 0.714853, -0.0269334)
 visible = false
 
 [node name="Rifle" parent="Agent/game_rig/Skeleton3D" index="7"]
-transform = Transform3D(0.177585, 0.00944586, -0.984059, -0.974037, -0.140983, -0.177129, -0.140409, 0.989967, -0.0158358, -0.494218, 0.701634, -0.0300946)
+transform = Transform3D(0.177585, 0.00944401, -0.984059, -0.974038, -0.140984, -0.177129, -0.14041, 0.989967, -0.0158379, -0.494218, 0.701635, -0.030095)
 visible = false
 
 [node name="Shotgun" parent="Agent/game_rig/Skeleton3D" index="8"]
-transform = Transform3D(0.198861, -0.0394144, -0.979234, -0.979479, 0.0254327, -0.199934, 0.0327848, 0.998899, -0.033548, -0.495614, 0.700998, -0.0373763)
+transform = Transform3D(0.19886, -0.0394157, -0.979234, -0.979479, 0.025432, -0.199934, 0.0327843, 0.998899, -0.0335497, -0.495614, 0.700998, -0.0373767)
 visible = false
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]

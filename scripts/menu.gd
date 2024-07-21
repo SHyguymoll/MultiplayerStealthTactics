@@ -37,7 +37,6 @@ func get_agents(): #TODO: replace with loading from a file later
 				eye_strength=0.2, # the strength of the agent's vision as elements get closer
 # (note, this is within the view cone, calculated here: https://www.desmos.com/calculator/azk19m9ik3)
 				hearing_dist=1.5, # the radius of the hearing cylinder
-				ear_strength=1, # the strength of the hearing cylinder as audio events play closer
 				# calculate this with the vision calculator by setting v to 100
 				movement_dist=7.0, # how far the agent can move in a single step
 				movement_speed=2.75, # how fast the agent moves
@@ -52,7 +51,6 @@ func get_agents(): #TODO: replace with loading from a file later
 				view_across=1.0,
 				eye_strength=0.2,
 				hearing_dist=1.5,
-				ear_strength=1,
 				movement_dist=7.0,
 				movement_speed=2.75,
 				held_items=["cigar", "box"],
