@@ -438,7 +438,7 @@ func _game_step(delta: float) -> void:
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
 			rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
-			if abs(rotation.y - target_direction) < 0.1:
+			if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1:
 				rotation.y = target_direction
 				action_complete()
 		GameActions.CHANGE_WEAPON:
@@ -449,8 +449,8 @@ func _game_step(delta: float) -> void:
 		GameActions.USE_WEAPON: #TODO
 			match attack_step:
 				AttackStep.ORIENTING:
-					rotation.y = lerpf(rotation.y, target_direction, GENERAL_LERP_VAL)
-					if abs(abs(rotation.y) - abs(target_direction)) < 0.1:
+					rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
+					if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1:
 						rotation.y = target_direction
 						_attack_orient_transition()
 				AttackStep.ATTACKING:
