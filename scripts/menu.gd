@@ -32,16 +32,24 @@ func get_agents(): #TODO: replace with loading from a file later
 				name="stealthy", # the agent's name
 				mission_count=0, # the number of missions that this agent has been used in
 				health=10, # the agent's health and stun health (div by 2 and round down for stun)
+# value between 5 and 13
 				view_dist=2.5, # how far the view cone extends from the agent
+# value between 2.00 and 3.50
 				view_across=1.0, # how wide the view cone base is
-				eye_strength=0.2, # the strength of the agent's vision as elements get closer
+# value between 0.80 and 1.20
+				eye_strength=0.4, # the strength of the agent's vision as elements get closer
+# value between 0.30 and 0.60
 # (note, this is within the view cone, calculated here: https://www.desmos.com/calculator/azk19m9ik3)
 				hearing_dist=1.5, # the radius of the hearing cylinder
-				# calculate this with the vision calculator by setting v to 100
+# value between 0.80 and 1.65
 				movement_dist=7.0, # how far the agent can move in a single step
+# value between 6.00 and 9.00
 				movement_speed=2.75, # how fast the agent moves
+# value between 1.25 and 3.00
 				held_items=["cigar", "box"], # the items that the agent starts with
+# no more than 2
 				held_weapons=["pistol", "grenade_smoke"], # the weapons that the agent starts with
+# no more than 2
 			},
 			{
 				name="loud",
@@ -49,7 +57,7 @@ func get_agents(): #TODO: replace with loading from a file later
 				health=10,
 				view_dist=2.5,
 				view_across=1.0,
-				eye_strength=0.2,
+				eye_strength=0.4,
 				hearing_dist=1.5,
 				movement_dist=7.0,
 				movement_speed=2.75,
