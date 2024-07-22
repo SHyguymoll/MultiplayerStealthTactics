@@ -3,8 +3,6 @@ extends Node
 
 @export var reserve_ammo : int = 0
 @export var loaded_ammo : int = 0
-@export var reload_time : int
-@export var cooldown_time : int
 @export var wep_name : String # Refer to GameRefs.WEP for valid string names
 @export var wep_id : String # set when loading game for unique weapons
 
