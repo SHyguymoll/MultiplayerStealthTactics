@@ -4,8 +4,8 @@ extends Node3D
 @export var attached_wep : GameWeapon
 var position_y_inter = 0
 var position_y = 0
-var server_knows = false
-var client_knows = false
+@export var server_knows = false
+@export var client_knows = false
 
 func _ready():
 	for weapon_mesh in get_children():

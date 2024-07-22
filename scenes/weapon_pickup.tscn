@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://bokbyc6n8xxeu"]
+[gd_scene load_steps=37 format=3 uid="uid://bokbyc6n8xxeu"]
 
 [ext_resource type="Script" path="res://scripts/game_weapon_pickup.gd" id="2_hqexf"]
 [ext_resource type="Texture2D" uid="uid://rknp5rllix1t" path="res://assets/models/exports/textures/palettething.png" id="3_e8605"]
@@ -588,6 +588,14 @@ shadow_mesh = SubResource("ArrayMesh_nw3i1")
 height = 0.269976
 radius = 0.243106
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_75nm4"]
+properties/0/path = NodePath(".:server_knows")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:client_knows")
+properties/1/spawn = true
+properties/1/replication_mode = 2
+
 [node name="WeaponPickup" type="Node3D"]
 script = ExtResource("2_hqexf")
 
@@ -637,3 +645,6 @@ collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="PickupViewable"]
 shape = SubResource("CylinderShape3D_gm74m")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_75nm4")
