@@ -62,6 +62,12 @@ var _outline_mat : StandardMaterial3D
 	flag_client = $Agent/game_rig/Skeleton3D/FlagClient,
 }
 
+@onready var sounds = {
+	glanced = ($ClientsideSoundEffects/GlancedSomething as AudioStreamPlayer3D),
+	spotted_element = ($ClientsideSoundEffects/SpottedElement as AudioStreamPlayer3D),
+	spotted_agent = ($ClientsideSoundEffects/SpottedAgent as AudioStreamPlayer3D),
+}
+
 # Actions are stored as an enum in order to make serialization much easier
 # each agent will be stored in the action timeline as an array, where the first entry is the action,
 # and any important metadata (position, rotation, selection, etc.) follows.

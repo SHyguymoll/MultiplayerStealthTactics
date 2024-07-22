@@ -99,7 +99,6 @@ func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = fal
 		new_popup.disappear()
 
 
-
 func update_text() -> void:
 	_ag_insts.text = ""
 	for agent in ($Agents.get_children() as Array[Agent]):
@@ -126,10 +125,6 @@ func determine_sights():
 		for to_remove in previously_detected.spotted:
 			create_popup(GameRefs.POPUP.sight_unknown, to_remove.position)
 
-		# remove lost known
-		# add found unknown
-		# add found known
-		pass
 
 
 func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_level : int) -> float:
@@ -137,6 +132,7 @@ func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_leve
 	var exponent = ((1.5 * dist)/(log(visible_level)/log(10)))
 	var inv_eye = 1.0/spotter.eye_strength
 	return maxf(1.0/(inv_eye**exponent), 0.01)
+
 
 func try_see_agent(spotter : Agent, spottee : Agent):
 	if spottee in spotter.detected:
@@ -148,12 +144,15 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 		spottee.visible = true
 		create_popup(GameRefs.POPUP.spotted, spottee.position, true)
 		spotter.detected.spotted.append(spottee)
+		if spotter.player_id != spottee.player_id:
+			spotter.sounds.spotted_agent.play()
 	elif sight_chance > 1.0/3.0: # almost seent it
 		spotter.detected.glanced.append(spottee)
 		var p_offset = -0.1/sight_chance
 		var x_off = randf_range(-p_offset, p_offset)
 		var z_off = randf_range(-p_offset, p_offset)
 		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(x_off, 0, z_off))
+		spotter.sounds.glanced.play()
 
 
 func try_see_element(spotter : Agent, element : Node3D):
@@ -165,8 +164,10 @@ func try_see_element(spotter : Agent, element : Node3D):
 			element.server_knows = true
 		else:
 			element.client_knows = true
+		spotter.sounds.spotted_element.play()
 	else:
 		element.visible = true
+		spotter.sounds.spotted_element.play()
 
 
 func determine_sounds():
@@ -428,7 +429,6 @@ func return_attacked(attacker : Agent, location : Vector3):
 	query.hit_from_inside = true
 	var result = space_state.intersect_ray(query)
 	return [(result.get("collider", null) as Area3D), result.get("position", location)]
-
 
 
 func determine_cqc_events():
