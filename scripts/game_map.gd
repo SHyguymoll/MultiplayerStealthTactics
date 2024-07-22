@@ -17,7 +17,8 @@ enum Objectives {
 	CAPTURE_CENTRAL_FLAG,
 	TARGET_DEFEND,
 }
-@export var objective : GameObjective
+@export var objective : Objectives
+@export var objective_params : Array
 
 @export var server_exfiltrate_zone : Area3D
 @export var client_exfiltrate_zone : Area3D

@@ -38,6 +38,8 @@ agent_spawn_client_1 = NodePath("Spawns/Client1")
 agent_spawn_client_2 = NodePath("Spawns/Client2")
 agent_spawn_client_3 = NodePath("Spawns/Client3")
 agent_spawn_client_4 = NodePath("Spawns/Client4")
+objective = 1
+objective_params = [0.0, 0.222, 0.0]
 server_exfiltrate_zone = NodePath("ServerExfil")
 client_exfiltrate_zone = NodePath("ClientExfil")
 
