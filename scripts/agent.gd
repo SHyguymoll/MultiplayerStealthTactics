@@ -49,6 +49,7 @@ var _outline_mat : StandardMaterial3D
 @onready var _cqc_anim_helper : Node3D = $CQCAnimationHelper
 @onready var _nav_agent : NavigationAgent3D = $NavigationAgent3D
 @onready var _active_item_icon : Sprite3D = $ActiveItem
+@onready var _pickup_range : Area3D = $PickupRange
 @onready var _held_weapon_meshes = {
 	pistol = $Agent/game_rig/Skeleton3D/Pistol,
 	rifle = $Agent/game_rig/Skeleton3D/Rifle,

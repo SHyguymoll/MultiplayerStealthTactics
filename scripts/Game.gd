@@ -9,6 +9,7 @@ var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
 var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
 var popup_scene = preload("res://scenes/game_popup.tscn")
 var audio_event_scene = preload("res://scenes/game_audio_event.tscn")
+var weapon_pickup_scene = preload("res://scenes/weapon_pickup.tscn")
 
 var server_ready_bool := false
 var client_ready_bool := false
@@ -34,6 +35,7 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 @export var game_map : GameMap
 @onready var _camera : GameCamera = $World/Camera3D
 @onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
+@onready var pickup_spawner : MultiplayerSpawner = $PickupSpawner
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu
@@ -49,6 +51,7 @@ func _ready():
 	# Preconfigure game.
 	_radial_menu.visible = false
 	ag_spawner.spawn_function = create_agent
+	pickup_spawner.spawn_function = create_pickup
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 
@@ -154,9 +157,16 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 
 
 func try_see_element(spotter : Agent, element : Node3D):
-	element.visible = true
 	if element is GamePopup:
-		element.disappear()
+		if calculate_sight_chance(spotter, element.global_position, 120) > 0.25:
+			element.disappear()
+	elif element is WeaponPickup:
+		if spotter.player_id == 1:
+			element.server_knows = true
+		else:
+			element.client_knows = true
+	else:
+		element.visible = true
 
 
 func determine_sounds():
@@ -280,6 +290,46 @@ func server_populate_variables(): #TODO
 		data.pos_z = game_map.agent_spawn_client_4.position.z
 		data.rot_y = game_map.agent_spawn_client_4.rotation.y
 		ag_spawner.spawn(data)
+	# game map stuff
+	data.clear()
+	match game_map.objective:
+		game_map.Objectives.CAPTURE_ENEMY_FLAG:
+			# create server's flag
+			data.pos_x = game_map.objective_params[0]
+			data.pos_y = game_map.objective_params[1]
+			data.pos_z = game_map.objective_params[2]
+			data.server_knows = true
+			data.client_knows = false
+			data.weapon_name = "flag_server"
+			data.weapon_id = "map_flag_server"
+			data.loaded_ammo = GameRefs.WEP.flag_server.ammo
+			data.reserve_ammo = GameRefs.WEP.flag_server.ammo * 3
+			pickup_spawner.spawn(data)
+			# create client's flag
+			data.pos_x = game_map.objective_params[3]
+			data.pos_y = game_map.objective_params[4]
+			data.pos_z = game_map.objective_params[5]
+			data.server_knows = false
+			data.client_knows = true
+			data.weapon_name = "flag_client"
+			data.weapon_id = "map_flag_client"
+			data.loaded_ammo = GameRefs.WEP.flag_client.ammo
+			data.reserve_ammo = GameRefs.WEP.flag_client.ammo * 3
+			pickup_spawner.spawn(data)
+		game_map.Objectives.CAPTURE_CENTRAL_FLAG:
+			# create central flag
+			data.pos_x = game_map.objective_params[0]
+			data.pos_y = game_map.objective_params[1]
+			data.pos_z = game_map.objective_params[2]
+			data.server_knows = true
+			data.client_knows = true
+			data.weapon_name = "flag_center"
+			data.weapon_id = "map_flag_center"
+			data.loaded_ammo = GameRefs.WEP.flag_center.ammo
+			data.reserve_ammo = GameRefs.WEP.flag_center.ammo * 3
+			pickup_spawner.spawn(data)
+		game_map.Objectives.TARGET_DEFEND:
+			game_map.objective_params
 
 
 #@rpc("authority", "call_local", "reliable")
@@ -334,8 +384,19 @@ func create_agent(data) -> Agent: #TODO
 		new_small_hud._health_bar.max_value = data.agent_stats.health
 		new_small_hud._stun_health_bar.max_value = data.agent_stats.health / 2
 		new_small_hud.ref_ag = new_agent
-
 	return new_agent
+
+
+func create_pickup(data) -> WeaponPickup:
+	var new_pickup : WeaponPickup = weapon_pickup_scene.instantiate()
+	new_pickup.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_pickup.server_knows = data.server_knows
+	new_pickup.client_knows = data.client_knows
+	var attached_weapon = GameWeapon.new(data.weapon_name, data.weapon_id)
+	attached_weapon.reserve_ammo = data.reserve_ammo
+	attached_weapon.loaded_ammo = data.loaded_ammo
+	new_pickup.attached_wep = attached_weapon
+	return new_pickup
 
 
 func create_agent_selector(agent : Agent):

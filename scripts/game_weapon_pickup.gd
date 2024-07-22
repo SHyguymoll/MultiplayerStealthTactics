@@ -1,10 +1,11 @@
 class_name WeaponPickup
 extends Node3D
 
-var attached_wep : GameWeapon
+@export var attached_wep : GameWeapon
 var position_y_inter = 0
 var position_y = 0
-
+var server_knows = false
+var client_knows = false
 
 func _ready():
 	for weapon_mesh in get_children():
@@ -32,6 +33,7 @@ func _ready():
 			$FlagServer.visible = true
 		"flag_client":
 			$FlagClient.visible = true
+	visible = multiplayer.is_server() and server_knows or not multiplayer.is_server() and client_knows
 
 
 func _physics_process(delta: float) -> void:
