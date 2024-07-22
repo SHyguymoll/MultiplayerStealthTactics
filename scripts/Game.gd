@@ -194,6 +194,16 @@ func determine_sounds():
 		audio_event.update()
 
 
+func determine_nearby_pickups():
+	for agent in ($Agents.get_children() as Array[Agent]):
+		agent.detected.weapons.clear()
+		for overlap in agent._pickup_range.get_overlapping_areas():
+			if len(agent.detected.weapons) > 8:
+				break
+			agent.detected.weapons.append(overlap.get_parent())
+	pass
+
+
 func determine_indicator_removals():
 	for ind in $ClientsideIndicators.get_children():
 		if ind is AimingIndicator or ind is MovementIndicator:
@@ -222,6 +232,7 @@ func _physics_process(delta: float) -> void:
 			current_game_step += 1
 			determine_sights()
 			determine_sounds()
+			determine_nearby_pickups()
 			determine_indicator_removals()
 			if multiplayer.is_server():
 				for agent in ($Agents.get_children() as Array[Agent]):

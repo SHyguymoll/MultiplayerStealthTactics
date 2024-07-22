@@ -44,6 +44,16 @@ var current_screen : String
 @onready var _d : Button = $D
 @onready var _dr : Button = $DR
 
+var _ul_extra
+var _u_extra
+var _ur_extra
+var _l_extra
+var _m_extra
+var _r_extra
+var _dl_extra
+var _d_extra
+var _dr_extra
+
 @onready var _menu_nav : AudioStreamPlayer = $MenuNavigation
 @onready var _action_sel : AudioStreamPlayer = $ActionSelected
 @onready var _action_can : AudioStreamPlayer = $ActionCancelled
@@ -118,6 +128,18 @@ func _disable_all_buttons():
 	_dr.disabled = true
 
 
+func clear_extras():
+	_ul_extra = null
+	_u_extra = null
+	_ur_extra = null
+	_l_extra = null
+	_m_extra = null
+	_r_extra = null
+	_dl_extra = null
+	_d_extra = null
+	_dr_extra = null
+
+
 func debug_agent():
 	referenced_agent = Agent.new()
 	referenced_agent.state = Agent.States.CRAWL
@@ -132,6 +154,7 @@ func debug_agent():
 func init_menu():
 	button_collapse_animation(true)
 	current_screen = "top"
+	clear_extras()
 	button_menu_screen()
 
 func determine_items():
@@ -157,22 +180,82 @@ func determine_weapons():
 	var candidates : Array[GameWeapon] = referenced_agent.held_weapons.duplicate()
 	if current_screen == "swap_weapon":
 		_u.icon = GameRefs.WEP[candidates[0].wep_name].icon
+		_u_extra = candidates[0]
 		if len(candidates) > 1 and candidates[1].has_ammo():
 			_dl.icon = GameRefs.WEP[candidates[1].wep_name].icon
+			_dl_extra = candidates[1]
 		if len(candidates) > 2 and candidates[2].has_ammo():
 			_dr.icon = GameRefs.WEP[candidates[2].wep_name].icon
+			_dr_extra = candidates[2]
 	else:
 		if len(candidates) > 1:
 			_dl.icon = GameRefs.WEP[candidates[1].wep_name].icon
+			_dl_extra = candidates[1]
 		if len(candidates) > 2:
 			_dr.icon = GameRefs.WEP[candidates[2].wep_name].icon
+			_dr_extra = candidates[2]
 	match referenced_agent.selected_weapon:
 		0:
 			_u.icon = ICONS.none
+			_u_extra = null
 		1:
 			_dl.icon = ICONS.none
+			_dl_extra = null
 		2:
 			_dr.icon = ICONS.none
+			_dr_extra = null
+
+
+func determine_pickups():
+	if len(referenced_agent.detected.weapons) < 1:
+		_ul.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[0], "icon")
+		_ul_extra = referenced_agent.detected.weapons[0]
+	else:
+		_ul.icon = ICONS.none
+		_ul_extra = null
+	if len(referenced_agent.detected.weapons) < 2:
+		_u.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[1], "icon")
+		_u_extra = referenced_agent.detected.weapons[1]
+	else:
+		_u.icon = ICONS.none
+		_u_extra = null
+	if len(referenced_agent.detected.weapons) < 3:
+		_ur.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[2], "icon")
+		_ur_extra = referenced_agent.detected.weapons[2]
+	else:
+		_ur.icon = ICONS.none
+		_ur_extra = null
+	if len(referenced_agent.detected.weapons) < 4:
+		_l.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[3], "icon")
+		_l_extra = referenced_agent.detected.weapons[3]
+	else:
+		_l.icon = ICONS.none
+		_l_extra = null
+	if len(referenced_agent.detected.weapons) < 5:
+		_r.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[4], "icon")
+		_r_extra = referenced_agent.detected.weapons[4]
+	else:
+		_r.icon = ICONS.none
+		_r_extra = null
+	if len(referenced_agent.detected.weapons) < 6:
+		_dl.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[5], "icon")
+		_dl_extra = referenced_agent.detected.weapons[5]
+	else:
+		_dl.icon = ICONS.none
+		_dl_extra = null
+	if len(referenced_agent.detected.weapons) < 7:
+		_d.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[6], "icon")
+		_d_extra = referenced_agent.detected.weapons[6]
+	else:
+		_d.icon = ICONS.none
+		_d_extra = null
+	if len(referenced_agent.detected.weapons) < 8:
+		_dr.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[7], "icon")
+		_dr_extra = referenced_agent.detected.weapons[5]
+	else:
+		_dr.icon = ICONS.none
+		_dr_extra = null
+	_m.icon = ICONS.cancel_back
 
 
 # the action is available unless it was already selected,
@@ -187,6 +270,7 @@ func a_o_na(icon, action : Agent.GameActions):
 
 
 func button_menu_screen():
+	clear_extras()
 	match current_screen:
 		"top":
 			var buttons = [
@@ -275,6 +359,8 @@ func button_menu_screen():
 			_m.icon = ICONS.cancel_back
 			_r.icon = ICONS.none
 			_d.icon = ICONS.none
+		"pick_up_weapon":
+			determine_pickups()
 	_ul.visible = _ul.icon != ICONS.none
 	_u.visible = _u.icon != ICONS.none
 	_ur.visible = _ur.icon != ICONS.none
@@ -288,7 +374,7 @@ func button_menu_screen():
 	button_spread_animation()
 
 
-func _button_pressed_metadata(button : Button):
+func _button_pressed_metadata(button : Button, extra):
 	var button_texture = button.icon
 	match button_texture:
 		ICONS.none:
@@ -396,40 +482,41 @@ func _button_pressed_metadata(button : Button):
 						return
 					new_ind += 1
 			else:
-				pass #TODO: for weapon around agent, needs method
+				_action_sel.play()
+				decision_made.emit([Agent.GameActions.PICK_UP_WEAPON, extra])
 
 
 func _on_ul_pressed() -> void:
-	_button_pressed_metadata(_ul)
+	_button_pressed_metadata(_ul, _ul_extra)
 
 
 func _on_u_pressed() -> void:
-	_button_pressed_metadata(_u)
+	_button_pressed_metadata(_u, _u_extra)
 
 
 func _on_ur_pressed() -> void:
-	_button_pressed_metadata(_ur)
+	_button_pressed_metadata(_ur, _ur_extra)
 
 
 func _on_l_pressed() -> void:
-	_button_pressed_metadata(_l)
+	_button_pressed_metadata(_l, _l_extra)
 
 
 func _on_m_pressed() -> void:
-	_button_pressed_metadata(_m)
+	_button_pressed_metadata(_m, _m_extra)
 
 
 func _on_r_pressed() -> void:
-	_button_pressed_metadata(_r)
+	_button_pressed_metadata(_r, _r_extra)
 
 
 func _on_dl_pressed() -> void:
-	_button_pressed_metadata(_dl)
+	_button_pressed_metadata(_dl, _dl_extra)
 
 
 func _on_d_pressed() -> void:
-	_button_pressed_metadata(_d)
+	_button_pressed_metadata(_d, _d_extra)
 
 
 func _on_dr_pressed() -> void:
-	_button_pressed_metadata(_dr)
+	_button_pressed_metadata(_dr, _dr_extra)

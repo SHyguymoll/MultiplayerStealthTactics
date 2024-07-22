@@ -170,6 +170,9 @@ func get_weapon_attribute(agent : Agent, weapon_ind : int, attribute : String):
 	return WEP[agent.held_weapons[weapon_ind].wep_name].get(attribute)
 
 
+func get_pickup_attribute(pickup : WeaponPickup, attribute : String):
+	return WEP[pickup.attached_wep.wep_name].get(attribute)
+
 func compare_wep_type(agent : Agent, wep_type : WeaponTypes):
 	return get_weapon_attribute(agent, agent.selected_weapon, "type") == wep_type
 

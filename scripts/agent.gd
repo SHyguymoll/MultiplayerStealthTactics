@@ -119,6 +119,7 @@ enum AttackStep {
 @export var detected : Dictionary = {
 	glanced=[],
 	spotted=[],
+	weapons=[],
 }
 
 func in_incapacitated_state() -> bool:
