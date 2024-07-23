@@ -212,49 +212,129 @@ func determine_weapons():
 func determine_pickups():
 	if len(referenced_agent.detected.weapons) > 0:
 		_ul.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[0], "icon")
-		_ul_extra = referenced_agent.detected.weapons[0]
+		_ul_extra = {
+			weapon_name = referenced_agent.detected.weapons[0].attached_wep.wep_name,
+			weapon_printed_name = GameRefs.WEP[referenced_agent.detected.weapons[0].attached_wep.wep_name].name,
+			weapon_id = referenced_agent.detected.weapons[0].attached_wep.wep_id,
+			reserve_ammo = referenced_agent.detected.weapons[0].attached_wep.reserve_ammo,
+			loaded_ammo = referenced_agent.detected.weapons[0].attached_wep.loaded_ammo,
+			pickup_name = referenced_agent.detected.weapons[0].name,
+			pos_x = referenced_agent.detected.weapons[0].global_position.x,
+			pos_y = referenced_agent.detected.weapons[0].global_position.y,
+			pos_z = referenced_agent.detected.weapons[0].global_position.z,
+		}
 	else:
 		_ul.icon = ICONS.none
 		_ul_extra = null
 	if len(referenced_agent.detected.weapons) > 1:
 		_u.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[1], "icon")
-		_u_extra = referenced_agent.detected.weapons[1]
+		_u_extra = {
+			weapon_name = referenced_agent.detected.weapons[1].attached_wep.wep_name,
+			weapon_printed_name = GameRefs.WEP[referenced_agent.detected.weapons[1].attached_wep.wep_name].name,
+			weapon_id = referenced_agent.detected.weapons[1].attached_wep.wep_id,
+			reserve_ammo = referenced_agent.detected.weapons[1].attached_wep.reserve_ammo,
+			loaded_ammo = referenced_agent.detected.weapons[1].attached_wep.loaded_ammo,
+			pickup_name = referenced_agent.detected.weapons[1].name,
+			pos_x = referenced_agent.detected.weapons[1].global_position.x,
+			pos_y = referenced_agent.detected.weapons[1].global_position.y,
+			pos_z = referenced_agent.detected.weapons[1].global_position.z,
+		}
 	else:
 		_u.icon = ICONS.none
 		_u_extra = null
 	if len(referenced_agent.detected.weapons) > 2:
 		_ur.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[2], "icon")
-		_ur_extra = referenced_agent.detected.weapons[2]
+		_ur_extra = {
+			weapon_name = referenced_agent.detected.weapons[2].attached_wep.wep_name,
+			weapon_printed_name = GameRefs.WEP[referenced_agent.detected.weapons[2].attached_wep.wep_name].name,
+			weapon_id = referenced_agent.detected.weapons[2].attached_wep.wep_id,
+			reserve_ammo = referenced_agent.detected.weapons[2].attached_wep.reserve_ammo,
+			loaded_ammo = referenced_agent.detected.weapons[2].attached_wep.loaded_ammo,
+			pickup_name = referenced_agent.detected.weapons[2].name,
+			pos_x = referenced_agent.detected.weapons[2].global_position.x,
+			pos_y = referenced_agent.detected.weapons[2].global_position.y,
+			pos_z = referenced_agent.detected.weapons[2].global_position.z,
+		}
 	else:
 		_ur.icon = ICONS.none
 		_ur_extra = null
 	if len(referenced_agent.detected.weapons) > 3:
 		_l.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[3], "icon")
-		_l_extra = referenced_agent.detected.weapons[3]
+		_l_extra = {
+			weapon_name = referenced_agent.detected.weapons[3].attached_wep.wep_name,
+			weapon_printed_name = GameRefs.WEP[referenced_agent.detected.weapons[3].attached_wep.wep_name].name,
+			weapon_id = referenced_agent.detected.weapons[3].attached_wep.wep_id,
+			reserve_ammo = referenced_agent.detected.weapons[3].attached_wep.reserve_ammo,
+			loaded_ammo = referenced_agent.detected.weapons[3].attached_wep.loaded_ammo,
+			pickup_name = referenced_agent.detected.weapons[3].name,
+			pos_x = referenced_agent.detected.weapons[3].global_position.x,
+			pos_y = referenced_agent.detected.weapons[3].global_position.y,
+			pos_z = referenced_agent.detected.weapons[3].global_position.z,
+		}
 	else:
 		_l.icon = ICONS.none
 		_l_extra = null
 	if len(referenced_agent.detected.weapons) > 4:
 		_r.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[4], "icon")
-		_r_extra = referenced_agent.detected.weapons[4]
+		_r_extra = {
+			weapon_name = referenced_agent.detected.weapons[4].attached_wep.wep_name,
+			weapon_printed_name = GameRefs.WEP[referenced_agent.detected.weapons[4].attached_wep.wep_name].name,
+			weapon_id = referenced_agent.detected.weapons[4].attached_wep.wep_id,
+			reserve_ammo = referenced_agent.detected.weapons[4].attached_wep.reserve_ammo,
+			loaded_ammo = referenced_agent.detected.weapons[4].attached_wep.loaded_ammo,
+			pickup_name = referenced_agent.detected.weapons[4].name,
+			pos_x = referenced_agent.detected.weapons[4].global_position.x,
+			pos_y = referenced_agent.detected.weapons[4].global_position.y,
+			pos_z = referenced_agent.detected.weapons[4].global_position.z,
+		}
 	else:
 		_r.icon = ICONS.none
 		_r_extra = null
 	if len(referenced_agent.detected.weapons) > 5:
 		_dl.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[5], "icon")
-		_dl_extra = referenced_agent.detected.weapons[5]
+		_dl_extra = {
+			weapon_name = referenced_agent.detected.weapons[5].attached_wep.wep_name,
+			weapon_printed_name = GameRefs.WEP[referenced_agent.detected.weapons[5].attached_wep.wep_name].name,
+			weapon_id = referenced_agent.detected.weapons[5].attached_wep.wep_id,
+			reserve_ammo = referenced_agent.detected.weapons[5].attached_wep.reserve_ammo,
+			loaded_ammo = referenced_agent.detected.weapons[5].attached_wep.loaded_ammo,
+			pickup_name = referenced_agent.detected.weapons[5].name,
+			pos_x = referenced_agent.detected.weapons[5].global_position.x,
+			pos_y = referenced_agent.detected.weapons[5].global_position.y,
+			pos_z = referenced_agent.detected.weapons[5].global_position.z,
+		}
 	else:
 		_dl.icon = ICONS.none
 		_dl_extra = null
 	if len(referenced_agent.detected.weapons) > 6:
 		_d.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[6], "icon")
-		_d_extra = referenced_agent.detected.weapons[6]
+		_d_extra = {
+			weapon_name = referenced_agent.detected.weapons[6].attached_wep.wep_name,
+			weapon_printed_name = GameRefs.WEP[referenced_agent.detected.weapons[6].attached_wep.wep_name].name,
+			weapon_id = referenced_agent.detected.weapons[6].attached_wep.wep_id,
+			reserve_ammo = referenced_agent.detected.weapons[6].attached_wep.reserve_ammo,
+			loaded_ammo = referenced_agent.detected.weapons[6].attached_wep.loaded_ammo,
+			pickup_name = referenced_agent.detected.weapons[6].name,
+			pos_x = referenced_agent.detected.weapons[6].global_position.x,
+			pos_y = referenced_agent.detected.weapons[6].global_position.y,
+			pos_z = referenced_agent.detected.weapons[6].global_position.z,
+		}
 	else:
 		_d.icon = ICONS.none
 		_d_extra = null
 	if len(referenced_agent.detected.weapons) > 7:
 		_dr.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[7], "icon")
-		_dr_extra = referenced_agent.detected.weapons[5]
+		_dr_extra = {
+			weapon_name = referenced_agent.detected.weapons[7].attached_wep.wep_name,
+			weapon_printed_name = GameRefs.WEP[referenced_agent.detected.weapons[7].attached_wep.wep_name].name,
+			weapon_id = referenced_agent.detected.weapons[7].attached_wep.wep_id,
+			reserve_ammo = referenced_agent.detected.weapons[7].attached_wep.reserve_ammo,
+			loaded_ammo = referenced_agent.detected.weapons[7].attached_wep.loaded_ammo,
+			pickup_name = referenced_agent.detected.weapons[7].name,
+			pos_x = referenced_agent.detected.weapons[7].global_position.x,
+			pos_y = referenced_agent.detected.weapons[7].global_position.y,
+			pos_z = referenced_agent.detected.weapons[7].global_position.z,
+		}
 	else:
 		_dr.icon = ICONS.none
 		_dr_extra = null
@@ -347,7 +427,10 @@ func button_menu_screen():
 		"menu_weapon":
 			_ul.icon = a_o_na(ICONS.drop_weapon, Agent.GameActions.DROP_WEAPON)
 			_u.icon = a_o_na(ICONS.swap_weapon, Agent.GameActions.CHANGE_WEAPON)
-			_ur.icon = a_o_na(ICONS.pick_up_weapon, Agent.GameActions.PICK_UP_WEAPON)
+			if len(referenced_agent.held_weapons) < 3:
+				_ur.icon = a_o_na(ICONS.pick_up_weapon, Agent.GameActions.PICK_UP_WEAPON)
+			else:
+				_ur.icon = ICONS.none
 			_l.icon = ICONS.none
 			_m.icon = ICONS.cancel_back
 			_r.icon = ICONS.none
@@ -475,7 +558,7 @@ func _button_pressed_metadata(button : Button, extra):
 				button_collapse_animation()
 			"drop_weapon":
 				_action_sel.play()
-				decision_made.emit([Agent.GameActions.DROP_WEAPON, extra])
+				aiming_decision_made.emit([Agent.GameActions.DROP_WEAPON, extra])
 				button_collapse_animation()
 			"pick_up_weapon":
 				_action_sel.play()

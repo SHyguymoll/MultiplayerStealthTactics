@@ -6,6 +6,7 @@ var position_y_inter = 0
 var position_y = 0
 @export var server_knows = false
 @export var client_knows = false
+var agent_collecting : Agent = null
 
 func _ready():
 	for weapon_mesh in get_children():
@@ -36,7 +37,7 @@ func _ready():
 	visible = multiplayer.is_server() and server_knows or not multiplayer.is_server() and client_knows
 
 
-func _physics_process(delta: float) -> void:
+func _animate(delta: float) -> void:
 	position_y_inter = fmod(position_y_inter + delta*2, PI*2)
 	position_y = sin(position_y_inter)/16 + 0.5
 	for weapon_mesh in get_children():

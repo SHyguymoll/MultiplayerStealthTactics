@@ -51,7 +51,8 @@ func _physics_process(delta: float) -> void:
 		Agent.States.DEAD:
 			_state_tex.texture = GameRefs.STE.dead
 	_wep_tex.texture = GameRefs.return_icon(ref_ag, true)
-	_itm_tex.texture = GameRefs.return_icon(ref_ag, false)
+	if len(ref_ag.held_items) > 0:
+		_itm_tex.texture = GameRefs.return_icon(ref_ag, false)
 
 	_health_bar.value = ref_ag.health
 	_stun_health_bar.value = ref_ag.stun_health

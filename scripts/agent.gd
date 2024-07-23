@@ -109,10 +109,13 @@ enum States {
 @export var target_world_collide_y : float
 @export var game_steps_since_execute : int
 @export var grabbing_agent : Agent
+var mark_for_drop := {}
+var try_grab_pickup := false
 
 enum AttackStep {
 	ORIENTING,
 	ATTACKING,
+	BACKPACKING,
 }
 @export var attack_step := AttackStep.ORIENTING
 
@@ -209,7 +212,20 @@ func perform_action():
 			if held_weapons[selected_weapon].wep_name != "fist":
 				_held_weapon_meshes[held_weapons[selected_weapon].wep_name].visible = true
 		GameActions.PICK_UP_WEAPON:
-			pass
+			 # point to pickup before picking up pickup
+			target_direction = get_required_y_rotation(Vector3(queued_action[1].pos_x, queued_action[1].pos_y, queued_action[1].pos_z))
+			if in_standing_state():
+				_anim_state.travel("Stand")
+			elif in_crouching_state():
+				_anim_state.travel("Crouch")
+			attack_step = AttackStep.ORIENTING
+		GameActions.DROP_WEAPON:
+			 # direct to drop off before dropping off drop
+			target_direction = get_required_y_rotation(queued_action[2])
+			if in_standing_state():
+				_anim_state.travel("Stand")
+			elif in_crouching_state():
+				_anim_state.travel("Crouch")
 		GameActions.USE_WEAPON:
 			target_direction = get_required_y_rotation(queued_action[1])
 			if in_standing_state():
@@ -476,6 +492,35 @@ func _game_step(delta: float) -> void:
 							_cqc_anim_helper.rotation.y = lerp_angle(-PI/2, 0, cqc_lerp_value)
 						GameRefs.WeaponTypes.SMALL, GameRefs.WeaponTypes.BIG:
 							pass
+		GameActions.PICK_UP_WEAPON:
+			match attack_step:
+				AttackStep.ORIENTING:
+					rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
+					if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1:
+						rotation.y = target_direction
+						attack_step = AttackStep.BACKPACKING
+						game_steps_since_execute = 0
+				AttackStep.BACKPACKING:
+					if game_steps_since_execute < 30:
+						visible_level = 100
+					if game_steps_since_execute == 30:
+						try_grab_pickup = true
+						var new_weapon = GameWeapon.new(queued_action[1].weapon_name, queued_action[1].weapon_id)
+						new_weapon.reserve_ammo = queued_action[1].reserve_ammo
+						new_weapon.loaded_ammo = queued_action[1].loaded_ammo
+						held_weapons.append(new_weapon)
+					if game_steps_since_execute > 39:
+						action_complete()
+		GameActions.DROP_WEAPON:
+			rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
+			if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1:
+				rotation.y = target_direction
+				mark_for_drop = {
+					position = queued_action[2],
+					wep_ind = queued_action[1],
+					wep_node = held_weapons[queued_action[1]]
+				}
+				action_complete()
 		GameActions.RELOAD_WEAPON:
 			if game_steps_since_execute < -50:
 				weapons_animation_blend = weapons_animation_blend.lerp(Vector2.ONE, GENERAL_LERP_VAL)

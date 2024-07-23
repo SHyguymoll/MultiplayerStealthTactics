@@ -64,6 +64,20 @@ func get_agents(): #TODO: replace with loading from a file later
 				held_items=["cigar", "box"],
 				held_weapons=["shotgun", "rifle"],
 			},
+			{
+				name="nothing",
+				mission_count=0,
+				health=10,
+				view_dist=2.5,
+				view_across=1.0,
+				eye_strength=0.4,
+				hearing_dist=1.5,
+				movement_dist=7.0,
+				movement_speed=2.75,
+				held_items=[],
+				held_weapons=[],
+			},
+
 		]
 	}
 

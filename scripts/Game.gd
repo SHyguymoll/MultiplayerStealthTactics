@@ -229,6 +229,26 @@ func _physics_process(delta: float) -> void:
 			determine_weapon_events()
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
+				if len(agent.mark_for_drop) > 0 and multiplayer.is_server():
+					var new_drop = {
+						pos_x = agent.mark_for_drop.position.x,
+						pos_y = agent.mark_for_drop.position.y,
+						pos_z = agent.mark_for_drop.position.z,
+						server_knows = agent.player_id == 1,
+						client_knows = agent.player_id != 1,
+						weapon_name = agent.mark_for_drop.wep_node.wep_name,
+						weapon_id = agent.mark_for_drop.wep_node.wep_id,
+						reserve_ammo = agent.mark_for_drop.wep_node.reserve_ammo,
+						loaded_ammo = agent.mark_for_drop.wep_node.loaded_ammo,
+					}
+					pickup_spawner.spawn(new_drop)
+					agent.held_weapons.remove_at(agent.mark_for_drop.wep_ind)
+					agent.mark_for_drop.clear()
+				if agent.try_grab_pickup:
+					$Pickups.get_node(str(agent.queued_action[1].pickup_name)).queue_free()
+					agent.try_grab_pickup = false
+			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
+				pickup._animate(delta)
 			current_game_step += 1
 			determine_sights()
 			determine_sounds()
@@ -600,7 +620,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
 				ref_ag.name,
-				GameRefs.get_pickup_attribute(decision_array[1], "name")])
+				decision_array[1].weapon_printed_name])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
 				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
@@ -682,6 +702,9 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.USE_WEAPON:
 			final_text_string = "{0}: Use {1} at Position".format(
 				[ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, ref_ag.selected_weapon, "name")])
+		Agent.GameActions.DROP_WEAPON:
+			final_text_string = "{0}: Drop {1}".format([
+				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
 	update_text()
