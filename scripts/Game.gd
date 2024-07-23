@@ -160,11 +160,11 @@ func try_see_element(spotter : Agent, element : Node3D):
 		if calculate_sight_chance(spotter, element.global_position, 120) > 0.25:
 			element.disappear()
 	elif element is WeaponPickup:
-		if spotter.player_id == 1:
+		if spotter.player_id == 1 and element.server_knows != true:
 			element.server_knows = true
-		else:
+			spotter.sounds.spotted_element.play()
+		elif spotter.player_id != 1 and element.client_knows != true:
 			element.client_knows = true
-		spotter.sounds.spotted_element.play()
 	else:
 		element.visible = true
 		spotter.sounds.spotted_element.play()
@@ -232,7 +232,7 @@ func _physics_process(delta: float) -> void:
 			current_game_step += 1
 			determine_sights()
 			determine_sounds()
-			determine_nearby_pickups()
+			#determine_nearby_pickups()
 			determine_indicator_removals()
 			if multiplayer.is_server():
 				for agent in ($Agents.get_children() as Array[Agent]):
@@ -600,7 +600,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
 				ref_ag.name,
-				GameRefs.WEP[decision_array[1]].name])
+				GameRefs.get_pickup_attribute(decision_array[1], "name")])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
 				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
@@ -696,6 +696,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
+			determine_nearby_pickups()
 			for ag in ($Agents.get_children() as Array[Agent]):
 				ag.action_done = Agent.ActionDoneness.NOT_DONE
 				if multiplayer.is_server():
