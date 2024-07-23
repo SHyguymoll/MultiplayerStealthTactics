@@ -182,6 +182,15 @@ func compare_wep_type(agent : Agent, wep_type : WeaponTypes):
 	return get_held_weapon_attribute(agent, agent.selected_weapon, "type") == wep_type
 
 
+func get_all_wep_and_itm_icons():
+	var icons = []
+	for itm in ITM:
+		icons.append(ITM[itm].icon)
+	for wep in WEP:
+		icons.append(WEP[wep].icon)
+	return icons
+
+
 func return_icon(agent : Agent, is_wep : bool):
 	if is_wep:
 		if WEP.get(agent.held_weapons[agent.selected_weapon].wep_name, null) == null:
