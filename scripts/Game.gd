@@ -516,7 +516,7 @@ func determine_weapon_events():
 						continue # skip already attacked agents
 					if attacked.in_prone_state():
 						continue # skip prone agents
-					attacked.take_damage(GameRefs.get_weapon_attribute(attacker, attacker.selected_weapon, "damage"))
+					attacked.take_damage(GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"))
 					create_sound_effect(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 					attacked.stun_time = 60 if attacked.health > 0 else 300
 					attacked.select_hurt_animation()
@@ -596,17 +596,17 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 				final_text_string += GameRefs.ITM[decision_array[1]].name
 		Agent.GameActions.CHANGE_WEAPON:
 			final_text_string = "{0}: Switch to {1}".format([
-				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, decision_array[1], "name")])
+				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
 				ref_ag.name,
 				GameRefs.WEP[decision_array[1]].name])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
-				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, decision_array[1], "name")])
+				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.RELOAD_WEAPON:
 			final_text_string = "{0}: Reload {1}".format([
-				ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, decision_array[1], "name")])
+				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.HALT:
 			final_text_string = "{0}: Stop ".format([ref_ag.name])
 			match ref_ag.state:
@@ -681,7 +681,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 			final_text_string = "{0}: Look at Position".format([ref_ag.name])
 		Agent.GameActions.USE_WEAPON:
 			final_text_string = "{0}: Use {1} at Position".format(
-				[ref_ag.name, GameRefs.get_weapon_attribute(ref_ag, ref_ag.selected_weapon, "name")])
+				[ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, ref_ag.selected_weapon, "name")])
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
 	update_text()
