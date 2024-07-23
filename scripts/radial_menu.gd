@@ -210,49 +210,49 @@ func determine_weapons():
 
 
 func determine_pickups():
-	if len(referenced_agent.detected.weapons) < 1:
+	if len(referenced_agent.detected.weapons) > 0:
 		_ul.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[0], "icon")
 		_ul_extra = referenced_agent.detected.weapons[0]
 	else:
 		_ul.icon = ICONS.none
 		_ul_extra = null
-	if len(referenced_agent.detected.weapons) < 2:
+	if len(referenced_agent.detected.weapons) > 1:
 		_u.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[1], "icon")
 		_u_extra = referenced_agent.detected.weapons[1]
 	else:
 		_u.icon = ICONS.none
 		_u_extra = null
-	if len(referenced_agent.detected.weapons) < 3:
+	if len(referenced_agent.detected.weapons) > 2:
 		_ur.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[2], "icon")
 		_ur_extra = referenced_agent.detected.weapons[2]
 	else:
 		_ur.icon = ICONS.none
 		_ur_extra = null
-	if len(referenced_agent.detected.weapons) < 4:
+	if len(referenced_agent.detected.weapons) > 3:
 		_l.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[3], "icon")
 		_l_extra = referenced_agent.detected.weapons[3]
 	else:
 		_l.icon = ICONS.none
 		_l_extra = null
-	if len(referenced_agent.detected.weapons) < 5:
+	if len(referenced_agent.detected.weapons) > 4:
 		_r.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[4], "icon")
 		_r_extra = referenced_agent.detected.weapons[4]
 	else:
 		_r.icon = ICONS.none
 		_r_extra = null
-	if len(referenced_agent.detected.weapons) < 6:
+	if len(referenced_agent.detected.weapons) > 5:
 		_dl.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[5], "icon")
 		_dl_extra = referenced_agent.detected.weapons[5]
 	else:
 		_dl.icon = ICONS.none
 		_dl_extra = null
-	if len(referenced_agent.detected.weapons) < 7:
+	if len(referenced_agent.detected.weapons) > 6:
 		_d.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[6], "icon")
 		_d_extra = referenced_agent.detected.weapons[6]
 	else:
 		_d.icon = ICONS.none
 		_d_extra = null
-	if len(referenced_agent.detected.weapons) < 8:
+	if len(referenced_agent.detected.weapons) > 7:
 		_dr.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[7], "icon")
 		_dr_extra = referenced_agent.detected.weapons[5]
 	else:
