@@ -108,6 +108,9 @@ enum States {
 @export var target_world_collide_y : float
 @export var game_steps_since_execute : int
 @export var grabbing_agent : Agent
+
+@export var server_knows := false
+@export var client_knows := false
 var mark_for_drop := {}
 var try_grab_pickup := false
 
@@ -333,6 +336,7 @@ func _ready() -> void:
 	_active_item_icon.texture = null
 	for weapon_mesh in _held_weapon_meshes:
 		_held_weapon_meshes[weapon_mesh].visible = false
+	visible = server_knows and multiplayer.is_server() or client_knows and not multiplayer.is_server()
 	# debug
 	# debug_setup()
 
@@ -393,6 +397,7 @@ func _physics_process(delta: float) -> void:
 func _game_step(delta: float) -> void:
 	# update agent generally
 	game_steps_since_execute += 1
+	visible = server_knows and multiplayer.is_server() or client_knows and not multiplayer.is_server()
 	if not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly) or selected_item == -1:
 		_active_item_icon.visible = false
 	elif selected_item > -1:

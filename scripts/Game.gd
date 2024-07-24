@@ -116,6 +116,7 @@ func determine_sights():
 				previously_detected.glanced.erase(par)
 			if par in previously_detected.spotted:
 				previously_detected.spotted.erase(par)
+				continue
 			if par is Agent:
 				if agent == par: # of course you can see yourself
 					continue
@@ -123,7 +124,13 @@ func determine_sights():
 			else:
 				try_see_element(agent, par)
 		for to_remove in previously_detected.spotted:
+			if to_remove.get_parent() is Agent:
+				if agent.player_id == 1:
+					set_agent_server_visibility(to_remove.get_parent().name, false)
+				else:
+					set_agent_client_visibility(to_remove.get_parent().name, false)
 			create_popup(GameRefs.POPUP.sight_unknown, to_remove.position)
+
 
 
 
@@ -141,7 +148,10 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 		return
 	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level)
 	if sight_chance > 0.7: # seent it
-		spottee.visible = true
+		if spotter.player_id == 1:
+			set_agent_server_visibility.rpc(spottee.name, true)
+		else:
+			set_agent_client_visibility.rpc(spottee.name, true)
 		create_popup(GameRefs.POPUP.spotted, spottee.position, true)
 		spotter.detected.spotted.append(spottee)
 		if spotter.player_id != spottee.player_id:
@@ -408,8 +418,12 @@ func create_agent(data) -> Agent: #TODO
 	for weapon in data.agent_stats.held_weapons:
 		new_agent.held_weapons.append(GameWeapon.new(weapon, new_agent.name + "_" + weapon))
 	new_agent.visible = false
-	if multiplayer.multiplayer_peer.get_unique_id() == data.player_id:
-		new_agent.visible = true
+	if multiplayer.get_unique_id() == data.player_id:
+		#new_agent.visible = true
+		if multiplayer.get_unique_id() == 1:
+			new_agent.server_knows = true
+		else:
+			new_agent.client_knows = true
 		var new_small_hud = hud_agent_small_scene.instantiate()
 		_quick_views.add_child(new_small_hud)
 		new_small_hud._health_bar.max_value = data.agent_stats.health
@@ -739,6 +753,17 @@ func player_is_ready(id):
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_action(agent_name : String, action : Array):
 	$Agents.get_node(agent_name).queued_action = action
+
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_server_visibility(agent_name : String, visibility : bool):
+	$Agents.get_node(agent_name).server_knows = visibility
+
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_client_visibility(agent_name : String, visibility : bool):
+	$Agents.get_node(agent_name).client_knows = visibility
+
 
 func _on_execute_pressed() -> void:
 	_actions_submitted.play()
