@@ -94,6 +94,7 @@ enum States {
 	RUN, WALK, CROUCH_WALK, CRAWL,
 	USING_ITEM, USING_WEAPON, CQC_GRAB, FIRE_GUN, THROW_BOMB, RELOADING_WEAPON,
 	HURT, GRABBED, STUNNED, DEAD,
+	EXFILTRATED,
 }
 @export var state : States = States.STAND
 
@@ -128,7 +129,7 @@ enum AttackStep {
 }
 
 func in_incapacitated_state() -> bool:
-	return state in [States.GRABBED, States.STUNNED, States.DEAD]
+	return state in [States.GRABBED, States.STUNNED, States.DEAD, States.EXFILTRATED]
 
 
 func in_standing_state() -> bool:
@@ -388,6 +389,16 @@ func select_hurt_animation():
 
 func flash_outline(color : Color):
 	_outline_mat.albedo_color = color
+
+
+func exfiltrate():
+	state = States.EXFILTRATED
+	var twe = Tween.new()
+	twe.set_parallel()
+	twe.tween_property(_mesh, "transparency", 1.0, 2.0).from(0.0)
+	twe.tween_property($Agent, "position:y", 10.0, 2.0).from_current()
+	twe.play()
+
 
 
 func _physics_process(delta: float) -> void:

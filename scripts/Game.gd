@@ -712,18 +712,35 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
 			determine_nearby_pickups()
+			var server_agent_count := 0
+			var client_agent_count := 0
+			var dead_server_agents := 0
+			var dead_client_agents := 0
 			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id == 1:
+					server_agent_count += 1
+				else:
+					client_agent_count += 1
 				ag.action_done = Agent.ActionDoneness.NOT_DONE
 				if multiplayer.is_server():
 					set_agent_action.rpc(ag.name, [])
 				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
 					create_agent_selector(ag)
 					ag.flash_outline(Color.ORCHID)
-			show_hud()
-			#if event occurred: TODO
-				#_round_update.play()
-			if $HUDSelectors.get_child_count() == 0 and check_incap:
-				_on_execute_pressed() # run the execute function since the player can't do anything
+				if ag.state == Agent.States.DEAD:
+					if ag.player_id == 1:
+						dead_server_agents += 1
+					else:
+						dead_client_agents += 1
+			# objective based updates here
+			track_objective_completion()
+			# checking win condition and stuff here
+			if not player_has_won(dead_server_agents == server_agent_count, dead_client_agents == client_agent_count):
+				show_hud()
+				#if event occurred: TODO
+					#_round_update.play()
+				if $HUDSelectors.get_child_count() == 0 and check_incap:
+					_on_execute_pressed() # run the execute function since the player can't do anything
 		GamePhases.EXECUTION:
 			for selector in $HUDSelectors.get_children(): # remove previous selectors
 				selector.queue_free()
@@ -740,6 +757,261 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 					append_action_timeline(agent)
 				agent.perform_action()
 			await get_tree().create_timer(0.10).timeout
+
+
+func track_objective_completion():
+	match game_map.objective:
+		GameMap.Objectives.CAPTURE_CENTRAL_FLAG:
+			central_flag_completion()
+		GameMap.Objectives.CAPTURE_ENEMY_FLAG:
+			enemy_flag_completion()
+
+func central_flag_completion():
+	match game_map.objective_progress.server_team:
+		0:
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id != 1:
+					continue
+				if ag.state == Agent.States.DEAD:
+					continue
+				for wep in ag.held_weapons:
+					if wep.wep_id == "map_flag_center":
+						create_toast_update(
+							"YOU HAVE THE FLAG" if ag.player_id == multiplayer.get_unique_id() else "THEY HAVE THE FLAG", true)
+						game_map.objective_progress.server_team = 1
+						break
+		1:
+			var flag_still_held = false
+			var flag_captured = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id != 1:
+					continue
+				if ag.state == Agent.States.DEAD:
+					continue
+				for wep in ag.held_weapons:
+					if wep.wep_id == "map_flag_center":
+						flag_still_held = true
+						if ag.state == Agent.States.EXFILTRATED:
+							flag_captured = true
+						break
+			if not flag_still_held:
+				create_toast_update("YOU LOST THE FLAG" if multiplayer.get_unique_id() == 1 else "THEY LOST THE FLAG", true)
+				game_map.objective_progress.server_team = 0
+				return
+			var agents_remain = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id != 1:
+					continue
+				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					agents_remain = true
+					break
+			if flag_captured:
+				if agents_remain:
+					create_toast_update("THE FLAG HAS BEEN CAPTURED, AGENTS STILL REMAIN", true)
+					game_map.objective_progress.server_team = 2
+				else:
+					create_toast_update("THE FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() == 1 else "THE FLAG HAS BEEN CAPTURED, OTHER TEAM LEFT HOT ZONE, MISSION FAILURE", true)
+					game_map.objective_progress.server_team = 3
+		2:
+			var agents_remain = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id != 1:
+					continue
+				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					agents_remain = true
+					break
+			if not agents_remain:
+				create_toast_update("ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() == 1 else "OTHER TEAM LEFT HOT ZONE, MISSION FAILURE", true)
+				game_map.objective_progress.server_team = 3
+	match game_map.objective_progress.client_team:
+		0:
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id == 1:
+					continue
+				if ag.state == Agent.States.DEAD:
+					continue
+				for wep in ag.held_weapons:
+					if wep.wep_id == "map_flag_center":
+						create_toast_update(
+							"YOU HAVE THE FLAG" if ag.player_id == multiplayer.get_unique_id() else "THEY HAVE THE FLAG", true)
+						game_map.objective_progress.client_team = 1
+						break
+		1:
+			var flag_still_held = false
+			var flag_captured = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id == 1:
+					continue
+				if ag.state == Agent.States.DEAD:
+					continue
+				for wep in ag.held_weapons:
+					if wep.wep_id == "map_flag_center":
+						flag_still_held = true
+						if ag.state == Agent.States.EXFILTRATED:
+							flag_captured = true
+						break
+			if not flag_still_held:
+				create_toast_update("YOU LOST THE FLAG" if multiplayer.get_unique_id() != 1 else "THEY LOST THE FLAG", true)
+				game_map.objective_progress.client_team = 0
+				return
+			var agents_remain = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id == 1:
+					continue
+				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					agents_remain = true
+					break
+			if flag_captured:
+				if agents_remain:
+					create_toast_update("THE FLAG HAS BEEN CAPTURED, AGENTS STILL REMAIN", true)
+					game_map.objective_progress.client_team = 2
+				else:
+					create_toast_update("THE FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() != 1 else "THE FLAG HAS BEEN CAPTURED, OTHER TEAM LEFT HOT ZONE, MISSION FAILURE", true)
+					game_map.objective_progress.client_team = 3
+		2:
+			var agents_remain = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id == 1:
+					continue
+				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					agents_remain = true
+					break
+			if not agents_remain:
+				create_toast_update("ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() != 1 else "OTHER TEAM LEFT HOT ZONE, MISSION FAILURE", true)
+				game_map.objective_progress.client_team = 3
+
+
+func enemy_flag_completion():
+	match game_map.objective_progress.server_team:
+		0:
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id != 1:
+					continue
+				if ag.state == Agent.States.DEAD:
+					continue
+				for wep in ag.held_weapons:
+					if wep.wep_id == "map_flag_client":
+						create_toast_update(
+							"YOU HAVE THE ENEMY FLAG" if ag.player_id == multiplayer.get_unique_id() else "THE ENEMY HAS YOUR FLAG", true)
+						game_map.objective_progress.server_team = 1
+						break
+		1:
+			var flag_still_held = false
+			var flag_captured = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id != 1:
+					continue
+				if ag.state == Agent.States.DEAD:
+					continue
+				for wep in ag.held_weapons:
+					if wep.wep_id == "map_flag_client":
+						flag_still_held = true
+						if ag.state == Agent.States.EXFILTRATED:
+							flag_captured = true
+						break
+			if not flag_still_held:
+				create_toast_update("YOU LOST THE ENEMY FLAG" if multiplayer.get_unique_id() == 1 else "THEY LOST YOUR FLAG", true)
+				game_map.objective_progress.server_team = 0
+				return
+			var agents_remain = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id != 1:
+					continue
+				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					agents_remain = true
+					break
+			if flag_captured:
+				if agents_remain:
+					create_toast_update("YOU CAPTURED THE ENEMY FLAG, EXFILTRATE REMAINING AGENTS" if multiplayer.get_unique_id() == 1 else "ENEMY TEAM CAPTURED YOUR FLAG, NEUTRALIZE REMAINING AGENTS", true)
+					game_map.objective_progress.server_team = 2
+				else:
+					create_toast_update("THE ENEMY FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() == 1 else "YOUR FLAG HAS BEEN CAPTURED, OTHER TEAM FULLY EXFILTRATED, MISSION FAILURE", true)
+					game_map.objective_progress.server_team = 3
+		2:
+			var agents_remain = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id != 1:
+					continue
+				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					agents_remain = true
+					break
+			if not agents_remain:
+				create_toast_update("ALL AGENTS EXFILTRATED, MISSION SUCCESS" if multiplayer.get_unique_id() == 1 else "ENEMY TEAM FULLY EXFILTRATED, MISSION FAILURE", true)
+				game_map.objective_progress.server_team = 3
+	match game_map.objective_progress.client_team:
+		0:
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id == 1:
+					continue
+				if ag.state == Agent.States.DEAD:
+					continue
+				for wep in ag.held_weapons:
+					if wep.wep_id == "map_flag_server":
+						create_toast_update(
+							"YOU HAVE THE ENEMY FLAG" if ag.player_id == multiplayer.get_unique_id() else "THE ENEMY HAS YOUR FLAG", true)
+						game_map.objective_progress.client_team = 1
+						break
+		1:
+			var flag_still_held = false
+			var flag_captured = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id == 1:
+					continue
+				if ag.state == Agent.States.DEAD:
+					continue
+				for wep in ag.held_weapons:
+					if wep.wep_id == "map_flag_server":
+						flag_still_held = true
+						if ag.state == Agent.States.EXFILTRATED:
+							flag_captured = true
+						break
+			if not flag_still_held:
+				create_toast_update("YOU LOST THE ENEMY FLAG" if multiplayer.get_unique_id() != 1 else "THEY LOST YOUR FLAG", true)
+				game_map.objective_progress.client_team = 0
+				return
+			var agents_remain = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id == 1:
+					continue
+				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					agents_remain = true
+					break
+			if flag_captured:
+				if agents_remain:
+					create_toast_update("YOU CAPTURED THE ENEMY FLAG, EXFILTRATE REMAINING AGENTS" if multiplayer.get_unique_id() != 1 else "ENEMY TEAM CAPTURED YOUR FLAG, NEUTRALIZE REMAINING AGENTS", true)
+					game_map.objective_progress.client_team = 2
+				else:
+					create_toast_update("THE ENEMY FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() != 1 else "YOUR FLAG HAS BEEN CAPTURED, OTHER TEAM FULLY EXFILTRATED, MISSION FAILURE", true)
+					game_map.objective_progress.client_team = 3
+		2:
+			var agents_remain = false
+			for ag in ($Agents.get_children() as Array[Agent]):
+				if ag.player_id == 1:
+					continue
+				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					agents_remain = true
+					break
+			if not agents_remain:
+				create_toast_update("ALL AGENTS EXFILTRATED, MISSION SUCCESS" if multiplayer.get_unique_id() != 1 else "ENEMY TEAM FULLY EXFILTRATED, MISSION FAILURE", true)
+				game_map.objective_progress.client_team = 3
+
+
+func create_toast_update(text : String, add_sound_effect : bool):
+	pass
+
+
+func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
+	if all_server_dead and all_client_dead:
+		pass
+		return true
+	if all_server_dead:
+		pass
+		return true
+	if all_client_dead:
+		pass
+		return true
+
+	return false
 
 
 @rpc("any_peer", "call_local", "reliable")

@@ -19,6 +19,10 @@ enum Objectives {
 }
 @export var objective : Objectives
 @export var objective_params : Array
+@export var objective_progress = {
+	server_team=0,
+	client_team=0,
+}
 
 @export var server_exfiltrate_zone : Area3D
 @export var client_exfiltrate_zone : Area3D
