@@ -31,8 +31,10 @@ func get_agents(): #TODO: replace with loading from a file later
 			{
 				name="stealthy", # the agent's name
 				mission_count=0, # the number of missions that this agent has been used in
-				health=10, # the agent's health and stun health (div by 2 and round down for stun)
+				health=10, # the agent's health
 # value between 5 and 13
+				stun_health=5, # the agent's stun health
+# value between 3 and 8
 				view_dist=2.5, # how far the view cone extends from the agent
 # value between 2.00 and 3.50
 				view_across=1.0, # how wide the view cone base is
@@ -55,6 +57,7 @@ func get_agents(): #TODO: replace with loading from a file later
 				name="loud",
 				mission_count=0,
 				health=10,
+				stun_health=5,
 				view_dist=2.5,
 				view_across=1.0,
 				eye_strength=0.4,
@@ -68,6 +71,7 @@ func get_agents(): #TODO: replace with loading from a file later
 				name="nothing",
 				mission_count=0,
 				health=10,
+				stun_health=5,
 				view_dist=2.5,
 				view_across=1.0,
 				eye_strength=0.4,
@@ -77,7 +81,20 @@ func get_agents(): #TODO: replace with loading from a file later
 				held_items=[],
 				held_weapons=[],
 			},
-
+			{
+				name="weak",
+				mission_count=0,
+				health=1,
+				stun_health=1,
+				view_dist=2.5,
+				view_across=1.0,
+				eye_strength=0.4,
+				hearing_dist=1.5,
+				movement_dist=7.0,
+				movement_speed=2.75,
+				held_items=[],
+				held_weapons=["pistol"],
+			},
 		]
 	}
 

@@ -392,14 +392,13 @@ func ping():
 func create_agent(data) -> Agent: #TODO
 	var new_agent : Agent = agent_scene.instantiate()
 	new_agent.name = str(data.player_id) + "_" + str(data.agent_stats.name)
-	new_agent.agent_died.connect(_agent_died)
 
 	new_agent.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
 	new_agent.rotation.y = data.rot_y
 	new_agent.set_multiplayer_authority(data.player_id)
 	new_agent.player_id = data.player_id
 	new_agent.health = data.agent_stats.health
-	new_agent.stun_health = data.agent_stats.health / 2
+	new_agent.stun_health = data.agent_stats.stun_health
 	new_agent.view_dist = data.agent_stats.view_dist
 	new_agent.view_across = data.agent_stats.view_across
 	new_agent.eye_strength = data.agent_stats.eye_strength
@@ -438,17 +437,6 @@ func create_agent_selector(agent : Agent):
 	$HUDSelectors.add_child(new_selector)
 
 
-func _agent_lost_agent(unspotter : Agent, unspottee : Agent):
-	if not unspotter.is_multiplayer_authority():
-		return
-	if unspotter.player_id != unspottee.player_id:
-		pass
-
-
-func _agent_lost_element(element : Node3D):
-	pass
-
-
 func return_attacked(attacker : Agent, location : Vector3):
 	var space_state = get_world_3d().direct_space_state
 	var origin = attacker._body.global_position
@@ -464,12 +452,10 @@ func return_attacked(attacker : Agent, location : Vector3):
 
 func determine_cqc_events():
 	var cqc_actors = {}
-
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if agent.state != Agent.States.CQC_GRAB:
 			continue
 		cqc_actors[agent] = return_attacked(agent, agent.queued_action[1])[0]
-
 	for grabber in (cqc_actors.keys() as Array[Agent]):
 		grabber.state = Agent.States.USING_WEAPON
 		if cqc_actors[grabber] == null:
@@ -490,10 +476,6 @@ func determine_cqc_events():
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
 		grabbee.take_damage(3, true)
-		grabbee.stun_time = 30 if grabbee.stun_health > 0 else 300
-		grabbee._anim_state.travel("B_Hurt_Slammed")
-		grabbee.state = Agent.States.GRABBED
-		grabbee.queued_action.clear()
 		pass
 
 func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
@@ -501,7 +483,6 @@ func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
 
 func determine_weapon_events():
 	var attackers = {}
-
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if agent.state != Agent.States.FIRE_GUN:
 			continue
@@ -515,10 +496,20 @@ func determine_weapon_events():
 				create_sound_effect(agent.position, agent.player_id, 10, 0.5, 1.5, "rifle")
 			"shotgun":
 				attackers[agent] = [
-	return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 1.0)), return_attacked(agent, agent.queued_action[1]), return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)),]
+					return_attacked(
+						agent,
+						slide_end_pos(agent._body.global_position, agent.queued_action[1], 1.0)
+						),
+					return_attacked(
+						agent,
+						agent.queued_action[1]
+						),
+					return_attacked(
+						agent,
+						slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)
+						),
+					]
 				create_sound_effect(agent.position, agent.player_id, 15, 2.25, 3.5, "shotgun")
-
-
 	for attacker in (attackers.keys() as Array[Agent]):
 		attacker.state = Agent.States.USING_WEAPON
 		for hit in attackers[attacker]:
@@ -538,19 +529,6 @@ func determine_weapon_events():
 						continue # skip prone agents
 					attacked.take_damage(GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"))
 					create_sound_effect(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
-					attacked.stun_time = 60 if attacked.health > 0 else 300
-					attacked.select_hurt_animation()
-					attacked.state = Agent.States.HURT
-					attacked.queued_action.clear()
-
-
-func _agent_died(deceased : Agent):
-	print(deceased.name, " has died, big f")
-	for agent_selector in $HUDSelectors.get_children() as Array[AgentSelector]:
-		if agent_selector.referenced_agent == deceased:
-			agent_selector.queue_free()
-			break
-	pass
 
 
 func _hud_agent_details_actions(agent_selector : AgentSelector):

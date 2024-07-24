@@ -2,7 +2,6 @@ class_name Agent
 extends CharacterBody3D
 
 signal agent_selected(agent : Agent)
-signal agent_died(deceased : Agent)
 
 const CQC_START = Vector3(0, 0, 0.48)
 const CQC_END = Vector3(0.545, 0, 0)
@@ -316,7 +315,7 @@ func _ready() -> void:
 	_eye_cone.points[2] = Vector3(-view_across, view_across, view_dist)
 	_eye_cone.points[3] = Vector3(view_across, -view_across, view_dist)
 	_eye_cone.points[4] = Vector3(-view_across, -view_across, view_dist)
-	if is_multiplayer_authority():
+	if player_id == multiplayer.get_unique_id():
 		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
 	_ear_cylinder.radius = hearing_dist
 	# custom texture
@@ -358,11 +357,22 @@ func decide_weapon_blend() -> Vector2:
 func take_damage(amount : int, is_stun : bool = false):
 	if is_stun:
 		stun_health = max(0, stun_health - amount)
+		stun_time = 30 if stun_health > 0 else 300
+		_anim_state.travel("B_Hurt_Slammed")
+		state = States.GRABBED
+		#queued_action.clear()
 	else:
 		health = max(0, health - amount)
+		stun_time = 60 if health > 0 else 300
+		select_hurt_animation()
+		state = States.HURT if health > 0 else States.DEAD
+		#queued_action.clear()
 
 
 func select_hurt_animation():
+	if health == 0 or stun_health == 0:
+		_anim_state.travel("B_Hurt_Collapse")
+		return
 	var cur_node = _anim_state.get_current_node()
 	if cur_node.begins_with("B_Stand_") or cur_node in ["B_Walk", "B_Run", "B_CrouchToStand", "B_Hurt_Standing", "Stand"]:
 		_anim_state.travel("B_Hurt_Standing")
@@ -570,8 +580,13 @@ func _attack_orient_transition():
 
 
 func _on_animation_finished(anim_name: StringName) -> void:
-	if anim_name.begins_with("B_Hurt") and not anim_name in ["B_Hurt_Stunned", "B_Hurt_WakeUp"]:
+	if anim_name.begins_with("B_Hurt") and not anim_name in ["B_Hurt_Stunned", "B_Hurt_WakeUp", "B_Hurt_Collapse"]:
 		action_complete(false)
+	if anim_name == "B_Hurt_Collapse":
+		if health == 0:
+			_anim_state.travel("B_Dead")
+		if stun_health == 0:
+			_anim_state.travel("B_Hurt_Stunned")
 	if state == States.GRABBED:
 		state = States.STUNNED
 	if len(queued_action) == 0:
@@ -592,10 +607,8 @@ func _on_animation_finished(anim_name: StringName) -> void:
 			action_complete()
 
 
-
-
-func _on_animation_started(anim_name: StringName) -> void:
-	if anim_name == "B_Dead":
-		agent_died.emit(self)
-	if len(queued_action) == 0:
-		return
+#func _on_animation_started(anim_name: StringName) -> void:
+	#if anim_name == "B_Dead":
+		#agent_died.emit(self)
+	#if len(queued_action) == 0:
+		#return
