@@ -732,6 +732,8 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 						dead_server_agents += 1
 					else:
 						dead_client_agents += 1
+			# update exfiltrations
+			# TODO
 			# objective based updates here
 			track_objective_completion()
 			# checking win condition and stuff here
