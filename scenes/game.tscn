@@ -108,6 +108,17 @@ horizontal_alignment = 2
 autowrap_mode = 2
 clip_text = true
 
+[node name="Toasts" type="VBoxContainer" parent="HUDBase"]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -250.0
+offset_right = 553.0
+offset_bottom = 250.0
+grow_vertical = 2
+size_flags_horizontal = 0
+theme = ExtResource("5_b0o1h")
+
 [node name="CurrentPhase" type="Label" parent="HUDBase"]
 anchors_preset = 10
 anchor_right = 1.0

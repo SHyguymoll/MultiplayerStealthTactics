@@ -1,0 +1,45 @@
+[gd_scene load_steps=4 format=3 uid="uid://b5e7r1vbpllv5"]
+
+[ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="1_f1uw1"]
+[ext_resource type="Script" path="res://scripts/game_toast.gd" id="1_kbu1w"]
+[ext_resource type="AudioStream" uid="uid://c1racinscro6b" path="res://assets/sounds/menu/toast_progress.wav" id="3_bhypg"]
+
+[node name="Toast" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_kbu1w")
+
+[node name="Label" type="Label" parent="."]
+custom_minimum_size = Vector2(553, 0)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -276.5
+offset_right = 276.5
+offset_bottom = 49.0
+grow_horizontal = 2
+theme = ExtResource("1_f1uw1")
+theme_override_font_sizes/font_size = 48
+text = "EXAMPLE TOAST"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="Label"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+color = Color(0.564706, 0, 0.564706, 0.211765)
+
+[node name="PersistTime" type="Timer" parent="."]
+wait_time = 8.0
+autostart = true
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_bhypg")
+
+[connection signal="timeout" from="PersistTime" to="." method="_on_persist_time_timeout"]

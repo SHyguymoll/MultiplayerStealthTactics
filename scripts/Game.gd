@@ -4,6 +4,7 @@ extends Node3D
 var agent_scene = preload("res://scenes/agent.tscn")
 var agent_selector_scene = preload("res://scenes/agent_selector.tscn")
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
+var toast_scene = preload("res://scenes/toast.tscn")
 var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
 var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
@@ -998,8 +999,14 @@ func enemy_flag_completion():
 				game_map.objective_progress.client_team = 3
 
 
-func create_toast_update(text : String, add_sound_effect : bool):
-	pass
+func create_toast_update(text : String, add_sound_effect : bool, color : Color = Color(144, 0, 144, 54)):
+	var new_toast : ToastMessage = toast_scene.instantiate()
+	new_toast.text = text
+	new_toast.color = color
+	$HUDBase/Toasts.add_child(new_toast)
+	if add_sound_effect:
+		_round_update.play()
+		pass
 
 
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
