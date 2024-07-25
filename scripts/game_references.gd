@@ -147,6 +147,7 @@ const POPUP := {
 }
 
 const TXT := {
+	of_intro = "LOCATE AND EXFILTRATE THE FLAG",
 	of_y_get = "YOU HAVE THE FLAG",
 	of_t_get = "THEY HAVE THE FLAG",
 	of_y_lost = "YOU LOST THE FLAG",
@@ -154,6 +155,7 @@ const TXT := {
 	of_cap_agents_remain = "THE FLAG HAS BEEN CAPTURED, AGENTS STILL REMAIN",
 	of_y_cap_left = "THE FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS",
 	of_t_cap_left = "THE FLAG HAS BEEN CAPTURED, OTHER TEAM LEFT HOT ZONE, MISSION FAILURE",
+	tf_intro = "LOCATE AND EXFILTRATE THE ENEMY'S FLAG",
 	tf_y_get = "YOU HAVE THE ENEMY FLAG",
 	tf_t_get = "THE ENEMY HAS YOUR FLAG",
 	tf_y_lost = "YOU LOST THE ENEMY FLAG",

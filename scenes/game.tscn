@@ -129,6 +129,20 @@ theme_override_font_sizes/font_size = 48
 horizontal_alignment = 1
 autowrap_mode = 2
 
+[node name="ProgressBarServer" type="ProgressBar" parent="HUDBase"]
+offset_top = 50.0
+offset_right = 512.0
+offset_bottom = 98.0
+theme = ExtResource("5_b0o1h")
+show_percentage = false
+
+[node name="ProgressBarServer2" type="ProgressBar" parent="HUDBase"]
+offset_top = 105.0
+offset_right = 512.0
+offset_bottom = 153.0
+theme = ExtResource("5_b0o1h")
+show_percentage = false
+
 [node name="HUDSelected" type="CanvasLayer" parent="."]
 follow_viewport_enabled = true
 
@@ -155,6 +169,7 @@ autostart = true
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_pu7ty")
 
+[connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]
 [connection signal="pressed" from="HUDBase/Execute" to="." method="_on_execute_pressed"]
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
 [connection signal="decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]

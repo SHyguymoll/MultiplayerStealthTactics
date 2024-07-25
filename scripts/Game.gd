@@ -34,6 +34,10 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 
 
 @export var game_map : GameMap
+
+var target_server_progression : float
+var target_client_progression : float
+
 @onready var _camera : GameCamera = $World/Camera3D
 @onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
 @onready var pickup_spawner : MultiplayerSpawner = $PickupSpawner
@@ -65,6 +69,7 @@ func start_game():
 	server_populate_variables()
 	force_camera.rpc_id(GameSettings.other_player_id, (game_map.agent_spawn_client_1.position + game_map.agent_spawn_client_2.position + game_map.agent_spawn_client_3.position + game_map.agent_spawn_client_4.position)/4, 20)
 	force_camera((game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position + game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
+	set_up_progress_bars.rpc()
 	pass
 
 
@@ -76,6 +81,11 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.final_position = Vector2(new_pos.x, new_pos.z) * Vector2(get_viewport().size/$World/Camera3D.sensitivity)
 	if new_fov != -1.0:
 		$World/Camera3D.fov_target = new_fov
+
+
+@rpc("authority", "call_local", "reliable")
+func set_up_progress_bars():
+	pass
 
 
 func create_sound_effect(location : Vector3, player_id : int, lifetime : int, min_rad : float, max_rad : float, sound_id : String) -> void: #TODO
@@ -256,7 +266,8 @@ func _physics_process(delta: float) -> void:
 					agent.held_weapons.remove_at(agent.mark_for_drop.wep_ind)
 					agent.mark_for_drop.clear()
 				if agent.try_grab_pickup:
-					$Pickups.get_node(str(agent.queued_action[1].pickup_name)).queue_free()
+					if multiplayer.is_server():
+						$Pickups.get_node(str(agent.queued_action[1].pickup_name)).queue_free()
 					agent.try_grab_pickup = false
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
@@ -771,6 +782,9 @@ func track_objective_completion():
 
 func central_flag_completion():
 	match game_map.objective_progress.server_team:
+		-1:
+			create_toast_update(GameRefs.TXT.of_intro, true)
+			game_map.objective_progress.server_team = 0
 		0:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				if ag.player_id != 1:
@@ -827,6 +841,9 @@ func central_flag_completion():
 				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() == 1 else GameRefs.TXT.mission_failure, true)
 				game_map.objective_progress.server_team = 3
 	match game_map.objective_progress.client_team:
+		-1:
+			create_toast_update(GameRefs.TXT.of_intro, true)
+			game_map.objective_progress.client_team = 0
 		0:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				if ag.player_id == 1:
@@ -886,6 +903,9 @@ func central_flag_completion():
 
 func enemy_flag_completion():
 	match game_map.objective_progress.server_team:
+		-1:
+			create_toast_update(GameRefs.TXT.tf_intro, true)
+			game_map.objective_progress.server_team = 0
 		0:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				if ag.player_id != 1:
@@ -942,6 +962,8 @@ func enemy_flag_completion():
 				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() == 1 else GameRefs.TXT.mission_failure, true)
 				game_map.objective_progress.server_team = 3
 	match game_map.objective_progress.client_team:
+		-1:
+			game_map.objective_progress.client_team = 0
 		0:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				if ag.player_id == 1:
@@ -999,7 +1021,7 @@ func enemy_flag_completion():
 				game_map.objective_progress.client_team = 3
 
 
-func create_toast_update(text : String, add_sound_effect : bool, color : Color = Color(144, 0, 144, 54)):
+func create_toast_update(text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
 	var new_toast : ToastMessage = toast_scene.instantiate()
 	new_toast.text = text
 	new_toast.color = color
@@ -1057,3 +1079,7 @@ func _on_execute_pressed() -> void:
 
 func _on_cold_boot_timer_timeout() -> void:
 	_update_game_phase(GamePhases.SELECTION, false)
+
+
+func _on_pickup_spawner_despawned(node: Node) -> void:
+	node.queue_free()
