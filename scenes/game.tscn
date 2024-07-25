@@ -134,13 +134,15 @@ offset_top = 50.0
 offset_right = 512.0
 offset_bottom = 98.0
 theme = ExtResource("5_b0o1h")
+max_value = 3.0
 show_percentage = false
 
-[node name="ProgressBarServer2" type="ProgressBar" parent="HUDBase"]
+[node name="ProgressBarClient" type="ProgressBar" parent="HUDBase"]
 offset_top = 105.0
 offset_right = 512.0
 offset_bottom = 153.0
 theme = ExtResource("5_b0o1h")
+max_value = 3.0
 show_percentage = false
 
 [node name="HUDSelected" type="CanvasLayer" parent="."]

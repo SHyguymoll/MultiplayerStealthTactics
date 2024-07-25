@@ -47,6 +47,8 @@ var target_client_progression : float
 @onready var _execute_button : Button = $HUDBase/Execute
 @onready var _phase_label : Label = $HUDBase/CurrentPhase
 @onready var _ag_insts : Label = $HUDBase/AgentInstructions
+@onready var _server_progress : ProgressBar = $HUDBase/ProgressBarServer
+@onready var _client_progress : ProgressBar = $HUDBase/ProgressBarClient
 
 @onready var _round_update : AudioStreamPlayer = $SoundEffects/RoundUpdate
 @onready var _round_ended : AudioStreamPlayer = $SoundEffects/RoundEnded
@@ -243,6 +245,9 @@ func _physics_process(delta: float) -> void:
 			$World/Camera3D as Camera3D).unproject_position(
 					selector.referenced_agent.position)
 				(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
+			_server_progress.value = lerpf(_server_progress.value, float(game_map.objective_progress.server_team), 0.2)
+			_client_progress.value = lerpf(_client_progress.value, float(game_map.objective_progress.client_team), 0.2)
+
 			if multiplayer.is_server() and server_ready_bool and client_ready_bool:
 				_update_game_phase.rpc(GamePhases.EXECUTION)
 		GamePhases.EXECUTION:
