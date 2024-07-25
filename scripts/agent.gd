@@ -563,7 +563,7 @@ func _game_step(delta: float) -> void:
 				action_complete()
 	visible_level = clamp(visible_level, 0, 100)
 	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
-	$DebugLabel3D.text = str(target_visible_level)
+	$DebugLabel3D.text = str(target_visible_level) + "\n" + str(_pickup_range.get_overlapping_areas())
 
 
 func _attack_orient_transition():
