@@ -1,7 +1,8 @@
-[gd_scene load_steps=37 format=3 uid="uid://bokbyc6n8xxeu"]
+[gd_scene load_steps=38 format=3 uid="uid://bokbyc6n8xxeu"]
 
 [ext_resource type="Script" path="res://scripts/game_weapon_pickup.gd" id="2_hqexf"]
 [ext_resource type="Texture2D" uid="uid://rknp5rllix1t" path="res://assets/models/exports/textures/palettething.png" id="3_e8605"]
+[ext_resource type="Material" uid="uid://6kvgqc45bkpu" path="res://assets/models/materials/agent_outline.tres" id="3_edff4"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hmf60"]
 resource_name = "WeaponSolids"
@@ -600,44 +601,67 @@ properties/1/replication_mode = 2
 script = ExtResource("2_hqexf")
 
 [node name="Shotgun" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, -0.00118488, 0, -0.0082946)
+visible = false
 mesh = SubResource("ArrayMesh_guljv")
 skeleton = NodePath("")
+surface_material_override/1 = ExtResource("3_edff4")
 
 [node name="Rifle" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, -0.00236994, 0, -0.0225139)
+visible = false
 mesh = SubResource("ArrayMesh_7o47w")
 skeleton = NodePath("")
+surface_material_override/1 = ExtResource("3_edff4")
 
 [node name="Pistol" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, -0.0142193, 0, -0.0248839)
+visible = false
 mesh = SubResource("ArrayMesh_8js07")
 skeleton = NodePath("")
+surface_material_override/1 = ExtResource("3_edff4")
 
 [node name="GrenadeFrag" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+visible = false
 mesh = SubResource("ArrayMesh_av1vq")
 skeleton = NodePath("")
+surface_material_override/1 = ExtResource("3_edff4")
 
 [node name="GrenadeSmoke" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+visible = false
 mesh = SubResource("ArrayMesh_7htds")
 skeleton = NodePath("")
+surface_material_override/1 = ExtResource("3_edff4")
 
 [node name="GrenadeNoise" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.0916819, 0.994689, -0.0467822, -0.631752, 0.0944159, 0.7694, 0.76973, -0.0409853, 0.637052, 0, 0, 0)
+transform = Transform3D(-0.161604, -0.986856, 0, 0.607569, -0.0994933, 0.788011, -0.777653, 0.127346, 0.615662, 0, 0, 0)
+visible = false
 mesh = SubResource("ArrayMesh_yeiy4")
 skeleton = NodePath("")
+surface_material_override/1 = ExtResource("3_edff4")
 
 [node name="FlagCenter" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.761412, 0.646805, -0.043538, -0.648237, 0.758988, -0.0610485, -0.00644168, 0.074706, 0.997185, 0, 0, 0)
+transform = Transform3D(0.0540789, -0.998537, 0, 0.369206, 0.0199955, 0.929133, -0.927773, -0.0502464, 0.369747, 0.0507122, 0, -0.041996)
+visible = false
 mesh = SubResource("ArrayMesh_w7aac")
 skeleton = NodePath("")
+surface_material_override/1 = ExtResource("3_edff4")
 
 [node name="FlagClient" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.761412, 0.646805, -0.043538, -0.648237, 0.758988, -0.0610485, -0.00644168, 0.074706, 0.997185, 0, 0, 0)
+transform = Transform3D(0.0540789, -0.998537, 0, 0.369206, 0.0199955, 0.929133, -0.927773, -0.0502464, 0.369747, 0.0507122, 0, -0.041996)
+visible = false
 mesh = SubResource("ArrayMesh_142q1")
 skeleton = NodePath("")
+surface_material_override/1 = ExtResource("3_edff4")
 
 [node name="FlagServer" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.761412, 0.646805, -0.043538, -0.648237, 0.758988, -0.0610485, -0.00644168, 0.074706, 0.997185, 0, 0, 0)
+transform = Transform3D(0.0540789, -0.998537, 0, 0.369206, 0.0199955, 0.929133, -0.927773, -0.0502464, 0.369747, 0.0507122, 0, -0.041996)
+visible = false
 mesh = SubResource("ArrayMesh_m2f7p")
 skeleton = NodePath("")
+surface_material_override/1 = ExtResource("3_edff4")
 
 [node name="PickupViewable" type="Area3D" parent="."]
 collision_layer = 2080
