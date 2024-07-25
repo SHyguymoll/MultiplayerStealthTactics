@@ -17,7 +17,7 @@ func _ready():
 	twe.tween_property(_color_bg, "size:x", 553, 1.0).from(0)
 
 
-func _process(_d):
+func _physics_process(_delta: float) -> void:
 	_text_node.text = underscore_to_text(text, progress)
 
 

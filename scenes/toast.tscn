@@ -41,5 +41,6 @@ autostart = true
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_bhypg")
+volume_db = -15.0
 
 [connection signal="timeout" from="PersistTime" to="." method="_on_persist_time_timeout"]
