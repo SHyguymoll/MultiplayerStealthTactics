@@ -779,7 +779,7 @@ func central_flag_completion():
 				for wep in ag.held_weapons:
 					if wep.wep_id == "map_flag_center":
 						create_toast_update(
-							"YOU HAVE THE FLAG" if ag.player_id == multiplayer.get_unique_id() else "THEY HAVE THE FLAG", true)
+							GameRefs.TXT.of_y_get if ag.owned() else GameRefs.TXT.of_t_get, true)
 						game_map.objective_progress.server_team = 1
 						break
 		1:
@@ -797,7 +797,7 @@ func central_flag_completion():
 							flag_captured = true
 						break
 			if not flag_still_held:
-				create_toast_update("YOU LOST THE FLAG" if multiplayer.get_unique_id() == 1 else "THEY LOST THE FLAG", true)
+				create_toast_update(GameRefs.TXT.of_y_lost if multiplayer.get_unique_id() == 1 else GameRefs.TXT.of_t_lost, true)
 				game_map.objective_progress.server_team = 0
 				return
 			var agents_remain = false
@@ -809,10 +809,10 @@ func central_flag_completion():
 					break
 			if flag_captured:
 				if agents_remain:
-					create_toast_update("THE FLAG HAS BEEN CAPTURED, AGENTS STILL REMAIN", true)
+					create_toast_update(GameRefs.TXT.of_cap_agents_remain, true)
 					game_map.objective_progress.server_team = 2
 				else:
-					create_toast_update("THE FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() == 1 else "THE FLAG HAS BEEN CAPTURED, OTHER TEAM LEFT HOT ZONE, MISSION FAILURE", true)
+					create_toast_update(GameRefs.TXT.of_y_cap_left if multiplayer.get_unique_id() == 1 else GameRefs.TXT.of_t_cap_left, true)
 					game_map.objective_progress.server_team = 3
 		2:
 			var agents_remain = false
@@ -823,7 +823,7 @@ func central_flag_completion():
 					agents_remain = true
 					break
 			if not agents_remain:
-				create_toast_update("ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() == 1 else "OTHER TEAM LEFT HOT ZONE, MISSION FAILURE", true)
+				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() == 1 else GameRefs.TXT.mission_failure, true)
 				game_map.objective_progress.server_team = 3
 	match game_map.objective_progress.client_team:
 		0:
@@ -835,7 +835,7 @@ func central_flag_completion():
 				for wep in ag.held_weapons:
 					if wep.wep_id == "map_flag_center":
 						create_toast_update(
-							"YOU HAVE THE FLAG" if ag.player_id == multiplayer.get_unique_id() else "THEY HAVE THE FLAG", true)
+							GameRefs.TXT.of_y_get if ag.owned() else GameRefs.TXT.of_t_get, true)
 						game_map.objective_progress.client_team = 1
 						break
 		1:
@@ -853,7 +853,7 @@ func central_flag_completion():
 							flag_captured = true
 						break
 			if not flag_still_held:
-				create_toast_update("YOU LOST THE FLAG" if multiplayer.get_unique_id() != 1 else "THEY LOST THE FLAG", true)
+				create_toast_update(GameRefs.TXT.of_y_lost if multiplayer.get_unique_id() != 1 else GameRefs.TXT.of_t_lost, true)
 				game_map.objective_progress.client_team = 0
 				return
 			var agents_remain = false
@@ -865,10 +865,10 @@ func central_flag_completion():
 					break
 			if flag_captured:
 				if agents_remain:
-					create_toast_update("THE FLAG HAS BEEN CAPTURED, AGENTS STILL REMAIN", true)
+					create_toast_update(GameRefs.TXT.of_cap_agents_remain, true)
 					game_map.objective_progress.client_team = 2
 				else:
-					create_toast_update("THE FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() != 1 else "THE FLAG HAS BEEN CAPTURED, OTHER TEAM LEFT HOT ZONE, MISSION FAILURE", true)
+					create_toast_update(GameRefs.TXT.of_y_cap_left if multiplayer.get_unique_id() != 1 else GameRefs.TXT.of_t_cap_left, true)
 					game_map.objective_progress.client_team = 3
 		2:
 			var agents_remain = false
@@ -879,7 +879,7 @@ func central_flag_completion():
 					agents_remain = true
 					break
 			if not agents_remain:
-				create_toast_update("ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() != 1 else "OTHER TEAM LEFT HOT ZONE, MISSION FAILURE", true)
+				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() != 1 else GameRefs.TXT.mission_failure, true)
 				game_map.objective_progress.client_team = 3
 
 
@@ -894,7 +894,7 @@ func enemy_flag_completion():
 				for wep in ag.held_weapons:
 					if wep.wep_id == "map_flag_client":
 						create_toast_update(
-							"YOU HAVE THE ENEMY FLAG" if ag.player_id == multiplayer.get_unique_id() else "THE ENEMY HAS YOUR FLAG", true)
+							GameRefs.TXT.tf_y_get if ag.owned() else GameRefs.TXT.tf_t_get, true)
 						game_map.objective_progress.server_team = 1
 						break
 		1:
@@ -912,7 +912,7 @@ func enemy_flag_completion():
 							flag_captured = true
 						break
 			if not flag_still_held:
-				create_toast_update("YOU LOST THE ENEMY FLAG" if multiplayer.get_unique_id() == 1 else "THEY LOST YOUR FLAG", true)
+				create_toast_update(GameRefs.TXT.tf_y_lost if multiplayer.get_unique_id() == 1 else GameRefs.TXT.tf_t_lost, true)
 				game_map.objective_progress.server_team = 0
 				return
 			var agents_remain = false
@@ -924,10 +924,10 @@ func enemy_flag_completion():
 					break
 			if flag_captured:
 				if agents_remain:
-					create_toast_update("YOU CAPTURED THE ENEMY FLAG, EXFILTRATE REMAINING AGENTS" if multiplayer.get_unique_id() == 1 else "ENEMY TEAM CAPTURED YOUR FLAG, NEUTRALIZE REMAINING AGENTS", true)
+					create_toast_update(GameRefs.TXT.tf_y_cap_agents_remain if multiplayer.get_unique_id() == 1 else GameRefs.TXT.tf_t_cap_agents_remain, true)
 					game_map.objective_progress.server_team = 2
 				else:
-					create_toast_update("THE ENEMY FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() == 1 else "YOUR FLAG HAS BEEN CAPTURED, OTHER TEAM FULLY EXFILTRATED, MISSION FAILURE", true)
+					create_toast_update(GameRefs.TXT.tf_y_cap_left if multiplayer.get_unique_id() == 1 else GameRefs.TXT.tf_t_cap_left, true)
 					game_map.objective_progress.server_team = 3
 		2:
 			var agents_remain = false
@@ -938,7 +938,7 @@ func enemy_flag_completion():
 					agents_remain = true
 					break
 			if not agents_remain:
-				create_toast_update("ALL AGENTS EXFILTRATED, MISSION SUCCESS" if multiplayer.get_unique_id() == 1 else "ENEMY TEAM FULLY EXFILTRATED, MISSION FAILURE", true)
+				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() == 1 else GameRefs.TXT.mission_failure, true)
 				game_map.objective_progress.server_team = 3
 	match game_map.objective_progress.client_team:
 		0:
@@ -950,7 +950,7 @@ func enemy_flag_completion():
 				for wep in ag.held_weapons:
 					if wep.wep_id == "map_flag_server":
 						create_toast_update(
-							"YOU HAVE THE ENEMY FLAG" if ag.player_id == multiplayer.get_unique_id() else "THE ENEMY HAS YOUR FLAG", true)
+							GameRefs.TXT.tf_y_get if ag.owned() else GameRefs.TXT.tf_t_get, true)
 						game_map.objective_progress.client_team = 1
 						break
 		1:
@@ -968,7 +968,7 @@ func enemy_flag_completion():
 							flag_captured = true
 						break
 			if not flag_still_held:
-				create_toast_update("YOU LOST THE ENEMY FLAG" if multiplayer.get_unique_id() != 1 else "THEY LOST YOUR FLAG", true)
+				create_toast_update(GameRefs.TXT.tf_y_lost if multiplayer.get_unique_id() != 1 else GameRefs.TXT.tf_t_lost, true)
 				game_map.objective_progress.client_team = 0
 				return
 			var agents_remain = false
@@ -980,10 +980,10 @@ func enemy_flag_completion():
 					break
 			if flag_captured:
 				if agents_remain:
-					create_toast_update("YOU CAPTURED THE ENEMY FLAG, EXFILTRATE REMAINING AGENTS" if multiplayer.get_unique_id() != 1 else "ENEMY TEAM CAPTURED YOUR FLAG, NEUTRALIZE REMAINING AGENTS", true)
+					create_toast_update(GameRefs.TXT.tf_y_cap_agents_remain if multiplayer.get_unique_id() != 1 else GameRefs.TXT.tf_t_cap_agents_remain, true)
 					game_map.objective_progress.client_team = 2
 				else:
-					create_toast_update("THE ENEMY FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS" if multiplayer.get_unique_id() != 1 else "YOUR FLAG HAS BEEN CAPTURED, OTHER TEAM FULLY EXFILTRATED, MISSION FAILURE", true)
+					create_toast_update(GameRefs.TXT.tf_y_cap_left if multiplayer.get_unique_id() != 1 else GameRefs.TXT.tf_t_cap_left, true)
 					game_map.objective_progress.client_team = 3
 		2:
 			var agents_remain = false
@@ -994,7 +994,7 @@ func enemy_flag_completion():
 					agents_remain = true
 					break
 			if not agents_remain:
-				create_toast_update("ALL AGENTS EXFILTRATED, MISSION SUCCESS" if multiplayer.get_unique_id() != 1 else "ENEMY TEAM FULLY EXFILTRATED, MISSION FAILURE", true)
+				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() != 1 else GameRefs.TXT.mission_failure, true)
 				game_map.objective_progress.client_team = 3
 
 

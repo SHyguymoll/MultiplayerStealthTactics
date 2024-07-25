@@ -256,6 +256,10 @@ func agent_is_done(doneness : Agent.ActionDoneness):
 	action_done = doneness
 
 
+func owned() -> bool:
+	return player_id == multiplayer.get_unique_id()
+
+
 func action_complete(successfully : bool = true, no_flash : bool = false):
 	agent_is_done.rpc(ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL)
 	#action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL

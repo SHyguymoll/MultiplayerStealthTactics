@@ -146,6 +146,26 @@ const POPUP := {
 	spotted = preload("res://assets/sprites/game_popups/spotted.png"),
 }
 
+const TXT := {
+	of_y_get = "YOU HAVE THE FLAG",
+	of_t_get = "THEY HAVE THE FLAG",
+	of_y_lost = "YOU LOST THE FLAG",
+	of_t_lost = "THEY LOST THE FLAG",
+	of_cap_agents_remain = "THE FLAG HAS BEEN CAPTURED, AGENTS STILL REMAIN",
+	of_y_cap_left = "THE FLAG HAS BEEN CAPTURED, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS",
+	of_t_cap_left = "THE FLAG HAS BEEN CAPTURED, OTHER TEAM LEFT HOT ZONE, MISSION FAILURE",
+	tf_y_get = "YOU HAVE THE ENEMY FLAG",
+	tf_t_get = "THE ENEMY HAS YOUR FLAG",
+	tf_y_lost = "YOU LOST THE ENEMY FLAG",
+	tf_t_lost = "THE ENEMY LOST YOUR FLAG",
+	tf_y_cap_agents_remain = "YOU CAPTURED THE ENEMY FLAG, EXFILTRATE REMAINING AGENTS",
+	tf_t_cap_agents_remain = "ENEMY TEAM CAPTURED YOUR FLAG, NEUTRALIZE REMAINING AGENTS",
+	tf_y_cap_left = "YOU CAPTURED THE ENEMY FLAG, ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS",
+	tf_t_cap_left = "ENEMY TEAM CAPTURED YOUR FLAG, OTHER TEAM FULLY EXFILTRATED, MISSION FAILURE",
+	mission_success = "ALL AGENTS LEFT HOT ZONE, MISSION SUCCESS",
+	mission_failure = "OTHER TEAM LEFT HOT ZONE, MISSION FAILURE",
+}
+
 const AUDIO = {
 	ag_step_quiet = preload("res://assets/sounds/agent/footfall_slow.wav"),
 	ag_step_loud = preload("res://assets/sounds/agent/footfall_fast.wav"),
@@ -163,7 +183,6 @@ const AUDIO = {
 	grenade_frag = preload("res://assets/sounds/weapon/grenade_frag.wav"),
 	grenade_smoke = preload("res://assets/sounds/weapon/grenade_smoke.wav"),
 	projectile_bounce = preload("res://assets/sounds/weapon/projectile_bounce.wav"),
-
 }
 
 func get_weapon_attribute(weapon : GameWeapon, attribute : String):
