@@ -26,5 +26,10 @@ func reload_weapon() -> bool:
 	else:
 		return false
 
+
 func has_ammo() -> bool:
 	return loaded_ammo + reserve_ammo > 0
+
+
+func is_map_element() -> bool:
+	return wep_id.begins_with("map_")
