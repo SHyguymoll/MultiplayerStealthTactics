@@ -643,10 +643,10 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 			final_text_string = "{0}: Survey Area".format([ref_ag.name])
 		Agent.GameActions.CHANGE_ITEM:
 			final_text_string = "{0}: Equip ".format([ref_ag.name])
-			if decision_array[1] == GameRefs.ITM.none.name:
+			if decision_array[1] == -1:
 				final_text_string = "{0}: Unequip Item".format([ref_ag.name])
 			else:
-				final_text_string += GameRefs.ITM[decision_array[1]].name
+				final_text_string += GameRefs.ITM[ref_ag.held_items[decision_array[1]]].name
 		Agent.GameActions.CHANGE_WEAPON:
 			final_text_string = "{0}: Switch to {1}".format([
 				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])

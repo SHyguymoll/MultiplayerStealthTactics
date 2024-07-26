@@ -105,6 +105,10 @@ const ITM := {
 		icon = preload("res://assets/sprites/hud_agent_small/items/none.png"),
 		name = "Nothing",
 		},
+	no_item = {
+		icon = preload("res://assets/sprites/hud_agent_small/items/no_item.png"),
+		name = "null"
+		},
 	body_armor = {
 		icon = preload("res://assets/sprites/hud_agent_small/items/body_armor.png"),
 		name = "Body Armor",

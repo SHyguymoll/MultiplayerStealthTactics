@@ -204,10 +204,12 @@ func perform_action():
 		GameActions.LOOK_AROUND:
 			target_direction = get_required_y_rotation(queued_action[1])
 		GameActions.CHANGE_ITEM:
-			if queued_action[1] == "none":
-				selected_item = -1
-			else:
-				selected_item = held_items.find(queued_action[1])
+			selected_item = queued_action[1]
+			if selected_item == -1:
+				return
+			match held_items[selected_item]:
+				"box":
+					state = States.STAND
 		GameActions.CHANGE_WEAPON:
 			selected_weapon = queued_action[1]
 			for weapon_mesh in _held_weapon_meshes:
@@ -327,6 +329,7 @@ func _ready() -> void:
 	if player_id == multiplayer.get_unique_id():
 		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
 	_ear_cylinder.radius = hearing_dist
+	# item strings
 	# custom texture
 	if skin_texture:
 		_custom_skin_mat = StandardMaterial3D.new()
@@ -337,6 +340,7 @@ func _ready() -> void:
 	_outline_mat = _outline_mat_base.duplicate()
 	_mesh.set_surface_override_material(1, _outline_mat)
 	_box_mesh.set_surface_override_material(2, _outline_mat)
+	_box_mesh.visible = false
 	# other visuals
 	_anim_state.start("Stand")
 	_anim.advance(0)
@@ -344,6 +348,7 @@ func _ready() -> void:
 	for weapon_mesh in _held_weapon_meshes:
 		_held_weapon_meshes[weapon_mesh].visible = false
 	visible = server_knows and multiplayer.is_server() or client_knows and not multiplayer.is_server()
+
 	# debug
 	# debug_setup()
 
@@ -460,6 +465,9 @@ func _game_step(delta: float) -> void:
 		_box_mesh.visible = true
 		_mesh.visible = false
 		target_visible_level = 0
+	else:
+		_box_mesh.visible = false
+		_mesh.visible = true
 	if in_moving_state():
 		if selected_item > -1 and held_items[selected_item] == "box":
 			target_visible_level = 150
@@ -510,6 +518,9 @@ func _game_step(delta: float) -> void:
 			rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
 			if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1:
 				rotation.y = target_direction
+				action_complete()
+		GameActions.CHANGE_ITEM:
+			if game_steps_since_execute > 5:
 				action_complete()
 		GameActions.CHANGE_WEAPON:
 			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) == 0:

@@ -151,9 +151,6 @@ func determine_items():
 	_u.icon = ICONS.none
 	_ur.icon = ICONS.none
 	var candidates := referenced_agent.held_items.duplicate()
-	if referenced_agent.selected_item > -1:
-		candidates.remove_at(referenced_agent.selected_item)
-		candidates.insert(referenced_agent.selected_item, GameRefs.ITM.none.icon)
 	if len(candidates) > 0:
 		_ul.icon = GameRefs.ITM[candidates[0]].icon
 		_ul_extra = 0
@@ -163,6 +160,17 @@ func determine_items():
 	if len(candidates) > 2:
 		_ur.icon = GameRefs.ITM[candidates[2]].icon
 		_ur_extra = 2
+	if referenced_agent.selected_item > -1:
+		match referenced_agent.selected_item:
+			0:
+				_ul.icon = GameRefs.ITM.no_item.icon
+				_ul_extra = -1
+			1:
+				_u.icon = GameRefs.ITM.no_item.icon
+				_u_extra = -1
+			2:
+				_ur.icon = GameRefs.ITM.no_item.icon
+				_ur_extra = -1
 
 
 func determine_weapons():
@@ -292,6 +300,12 @@ func button_menu_screen():
 					buttons[1] = ICONS.halt
 				if referenced_agent.state == referenced_agent.States.WALK:
 					buttons[2] = ICONS.halt
+				if referenced_agent.selected_item > -1 and referenced_agent.held_items[referenced_agent.selected_item] == "box":
+					buttons[0] = ICONS.none
+					buttons[1] = ICONS.none
+					buttons[3] = ICONS.none
+					buttons[5] = ICONS.none
+					buttons[8] = ICONS.none
 
 			elif referenced_agent.in_crouching_state():
 				buttons[0] = a_o_na(ICONS.stance_stand, Agent.GameActions.GO_STAND)
