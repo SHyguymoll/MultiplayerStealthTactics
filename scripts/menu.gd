@@ -7,14 +7,25 @@ extends ColorRect
 @onready var _start_button : Button = $HostScreen/ButtonsHbox/Start
 @onready var _text_reset_timer : Timer = $HostScreen/TextReset
 
+@onready var _review_agents_list : ItemList = $ReviewScreen/ReviewItemList
+@onready var _review_items_list : ItemList = $ReviewScreen/AgentDetails/HBox/Items
+@onready var _review_weapons_list : ItemList = $ReviewScreen/AgentDetails/HBox/Weapons
+
+@onready var _review_save_agents : Button
+@onready var _review_recruit_new_agent : Button
+
+var review_selected_agent : int = -1
+
 var user_data = {}
 var agents = []
+
 func _ready() -> void:
 	GameSettings.selected_agents.clear()
 	GameSettings.client_selected_agents.clear()
 	GameSettings.other_player_id = 0
 	$HostScreen.visible = false
 	$SettingsScreen.visible = false
+	$ReviewScreen.visible = false
 	$MainMenu.visible = true
 	load_user()
 	load_agents()
@@ -116,22 +127,17 @@ func _on_host_pressed() -> void:
 	$HostScreen.visible = true
 
 
-func _on_singleplayer_pressed() -> void:
+func _on_review_agents_pressed() -> void:
 	$MainMenu.visible = false
-	$HostScreen/Label.text = "SINGLEPLAYER MODE"
-	_ready_button.visible = false
-	_start_button.visible = true
-	_start_button.disabled = false
-	GameSettings.local_mode = true
-	Lobby.create_game(1)
-	$HostScreen.visible = true
-	_populate_agent_list()
+	$ReviewScreen.visible = true
 
 
 func _populate_agent_list():
 	_player_agents.clear()
+	_review_agents_list.clear()
 	for agent in Lobby.player_info.agents:
 		_player_agents.add_item(agent.name)
+		_review_agents_list.add_item(agent.name)
 
 
 func _on_item_list_item_selected(index: int) -> void:
@@ -246,6 +252,153 @@ func _on_quit_pressed() -> void:
 	get_tree().reload_current_scene()
 
 
+func _on_back_pressed() -> void:
+	$SettingsScreen.visible = false
+	$ReviewScreen.visible = false
+	$ReviewScreen/FireAgent.disabled = true
+	review_selected_agent = -1
+	$MainMenu.visible = true
+
+
 func _on_text_reset_timeout() -> void:
 	_ready_button.text = "READY"
 	_start_button.text = "START"
+
+func _on_review_item_list_item_selected(index: int) -> void:
+	if review_selected_agent > -1:
+		_review_agents_list.set_item_text(review_selected_agent, _review_agents_list.get_item_text(review_selected_agent).trim_suffix(" <"))
+	review_selected_agent = index
+	_review_agents_list.set_item_text(index, _review_agents_list.get_item_text(index) + " <")
+	$ReviewScreen/FireAgent.disabled = false
+
+
+func _process(delta: float) -> void:
+	if review_selected_agent > -1:
+		$ReviewScreen/AgentDetails/MissionCount.text = "MISSION COUNT: " + str(agents[review_selected_agent]["mission_count"])
+		$ReviewScreen/AgentDetails/Health/HBoxContainer/HSlider.value = lerpf(
+			$ReviewScreen/AgentDetails/Health/HBoxContainer/HSlider.value,
+			agents[review_selected_agent]["health"], 0.2
+		)
+		$ReviewScreen/AgentDetails/StunHealth/HBoxContainer/HSlider.value = lerpf(
+			$ReviewScreen/AgentDetails/StunHealth/HBoxContainer/HSlider.value,
+			agents[review_selected_agent]["stun_health"], 0.2
+		)
+		$ReviewScreen/AgentDetails/ViewDist/HBoxContainer/HSlider.value = lerpf(
+			$ReviewScreen/AgentDetails/ViewDist/HBoxContainer/HSlider.value,
+			agents[review_selected_agent]["view_dist"], 0.2
+		)
+		$ReviewScreen/AgentDetails/ViewAcross/HBoxContainer/HSlider.value = lerpf(
+			$ReviewScreen/AgentDetails/ViewAcross/HBoxContainer/HSlider.value,
+			agents[review_selected_agent]["view_across"], 0.2
+		)
+		$ReviewScreen/AgentDetails/EyeStrength/HBoxContainer/HSlider.value = lerpf(
+			$ReviewScreen/AgentDetails/EyeStrength/HBoxContainer/HSlider.value,
+			agents[review_selected_agent]["eye_strength"], 0.2
+		)
+		$ReviewScreen/AgentDetails/HearingDist/HBoxContainer/HSlider.value = lerpf(
+			$ReviewScreen/AgentDetails/HearingDist/HBoxContainer/HSlider.value,
+			agents[review_selected_agent]["hearing_dist"], 0.2
+		)
+		$ReviewScreen/AgentDetails/MovementDist/HBoxContainer/HSlider.value = lerpf(
+			$ReviewScreen/AgentDetails/MovementDist/HBoxContainer/HSlider.value,
+			agents[review_selected_agent]["movement_dist"], 0.2
+		)
+		$ReviewScreen/AgentDetails/MovementSpeed/HBoxContainer/HSlider.value = lerpf(
+			$ReviewScreen/AgentDetails/MovementSpeed/HBoxContainer/HSlider.value,
+			agents[review_selected_agent]["movement_speed"], 0.2
+		)
+
+		for item in range(_review_items_list.item_count):
+			_review_items_list.set_item_text(item, "")
+		for item in range(_review_weapons_list.item_count):
+			_review_weapons_list.set_item_text(item, "")
+		for itm_name in agents[review_selected_agent]["held_items"]:
+			_review_items_list.set_item_text(reverse_get_index_from_name(itm_name), "^")
+		for wep_name in agents[review_selected_agent]["held_weapons"]:
+			_review_weapons_list.set_item_text(reverse_get_index_from_name(wep_name), "^")
+	else:
+		$ReviewScreen/AgentDetails/MissionCount.text = "MISSION COUNT: -"
+		$ReviewScreen/AgentDetails/Health/HBoxContainer/HSlider.value = $ReviewScreen/AgentDetails/Health/HBoxContainer/HSlider.min_value
+		$ReviewScreen/AgentDetails/StunHealth/HBoxContainer/HSlider.value = $ReviewScreen/AgentDetails/StunHealth/HBoxContainer/HSlider.min_value
+		$ReviewScreen/AgentDetails/ViewDist/HBoxContainer/HSlider.value = $ReviewScreen/AgentDetails/ViewDist/HBoxContainer/HSlider.min_value
+		$ReviewScreen/AgentDetails/ViewAcross/HBoxContainer/HSlider.value = $ReviewScreen/AgentDetails/ViewAcross/HBoxContainer/HSlider.min_value
+		$ReviewScreen/AgentDetails/EyeStrength/HBoxContainer/HSlider.value = $ReviewScreen/AgentDetails/EyeStrength/HBoxContainer/HSlider.min_value
+		$ReviewScreen/AgentDetails/HearingDist/HBoxContainer/HSlider.value = $ReviewScreen/AgentDetails/HearingDist/HBoxContainer/HSlider.min_value
+		$ReviewScreen/AgentDetails/MovementDist/HBoxContainer/HSlider.value = $ReviewScreen/AgentDetails/MovementDist/HBoxContainer/HSlider.min_value
+		$ReviewScreen/AgentDetails/MovementSpeed/HBoxContainer/HSlider.value = $ReviewScreen/AgentDetails/MovementSpeed/HBoxContainer/HSlider.min_value
+		for item in range(_review_items_list.item_count):
+			_review_items_list.set_item_text(item, "")
+		for item in range(_review_weapons_list.item_count):
+			_review_weapons_list.set_item_text(item, "")
+
+
+func reverse_get_index_from_name(icon_name : String):
+	for ind in range(_review_items_list.item_count):
+		if GameRefs.get_name_from_icon(_review_items_list.get_item_icon(ind)) == icon_name:
+			return ind
+	for ind in range(_review_weapons_list.item_count):
+		if GameRefs.get_name_from_icon(_review_weapons_list.get_item_icon(ind)) == icon_name:
+			return ind
+	return null
+
+
+func _on_items_item_selected(index: int) -> void:
+	if review_selected_agent == -1:
+		return
+	var actual_name = GameRefs.get_name_from_icon(_review_items_list.get_item_icon(index))
+	if actual_name in agents[review_selected_agent].held_items:
+		agents[review_selected_agent].held_items.erase(actual_name)
+		_review_items_list.set_item_text(index, "")
+	else:
+		if len(agents[review_selected_agent].held_items) == 3:
+			_review_items_list.deselect(index)
+		else:
+			agents[review_selected_agent].held_items.append(actual_name)
+			_review_items_list.set_item_text(index, "^")
+
+
+func _on_weapons_item_selected(index: int) -> void:
+	if review_selected_agent == -1:
+		return
+	var actual_name = GameRefs.get_name_from_icon(_review_weapons_list.get_item_icon(index))
+	if actual_name in agents[review_selected_agent].held_weapons:
+		agents[review_selected_agent].held_weapons.erase(actual_name)
+		_review_weapons_list.set_item_text(index, "")
+	else:
+		if len(agents[review_selected_agent].held_weapons) == 2:
+			_review_weapons_list.deselect(index)
+		else:
+			agents[review_selected_agent].held_weapons.append(actual_name)
+			_review_weapons_list.set_item_text(index, "^")
+
+
+const ADJECTIVE : Array[String] = ["Cunning", "Silent", "White", "Gray", "Black", "Plasma", "Dachous", "Shy", "Cubed", "Smoking"]
+const ANIMAL : Array[String] = ["Wolf", "Bobcat", "Shark", "Serpent", "Penguin", "Crocodile"]
+
+func _on_recruit_agent_pressed() -> void:
+	agents.append({
+				name=ADJECTIVE.pick_random() + " " + ANIMAL.pick_random(),
+				mission_count=0,
+				health=randi_range(5, 10),
+				stun_health=randi_range(3, 5),
+				view_dist=randf_range(2.00, 2.75),
+				view_across=randf_range(0.8, 0.9),
+				eye_strength=randf_range(0.30, 0.45),
+				hearing_dist=randf_range(0.8, 1.5),
+				movement_dist=randf_range(4.0, 6.0),
+				movement_speed=randf_range(1.25, 2.7),
+				held_items=[],
+				held_weapons=[],
+			})
+	_populate_agent_list()
+
+
+func _on_fire_agent_pressed() -> void:
+	agents.remove_at(review_selected_agent)
+	review_selected_agent = -1
+	$ReviewScreen/FireAgent.disabled = true
+	_populate_agent_list()
+
+
+func _on_save_roster_pressed() -> void:
+	save_agents()

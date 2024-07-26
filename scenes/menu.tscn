@@ -1,13 +1,25 @@
-[gd_scene load_steps=10 format=3 uid="uid://tpqpwqi5p3an"]
+[gd_scene load_steps=22 format=3 uid="uid://tpqpwqi5p3an"]
 
 [ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="1_s0wmi"]
 [ext_resource type="Script" path="res://scripts/menu.gd" id="1_y43yw"]
 [ext_resource type="Texture2D" uid="uid://bkhpurxit5akt" path="res://assets/ui/logos/SpinnyBitFlat.png" id="3_0hrpe"]
 [ext_resource type="Texture2D" uid="uid://cm1j5ov30v5ah" path="res://assets/ui/logos/MST_Logo_Transparent.png" id="3_hbl0t"]
+[ext_resource type="Texture2D" uid="uid://cp2fo0iw6giig" path="res://assets/sprites/hud_agent_small/items/box.png" id="4_88vtr"]
 [ext_resource type="Texture2D" uid="uid://s4mrrqcjlq67" path="res://assets/ui/logos/SpinnyBit_0.png" id="4_508h6"]
+[ext_resource type="Texture2D" uid="uid://dvluc888xwefq" path="res://assets/sprites/hud_agent_small/items/body_armor.png" id="5_0dyx8"]
 [ext_resource type="Texture2D" uid="uid://bcc8y0qqc1u5e" path="res://assets/ui/logos/SpinnyBit_1.png" id="5_ithcw"]
+[ext_resource type="Texture2D" uid="uid://c66xjh75tohpi" path="res://assets/sprites/hud_agent_small/items/cigar.png" id="6_et3gt"]
 [ext_resource type="Texture2D" uid="uid://dvx0x10yp1r32" path="res://assets/ui/logos/SpinnyBit_2.png" id="6_rt20l"]
 [ext_resource type="Texture2D" uid="uid://di2uw7av3tand" path="res://assets/ui/logos/SpinnyBit_3.png" id="7_g15ho"]
+[ext_resource type="Texture2D" uid="uid://cjs6kyph32wxn" path="res://assets/sprites/hud_agent_small/items/reflex_pill.png" id="7_hl2io"]
+[ext_resource type="Texture2D" uid="uid://cwqah8mx0lopn" path="res://assets/sprites/hud_agent_small/items/analyzer.png" id="8_2028b"]
+[ext_resource type="Texture2D" uid="uid://cahcpuf0gdy6a" path="res://assets/sprites/hud_agent_small/items/fake_death_pill.png" id="9_3k1c4"]
+[ext_resource type="Texture2D" uid="uid://dd24a107cuywk" path="res://assets/sprites/hud_agent_small/weapons/pistol.png" id="10_bw4bd"]
+[ext_resource type="Texture2D" uid="uid://bcmck6xotomq6" path="res://assets/sprites/hud_agent_small/weapons/rifle.png" id="11_cqf6n"]
+[ext_resource type="Texture2D" uid="uid://uxmytcsbax3f" path="res://assets/sprites/hud_agent_small/weapons/shotgun.png" id="12_sk1ki"]
+[ext_resource type="Texture2D" uid="uid://c5t3n6wjdk1oi" path="res://assets/sprites/hud_agent_small/weapons/grenade_frag.png" id="13_ttbev"]
+[ext_resource type="Texture2D" uid="uid://byt0brgih1cql" path="res://assets/sprites/hud_agent_small/weapons/grenade_smoke.png" id="14_r5mbe"]
+[ext_resource type="Texture2D" uid="uid://dbda34k7omlv8" path="res://assets/sprites/hud_agent_small/weapons/noise_maker.png" id="15_hj263"]
 
 [sub_resource type="AnimatedTexture" id="AnimatedTexture_higo5"]
 frames = 5
@@ -145,7 +157,473 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="ReviewScreen" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ReviewItemList" type="ItemList" parent="ReviewScreen"]
+layout_mode = 2
+offset_left = 78.0
+offset_top = 5.0
+offset_right = 737.0
+offset_bottom = 821.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_s0wmi")
+allow_reselect = true
+allow_search = false
+
+[node name="Back" type="Button" parent="ReviewScreen"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -146.0
+offset_top = -65.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
+text = "QUIT"
+
+[node name="RecruitAgent" type="Button" parent="ReviewScreen"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1584.0
+offset_top = -65.0
+offset_right = -1043.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
+text = "RECRUIT NEW AGENT"
+
+[node name="SaveRoster" type="Button" parent="ReviewScreen"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -994.0
+offset_top = -65.0
+offset_right = -647.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
+text = "SAVE ROSTER"
+
+[node name="FireAgent" type="Button" parent="ReviewScreen"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -555.0
+offset_top = -65.0
+offset_right = -254.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
+text = "FIRE AGENT"
+
+[node name="AgentDetails" type="VBoxContainer" parent="ReviewScreen"]
+layout_mode = 0
+offset_left = 800.0
+offset_top = 10.0
+offset_right = 1446.0
+offset_bottom = 823.0
+
+[node name="MissionCount" type="Label" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "MISSION COUNT: "
+horizontal_alignment = 1
+
+[node name="Health" type="VBoxContainer" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ReviewScreen/AgentDetails/Health"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "VITALITY"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ReviewScreen/AgentDetails/Health"]
+layout_mode = 2
+
+[node name="Min" type="Label" parent="ReviewScreen/AgentDetails/Health/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "FRAGILE"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="ReviewScreen/AgentDetails/Health/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 5.0
+max_value = 13.0
+step = 0.01
+value = 5.0
+editable = false
+scrollable = false
+
+[node name="Max" type="Label" parent="ReviewScreen/AgentDetails/Health/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "TANKY"
+horizontal_alignment = 1
+
+[node name="StunHealth" type="VBoxContainer" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ReviewScreen/AgentDetails/StunHealth"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "FOCUS"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ReviewScreen/AgentDetails/StunHealth"]
+layout_mode = 2
+
+[node name="Min" type="Label" parent="ReviewScreen/AgentDetails/StunHealth/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "FAINTING"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="ReviewScreen/AgentDetails/StunHealth/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 3.0
+max_value = 8.0
+step = 0.01
+value = 3.0
+editable = false
+scrollable = false
+
+[node name="Max" type="Label" parent="ReviewScreen/AgentDetails/StunHealth/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "WOKE"
+horizontal_alignment = 1
+
+[node name="ViewDist" type="VBoxContainer" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ReviewScreen/AgentDetails/ViewDist"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "EYESIGHT"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ReviewScreen/AgentDetails/ViewDist"]
+layout_mode = 2
+
+[node name="Min" type="Label" parent="ReviewScreen/AgentDetails/ViewDist/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "SHORT"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="ReviewScreen/AgentDetails/ViewDist/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 2.0
+max_value = 3.5
+step = 0.01
+value = 2.0
+editable = false
+scrollable = false
+
+[node name="Max" type="Label" parent="ReviewScreen/AgentDetails/ViewDist/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "10/20"
+horizontal_alignment = 1
+
+[node name="ViewAcross" type="VBoxContainer" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ReviewScreen/AgentDetails/ViewAcross"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "AWARENESS"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ReviewScreen/AgentDetails/ViewAcross"]
+layout_mode = 2
+
+[node name="Min" type="Label" parent="ReviewScreen/AgentDetails/ViewAcross/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "BLINDERS"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="ReviewScreen/AgentDetails/ViewAcross/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 0.8
+max_value = 1.2
+step = 0.01
+value = 0.8
+editable = false
+scrollable = false
+
+[node name="Max" type="Label" parent="ReviewScreen/AgentDetails/ViewAcross/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "OWL"
+horizontal_alignment = 1
+
+[node name="EyeStrength" type="VBoxContainer" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ReviewScreen/AgentDetails/EyeStrength"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "REACTION TIME"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ReviewScreen/AgentDetails/EyeStrength"]
+layout_mode = 2
+
+[node name="Min" type="Label" parent="ReviewScreen/AgentDetails/EyeStrength/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "NONE"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="ReviewScreen/AgentDetails/EyeStrength/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 0.3
+max_value = 0.6
+step = 0.001
+value = 0.3
+editable = false
+scrollable = false
+
+[node name="Max" type="Label" parent="ReviewScreen/AgentDetails/EyeStrength/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "INSTINCT"
+horizontal_alignment = 1
+
+[node name="HearingDist" type="VBoxContainer" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ReviewScreen/AgentDetails/HearingDist"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "LISTENING SKILLS"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ReviewScreen/AgentDetails/HearingDist"]
+layout_mode = 2
+
+[node name="Min" type="Label" parent="ReviewScreen/AgentDetails/HearingDist/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "DEAF"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="ReviewScreen/AgentDetails/HearingDist/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 0.8
+max_value = 1.65
+step = 0.01
+value = 0.8
+editable = false
+scrollable = false
+
+[node name="Max" type="Label" parent="ReviewScreen/AgentDetails/HearingDist/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "TELEPATHIC"
+horizontal_alignment = 1
+
+[node name="MovementDist" type="VBoxContainer" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ReviewScreen/AgentDetails/MovementDist"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "BURST MOVEMENT"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ReviewScreen/AgentDetails/MovementDist"]
+layout_mode = 2
+
+[node name="Min" type="Label" parent="ReviewScreen/AgentDetails/MovementDist/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "STEP"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="ReviewScreen/AgentDetails/MovementDist/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 4.0
+max_value = 9.0
+step = 0.01
+value = 4.0
+editable = false
+scrollable = false
+
+[node name="Max" type="Label" parent="ReviewScreen/AgentDetails/MovementDist/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "GIANT STEP"
+horizontal_alignment = 1
+
+[node name="MovementSpeed" type="VBoxContainer" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ReviewScreen/AgentDetails/MovementSpeed"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "MOVEMENT SPEED"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ReviewScreen/AgentDetails/MovementSpeed"]
+layout_mode = 2
+
+[node name="Min" type="Label" parent="ReviewScreen/AgentDetails/MovementSpeed/HBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "SNAIL"
+horizontal_alignment = 1
+
+[node name="HSlider" type="HSlider" parent="ReviewScreen/AgentDetails/MovementSpeed/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 1.25
+max_value = 3.0
+step = 0.01
+value = 1.25
+editable = false
+scrollable = false
+
+[node name="Max" type="Label" parent="ReviewScreen/AgentDetails/MovementSpeed/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 24
+text = "CHEETAH"
+horizontal_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="ReviewScreen/AgentDetails"]
+layout_mode = 2
+
+[node name="Items" type="ItemList" parent="ReviewScreen/AgentDetails/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 16
+allow_reselect = true
+allow_search = false
+auto_height = true
+item_count = 6
+max_columns = 3
+same_column_width = true
+icon_mode = 0
+icon_scale = 0.8
+item_0/text = ""
+item_0/icon = ExtResource("4_88vtr")
+item_1/text = ""
+item_1/icon = ExtResource("5_0dyx8")
+item_2/text = ""
+item_2/icon = ExtResource("6_et3gt")
+item_3/text = ""
+item_3/icon = ExtResource("7_hl2io")
+item_4/text = ""
+item_4/icon = ExtResource("8_2028b")
+item_5/text = ""
+item_5/icon = ExtResource("9_3k1c4")
+
+[node name="Weapons" type="ItemList" parent="ReviewScreen/AgentDetails/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 16
+allow_reselect = true
+allow_search = false
+auto_height = true
+item_count = 6
+max_columns = 3
+icon_mode = 0
+icon_scale = 0.8
+item_0/text = ""
+item_0/icon = ExtResource("10_bw4bd")
+item_1/text = ""
+item_1/icon = ExtResource("11_cqf6n")
+item_2/text = ""
+item_2/icon = ExtResource("12_sk1ki")
+item_3/text = ""
+item_3/icon = ExtResource("13_ttbev")
+item_4/text = ""
+item_4/icon = ExtResource("14_r5mbe")
+item_5/text = ""
+item_5/icon = ExtResource("15_hj263")
+
 [node name="MainMenu" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -208,10 +686,10 @@ layout_mode = 2
 theme = ExtResource("1_s0wmi")
 text = "JOIN GAME"
 
-[node name="Singleplayer" type="Button" parent="MainMenu/VBoxContainer"]
+[node name="ReviewAgents" type="Button" parent="MainMenu/VBoxContainer"]
 layout_mode = 2
 theme = ExtResource("1_s0wmi")
-text = "SINGLEPLAYER"
+text = "ROSTER"
 
 [node name="Settings" type="Button" parent="MainMenu/VBoxContainer"]
 layout_mode = 2
@@ -223,7 +701,13 @@ text = "SETTINGS"
 [connection signal="pressed" from="HostScreen/ButtonsHbox/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="HostScreen/ButtonsHbox/Quit" to="." method="_on_quit_pressed"]
 [connection signal="timeout" from="HostScreen/TextReset" to="." method="_on_text_reset_timeout"]
+[connection signal="item_selected" from="ReviewScreen/ReviewItemList" to="." method="_on_review_item_list_item_selected"]
+[connection signal="pressed" from="ReviewScreen/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="ReviewScreen/RecruitAgent" to="." method="_on_recruit_agent_pressed"]
+[connection signal="pressed" from="ReviewScreen/SaveRoster" to="." method="_on_save_roster_pressed"]
+[connection signal="pressed" from="ReviewScreen/FireAgent" to="." method="_on_fire_agent_pressed"]
+[connection signal="item_selected" from="ReviewScreen/AgentDetails/HBox/Items" to="." method="_on_items_item_selected"]
+[connection signal="item_selected" from="ReviewScreen/AgentDetails/HBox/Weapons" to="." method="_on_weapons_item_selected"]
 [connection signal="pressed" from="MainMenu/VBoxContainer/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="MainMenu/VBoxContainer/Join" to="." method="_on_join_pressed"]
-[connection signal="pressed" from="MainMenu/VBoxContainer/Singleplayer" to="." method="_on_singleplayer_pressed"]
-[connection signal="pressed" from="MainMenu/VBoxContainer/ReviewAgents" to="." method="_on_singleplayer_pressed"]
+[connection signal="pressed" from="MainMenu/VBoxContainer/ReviewAgents" to="." method="_on_review_agents_pressed"]
