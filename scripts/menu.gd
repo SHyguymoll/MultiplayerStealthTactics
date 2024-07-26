@@ -7,6 +7,8 @@ extends ColorRect
 @onready var _start_button : Button = $HostScreen/ButtonsHbox/Start
 @onready var _text_reset_timer : Timer = $HostScreen/TextReset
 
+var user_data = {}
+var agents = []
 func _ready() -> void:
 	GameSettings.selected_agents.clear()
 	GameSettings.client_selected_agents.clear()
@@ -14,7 +16,13 @@ func _ready() -> void:
 	$HostScreen.visible = false
 	$SettingsScreen.visible = false
 	$MainMenu.visible = true
-	Lobby.player_info = get_agents()
+	load_user()
+	load_agents()
+	Lobby.player_info = {
+		name = user_data.name,
+		agents = agents,
+	}
+	_populate_agent_list()
 	Lobby.player_connected.connect(_on_player_connect)
 	Lobby.player_disconnected.connect(_on_player_disconnect)
 	pass
@@ -24,12 +32,37 @@ func _ready() -> void:
 	#$HostScreen/DebugPrint.text = str(GameSettings.selected_agents) + "\n" + str(GameSettings.client_selected_agents) + "\n" + str(Lobby.players)
 
 
-func get_agents(): #TODO: replace with loading from a file later
-	return {
-		name="test", # the player's name
-		agents=[
+func save_user():
+	var file = FileAccess.open("user://player.mstd", FileAccess.WRITE)
+	var json_data = JSON.stringify(user_data)
+	file.store_string(json_data)
+
+
+func load_user():
+	var file = FileAccess.open("user://player.mstd", FileAccess.READ)
+	if file == null:
+		user_data = {
+			name = "XO " + str(int(Time.get_unix_time_from_system()) % 1000) + "-" + str(randi_range(0, 10)),
+			mission_count = 0,
+			victory_count = 0,
+		}
+		save_user()
+		file = FileAccess.open("user://player.mstd", FileAccess.READ)
+	user_data = JSON.parse_string(file.get_as_text(true))
+
+
+func save_agents():
+	var file = FileAccess.open("user://agents.mstd", FileAccess.WRITE)
+	var json_data = JSON.stringify(agents)
+	file.store_string(json_data)
+
+
+func load_agents():
+	var file = FileAccess.open("user://agents.mstd", FileAccess.READ)
+	if file == null:
+		agents = [
 			{
-				name="stealthy", # the agent's name
+				name="Smoking Shark", # the agent's name
 				mission_count=0, # the number of missions that this agent has been used in
 				health=10, # the agent's health
 # value between 5 and 13
@@ -44,8 +77,8 @@ func get_agents(): #TODO: replace with loading from a file later
 # (note, this is within the view cone, calculated here: https://www.desmos.com/calculator/azk19m9ik3)
 				hearing_dist=1.5, # the radius of the hearing cylinder
 # value between 0.80 and 1.65
-				movement_dist=7.0, # how far the agent can move in a single step
-# value between 6.00 and 9.00
+				movement_dist=5.50, # how far the agent can move in a single step
+# value between 4.00 and 9.00
 				movement_speed=2.75, # how fast the agent moves
 # value between 1.25 and 3.00
 				held_items=["cigar", "box"], # the items that the agent starts with
@@ -53,50 +86,12 @@ func get_agents(): #TODO: replace with loading from a file later
 				held_weapons=["pistol", "grenade_smoke"], # the weapons that the agent starts with
 # no more than 2
 			},
-			{
-				name="loud",
-				mission_count=0,
-				health=10,
-				stun_health=5,
-				view_dist=2.5,
-				view_across=1.0,
-				eye_strength=0.4,
-				hearing_dist=1.5,
-				movement_dist=7.0,
-				movement_speed=2.75,
-				held_items=["cigar", "box"],
-				held_weapons=["shotgun", "rifle"],
-			},
-			{
-				name="nothing",
-				mission_count=0,
-				health=10,
-				stun_health=5,
-				view_dist=2.5,
-				view_across=1.0,
-				eye_strength=0.4,
-				hearing_dist=1.5,
-				movement_dist=7.0,
-				movement_speed=2.75,
-				held_items=[],
-				held_weapons=[],
-			},
-			{
-				name="weak",
-				mission_count=0,
-				health=1,
-				stun_health=1,
-				view_dist=2.5,
-				view_across=1.0,
-				eye_strength=0.4,
-				hearing_dist=1.5,
-				movement_dist=7.0,
-				movement_speed=2.75,
-				held_items=[],
-				held_weapons=["pistol"],
-			},
 		]
-	}
+		save_agents()
+		file = FileAccess.open("user://agents.mstd", FileAccess.READ)
+	var agent_file = JSON.parse_string(file.get_as_text(true))
+	if agent_file != null:
+		agents = agent_file
 
 
 func _on_join_pressed() -> void:
@@ -108,7 +103,6 @@ func _on_join_pressed() -> void:
 	Lobby.join_game()
 	$MainMenu.visible = false
 	$HostScreen.visible = true
-	_populate_agent_list()
 
 
 func _on_host_pressed() -> void:
@@ -117,9 +111,9 @@ func _on_host_pressed() -> void:
 	_ready_button.visible = false
 	_start_button.visible = true
 	GameSettings.local_mode = false
+
 	Lobby.create_game()
 	$HostScreen.visible = true
-	_populate_agent_list()
 
 
 func _on_singleplayer_pressed() -> void:
@@ -242,7 +236,6 @@ func _on_start_pressed() -> void: # server-only
 
 func _on_quit_pressed() -> void:
 	$HostScreen.visible = false
-	$SettingsScreen.visible = false
 	$MainMenu.visible = true
 	if not multiplayer.is_server():
 		Lobby.players.clear()
