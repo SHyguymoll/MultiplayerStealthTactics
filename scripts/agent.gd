@@ -40,7 +40,6 @@ var _outline_mat : StandardMaterial3D
 @onready var _eye_cone : ConvexPolygonShape3D = $Eyes/CollisionShape3D.shape
 @onready var _ears : Area3D = $Ears
 @onready var _ear_cylinder : CylinderShape3D = _ears.get_node("CollisionShape3D").shape
-@onready var _body : Area3D = $Body
 @onready var _world_collide : CollisionShape3D = $WorldCollision
 @onready var _prone_ray : RayCast3D = $ProneCheck
 @onready var _crouch_ray : RayCast3D = $CrouchCheck
@@ -406,7 +405,7 @@ func exfiltrate():
 
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_d: float) -> void:
 	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, GENERAL_LERP_VAL)
 	$DebugLabel3D.text = str(target_visible_level) + "\n" + str(_pickup_range.get_overlapping_areas())
 	if not in_incapacitated_state():

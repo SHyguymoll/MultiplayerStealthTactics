@@ -5,7 +5,7 @@ extends ColorRect
 
 @onready var _ready_button : Button = $HostScreen/ButtonsHbox/Ready
 @onready var _start_button : Button = $HostScreen/ButtonsHbox/Start
-@onready var _text_reset_timer : Timer = $TextReset
+@onready var _text_reset_timer : Timer = $HostScreen/TextReset
 
 func _ready() -> void:
 	GameSettings.selected_agents.clear()

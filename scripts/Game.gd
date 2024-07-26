@@ -439,14 +439,16 @@ func create_agent(data) -> Agent: #TODO
 		loaded_ammo = GameRefs.WEP["fist"].ammo,
 		reserve_ammo = GameRefs.WEP["fist"].ammo * 3,
 	}
-	weapon_spawner.spawn(weapon_data)
+	if multiplayer.is_server():
+		weapon_spawner.spawn(weapon_data)
 	new_agent.held_weapons.append(weapon_data.wep_name)
 	for weapon in data.agent_stats.held_weapons:
 		weapon_data.wep_id = weapon
 		weapon_data.wep_name = new_agent.name + "_" + weapon
 		weapon_data.loaded_ammo = GameRefs.WEP[weapon_data.wep_id].ammo
 		weapon_data.reserve_ammo = GameRefs.WEP[weapon_data.wep_id].ammo * 3
-		weapon_spawner.spawn(weapon_data)
+		if multiplayer.is_server():
+			weapon_spawner.spawn(weapon_data)
 		new_agent.held_weapons.append(weapon_data.wep_name)
 	new_agent.visible = false
 	if multiplayer.get_unique_id() == data.player_id:
