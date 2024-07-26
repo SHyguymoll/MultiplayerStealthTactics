@@ -20,8 +20,8 @@ var player_id : int
 
 @export var visible_level : int = 50 #bounded from 0 to 100, based on current state
 
-var held_items : Array = [] #max length should be 3, only uses Strings
-var held_weapons : Array[GameWeapon] = [] #max length should be 3 (including fist)
+@export var held_items : Array = [] #max length should be 3, only uses Strings
+@export var held_weapons : Array = [] #max length should be 3 (including fist), also only uses Strings
 
 @export var selected_item : int = -1 #index for item (-1 for no item)
 @export var selected_weapon : int = 0 #index for weapon (0 for fist)
@@ -113,7 +113,7 @@ enum States {
 @export var server_knows := false
 @export var client_knows := false
 var mark_for_drop := {}
-var try_grab_pickup := false
+@export var try_grab_pickup := false
 
 enum AttackStep {
 	ORIENTING,
@@ -216,7 +216,8 @@ func perform_action():
 				_held_weapon_meshes[held_weapons[selected_weapon].wep_name].visible = true
 		GameActions.PICK_UP_WEAPON:
 			 # point to pickup before picking up pickup
-			target_direction = get_required_y_rotation(Vector3(queued_action[1].pos_x, queued_action[1].pos_y, queued_action[1].pos_z))
+			var pickup = GameRefs.get_pickup_node(queued_action[1])
+			target_direction = get_required_y_rotation(Vector3(pickup.position.x, pickup.position.y, pickup.position.z))
 			if in_standing_state():
 				_anim_state.travel("Stand")
 			elif in_crouching_state():
@@ -352,7 +353,7 @@ func _process(_delta: float) -> void:
 	pass
 
 func decide_weapon_blend() -> Vector2:
-	match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
+	match GameRefs.get_held_weapon_attribute(self, selected_weapon, "type"):
 		GameRefs.WeaponTypes.CQC:
 			return Vector2.ONE
 		GameRefs.WeaponTypes.SMALL:
@@ -407,6 +408,12 @@ func exfiltrate():
 
 func _physics_process(delta: float) -> void:
 	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, GENERAL_LERP_VAL)
+	$DebugLabel3D.text = str(target_visible_level) + "\n" + str(_pickup_range.get_overlapping_areas())
+	if not in_incapacitated_state():
+		var detected_weapons = []
+		for overlap in _pickup_range.get_overlapping_areas():
+			detected_weapons.append(overlap.get_parent())
+		detected.weapons = detected_weapons
 
 
 func _game_step(delta: float) -> void:
@@ -535,10 +542,7 @@ func _game_step(delta: float) -> void:
 						visible_level = 100
 					if game_steps_since_execute == 30:
 						try_grab_pickup = true
-						var new_weapon = GameWeapon.new(queued_action[1].weapon_name, queued_action[1].weapon_id)
-						new_weapon.reserve_ammo = queued_action[1].reserve_ammo
-						new_weapon.loaded_ammo = queued_action[1].loaded_ammo
-						held_weapons.append(new_weapon)
+						held_weapons.append(queued_action[1])
 					if game_steps_since_execute > 39:
 						action_complete()
 		GameActions.DROP_WEAPON:
@@ -563,7 +567,6 @@ func _game_step(delta: float) -> void:
 				action_complete()
 	visible_level = clamp(visible_level, 0, 100)
 	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
-	$DebugLabel3D.text = str(target_visible_level) + "\n" + str(_pickup_range.get_overlapping_areas())
 
 
 func _attack_orient_transition():

@@ -3,6 +3,7 @@ extends Node3D
 
 var agent_scene = preload("res://scenes/agent.tscn")
 var agent_selector_scene = preload("res://scenes/agent_selector.tscn")
+var weapon_scene = preload("res://scenes/weapon.tscn")
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 var toast_scene = preload("res://scenes/toast.tscn")
 var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
@@ -41,6 +42,7 @@ var target_client_progression : float
 @onready var _camera : GameCamera = $World/Camera3D
 @onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
 @onready var pickup_spawner : MultiplayerSpawner = $PickupSpawner
+@onready var weapon_spawner : MultiplayerSpawner = $WeaponSpawner
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu
@@ -59,6 +61,8 @@ func _ready():
 	_radial_menu.visible = false
 	ag_spawner.spawn_function = create_agent
 	pickup_spawner.spawn_function = create_pickup
+	weapon_spawner.spawn_function = create_weapon
+
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 
@@ -72,6 +76,7 @@ func start_game():
 	force_camera.rpc_id(GameSettings.other_player_id, (game_map.agent_spawn_client_1.position + game_map.agent_spawn_client_2.position + game_map.agent_spawn_client_3.position + game_map.agent_spawn_client_4.position)/4, 20)
 	force_camera((game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position + game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
 	set_up_progress_bars.rpc()
+	#determine_nearby_pickups.rpc()
 	pass
 
 
@@ -217,13 +222,15 @@ func determine_sounds():
 		audio_event.update()
 
 
+@rpc("authority", "call_local", "reliable")
 func determine_nearby_pickups():
 	for agent in ($Agents.get_children() as Array[Agent]):
-		agent.detected.weapons.clear()
+		if agent.in_incapacitated_state():
+			continue
+		var detected_weapons = []
 		for overlap in agent._pickup_range.get_overlapping_areas():
-			if len(agent.detected.weapons) > 8:
-				break
-			agent.detected.weapons.append(overlap.get_parent())
+			detected_weapons.append(overlap.get_parent())
+		agent.detected.weapons = detected_weapons
 	pass
 
 
@@ -247,32 +254,28 @@ func _physics_process(delta: float) -> void:
 				(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
 			_server_progress.value = lerpf(_server_progress.value, float(game_map.objective_progress.server_team), 0.2)
 			_client_progress.value = lerpf(_client_progress.value, float(game_map.objective_progress.client_team), 0.2)
-
 			if multiplayer.is_server() and server_ready_bool and client_ready_bool:
 				_update_game_phase.rpc(GamePhases.EXECUTION)
 		GamePhases.EXECUTION:
 			determine_cqc_events()
+			#determine_nearby_pickups()
 			determine_weapon_events()
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
 				if len(agent.mark_for_drop) > 0 and multiplayer.is_server():
 					var new_drop = {
 						pos_x = agent.mark_for_drop.position.x,
-						pos_y = agent.mark_for_drop.position.y,
+						pos_y = agent.mark_for_drop.position.y - 0.5,
 						pos_z = agent.mark_for_drop.position.z,
-						server_knows = agent.player_id == 1 or agent.mark_for_drop.wep_node.is_map_element(),
-						client_knows = agent.player_id != 1 or agent.mark_for_drop.wep_node.is_map_element(),
-						weapon_name = agent.mark_for_drop.wep_node.wep_name,
-						weapon_id = agent.mark_for_drop.wep_node.wep_id,
-						reserve_ammo = agent.mark_for_drop.wep_node.reserve_ammo,
-						loaded_ammo = agent.mark_for_drop.wep_node.loaded_ammo,
+						server_knows = agent.player_id == 1 or $Weapons.get_node(agent.mark_for_drop.wep_node).is_map_element(),
+						client_knows = agent.player_id != 1 or $Weapons.get_node(agent.mark_for_drop.wep_node).is_map_element(),
+						wep_name = agent.mark_for_drop.wep_node,
 					}
 					pickup_spawner.spawn(new_drop)
-					agent.held_weapons.remove_at(agent.mark_for_drop.wep_ind)
+					agent.held_weapons.erase(agent.mark_for_drop.wep_node)
 					agent.mark_for_drop.clear()
-				if agent.try_grab_pickup:
-					if multiplayer.is_server():
-						$Pickups.get_node(str(agent.queued_action[1].pickup_name)).queue_free()
+				if agent.try_grab_pickup and multiplayer.is_server():
+					$Pickups.get_node(str(agent.queued_action[1])).queue_free()
 					agent.try_grab_pickup = false
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
@@ -351,42 +354,51 @@ func server_populate_variables(): #TODO
 		ag_spawner.spawn(data)
 	# game map stuff
 	data.clear()
+	data.pickup = {}
+	data.pickup.generate_weapon = true
+	data.weapon = {}
 	match game_map.objective:
 		game_map.Objectives.CAPTURE_ENEMY_FLAG:
 			# create server's flag
-			data.pos_x = game_map.objective_params[0]
-			data.pos_y = game_map.objective_params[1]
-			data.pos_z = game_map.objective_params[2]
-			data.server_knows = true
-			data.client_knows = false
-			data.weapon_name = "flag_server"
-			data.weapon_id = "map_flag_server"
-			data.loaded_ammo = GameRefs.WEP.flag_server.ammo
-			data.reserve_ammo = GameRefs.WEP.flag_server.ammo * 3
-			pickup_spawner.spawn(data)
+			#data.weapon.wep_id = "flag_server"
+			#data.weapon.wep_name = "map_flag_server"
+			#data.weapon.loaded_ammo = GameRefs.WEP.flag_server.ammo
+			#data.weapon.reserve_ammo = GameRefs.WEP.flag_server.ammo * 3
+			#weapon_spawner.spawn(data.weapon)
+			data.pickup.pos_x = game_map.objective_params[0]
+			data.pickup.pos_y = game_map.objective_params[1]
+			data.pickup.pos_z = game_map.objective_params[2]
+			data.pickup.server_knows = true
+			data.pickup.client_knows = false
+			data.pickup.wep_name = "map_flag_server"
+			pickup_spawner.spawn(data.pickup)
 			# create client's flag
-			data.pos_x = game_map.objective_params[3]
-			data.pos_y = game_map.objective_params[4]
-			data.pos_z = game_map.objective_params[5]
-			data.server_knows = false
-			data.client_knows = true
-			data.weapon_name = "flag_client"
-			data.weapon_id = "map_flag_client"
-			data.loaded_ammo = GameRefs.WEP.flag_client.ammo
-			data.reserve_ammo = GameRefs.WEP.flag_client.ammo * 3
-			pickup_spawner.spawn(data)
+			#data.weapon.wep_id = "flag_client"
+			#data.weapon.wep_name = "map_flag_client"
+			#data.weapon.loaded_ammo = GameRefs.WEP.flag_client.ammo
+			#data.weapon.reserve_ammo = GameRefs.WEP.flag_client.ammo * 3
+			#weapon_spawner.spawn(data.weapon)
+			data.pickup.pos_x = game_map.objective_params[3]
+			data.pickup.pos_y = game_map.objective_params[4]
+			data.pickup.pos_z = game_map.objective_params[5]
+			data.pickup.server_knows = false
+			data.pickup.client_knows = true
+			data.pickup.wep_name = "map_flag_server"
+			pickup_spawner.spawn(data.pickup)
 		game_map.Objectives.CAPTURE_CENTRAL_FLAG:
 			# create central flag
-			data.pos_x = game_map.objective_params[0]
-			data.pos_y = game_map.objective_params[1]
-			data.pos_z = game_map.objective_params[2]
-			data.server_knows = true
-			data.client_knows = true
-			data.weapon_name = "flag_center"
-			data.weapon_id = "map_flag_center"
-			data.loaded_ammo = GameRefs.WEP.flag_center.ammo
-			data.reserve_ammo = GameRefs.WEP.flag_center.ammo * 3
-			pickup_spawner.spawn(data)
+			#data.weapon.wep_id = "flag_center"
+			#data.weapon.wep_name = "map_flag_center"
+			#data.weapon.loaded_ammo = GameRefs.WEP.flag_center.ammo
+			#data.weapon.reserve_ammo = GameRefs.WEP.flag_center.ammo * 3
+			#weapon_spawner.spawn(data.weapon)
+			data.pickup.pos_x = game_map.objective_params[0]
+			data.pickup.pos_y = game_map.objective_params[1]
+			data.pickup.pos_z = game_map.objective_params[2]
+			data.pickup.server_knows = true
+			data.pickup.client_knows = true
+			data.pickup.wep_name = "map_flag_server"
+			pickup_spawner.spawn(data.pickup)
 		game_map.Objectives.TARGET_DEFEND:
 			game_map.objective_params
 
@@ -431,9 +443,21 @@ func create_agent(data) -> Agent: #TODO
 	new_agent.eye_strength = data.agent_stats.eye_strength
 	new_agent.hearing_dist = data.agent_stats.hearing_dist
 	new_agent.held_items = data.agent_stats.held_items
-	new_agent.held_weapons.append(GameWeapon.new("fist", new_agent.name + "_fist"))
+	var weapon_data = {
+		wep_id = "fist",
+		wep_name = new_agent.name + "_fist",
+		loaded_ammo = GameRefs.WEP["fist"].ammo,
+		reserve_ammo = GameRefs.WEP["fist"].ammo * 3,
+	}
+	weapon_spawner.spawn(weapon_data)
+	new_agent.held_weapons.append(weapon_data.wep_name)
 	for weapon in data.agent_stats.held_weapons:
-		new_agent.held_weapons.append(GameWeapon.new(weapon, new_agent.name + "_" + weapon))
+		weapon_data.wep_id = weapon
+		weapon_data.wep_name = new_agent.name + "_" + weapon
+		weapon_data.loaded_ammo = GameRefs.WEP[weapon_data.wep_id].ammo
+		weapon_data.reserve_ammo = GameRefs.WEP[weapon_data.wep_id].ammo * 3
+		weapon_spawner.spawn(weapon_data)
+		new_agent.held_weapons.append(weapon_data.wep_name)
 	new_agent.visible = false
 	if multiplayer.get_unique_id() == data.player_id:
 		#new_agent.visible = true
@@ -449,15 +473,23 @@ func create_agent(data) -> Agent: #TODO
 	return new_agent
 
 
+func create_weapon(data) -> GameWeapon:
+	var new_weapon : GameWeapon = weapon_scene.instantiate()
+	new_weapon.name = data.wep_name
+	new_weapon.wep_id = data.wep_id
+	new_weapon.loaded_ammo = data.loaded_ammo
+	new_weapon.reserve_ammo = data.reserve_ammo
+	return new_weapon
+
+
 func create_pickup(data) -> WeaponPickup:
 	var new_pickup : WeaponPickup = weapon_pickup_scene.instantiate()
 	new_pickup.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
 	new_pickup.server_knows = data.server_knows
 	new_pickup.client_knows = data.client_knows
-	var attached_weapon = GameWeapon.new(data.weapon_name, data.weapon_id)
-	attached_weapon.reserve_ammo = data.reserve_ammo
-	attached_weapon.loaded_ammo = data.loaded_ammo
-	new_pickup.attached_wep = attached_weapon
+	new_pickup.name = data.wep_name
+	new_pickup.attached_wep = data.wep_name
+	new_pickup.generate_weapon = data.get("generate_weapon", false)
 	return new_pickup
 
 
@@ -518,7 +550,7 @@ func determine_weapon_events():
 		if agent.state != Agent.States.FIRE_GUN:
 			continue
 		agent.held_weapons[agent.selected_weapon].loaded_ammo -= 1
-		match agent.held_weapons[agent.selected_weapon].wep_name:
+		match agent.held_weapons[agent.selected_weapon].wep_id:
 			"pistol":
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
 				create_sound_effect(agent.position, agent.player_id, 10, 0.25, 0.5, "pistol")
@@ -628,8 +660,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
-				ref_ag.name,
-				decision_array[1].weapon_printed_name])
+				ref_ag.name, GameRefs.get_pickup_attribute(GameRefs.get_pickup_node(decision_array[1]), "name")])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
 				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
@@ -728,7 +759,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
-			determine_nearby_pickups()
+			#determine_nearby_pickups()
 			var server_agent_count := 0
 			var client_agent_count := 0
 			var dead_server_agents := 0
@@ -796,12 +827,11 @@ func central_flag_completion():
 					continue
 				if ag.state == Agent.States.DEAD:
 					continue
-				for wep in ag.held_weapons:
-					if wep.wep_id == "map_flag_center":
-						create_toast_update(
-							GameRefs.TXT.of_y_get if ag.owned() else GameRefs.TXT.of_t_get, true)
-						game_map.objective_progress.server_team = 1
-						break
+				if "map_flag_center" in ag.held_weapons:
+					create_toast_update(
+						GameRefs.TXT.of_y_get if ag.owned() else GameRefs.TXT.of_t_get, true)
+					game_map.objective_progress.server_team = 1
+					break
 		1:
 			var flag_still_held = false
 			var flag_captured = false
@@ -810,12 +840,11 @@ func central_flag_completion():
 					continue
 				if ag.state == Agent.States.DEAD:
 					continue
-				for wep in ag.held_weapons:
-					if wep.wep_id == "map_flag_center":
-						flag_still_held = true
-						if ag.state == Agent.States.EXFILTRATED:
-							flag_captured = true
-						break
+				if "map_flag_center" in ag.held_weapons:
+					flag_still_held = true
+					if ag.state == Agent.States.EXFILTRATED:
+						flag_captured = true
+					break
 			if not flag_still_held:
 				create_toast_update(GameRefs.TXT.of_y_lost if multiplayer.get_unique_id() == 1 else GameRefs.TXT.of_t_lost, true)
 				game_map.objective_progress.server_team = 0
@@ -847,7 +876,6 @@ func central_flag_completion():
 				game_map.objective_progress.server_team = 3
 	match game_map.objective_progress.client_team:
 		-1:
-			create_toast_update(GameRefs.TXT.of_intro, true)
 			game_map.objective_progress.client_team = 0
 		0:
 			for ag in ($Agents.get_children() as Array[Agent]):
@@ -855,12 +883,11 @@ func central_flag_completion():
 					continue
 				if ag.state == Agent.States.DEAD:
 					continue
-				for wep in ag.held_weapons:
-					if wep.wep_id == "map_flag_center":
-						create_toast_update(
-							GameRefs.TXT.of_y_get if ag.owned() else GameRefs.TXT.of_t_get, true)
-						game_map.objective_progress.client_team = 1
-						break
+				if "map_flag_center" in ag.held_weapons:
+					create_toast_update(
+						GameRefs.TXT.of_y_get if ag.owned() else GameRefs.TXT.of_t_get, true)
+					game_map.objective_progress.client_team = 1
+					break
 		1:
 			var flag_still_held = false
 			var flag_captured = false
@@ -869,12 +896,11 @@ func central_flag_completion():
 					continue
 				if ag.state == Agent.States.DEAD:
 					continue
-				for wep in ag.held_weapons:
-					if wep.wep_id == "map_flag_center":
-						flag_still_held = true
-						if ag.state == Agent.States.EXFILTRATED:
-							flag_captured = true
-						break
+				if "map_flag_center" in ag.held_weapons:
+					flag_still_held = true
+					if ag.state == Agent.States.EXFILTRATED:
+						flag_captured = true
+					break
 			if not flag_still_held:
 				create_toast_update(GameRefs.TXT.of_y_lost if multiplayer.get_unique_id() != 1 else GameRefs.TXT.of_t_lost, true)
 				game_map.objective_progress.client_team = 0
@@ -917,12 +943,11 @@ func enemy_flag_completion():
 					continue
 				if ag.state == Agent.States.DEAD:
 					continue
-				for wep in ag.held_weapons:
-					if wep.wep_id == "map_flag_client":
-						create_toast_update(
-							GameRefs.TXT.tf_y_get if ag.owned() else GameRefs.TXT.tf_t_get, true)
-						game_map.objective_progress.server_team = 1
-						break
+				if "map_flag_client" in ag.held_weapons:
+					create_toast_update(
+						GameRefs.TXT.tf_y_get if ag.owned() else GameRefs.TXT.tf_t_get, true)
+					game_map.objective_progress.server_team = 1
+					break
 		1:
 			var flag_still_held = false
 			var flag_captured = false
@@ -931,12 +956,11 @@ func enemy_flag_completion():
 					continue
 				if ag.state == Agent.States.DEAD:
 					continue
-				for wep in ag.held_weapons:
-					if wep.wep_id == "map_flag_client":
-						flag_still_held = true
-						if ag.state == Agent.States.EXFILTRATED:
-							flag_captured = true
-						break
+				if "map_flag_client" in ag.held_weapons:
+					flag_still_held = true
+					if ag.state == Agent.States.EXFILTRATED:
+						flag_captured = true
+					break
 			if not flag_still_held:
 				create_toast_update(GameRefs.TXT.tf_y_lost if multiplayer.get_unique_id() == 1 else GameRefs.TXT.tf_t_lost, true)
 				game_map.objective_progress.server_team = 0
@@ -975,12 +999,11 @@ func enemy_flag_completion():
 					continue
 				if ag.state == Agent.States.DEAD:
 					continue
-				for wep in ag.held_weapons:
-					if wep.wep_id == "map_flag_server":
-						create_toast_update(
-							GameRefs.TXT.tf_y_get if ag.owned() else GameRefs.TXT.tf_t_get, true)
-						game_map.objective_progress.client_team = 1
-						break
+				if "map_flag_server" in ag.held_weapons:
+					create_toast_update(
+						GameRefs.TXT.tf_y_get if ag.owned() else GameRefs.TXT.tf_t_get, true)
+					game_map.objective_progress.client_team = 1
+					break
 		1:
 			var flag_still_held = false
 			var flag_captured = false
@@ -989,12 +1012,11 @@ func enemy_flag_completion():
 					continue
 				if ag.state == Agent.States.DEAD:
 					continue
-				for wep in ag.held_weapons:
-					if wep.wep_id == "map_flag_server":
-						flag_still_held = true
-						if ag.state == Agent.States.EXFILTRATED:
-							flag_captured = true
-						break
+				if "map_flag_server" in ag.held_weapons:
+					flag_still_held = true
+					if ag.state == Agent.States.EXFILTRATED:
+						flag_captured = true
+					break
 			if not flag_still_held:
 				create_toast_update(GameRefs.TXT.tf_y_lost if multiplayer.get_unique_id() != 1 else GameRefs.TXT.tf_t_lost, true)
 				game_map.objective_progress.client_team = 0

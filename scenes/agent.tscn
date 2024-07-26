@@ -75,6 +75,15 @@ properties/14/replication_mode = 1
 properties/15/path = NodePath(".:client_knows")
 properties/15/spawn = true
 properties/15/replication_mode = 1
+properties/16/path = NodePath(".:held_items")
+properties/16/spawn = true
+properties/16/replication_mode = 1
+properties/17/path = NodePath(".:try_grab_pickup")
+properties/17/spawn = true
+properties/17/replication_mode = 1
+properties/18/path = NodePath(".:held_weapons")
+properties/18/spawn = true
+properties/18/replication_mode = 1
 
 [sub_resource type="Animation" id="Animation_wafph"]
 resource_name = "B_Crawl"

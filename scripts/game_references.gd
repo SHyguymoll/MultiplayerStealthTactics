@@ -188,15 +188,17 @@ const AUDIO = {
 }
 
 func get_weapon_attribute(weapon : GameWeapon, attribute : String):
-	return WEP[weapon.wep_name].get(attribute)
+	if weapon == null:
+		return null
+	return WEP[weapon.wep_id].get(attribute, null)
 
 
 func get_held_weapon_attribute(agent : Agent, weapon_ind : int, attribute : String):
-	return get_weapon_attribute(agent.held_weapons[weapon_ind], attribute)
+	return get_weapon_attribute(get_weapon_node(agent.held_weapons[weapon_ind]), attribute)
 
 
 func get_pickup_attribute(pickup : WeaponPickup, attribute : String):
-	return WEP[pickup.attached_wep.wep_name].get(attribute)
+	return get_weapon_attribute(get_weapon_node(pickup.attached_wep), attribute)
 
 
 func compare_wep_type(agent : Agent, wep_type : WeaponTypes):
@@ -212,10 +214,18 @@ func get_all_wep_and_itm_icons():
 	return icons
 
 
+func get_weapon_node(weapon_name : String) -> GameWeapon:
+	return $"/root/Game/Weapons".get_node_or_null(weapon_name)
+
+
+func get_pickup_node(pickup_name : String) -> WeaponPickup:
+	return $"/root/Game/Pickups".get_node_or_null(pickup_name)
+
+
 func return_icon(agent : Agent, is_wep : bool):
 	if is_wep:
-		if WEP.get(agent.held_weapons[agent.selected_weapon].wep_name, null) == null:
+		if get_held_weapon_attribute(agent, agent.selected_weapon, "icon") == null:
 			return ITM.none.icon
-		return WEP.get(agent.held_weapons[agent.selected_weapon].wep_name).icon
+		return get_held_weapon_attribute(agent, agent.selected_weapon, "icon")
 	else:
 		return ITM.get(agent.held_items[agent.selected_item]).icon

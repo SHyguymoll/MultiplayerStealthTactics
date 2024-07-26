@@ -31,6 +31,12 @@ spawn_path = NodePath("../Agents")
 _spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
 spawn_path = NodePath("../Pickups")
 
+[node name="Weapons" type="Node" parent="."]
+
+[node name="WeaponSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+spawn_path = NodePath("../Weapons")
+
 [node name="Pickups" type="Node3D" parent="."]
 
 [node name="World" type="Node3D" parent="."]

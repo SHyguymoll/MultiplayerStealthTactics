@@ -3,21 +3,12 @@ extends Node
 
 @export var reserve_ammo : int = 0
 @export var loaded_ammo : int = 0
-@export var wep_name : String # Refer to GameRefs.WEP for valid string names
-@export var wep_id : String # set when loading game for unique weapons
-
-
-func _init(weapon_name : String, weapon_id : String) -> void:
-	wep_name = weapon_name
-	wep_id = weapon_id
-	loaded_ammo = GameRefs.WEP[wep_name].ammo
-	reserve_ammo = loaded_ammo * 3
-
+@export var wep_id : String # Refer to GameRefs.WEP for valid string names
 
 func reload_weapon() -> bool:
-	if GameRefs.WEP[wep_name].ammo <= reserve_ammo:
-		loaded_ammo = GameRefs.WEP[wep_name].ammo
-		reserve_ammo -= GameRefs.WEP[wep_name].ammo
+	if GameRefs.WEP[wep_id].ammo <= reserve_ammo:
+		loaded_ammo = GameRefs.WEP[wep_id].ammo
+		reserve_ammo -= GameRefs.WEP[wep_id].ammo
 		return true
 	elif reserve_ammo > 0:
 		loaded_ammo = reserve_ammo
@@ -32,4 +23,4 @@ func has_ammo() -> bool:
 
 
 func is_map_element() -> bool:
-	return wep_id.begins_with("map_")
+	return name.begins_with("map_")
