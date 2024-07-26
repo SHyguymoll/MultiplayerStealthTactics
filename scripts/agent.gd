@@ -33,6 +33,7 @@ var player_id : int
 @onready var _anim : AnimationTree = $AnimationTree
 @onready var _anim_state : AnimationNodeStateMachinePlayback = _anim.get("parameters/playback")
 @onready var _mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Mesh
+@onready var _box_mesh : MeshInstance3D = $Agent/Box
 @onready var _custom_skin_mat : StandardMaterial3D
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat : StandardMaterial3D
@@ -335,6 +336,7 @@ func _ready() -> void:
 	# outline shader
 	_outline_mat = _outline_mat_base.duplicate()
 	_mesh.set_surface_override_material(1, _outline_mat)
+	_box_mesh.set_surface_override_material(2, _outline_mat)
 	# other visuals
 	_anim_state.start("Stand")
 	_anim.advance(0)
@@ -451,8 +453,16 @@ func _game_step(delta: float) -> void:
 	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
 	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 	_anim.advance(delta)
+	visible_level = clamp(visible_level, 0, 100)
+	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
 	# update agent specifically
+	if selected_item > -1 and held_items[selected_item] == "box":
+		_box_mesh.visible = true
+		_mesh.visible = false
+		target_visible_level = 0
 	if in_moving_state():
+		if selected_item > -1 and held_items[selected_item] == "box":
+			target_visible_level = 150
 		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
 		velocity *= movement_speed
 		match state:
@@ -564,8 +574,6 @@ func _game_step(delta: float) -> void:
 			if game_steps_since_execute == 0:
 				weapons_animation_blend = decide_weapon_blend()
 				action_complete()
-	visible_level = clamp(visible_level, 0, 100)
-	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
 
 
 func _attack_orient_transition():
