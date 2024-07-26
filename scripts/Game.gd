@@ -36,8 +36,8 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 
 @export var game_map : GameMap
 
-var target_server_progression : float
-var target_client_progression : float
+@export var server_progress : int = -1
+@export var client_progress : int = -1
 
 @onready var _camera : GameCamera = $World/Camera3D
 @onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
@@ -73,8 +73,13 @@ func start_game():
 	await get_tree().create_timer(0.25).timeout #...after waiting for them to completely load in
 	ping.rpc()
 	server_populate_variables()
-	force_camera.rpc_id(GameSettings.other_player_id, (game_map.agent_spawn_client_1.position + game_map.agent_spawn_client_2.position + game_map.agent_spawn_client_3.position + game_map.agent_spawn_client_4.position)/4, 20)
-	force_camera((game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position + game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
+	force_camera.rpc_id(
+		GameSettings.other_player_id,
+		(game_map.agent_spawn_client_1.position + game_map.agent_spawn_client_2.position +
+		game_map.agent_spawn_client_3.position + game_map.agent_spawn_client_4.position)/4, 20)
+	force_camera(
+		(game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position +
+		game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
 	set_up_progress_bars.rpc()
 	#determine_nearby_pickups.rpc()
 	pass
@@ -252,8 +257,8 @@ func _physics_process(delta: float) -> void:
 			$World/Camera3D as Camera3D).unproject_position(
 					selector.referenced_agent.position)
 				(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
-			_server_progress.value = lerpf(_server_progress.value, float(game_map.objective_progress.server_team), 0.2)
-			_client_progress.value = lerpf(_client_progress.value, float(game_map.objective_progress.client_team), 0.2)
+			_server_progress.value = lerpf(_server_progress.value, float(server_progress), 0.2)
+			_client_progress.value = lerpf(_client_progress.value, float(client_progress), 0.2)
 			if multiplayer.is_server() and server_ready_bool and client_ready_bool:
 				_update_game_phase.rpc(GamePhases.EXECUTION)
 		GamePhases.EXECUTION:
@@ -267,9 +272,9 @@ func _physics_process(delta: float) -> void:
 						pos_x = agent.mark_for_drop.position.x,
 						pos_y = agent.mark_for_drop.position.y - 0.5,
 						pos_z = agent.mark_for_drop.position.z,
-						server_knows = agent.player_id == 1 or $Weapons.get_node(agent.mark_for_drop.wep_node).is_map_element(),
-						client_knows = agent.player_id != 1 or $Weapons.get_node(agent.mark_for_drop.wep_node).is_map_element(),
-						wep_name = agent.mark_for_drop.wep_node,
+						server_knows = agent.player_id == 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
+						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
+						wep_name = str(agent.mark_for_drop.wep_node),
 					}
 					pickup_spawner.spawn(new_drop)
 					agent.held_weapons.erase(agent.mark_for_drop.wep_node)
@@ -360,11 +365,6 @@ func server_populate_variables(): #TODO
 	match game_map.objective:
 		game_map.Objectives.CAPTURE_ENEMY_FLAG:
 			# create server's flag
-			#data.weapon.wep_id = "flag_server"
-			#data.weapon.wep_name = "map_flag_server"
-			#data.weapon.loaded_ammo = GameRefs.WEP.flag_server.ammo
-			#data.weapon.reserve_ammo = GameRefs.WEP.flag_server.ammo * 3
-			#weapon_spawner.spawn(data.weapon)
 			data.pickup.pos_x = game_map.objective_params[0]
 			data.pickup.pos_y = game_map.objective_params[1]
 			data.pickup.pos_z = game_map.objective_params[2]
@@ -373,31 +373,21 @@ func server_populate_variables(): #TODO
 			data.pickup.wep_name = "map_flag_server"
 			pickup_spawner.spawn(data.pickup)
 			# create client's flag
-			#data.weapon.wep_id = "flag_client"
-			#data.weapon.wep_name = "map_flag_client"
-			#data.weapon.loaded_ammo = GameRefs.WEP.flag_client.ammo
-			#data.weapon.reserve_ammo = GameRefs.WEP.flag_client.ammo * 3
-			#weapon_spawner.spawn(data.weapon)
 			data.pickup.pos_x = game_map.objective_params[3]
 			data.pickup.pos_y = game_map.objective_params[4]
 			data.pickup.pos_z = game_map.objective_params[5]
 			data.pickup.server_knows = false
 			data.pickup.client_knows = true
-			data.pickup.wep_name = "map_flag_server"
+			data.pickup.wep_name = "map_flag_client"
 			pickup_spawner.spawn(data.pickup)
 		game_map.Objectives.CAPTURE_CENTRAL_FLAG:
 			# create central flag
-			#data.weapon.wep_id = "flag_center"
-			#data.weapon.wep_name = "map_flag_center"
-			#data.weapon.loaded_ammo = GameRefs.WEP.flag_center.ammo
-			#data.weapon.reserve_ammo = GameRefs.WEP.flag_center.ammo * 3
-			#weapon_spawner.spawn(data.weapon)
 			data.pickup.pos_x = game_map.objective_params[0]
 			data.pickup.pos_y = game_map.objective_params[1]
 			data.pickup.pos_z = game_map.objective_params[2]
 			data.pickup.server_knows = true
 			data.pickup.client_knows = true
-			data.pickup.wep_name = "map_flag_server"
+			data.pickup.wep_name = "map_flag_center"
 			pickup_spawner.spawn(data.pickup)
 		game_map.Objectives.TARGET_DEFEND:
 			game_map.objective_params
@@ -780,10 +770,11 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 						dead_server_agents += 1
 					else:
 						dead_client_agents += 1
-			# update exfiltrations
-			# TODO
-			# objective based updates here
-			track_objective_completion()
+			if multiplayer.is_server():
+				# update exfiltrations
+				# TODO
+				# objective based updates here
+				track_objective_completion()
 			# checking win condition and stuff here
 			if not player_has_won(dead_server_agents == server_agent_count, dead_client_agents == client_agent_count):
 				show_hud()
@@ -817,10 +808,10 @@ func track_objective_completion():
 			enemy_flag_completion()
 
 func central_flag_completion():
-	match game_map.objective_progress.server_team:
+	match server_progress:
 		-1:
-			create_toast_update(GameRefs.TXT.of_intro, true)
-			game_map.objective_progress.server_team = 0
+			create_toast_update.rpc(GameRefs.TXT.of_intro, GameRefs.TXT.of_intro, true)
+			server_progress = 0
 		0:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				if ag.player_id != 1:
@@ -828,9 +819,8 @@ func central_flag_completion():
 				if ag.state == Agent.States.DEAD:
 					continue
 				if "map_flag_center" in ag.held_weapons:
-					create_toast_update(
-						GameRefs.TXT.of_y_get if ag.owned() else GameRefs.TXT.of_t_get, true)
-					game_map.objective_progress.server_team = 1
+					create_toast_update.rpc(GameRefs.TXT.of_y_get, GameRefs.TXT.of_t_get, true)
+					server_progress = 1
 					break
 		1:
 			var flag_still_held = false
@@ -846,8 +836,8 @@ func central_flag_completion():
 						flag_captured = true
 					break
 			if not flag_still_held:
-				create_toast_update(GameRefs.TXT.of_y_lost if multiplayer.get_unique_id() == 1 else GameRefs.TXT.of_t_lost, true)
-				game_map.objective_progress.server_team = 0
+				create_toast_update.rpc(GameRefs.TXT.of_y_lost, GameRefs.TXT.of_t_lost, true)
+				server_progress = 0
 				return
 			var agents_remain = false
 			for ag in ($Agents.get_children() as Array[Agent]):
@@ -858,11 +848,11 @@ func central_flag_completion():
 					break
 			if flag_captured:
 				if agents_remain:
-					create_toast_update(GameRefs.TXT.of_cap_agents_remain, true)
-					game_map.objective_progress.server_team = 2
+					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
+					server_progress = 2
 				else:
-					create_toast_update(GameRefs.TXT.of_y_cap_left if multiplayer.get_unique_id() == 1 else GameRefs.TXT.of_t_cap_left, true)
-					game_map.objective_progress.server_team = 3
+					create_toast_update.rpc(GameRefs.TXT.of_y_cap_left, GameRefs.TXT.of_t_cap_left, true)
+					server_progress = 3
 		2:
 			var agents_remain = false
 			for ag in ($Agents.get_children() as Array[Agent]):
@@ -872,11 +862,11 @@ func central_flag_completion():
 					agents_remain = true
 					break
 			if not agents_remain:
-				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() == 1 else GameRefs.TXT.mission_failure, true)
-				game_map.objective_progress.server_team = 3
-	match game_map.objective_progress.client_team:
+				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
+				server_progress = 3
+	match client_progress:
 		-1:
-			game_map.objective_progress.client_team = 0
+			client_progress = 0
 		0:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				if ag.player_id == 1:
@@ -884,9 +874,8 @@ func central_flag_completion():
 				if ag.state == Agent.States.DEAD:
 					continue
 				if "map_flag_center" in ag.held_weapons:
-					create_toast_update(
-						GameRefs.TXT.of_y_get if ag.owned() else GameRefs.TXT.of_t_get, true)
-					game_map.objective_progress.client_team = 1
+					create_toast_update.rpc(GameRefs.TXT.of_t_get, GameRefs.TXT.of_y_get, true)
+					client_progress = 1
 					break
 		1:
 			var flag_still_held = false
@@ -902,8 +891,8 @@ func central_flag_completion():
 						flag_captured = true
 					break
 			if not flag_still_held:
-				create_toast_update(GameRefs.TXT.of_y_lost if multiplayer.get_unique_id() != 1 else GameRefs.TXT.of_t_lost, true)
-				game_map.objective_progress.client_team = 0
+				create_toast_update.rpc(GameRefs.TXT.of_t_lost, GameRefs.TXT.of_y_lost, true)
+				client_progress = 0
 				return
 			var agents_remain = false
 			for ag in ($Agents.get_children() as Array[Agent]):
@@ -914,11 +903,11 @@ func central_flag_completion():
 					break
 			if flag_captured:
 				if agents_remain:
-					create_toast_update(GameRefs.TXT.of_cap_agents_remain, true)
-					game_map.objective_progress.client_team = 2
+					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
+					client_progress = 2
 				else:
-					create_toast_update(GameRefs.TXT.of_y_cap_left if multiplayer.get_unique_id() != 1 else GameRefs.TXT.of_t_cap_left, true)
-					game_map.objective_progress.client_team = 3
+					create_toast_update.rpc(GameRefs.TXT.of_t_cap_left, GameRefs.TXT.of_y_cap_left, true)
+					client_progress = 3
 		2:
 			var agents_remain = false
 			for ag in ($Agents.get_children() as Array[Agent]):
@@ -928,15 +917,15 @@ func central_flag_completion():
 					agents_remain = true
 					break
 			if not agents_remain:
-				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() != 1 else GameRefs.TXT.mission_failure, true)
-				game_map.objective_progress.client_team = 3
+				create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
+				client_progress = 3
 
 
 func enemy_flag_completion():
-	match game_map.objective_progress.server_team:
+	match server_progress:
 		-1:
-			create_toast_update(GameRefs.TXT.tf_intro, true)
-			game_map.objective_progress.server_team = 0
+			create_toast_update.rpc(GameRefs.TXT.tf_intro, GameRefs.TXT.tf_intro, true)
+			server_progress = 0
 		0:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				if ag.player_id != 1:
@@ -944,9 +933,8 @@ func enemy_flag_completion():
 				if ag.state == Agent.States.DEAD:
 					continue
 				if "map_flag_client" in ag.held_weapons:
-					create_toast_update(
-						GameRefs.TXT.tf_y_get if ag.owned() else GameRefs.TXT.tf_t_get, true)
-					game_map.objective_progress.server_team = 1
+					create_toast_update.rpc(GameRefs.TXT.tf_y_get, GameRefs.TXT.tf_t_get, true)
+					server_progress = 1
 					break
 		1:
 			var flag_still_held = false
@@ -962,8 +950,8 @@ func enemy_flag_completion():
 						flag_captured = true
 					break
 			if not flag_still_held:
-				create_toast_update(GameRefs.TXT.tf_y_lost if multiplayer.get_unique_id() == 1 else GameRefs.TXT.tf_t_lost, true)
-				game_map.objective_progress.server_team = 0
+				create_toast_update.rpc(GameRefs.TXT.tf_y_lost, GameRefs.TXT.tf_t_lost, true)
+				server_progress = 0
 				return
 			var agents_remain = false
 			for ag in ($Agents.get_children() as Array[Agent]):
@@ -974,11 +962,11 @@ func enemy_flag_completion():
 					break
 			if flag_captured:
 				if agents_remain:
-					create_toast_update(GameRefs.TXT.tf_y_cap_agents_remain if multiplayer.get_unique_id() == 1 else GameRefs.TXT.tf_t_cap_agents_remain, true)
-					game_map.objective_progress.server_team = 2
+					create_toast_update.rpc(GameRefs.TXT.tf_y_cap_agents_remain, GameRefs.TXT.tf_t_cap_agents_remain, true)
+					server_progress = 2
 				else:
-					create_toast_update(GameRefs.TXT.tf_y_cap_left if multiplayer.get_unique_id() == 1 else GameRefs.TXT.tf_t_cap_left, true)
-					game_map.objective_progress.server_team = 3
+					create_toast_update.rpc(GameRefs.TXT.tf_y_cap_left, GameRefs.TXT.tf_t_cap_left, true)
+					server_progress = 3
 		2:
 			var agents_remain = false
 			for ag in ($Agents.get_children() as Array[Agent]):
@@ -988,11 +976,11 @@ func enemy_flag_completion():
 					agents_remain = true
 					break
 			if not agents_remain:
-				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() == 1 else GameRefs.TXT.mission_failure, true)
-				game_map.objective_progress.server_team = 3
-	match game_map.objective_progress.client_team:
+				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
+				server_progress = 3
+	match client_progress:
 		-1:
-			game_map.objective_progress.client_team = 0
+			client_progress = 0
 		0:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				if ag.player_id == 1:
@@ -1000,9 +988,8 @@ func enemy_flag_completion():
 				if ag.state == Agent.States.DEAD:
 					continue
 				if "map_flag_server" in ag.held_weapons:
-					create_toast_update(
-						GameRefs.TXT.tf_y_get if ag.owned() else GameRefs.TXT.tf_t_get, true)
-					game_map.objective_progress.client_team = 1
+					create_toast_update.rpc(GameRefs.TXT.tf_t_get, GameRefs.TXT.tf_y_get, true)
+					client_progress = 1
 					break
 		1:
 			var flag_still_held = false
@@ -1018,8 +1005,8 @@ func enemy_flag_completion():
 						flag_captured = true
 					break
 			if not flag_still_held:
-				create_toast_update(GameRefs.TXT.tf_y_lost if multiplayer.get_unique_id() != 1 else GameRefs.TXT.tf_t_lost, true)
-				game_map.objective_progress.client_team = 0
+				create_toast_update.rpc(GameRefs.TXT.tf_t_lost, GameRefs.TXT.tf_y_lost, true)
+				client_progress = 0
 				return
 			var agents_remain = false
 			for ag in ($Agents.get_children() as Array[Agent]):
@@ -1030,11 +1017,11 @@ func enemy_flag_completion():
 					break
 			if flag_captured:
 				if agents_remain:
-					create_toast_update(GameRefs.TXT.tf_y_cap_agents_remain if multiplayer.get_unique_id() != 1 else GameRefs.TXT.tf_t_cap_agents_remain, true)
-					game_map.objective_progress.client_team = 2
+					create_toast_update.rpc(GameRefs.TXT.tf_t_cap_agents_remain, GameRefs.TXT.tf_y_cap_agents_remain, true)
+					client_progress = 2
 				else:
-					create_toast_update(GameRefs.TXT.tf_y_cap_left if multiplayer.get_unique_id() != 1 else GameRefs.TXT.tf_t_cap_left, true)
-					game_map.objective_progress.client_team = 3
+					create_toast_update.rpc(GameRefs.TXT.tf_t_cap_left, GameRefs.TXT.tf_y_cap_left, true)
+					client_progress = 3
 		2:
 			var agents_remain = false
 			for ag in ($Agents.get_children() as Array[Agent]):
@@ -1044,13 +1031,14 @@ func enemy_flag_completion():
 					agents_remain = true
 					break
 			if not agents_remain:
-				create_toast_update(GameRefs.TXT.mission_success if multiplayer.get_unique_id() != 1 else GameRefs.TXT.mission_failure, true)
-				game_map.objective_progress.client_team = 3
+				create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
+				client_progress = 3
 
 
-func create_toast_update(text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
+@rpc("authority", "call_local")
+func create_toast_update(server_text : String, client_text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
 	var new_toast : ToastMessage = toast_scene.instantiate()
-	new_toast.text = text
+	new_toast.text = server_text if multiplayer.is_server() else client_text
 	new_toast.color = color
 	$HUDBase/Toasts.add_child(new_toast)
 	if add_sound_effect:
