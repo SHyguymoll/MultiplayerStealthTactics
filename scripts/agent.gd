@@ -264,12 +264,16 @@ func owned() -> bool:
 	return player_id == multiplayer.get_unique_id()
 
 
-func action_complete(successfully : bool = true, no_flash : bool = false):
-	agent_is_done.rpc(ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL)
-	#action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
+func action_complete(successfully : bool = true, no_flash : bool = false, single_mode : bool = false):
+	if not single_mode:
+		agent_is_done.rpc(ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL)
+		if is_multiplayer_authority() and not no_flash:
+			flash_outline(Color.GREEN if successfully else Color.RED)
+	else:
+		agent_is_done(ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL)
+		if not no_flash:
+			flash_outline(Color.GREEN if successfully else Color.RED)
 	queued_action.clear()
-	if is_multiplayer_authority() and not no_flash:
-		flash_outline(Color.GREEN if successfully else Color.RED)
 
 
 func debug_setup():
@@ -424,11 +428,12 @@ func _physics_process(_d: float) -> void:
 		detected.weapons = detected_weapons
 
 
-func _game_step(delta: float) -> void:
+func _game_step(delta: float, single_mode : bool = false) -> void:
 	# update agent generally
 	game_steps_since_execute += 1
-	visible = server_knows and multiplayer.is_server() or client_knows and not multiplayer.is_server()
-	if not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly) or selected_item == -1:
+	if not single_mode:
+		visible = server_knows and multiplayer.is_server() or client_knows and not multiplayer.is_server()
+	if single_mode or not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly) or selected_item == -1:
 		_active_item_icon.visible = false
 	elif selected_item > -1:
 		_active_item_icon.texture = GameRefs.ITM[held_items[selected_item]].icon
@@ -513,7 +518,7 @@ func _game_step(delta: float) -> void:
 			global_position = grabbing_agent._cqc_anim_helper.global_position
 			global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
 	if len(queued_action) == 0:
-		action_complete(true, true)
+		action_complete(true, true, single_mode)
 		return
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:

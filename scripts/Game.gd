@@ -318,7 +318,7 @@ func _physics_process(delta: float) -> void:
 					ag.state = Agent.States.CROUCH
 				elif ag.in_prone_state():
 					ag.state = Agent.States.PRONE
-				ag._game_step(delta)
+				ag._game_step(delta, true)
 
 
 func _process(delta: float) -> void:
