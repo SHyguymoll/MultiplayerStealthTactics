@@ -1,15 +1,14 @@
 class_name ToastMessage
-extends Control
+extends Label
 
-@onready var _text_node : Label = $Label
-@onready var _color_bg : ColorRect = $Label/ColorRect
+@onready var _color_bg : ColorRect = $ColorRect
 @onready var _audio : AudioStreamPlayer = $AudioStreamPlayer
-@export var text : String
+@export var input_text : String
 @export var color : Color
 var progress : float = 0.0
 
 func _ready():
-	_text_node.text = "".rpad(text.length(), "_")
+	text = "".rpad(input_text.length(), "_")
 	_color_bg.color = color
 	var twe = create_tween()
 	twe.set_parallel()
@@ -18,7 +17,7 @@ func _ready():
 
 
 func _physics_process(_delta: float) -> void:
-	_text_node.text = underscore_to_text(text, progress)
+	text = underscore_to_text(input_text, progress)
 
 
 func underscore_to_text(text : String, underscore_percentage : float):
@@ -37,5 +36,5 @@ func underscore_to_text(text : String, underscore_percentage : float):
 
 func _on_persist_time_timeout() -> void:
 	var twe = create_tween()
-	twe.tween_property(_text_node, "scale:y", 0.0, 0.5).from(1.0)
+	twe.tween_property(self, "scale:y", 0.0, 0.5).from(1.0)
 	twe.finished.connect(queue_free)
