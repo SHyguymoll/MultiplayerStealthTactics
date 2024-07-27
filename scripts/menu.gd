@@ -74,7 +74,7 @@ func load_agents():
 	if file == null:
 		agents = [
 			{
-				name="Smoking Shark", # the agent's name
+				name="Smoking Shark_32", # the agent's name
 				mission_count=0, # the number of missions that this agent has been used in
 				health=10, # the agent's health
 # value between 5 and 13
@@ -122,6 +122,11 @@ func _on_join_pressed() -> void:
 
 
 func _on_host_pressed() -> void:
+	if len(agents) == 0:
+		$MainMenu/VBoxContainer/Host.text = "Recruit an Agent first!"
+		$MainMenu/VBoxContainer/Join.text = "Recruit an Agent first!"
+		$MainMenu/TextChangeTimer.start()
+		return
 	$HostScreen/Label.text = "Waiting for Opponent..."
 	$MainMenu.visible = false
 	_ready_button.visible = false
@@ -138,6 +143,8 @@ func _on_host_pressed() -> void:
 func _on_review_agents_pressed() -> void:
 	$MainMenu.visible = false
 	$ReviewScreen.visible = true
+	review_selected_agent = -1
+	$ReviewScreen/FireAgent.disabled = true
 
 
 func _populate_agent_list():
@@ -380,12 +387,12 @@ func _on_weapons_item_selected(index: int) -> void:
 			_review_weapons_list.set_item_text(index, "^")
 
 
-const ADJECTIVE : Array[String] = ["Cunning", "Silent", "White", "Gray", "Black", "Plasma", "Dachous", "Shy", "Cubed", "Smoking"]
+const ADJECTIVE : Array[String] = ["Cunning", "Silent", "White", "Gray", "Black", "Plasma", "Dachous", "Shy", "Cubed", "Smoking", "Large", "Imposing", "Explosive"]
 const ANIMAL : Array[String] = ["Wolf", "Bobcat", "Shark", "Serpent", "Penguin", "Crocodile"]
 
 func _on_recruit_agent_pressed() -> void:
 	agents.append({
-				name=ADJECTIVE.pick_random() + " " + ANIMAL.pick_random(),
+				name=ADJECTIVE.pick_random() + " " + ANIMAL.pick_random() + "_" + str(int(fmod(Time.get_unix_time_from_system(), 1.0) * 100)),
 				mission_count=0,
 				health=randi_range(5, 10),
 				stun_health=randi_range(3, 5),
@@ -402,11 +409,21 @@ func _on_recruit_agent_pressed() -> void:
 
 
 func _on_fire_agent_pressed() -> void:
-	agents.remove_at(review_selected_agent)
-	review_selected_agent = -1
+	if review_selected_agent > -1:
+		agents.remove_at(review_selected_agent)
+		review_selected_agent -= 1
 	$ReviewScreen/FireAgent.disabled = true
 	_populate_agent_list()
+	if review_selected_agent > -1:
+		_review_agents_list.select(review_selected_agent)
+		$ReviewScreen/FireAgent.disabled = false
 
 
 func _on_save_roster_pressed() -> void:
 	save_agents()
+
+
+func _on_text_change_timer_timeout() -> void:
+	$MainMenu/VBoxContainer/Host.text = "HOST GAME"
+	$MainMenu/VBoxContainer/Join.text = "JOIN GAME"
+
