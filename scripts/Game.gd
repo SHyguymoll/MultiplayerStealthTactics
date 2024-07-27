@@ -93,9 +93,10 @@ func start_game():
 
 
 func open_pause_menu():
-	$PauseMenu/ColorRect/VBoxContainer/YesForfeit.disabled = false
-	$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = false
-	$PauseMenu.visible = true
+	if not $PauseMenu.visible:
+		$PauseMenu/ColorRect/VBoxContainer/YesForfeit.disabled = false
+		$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = false
+		$PauseMenu.visible = true
 
 
 func close_pause_menu():
@@ -322,7 +323,7 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("pause_menu"):
-		$PauseMenu.show()
+		open_pause_menu()
 
 
 func server_populate_variables(): #TODO
