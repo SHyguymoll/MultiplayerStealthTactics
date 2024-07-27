@@ -1130,7 +1130,7 @@ func enemy_flag_completion(): #TODO redo this with the proper checks
 @rpc("authority", "call_local")
 func create_toast_update(server_text : String, client_text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
 	var new_toast : ToastMessage = toast_scene.instantiate()
-	new_toast.text = server_text if multiplayer.is_server() else client_text
+	new_toast.input_text = server_text if multiplayer.is_server() else client_text
 	new_toast.color = color
 	$HUDBase/Toasts.add_child(new_toast)
 	if add_sound_effect:
@@ -1188,7 +1188,8 @@ func _on_pickup_spawner_despawned(node: Node) -> void:
 
 
 func _on_yes_forfeit_pressed() -> void:
-	multiplayer.multiplayer_peer.close()
+	if multiplayer.multiplayer_peer != null:
+		multiplayer.multiplayer_peer.close()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 
