@@ -330,7 +330,7 @@ func server_populate_variables(): #TODO
 		player_id = 1,
 		agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[0]],
 		pos_x = game_map.agent_spawn_server_1.position.x,
-		pos_y = game_map.agent_spawn_server_1.position.y,
+		pos_y = game_map.agent_spawn_server_1.position.y - 0.666,
 		pos_z = game_map.agent_spawn_server_1.position.z,
 		rot_y = game_map.agent_spawn_server_1.rotation.y,
 	}
@@ -338,21 +338,21 @@ func server_populate_variables(): #TODO
 	if len(GameSettings.selected_agents) > 1:
 		data.agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[1]]
 		data.pos_x = game_map.agent_spawn_server_2.position.x
-		data.pos_y = game_map.agent_spawn_server_2.position.y
+		data.pos_y = game_map.agent_spawn_server_2.position.y - 0.666
 		data.pos_z = game_map.agent_spawn_server_2.position.z
 		data.rot_y = game_map.agent_spawn_server_2.rotation.y
 		ag_spawner.spawn(data)
 	if len(GameSettings.selected_agents) > 2:
 		data.agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[2]]
 		data.pos_x = game_map.agent_spawn_server_3.position.x
-		data.pos_y = game_map.agent_spawn_server_3.position.y
+		data.pos_y = game_map.agent_spawn_server_3.position.y - 0.666
 		data.pos_z = game_map.agent_spawn_server_3.position.z
 		data.rot_y = game_map.agent_spawn_server_3.rotation.y
 		ag_spawner.spawn(data)
 	if len(GameSettings.selected_agents) > 3:
 		data.agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[3]]
 		data.pos_x = game_map.agent_spawn_server_4.position.x
-		data.pos_y = game_map.agent_spawn_server_4.position.y
+		data.pos_y = game_map.agent_spawn_server_4.position.y - 0.666
 		data.pos_z = game_map.agent_spawn_server_4.position.z
 		data.rot_y = game_map.agent_spawn_server_4.rotation.y
 		ag_spawner.spawn(data)
@@ -360,28 +360,28 @@ func server_populate_variables(): #TODO
 	data.player_id = GameSettings.other_player_id
 	data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[0]]
 	data.pos_x = game_map.agent_spawn_client_1.position.x
-	data.pos_y = game_map.agent_spawn_client_1.position.y
+	data.pos_y = game_map.agent_spawn_client_1.position.y - 0.666
 	data.pos_z = game_map.agent_spawn_client_1.position.z
 	data.rot_y = game_map.agent_spawn_client_1.rotation.y
 	ag_spawner.spawn(data)
 	if len(GameSettings.client_selected_agents) > 1:
 		data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[1]]
 		data.pos_x = game_map.agent_spawn_client_2.position.x
-		data.pos_y = game_map.agent_spawn_client_2.position.y
+		data.pos_y = game_map.agent_spawn_client_2.position.y - 0.666
 		data.pos_z = game_map.agent_spawn_client_2.position.z
 		data.rot_y = game_map.agent_spawn_client_2.rotation.y
 		ag_spawner.spawn(data)
 	if len(GameSettings.client_selected_agents) > 2:
 		data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[2]]
 		data.pos_x = game_map.agent_spawn_client_3.position.x
-		data.pos_y = game_map.agent_spawn_client_3.position.y
+		data.pos_y = game_map.agent_spawn_client_3.position.y - 0.666
 		data.pos_z = game_map.agent_spawn_client_3.position.z
 		data.rot_y = game_map.agent_spawn_client_3.rotation.y
 		ag_spawner.spawn(data)
 	if len(GameSettings.client_selected_agents) > 3:
 		data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[3]]
 		data.pos_x = game_map.agent_spawn_client_4.position.x
-		data.pos_y = game_map.agent_spawn_client_4.position.y
+		data.pos_y = game_map.agent_spawn_client_4.position.y - 0.666
 		data.pos_z = game_map.agent_spawn_client_4.position.z
 		data.rot_y = game_map.agent_spawn_client_4.rotation.y
 		ag_spawner.spawn(data)
