@@ -893,7 +893,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			new_replay.store_string(JSON.stringify(action_timeline))
 			if multiplayer.is_server():
 				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO)
-			Lobby.remove_multiplayer_peer()
+			multiplayer.multiplayer_peer.close()
 			$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
 			open_pause_menu()
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
@@ -916,12 +916,6 @@ func check_agents_for_weapon(server_team : bool, item_name : String) -> bool:
 			continue
 		if item_name in ag.held_weapons:
 			return true
-			if ag.state != Agent.States.EXFILTRATED:
-				create_toast_update.rpc(GameRefs.TXT.of_y_get, GameRefs.TXT.of_t_get, true)
-				server_progress = 1
-			else:
-				pass
-			break
 	return false
 
 
@@ -1194,7 +1188,7 @@ func _on_pickup_spawner_despawned(node: Node) -> void:
 
 
 func _on_yes_forfeit_pressed() -> void:
-	Lobby.remove_multiplayer_peer()
+	multiplayer.multiplayer_peer.close()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 
