@@ -69,6 +69,8 @@ enum ProgressParts {
 
 var start_time : String
 var end_time : String
+var sent_final_message = false
+var sent_reward = false
 
 func _ready():
 	# Preconfigure game.
@@ -270,17 +272,25 @@ func determine_indicator_removals():
 
 
 func _physics_process(delta: float) -> void:
+	_server_progress.value = lerpf(_server_progress.value, float(server_progress), 0.2)
+	_client_progress.value = lerpf(_client_progress.value, float(client_progress), 0.2)
 	match game_phase:
 		GamePhases.SELECTION:
+			var game_is_actually_over_check = false
 			for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
+				if selector.referenced_agent == null: # the only case where the agent is null is the one where the node was destroyed by the server disconnecting
+					game_is_actually_over_check = true
+					for selector_to_free in $HUDSelectors.get_children() as Array[AgentSelector]:
+						selector_to_free.queue_free()
+					break
 				selector.position = (
 			$World/Camera3D as Camera3D).unproject_position(
 					selector.referenced_agent.position)
 				(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
-			_server_progress.value = lerpf(_server_progress.value, float(server_progress), 0.2)
-			_client_progress.value = lerpf(_client_progress.value, float(client_progress), 0.2)
 			if multiplayer.is_server() and server_ready_bool and client_ready_bool:
 				_update_game_phase.rpc(GamePhases.EXECUTION)
+			if game_is_actually_over_check:
+				_update_game_phase(GamePhases.COMPLETION)
 		GamePhases.EXECUTION:
 			determine_cqc_events()
 			#determine_nearby_pickups()
@@ -299,8 +309,9 @@ func _physics_process(delta: float) -> void:
 					pickup_spawner.spawn(new_drop)
 					agent.held_weapons.erase(agent.mark_for_drop.wep_node)
 					agent.mark_for_drop.clear()
-				if agent.try_grab_pickup and multiplayer.is_server():
-					$Pickups.get_node(str(agent.queued_action[1])).queue_free()
+				if multiplayer.is_server() and agent.try_grab_pickup and len(agent.queued_action) > 1:
+					if $Pickups.get_node_or_null(str(agent.queued_action[1])) != null:
+						$Pickups.get_node(str(agent.queued_action[1])).queue_free()
 					agent.try_grab_pickup = false
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
@@ -522,6 +533,10 @@ func create_pickup(data) -> WeaponPickup:
 
 
 func create_agent_selector(agent : Agent):
+	# check if selector already exists
+	for s in ($HUDSelectors.get_children() as Array[AgentSelector]):
+		if s.referenced_agent == agent:
+			return
 	var new_selector = agent_selector_scene.instantiate()
 	new_selector.referenced_agent = agent
 	new_selector.agent_selected.connect(_hud_agent_details_actions)
@@ -780,6 +795,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 
 @rpc("authority", "call_local", "reliable")
 func _update_game_phase(new_phase: GamePhases, check_incap := true):
+	await get_tree().create_timer(0.1).timeout
 	game_phase = new_phase
 	match new_phase:
 		GamePhases.SELECTION:
@@ -789,7 +805,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
 			if multiplayer.is_server():
 				# update exfiltrations
-				if server_progress == 1:
+				if server_progress == ProgressParts.ITEM_HELD:
 					var can_exfil = false
 					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
 						var actual_agent : Agent = detect.get_parent()
@@ -807,13 +823,13 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 							if actual_agent.state == Agent.States.DEAD:
 								continue
 							exfiltration_queue.append(actual_agent.name)
-				elif server_progress == 2:
+				elif server_progress == ProgressParts.OBJECTIVE_COMPLETE:
 					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
 						var actual_agent : Agent = detect.get_parent()
 						if actual_agent.state == Agent.States.DEAD:
 							continue
 						exfiltration_queue.append(actual_agent.name)
-				if client_progress == 1:
+				if client_progress == ProgressParts.ITEM_HELD:
 					var can_exfil = false
 					for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
 						var actual_agent : Agent = detect.get_parent()
@@ -831,7 +847,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 							if actual_agent.state == Agent.States.DEAD:
 								continue
 							exfiltration_queue.append(actual_agent.name)
-				elif client_progress == 2:
+				elif client_progress == ProgressParts.OBJECTIVE_COMPLETE:
 					for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
 						var actual_agent : Agent = detect.get_parent()
 						if actual_agent.state == Agent.States.DEAD:
@@ -888,19 +904,22 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				DirAccess.make_dir_absolute("user://replays")
 			var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
 			new_replay.store_string(JSON.stringify(action_timeline))
-			if multiplayer.is_server():
+			if multiplayer.is_server() and not sent_final_message:
 				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
-			multiplayer.multiplayer_peer.close()
+				sent_final_message = true
+			#if multiplayer.multiplayer_peer != null:
+				#multiplayer.multiplayer_peer.close()
 			$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
 			open_pause_menu()
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
 
 
+
 func track_objective_completion():
 	match game_map.objective:
 		GameMap.Objectives.CAPTURE_CENTRAL_FLAG:
-			central_flag_completion()
+			of_comp()
 		#GameMap.Objectives.CAPTURE_ENEMY_FLAG:
 			#enemy_flag_completion()
 
@@ -940,7 +959,11 @@ func check_full_team_exfil_or_dead(server_team : bool):
 	return count == 0
 
 
-func central_flag_completion():
+func of_comp():
+	of_comp_server()
+	of_comp_client()
+
+func of_comp_server():
 	match server_progress:
 		ProgressParts.INTRO:
 			create_toast_update.rpc(GameRefs.TXT.of_intro, GameRefs.TXT.of_intro, true)
@@ -976,6 +999,9 @@ func central_flag_completion():
 			if check_full_team_exfil_or_dead(true):
 				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
 				set_server_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
+
+
+func of_comp_client():
 	match client_progress:
 		ProgressParts.INTRO:
 			set_client_progress.rpc(ProgressParts.NO_ADVANTAGE)
@@ -1155,15 +1181,18 @@ func player_quits(_peer_id):
 	_update_game_phase(GamePhases.COMPLETION)
 
 
+
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
 	if all_server_dead and all_client_dead:
 		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
 	if not all_client_dead and (all_server_dead or client_progress == ProgressParts.SURVIVORS_EXFILTRATED):
 		if all_server_dead:
 			create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
-		if multiplayer.is_server():
+		if multiplayer.is_server() and not sent_reward:
 			print("REWARDING CLIENT TEAM")
 			reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
+			#set_client_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
+			sent_reward = true
 	if not all_server_dead and (all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED):
 		if all_client_dead:
 			create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
