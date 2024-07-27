@@ -20,16 +20,16 @@ func _physics_process(_delta: float) -> void:
 	text = underscore_to_text(input_text, progress)
 
 
-func underscore_to_text(text : String, underscore_percentage : float):
+func underscore_to_text(given_text : String, underscore_percentage : float):
 	if underscore_percentage < 1.00:
 		_audio.play()
 	return (
-		text.substr(
+		given_text.substr(
 			0,
-			int(float(text.length()) * underscore_percentage)
+			int(float(input_text.length()) * underscore_percentage)
 			)
 		+ "".rpad(
-			ceil(float(text.length()) * (1 - underscore_percentage)),
+			ceil(float(given_text.length()) * (1 - underscore_percentage)),
 			"_")
 		)
 

@@ -33,7 +33,7 @@ func _input(event: InputEvent) -> void:
 		last_position = event.position
 
 
-func _process(delta: float) -> void:
+func _process(_d: float) -> void:
 	if Input.is_action_just_pressed("fov_change"):
 		match fov_target:
 			75.0:

@@ -82,7 +82,7 @@ func _check_position() -> bool:
 	return true
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_d: float) -> void:
 	if not ind_set:
 		flat_position.x = _game_camera.position.x
 		flat_position.y = _game_camera.position.z

@@ -327,7 +327,7 @@ func _physics_process(delta: float) -> void:
 				ag._game_step(delta, true)
 
 
-func _process(delta: float) -> void:
+func _process(_d: float) -> void:
 	if Input.is_action_just_pressed("pause_menu"):
 		open_pause_menu()
 
@@ -886,7 +886,6 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			var save_dir = DirAccess.open("user://replays")
 			if save_dir == null:
 				DirAccess.make_dir_absolute("user://replays")
-				save_dir.open("user://replays")
 			var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
 			new_replay.store_string(JSON.stringify(action_timeline))
 			if multiplayer.is_server():
@@ -902,8 +901,8 @@ func track_objective_completion():
 	match game_map.objective:
 		GameMap.Objectives.CAPTURE_CENTRAL_FLAG:
 			central_flag_completion()
-		GameMap.Objectives.CAPTURE_ENEMY_FLAG:
-			enemy_flag_completion()
+		#GameMap.Objectives.CAPTURE_ENEMY_FLAG:
+			#enemy_flag_completion()
 
 
 func check_agents_for_weapon(server_team : bool, item_name : String) -> bool:
@@ -1014,127 +1013,127 @@ func central_flag_completion():
 
 
 @rpc("authority", "call_local", "reliable")
-func set_server_progress(val : int):
+func set_server_progress(val : ProgressParts):
 	server_progress = val
 
 
 @rpc("authority", "call_local", "reliable")
-func set_client_progress(val : int):
+func set_client_progress(val : ProgressParts):
 	client_progress = val
 
 
-func enemy_flag_completion(): #TODO redo this with the proper checks
-	match server_progress:
-		-1:
-			create_toast_update.rpc(GameRefs.TXT.tf_intro, GameRefs.TXT.tf_intro, true)
-			server_progress = 0
-		0:
-			for ag in ($Agents.get_children() as Array[Agent]):
-				if ag.player_id != 1:
-					continue
-				if ag.state == Agent.States.DEAD:
-					continue
-				if "map_flag_client" in ag.held_weapons:
-					create_toast_update.rpc(GameRefs.TXT.tf_y_get, GameRefs.TXT.tf_t_get, true)
-					server_progress = 1
-					break
-		1:
-			var flag_still_held = false
-			var flag_captured = false
-			for ag in ($Agents.get_children() as Array[Agent]):
-				if ag.player_id != 1:
-					continue
-				if ag.state == Agent.States.DEAD:
-					continue
-				if "map_flag_client" in ag.held_weapons:
-					flag_still_held = true
-					if ag.state == Agent.States.EXFILTRATED:
-						flag_captured = true
-					break
-			if not flag_still_held:
-				create_toast_update.rpc(GameRefs.TXT.tf_y_lost, GameRefs.TXT.tf_t_lost, true)
-				server_progress = 0
-				return
-			var agents_remain = false
-			for ag in ($Agents.get_children() as Array[Agent]):
-				if ag.player_id != 1:
-					continue
-				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
-					agents_remain = true
-					break
-			if flag_captured:
-				if agents_remain:
-					create_toast_update.rpc(GameRefs.TXT.tf_y_cap_agents_remain, GameRefs.TXT.tf_t_cap_agents_remain, true)
-					server_progress = 2
-				else:
-					create_toast_update.rpc(GameRefs.TXT.tf_y_cap_left, GameRefs.TXT.tf_t_cap_left, true)
-					server_progress = 3
-		2:
-			var agents_remain = false
-			for ag in ($Agents.get_children() as Array[Agent]):
-				if ag.player_id != 1:
-					continue
-				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
-					agents_remain = true
-					break
-			if not agents_remain:
-				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
-				server_progress = 3
-	match client_progress:
-		-1:
-			client_progress = 0
-		0:
-			for ag in ($Agents.get_children() as Array[Agent]):
-				if ag.player_id == 1:
-					continue
-				if ag.state == Agent.States.DEAD:
-					continue
-				if "map_flag_server" in ag.held_weapons:
-					create_toast_update.rpc(GameRefs.TXT.tf_t_get, GameRefs.TXT.tf_y_get, true)
-					client_progress = 1
-					break
-		1:
-			var flag_still_held = false
-			var flag_captured = false
-			for ag in ($Agents.get_children() as Array[Agent]):
-				if ag.player_id == 1:
-					continue
-				if ag.state == Agent.States.DEAD:
-					continue
-				if "map_flag_server" in ag.held_weapons:
-					flag_still_held = true
-					if ag.state == Agent.States.EXFILTRATED:
-						flag_captured = true
-					break
-			if not flag_still_held:
-				create_toast_update.rpc(GameRefs.TXT.tf_t_lost, GameRefs.TXT.tf_y_lost, true)
-				client_progress = 0
-				return
-			var agents_remain = false
-			for ag in ($Agents.get_children() as Array[Agent]):
-				if ag.player_id == 1:
-					continue
-				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
-					agents_remain = true
-					break
-			if flag_captured:
-				if agents_remain:
-					create_toast_update.rpc(GameRefs.TXT.tf_t_cap_agents_remain, GameRefs.TXT.tf_y_cap_agents_remain, true)
-					client_progress = 2
-				else:
-					create_toast_update.rpc(GameRefs.TXT.tf_t_cap_left, GameRefs.TXT.tf_y_cap_left, true)
-					client_progress = 3
-		2:
-			var agents_remain = false
-			for ag in ($Agents.get_children() as Array[Agent]):
-				if ag.player_id == 1:
-					continue
-				if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
-					agents_remain = true
-					break
-			if not agents_remain:
-				create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
-				client_progress = 3
+#func enemy_flag_completion(): #TODO redo this with the proper checks
+	#match server_progress:
+		#-1:
+			#create_toast_update.rpc(GameRefs.TXT.tf_intro, GameRefs.TXT.tf_intro, true)
+			#server_progress = 0
+		#0:
+			#for ag in ($Agents.get_children() as Array[Agent]):
+				#if ag.player_id != 1:
+					#continue
+				#if ag.state == Agent.States.DEAD:
+					#continue
+				#if "map_flag_client" in ag.held_weapons:
+					#create_toast_update.rpc(GameRefs.TXT.tf_y_get, GameRefs.TXT.tf_t_get, true)
+					#server_progress = 1
+					#break
+		#1:
+			#var flag_still_held = false
+			#var flag_captured = false
+			#for ag in ($Agents.get_children() as Array[Agent]):
+				#if ag.player_id != 1:
+					#continue
+				#if ag.state == Agent.States.DEAD:
+					#continue
+				#if "map_flag_client" in ag.held_weapons:
+					#flag_still_held = true
+					#if ag.state == Agent.States.EXFILTRATED:
+						#flag_captured = true
+					#break
+			#if not flag_still_held:
+				#create_toast_update.rpc(GameRefs.TXT.tf_y_lost, GameRefs.TXT.tf_t_lost, true)
+				#server_progress = 0
+				#return
+			#var agents_remain = false
+			#for ag in ($Agents.get_children() as Array[Agent]):
+				#if ag.player_id != 1:
+					#continue
+				#if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					#agents_remain = true
+					#break
+			#if flag_captured:
+				#if agents_remain:
+					#create_toast_update.rpc(GameRefs.TXT.tf_y_cap_agents_remain, GameRefs.TXT.tf_t_cap_agents_remain, true)
+					#server_progress = 2
+				#else:
+					#create_toast_update.rpc(GameRefs.TXT.tf_y_cap_left, GameRefs.TXT.tf_t_cap_left, true)
+					#server_progress = 3
+		#2:
+			#var agents_remain = false
+			#for ag in ($Agents.get_children() as Array[Agent]):
+				#if ag.player_id != 1:
+					#continue
+				#if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					#agents_remain = true
+					#break
+			#if not agents_remain:
+				#create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
+				#server_progress = 3
+	#match client_progress:
+		#-1:
+			#client_progress = 0
+		#0:
+			#for ag in ($Agents.get_children() as Array[Agent]):
+				#if ag.player_id == 1:
+					#continue
+				#if ag.state == Agent.States.DEAD:
+					#continue
+				#if "map_flag_server" in ag.held_weapons:
+					#create_toast_update.rpc(GameRefs.TXT.tf_t_get, GameRefs.TXT.tf_y_get, true)
+					#client_progress = 1
+					#break
+		#1:
+			#var flag_still_held = false
+			#var flag_captured = false
+			#for ag in ($Agents.get_children() as Array[Agent]):
+				#if ag.player_id == 1:
+					#continue
+				#if ag.state == Agent.States.DEAD:
+					#continue
+				#if "map_flag_server" in ag.held_weapons:
+					#flag_still_held = true
+					#if ag.state == Agent.States.EXFILTRATED:
+						#flag_captured = true
+					#break
+			#if not flag_still_held:
+				#create_toast_update.rpc(GameRefs.TXT.tf_t_lost, GameRefs.TXT.tf_y_lost, true)
+				#client_progress = 0
+				#return
+			#var agents_remain = false
+			#for ag in ($Agents.get_children() as Array[Agent]):
+				#if ag.player_id == 1:
+					#continue
+				#if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					#agents_remain = true
+					#break
+			#if flag_captured:
+				#if agents_remain:
+					#create_toast_update.rpc(GameRefs.TXT.tf_t_cap_agents_remain, GameRefs.TXT.tf_y_cap_agents_remain, true)
+					#client_progress = 2
+				#else:
+					#create_toast_update.rpc(GameRefs.TXT.tf_t_cap_left, GameRefs.TXT.tf_y_cap_left, true)
+					#client_progress = 3
+		#2:
+			#var agents_remain = false
+			#for ag in ($Agents.get_children() as Array[Agent]):
+				#if ag.player_id == 1:
+					#continue
+				#if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+					#agents_remain = true
+					#break
+			#if not agents_remain:
+				#create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
+				#client_progress = 3
 
 
 @rpc("authority", "call_local")
@@ -1149,7 +1148,7 @@ func create_toast_update(server_text : String, client_text : String, add_sound_e
 		pass
 
 
-func player_quits(peer_id):
+func player_quits(_peer_id):
 	if game_phase == GamePhases.COMPLETION or server_progress > ProgressParts.NO_ADVANTAGE or client_progress > ProgressParts.NO_ADVANTAGE:
 		return
 	create_toast_update("ENEMY HAS FORFEITED, MISSION SUCCESS", "ENEMY HAS FORFEITED, MISSION SUCCESS", false)

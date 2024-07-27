@@ -217,7 +217,7 @@ func synchronize_agents(selected : Array):
 		_enemy_agents.add_child(new_notif)
 
 
-func _on_player_connect(peer_id, player_info):
+func _on_player_connect(peer_id, _player_info):
 	if peer_id == 1: # self joined, disregard
 		return
 	GameSettings.other_player_id = multiplayer.get_remote_sender_id()
@@ -287,7 +287,7 @@ func _on_review_item_list_item_selected(index: int) -> void:
 	$ReviewScreen/FireAgent.disabled = false
 
 
-func _process(delta: float) -> void:
+func _process(_d: float) -> void:
 	if review_selected_agent > -1:
 		$ReviewScreen/AgentDetails/MissionCount.text = "MISSION COUNT: " + str(agents[review_selected_agent]["mission_count"])
 		$ReviewScreen/AgentDetails/Health/HBoxContainer/HSlider.value = lerpf(

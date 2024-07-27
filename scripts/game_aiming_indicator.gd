@@ -34,7 +34,7 @@ func _on_animation_changed() -> void:
 	queue_free()
 
 
-func _physics_process(delta: float) -> void: #TODO
+func _physics_process(_d: float) -> void: #TODO
 	if not ind_set:
 		var ray_len = 1000
 		if GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC):
