@@ -493,7 +493,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			#velocity = velocity.normalized() * _nav_agent.distance_to_target()
 		move_and_slide()
 		if position.distance_to(queued_action[1]) < 0.3: #movement_speed / (1 if state == States.RUN else 2 if state in [States.WALK, States.CROUCH_WALK] else 2.5):
-			position = _nav_agent.target_position + Vector3(0, -0.5, 0)
+			position = _nav_agent.target_position
 			match state:
 				States.WALK, States.RUN:
 					_anim_state.travel("Stand")
@@ -560,7 +560,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			match attack_step:
 				AttackStep.ORIENTING:
 					rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
-					if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1:
+					if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1:
 						rotation.y = target_direction
 						attack_step = AttackStep.BACKPACKING
 						game_steps_since_execute = 0
@@ -574,7 +574,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 						action_complete()
 		GameActions.DROP_WEAPON:
 			rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
-			if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1:
+			if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1:
 				rotation.y = target_direction
 				mark_for_drop = {
 					position = queued_action[2],
