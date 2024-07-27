@@ -169,8 +169,6 @@ func determine_sights():
 			create_popup(GameRefs.POPUP.sight_unknown, to_remove.position)
 
 
-
-
 func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_level : int) -> float:
 	var dist = clampf(remap(spotter.position.distance_to(spottee_pos), 0.0, spotter.view_dist, 0.0, 1.0), 0.0, 1.0)
 	var exponent = ((1.5 * dist)/(log(visible_level)/log(10)))
@@ -939,70 +937,83 @@ func central_flag_completion():
 	match server_progress:
 		-1:
 			create_toast_update.rpc(GameRefs.TXT.of_intro, GameRefs.TXT.of_intro, true)
-			server_progress = 0
+			set_server_progress.rpc(0)
 		0: # no one has the flag
 			if not check_agents_for_weapon(true, "map_flag_center"):
 				return
 			if not check_weapon_holder_exfil(true, "map_flag_center"):
 				create_toast_update.rpc(GameRefs.TXT.of_y_get, GameRefs.TXT.of_t_get, true)
-				server_progress = 1
+				set_server_progress.rpc(1)
 				return
 			if not check_full_team_exfil_or_dead(true):
 				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-				server_progress = 2
+				set_server_progress.rpc(2)
 				return
 			create_toast_update.rpc(GameRefs.TXT.of_y_cap_left, GameRefs.TXT.of_t_cap_left, true)
-			server_progress = 3
+			set_server_progress.rpc(3)
 			return
 		1: # the server team has the flag
 			if not check_agents_for_weapon(true, "map_flag_center"):
 				create_toast_update.rpc(GameRefs.TXT.of_y_lost, GameRefs.TXT.of_t_lost, true)
-				server_progress = 0
+				set_server_progress.rpc(0)
 				return
-			if not check_full_team_exfil_or_dead(true):
-				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-				server_progress = 2
+			if check_weapon_holder_exfil(true, "map_flag_center"):
+				if not check_full_team_exfil_or_dead(true):
+					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
+					set_server_progress.rpc(2)
+					return
+				create_toast_update.rpc(GameRefs.TXT.of_y_cap_left, GameRefs.TXT.of_t_cap_left, true)
+				set_server_progress.rpc(3)
 				return
-			create_toast_update.rpc(GameRefs.TXT.of_y_cap_left, GameRefs.TXT.of_t_cap_left, true)
-			server_progress = 3
-			return
+
 		2: # a server team member has escaped with the flag
 			if check_full_team_exfil_or_dead(true):
 				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
-				server_progress = 3
+				set_server_progress.rpc(3)
 	match client_progress:
 		-1:
-			client_progress = 0
+			set_client_progress.rpc(0)
 		0: # no one has the flag
 			if not check_agents_for_weapon(false, "map_flag_center"):
 				return
 			if not check_weapon_holder_exfil(false, "map_flag_center"):
 				create_toast_update.rpc(GameRefs.TXT.of_t_get, GameRefs.TXT.of_y_get, true)
-				client_progress = 1
+				set_client_progress.rpc(1)
 				return
 			if not check_full_team_exfil_or_dead(false):
 				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-				client_progress = 2
+				set_client_progress.rpc(2)
 				return
 			create_toast_update.rpc(GameRefs.TXT.of_t_cap_left, GameRefs.TXT.of_y_cap_left, true)
-			client_progress = 3
+			set_client_progress.rpc(3)
 			return
-		1: # the server team has the flag
+		1: # the client team has the flag
 			if not check_agents_for_weapon(false, "map_flag_center"):
 				create_toast_update.rpc(GameRefs.TXT.of_t_lost, GameRefs.TXT.of_y_lost, true)
-				client_progress = 0
+				set_client_progress.rpc(0)
 				return
-			if not check_full_team_exfil_or_dead(false):
-				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-				client_progress = 2
+			if check_weapon_holder_exfil(false, "map_flag_center"):
+				if not check_full_team_exfil_or_dead(false):
+					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
+					set_client_progress.rpc(2)
+					return
+				create_toast_update.rpc(GameRefs.TXT.of_t_cap_left, GameRefs.TXT.of_y_cap_left, true)
+				set_client_progress.rpc(3)
 				return
-			create_toast_update.rpc(GameRefs.TXT.of_t_cap_left, GameRefs.TXT.of_y_cap_left, true)
-			client_progress = 3
-			return
-		2: # a server team member has escaped with the flag
+		2: # a client team member has escaped with the flag
 			if check_full_team_exfil_or_dead(false):
 				create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
-				client_progress = 3
+				set_client_progress.rpc(3)
+
+
+@rpc("authority", "call_local", "reliable")
+func set_server_progress(val : int):
+	server_progress = val
+
+
+@rpc("authority", "call_local", "reliable")
+func set_client_progress(val : int):
+	client_progress = val
 
 
 func enemy_flag_completion(): #TODO redo this with the proper checks
@@ -1124,7 +1135,7 @@ func create_toast_update(server_text : String, client_text : String, add_sound_e
 	var new_toast : ToastMessage = toast_scene.instantiate()
 	new_toast.input_text = server_text if multiplayer.is_server() else client_text
 	new_toast.color = color
-	print(server_text + " | " + client_text + " | " + str(color))
+	#print(server_text + " | " + client_text + " | " + str(color))
 	$HUDBase/Toasts.add_child(new_toast)
 	if add_sound_effect:
 		_round_update.play()
@@ -1141,11 +1152,27 @@ func player_quits(peer_id):
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
 	if all_server_dead and all_client_dead:
 		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
-	elif all_server_dead:
+	elif all_server_dead or client_progress == 3:
 		create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
-	if all_client_dead:
+		if multiplayer.is_server():
+			reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
+	if all_client_dead or server_progress == 3:
 		create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
+		reward_team(1)
 	return all_server_dead or all_client_dead or server_progress == 3 or client_progress == 3
+
+
+@rpc("authority", "reliable")
+func reward_team(team_id):
+	for ag in ($Agents.get_children() as Array[Agent]):
+		if ag.player_id != team_id: # pick the right team
+			continue
+		if ag.state == Agent.States.DEAD: # only the survivors
+			continue
+		var ag_name_local = ag.name.split("_", true, 1)[1]
+		for check in Lobby.player_info.agents:
+			if check.name == ag_name_local:
+				check.mission_count += 1
 
 
 @rpc("any_peer", "call_local", "reliable")
