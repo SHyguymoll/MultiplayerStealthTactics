@@ -40,6 +40,7 @@ var _outline_mat : StandardMaterial3D
 @onready var _eyes : Area3D = $Eyes
 @onready var _eye_cone : ConvexPolygonShape3D = $Eyes/CollisionShape3D.shape
 @onready var _ears : Area3D = $Ears
+@onready var _body : Area3D = $Body
 @onready var _ear_cylinder : CylinderShape3D = _ears.get_node("CollisionShape3D").shape
 @onready var _world_collide : CollisionShape3D = $WorldCollision
 @onready var _prone_ray : RayCast3D = $ProneCheck
@@ -329,7 +330,7 @@ func _ready() -> void:
 	if player_id == multiplayer.get_unique_id():
 		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
 	_ear_cylinder.radius = hearing_dist
-	# item strings
+	_body.collision_layer += 8 if player_id == 1 else 16
 	# custom texture
 	if skin_texture:
 		_custom_skin_mat = StandardMaterial3D.new()
@@ -403,18 +404,19 @@ func flash_outline(color : Color):
 
 
 func exfiltrate():
+	visible = true
 	state = States.EXFILTRATED
-	var twe = Tween.new()
+	var twe = create_tween()
 	twe.set_parallel()
 	twe.tween_property(_mesh, "transparency", 1.0, 2.0).from(0.0)
+	twe.tween_property(_box_mesh, "transparency", 1.0, 2.0).from(0.0)
 	twe.tween_property($Agent, "position:y", 10.0, 2.0).from_current()
-	twe.play()
 
 
 
 func _physics_process(_d: float) -> void:
 	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, GENERAL_LERP_VAL)
-	$DebugLabel3D.text = str(target_visible_level) + "\n" + str(_pickup_range.get_overlapping_areas())
+	#$DebugLabel3D.text = str(target_visible_level) + "\n" + str(_pickup_range.get_overlapping_areas())
 	if not in_incapacitated_state():
 		var detected_weapons = []
 		for overlap in _pickup_range.get_overlapping_areas():
@@ -486,7 +488,7 @@ func _game_step(delta: float) -> void:
 			#velocity = velocity.normalized() * _nav_agent.distance_to_target()
 		move_and_slide()
 		if position.distance_to(queued_action[1]) < 0.3: #movement_speed / (1 if state == States.RUN else 2 if state in [States.WALK, States.CROUCH_WALK] else 2.5):
-			position = _nav_agent.target_position
+			position = _nav_agent.target_position + Vector3(0, -0.5, 0)
 			match state:
 				States.WALK, States.RUN:
 					_anim_state.travel("Stand")

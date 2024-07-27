@@ -7,6 +7,9 @@
 [node name="Toast" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+offset_left = -275.0
+offset_right = 275.0
+offset_bottom = 54.0
 script = ExtResource("1_kbu1w")
 
 [node name="Label" type="Label" parent="."]

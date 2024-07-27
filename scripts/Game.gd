@@ -24,6 +24,7 @@ var current_game_step := 0
 enum GamePhases {
 	SELECTION,
 	EXECUTION,
+	COMPLETION,
 }
 @export var game_phase : GamePhases = GamePhases.SELECTION
 enum SelectionSteps {
@@ -38,6 +39,8 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 
 @export var server_progress : int = -1
 @export var client_progress : int = -1
+
+@export var exfiltration_queue = []
 
 @onready var _camera : GameCamera = $World/Camera3D
 @onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
@@ -56,15 +59,20 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 @onready var _round_ended : AudioStreamPlayer = $SoundEffects/RoundEnded
 @onready var _actions_submitted : AudioStreamPlayer = $SoundEffects/ActionsSubmitted
 
+var start_time : String
+var end_time : String
+
 func _ready():
 	# Preconfigure game.
 	_radial_menu.visible = false
+	close_pause_menu()
 	ag_spawner.spawn_function = create_agent
 	pickup_spawner.spawn_function = create_pickup
 	weapon_spawner.spawn_function = create_weapon
-
+	start_time = str(int(Time.get_unix_time_from_system()))
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
+	Lobby.player_disconnected.connect(player_quits)
 
 
 # Called only on the server.
@@ -80,10 +88,20 @@ func start_game():
 	force_camera(
 		(game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position +
 		game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
-	set_up_progress_bars.rpc()
 	#determine_nearby_pickups.rpc()
 	pass
 
+
+func open_pause_menu():
+	$PauseMenu/ColorRect/VBoxContainer/YesForfeit.disabled = false
+	$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = false
+	$PauseMenu.visible = true
+
+
+func close_pause_menu():
+	$PauseMenu/ColorRect/VBoxContainer/YesForfeit.disabled = true
+	$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
+	$PauseMenu.visible = false
 
 @rpc("authority", "call_remote", "reliable")
 func force_camera(new_pos, new_fov = -1.0):
@@ -93,11 +111,6 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.final_position = Vector2(new_pos.x, new_pos.z) * Vector2(get_viewport().size/$World/Camera3D.sensitivity)
 	if new_fov != -1.0:
 		$World/Camera3D.fov_target = new_fov
-
-
-@rpc("authority", "call_local", "reliable")
-func set_up_progress_bars():
-	pass
 
 
 func create_sound_effect(location : Vector3, player_id : int, lifetime : int, min_rad : float, max_rad : float, sound_id : String) -> void: #TODO
@@ -294,6 +307,22 @@ func _physics_process(delta: float) -> void:
 					if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 						return
 				_update_game_phase.rpc(GamePhases.SELECTION)
+		GamePhases.COMPLETION:
+			for ag in ($Agents.get_children() as Array[Agent]):
+				ag.visible = true
+				ag.queued_action.clear()
+				if ag.in_standing_state():
+					ag.state = Agent.States.STAND
+				elif ag.in_crouching_state():
+					ag.state = Agent.States.CROUCH
+				elif ag.in_prone_state():
+					ag.state = Agent.States.PRONE
+				ag._game_step(delta)
+
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("pause_menu"):
+		$PauseMenu.show()
 
 
 func server_populate_variables(): #TODO
@@ -751,7 +780,62 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
-			#determine_nearby_pickups()
+			if multiplayer.is_server():
+				# update exfiltrations
+				if server_progress == 1:
+					var can_exfil = false
+					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+						var actual_agent : Agent = detect.get_parent()
+						if actual_agent.state == Agent.States.DEAD:
+							continue
+						for weap in actual_agent.held_weapons:
+							if (weap as String).begins_with("map_"):
+								can_exfil = true
+								break
+						if can_exfil:
+							break
+					if can_exfil:
+						for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+							var actual_agent : Agent = detect.get_parent()
+							if actual_agent.state == Agent.States.DEAD:
+								continue
+							exfiltration_queue.append(actual_agent.name)
+				elif server_progress == 2:
+					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+						var actual_agent : Agent = detect.get_parent()
+						if actual_agent.state == Agent.States.DEAD:
+							continue
+						exfiltration_queue.append(actual_agent.name)
+				if client_progress == 1:
+					var can_exfil = false
+					for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+						var actual_agent : Agent = detect.get_parent()
+						if actual_agent.state == Agent.States.DEAD:
+							continue
+						for weap in actual_agent.held_weapons:
+							if (weap as String).begins_with("map_"):
+								can_exfil = true
+								break
+						if can_exfil:
+							break
+					if can_exfil:
+						for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+							var actual_agent : Agent = detect.get_parent()
+							if actual_agent.state == Agent.States.DEAD:
+								continue
+							exfiltration_queue.append(actual_agent.name)
+				elif client_progress == 2:
+					for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+						var actual_agent : Agent = detect.get_parent()
+						if actual_agent.state == Agent.States.DEAD:
+							continue
+						exfiltration_queue.append(actual_agent.name)
+			for agent_name in exfiltration_queue:
+				($Agents.get_node(str(agent_name)) as Agent).exfiltrate()
+			# more objective based updates here
+			if multiplayer.is_server():
+				track_objective_completion()
+			# create selectors and otherwise prepare for selection
 			var server_agent_count := 0
 			var client_agent_count := 0
 			var dead_server_agents := 0
@@ -772,11 +856,6 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 						dead_server_agents += 1
 					else:
 						dead_client_agents += 1
-			if multiplayer.is_server():
-				# update exfiltrations
-				# TODO
-				# objective based updates here
-				track_objective_completion()
 			# checking win condition and stuff here
 			if not player_has_won(dead_server_agents == server_agent_count, dead_client_agents == client_agent_count):
 				show_hud()
@@ -784,6 +863,8 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 					#_round_update.play()
 				if $HUDSelectors.get_child_count() == 0 and check_incap:
 					_on_execute_pressed() # run the execute function since the player can't do anything
+			else:
+				_update_game_phase(GamePhases.COMPLETION)
 		GamePhases.EXECUTION:
 			for selector in $HUDSelectors.get_children(): # remove previous selectors
 				selector.queue_free()
@@ -800,6 +881,22 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 					append_action_timeline(agent)
 				agent.perform_action()
 			await get_tree().create_timer(0.10).timeout
+		GamePhases.COMPLETION:
+			action_timeline[current_game_step] = "END"
+			end_time = str(int(Time.get_unix_time_from_system()))
+			var save_dir = DirAccess.open("user://replays")
+			if save_dir == null:
+				DirAccess.make_dir_absolute("user://replays")
+				save_dir.open("user://replays")
+			var new_replay = FileAccess.open(start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
+			new_replay.store_string(JSON.stringify(action_timeline))
+			if multiplayer.is_server():
+				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO)
+			Lobby.remove_multiplayer_peer()
+			$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
+			open_pause_menu()
+			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
+			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
 
 
 func track_objective_completion():
@@ -808,6 +905,7 @@ func track_objective_completion():
 			central_flag_completion()
 		GameMap.Objectives.CAPTURE_ENEMY_FLAG:
 			enemy_flag_completion()
+
 
 func central_flag_completion():
 	match server_progress:
@@ -1048,18 +1146,15 @@ func create_toast_update(server_text : String, client_text : String, add_sound_e
 		pass
 
 
-func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
-	if all_server_dead and all_client_dead:
-		pass
-		return true
-	if all_server_dead:
-		pass
-		return true
-	if all_client_dead:
-		pass
-		return true
+func player_quits(peer_id):
+	create_toast_update("ENEMY HAS FORFEITED, MISSION SUCCESS", "ENEMY HAS FORFEITED, MISSION SUCCESS", false)
+	_update_game_phase(GamePhases.COMPLETION)
 
-	return false
+
+
+
+func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
+	return all_server_dead or all_client_dead or server_progress == 3 or client_progress == 3
 
 
 @rpc("any_peer", "call_local", "reliable")
@@ -1100,3 +1195,12 @@ func _on_cold_boot_timer_timeout() -> void:
 
 func _on_pickup_spawner_despawned(node: Node) -> void:
 	node.queue_free()
+
+
+func _on_yes_forfeit_pressed() -> void:
+	Lobby.remove_multiplayer_peer()
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+
+
+func _on_no_forfeit_pressed() -> void:
+	close_pause_menu()

@@ -78,6 +78,69 @@ directional_shadow_mode = 0
 
 [node name="Popups" type="Node3D" parent="."]
 
+[node name="PauseMenu" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="ColorRect" type="ColorRect" parent="PauseMenu"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -143.0
+offset_top = -163.0
+offset_right = 143.0
+offset_bottom = 163.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.811765, 0, 0.811765, 0.235294)
+
+[node name="CurrentPhase" type="Label" parent="PauseMenu/ColorRect"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 17.0
+offset_bottom = 82.0
+grow_horizontal = 2
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 64
+text = "FORFEIT?"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/ColorRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -48.5
+offset_top = -77.0
+offset_right = 48.5
+offset_bottom = 111.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="YesForfeit" type="Button" parent="PauseMenu/ColorRect/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 64
+text = "YES"
+
+[node name="HSeparator" type="HSeparator" parent="PauseMenu/ColorRect/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="NoForfeit" type="Button" parent="PauseMenu/ColorRect/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 64
+text = "NO"
+
 [node name="HUDBase" type="CanvasLayer" parent="."]
 
 [node name="QuickViews" type="HBoxContainer" parent="HUDBase"]
@@ -184,6 +247,8 @@ autostart = true
 replication_config = SubResource("SceneReplicationConfig_pu7ty")
 
 [connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]
+[connection signal="pressed" from="PauseMenu/ColorRect/VBoxContainer/YesForfeit" to="." method="_on_yes_forfeit_pressed"]
+[connection signal="pressed" from="PauseMenu/ColorRect/VBoxContainer/NoForfeit" to="." method="_on_no_forfeit_pressed"]
 [connection signal="pressed" from="HUDBase/Execute" to="." method="_on_execute_pressed"]
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
 [connection signal="decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
