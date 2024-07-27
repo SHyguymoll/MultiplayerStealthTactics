@@ -1153,11 +1153,15 @@ func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
 	if all_server_dead and all_client_dead:
 		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
 	elif all_server_dead or client_progress == 3:
-		create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
+		if all_server_dead:
+			create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
 		if multiplayer.is_server():
+			print("REWARDING CLIENT TEAM")
 			reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
 	if all_client_dead or server_progress == 3:
-		create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
+		if all_client_dead:
+			create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
+		print("REWARDING SERVER TEAM")
 		reward_team(1)
 	return all_server_dead or all_client_dead or server_progress == 3 or client_progress == 3
 
