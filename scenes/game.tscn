@@ -141,6 +141,32 @@ theme = ExtResource("5_b0o1h")
 theme_override_font_sizes/font_size = 64
 text = "NO"
 
+[node name="FadeOut" type="CanvasLayer" parent="."]
+layer = 90
+
+[node name="ColorRect" type="ColorRect" parent="FadeOut"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.219608, 0, 0.219608, 1)
+
+[node name="HUDToasts" type="CanvasLayer" parent="."]
+layer = 95
+
+[node name="Toasts" type="VBoxContainer" parent="HUDToasts"]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -250.0
+offset_right = 553.0
+offset_bottom = 250.0
+grow_vertical = 2
+size_flags_horizontal = 0
+theme = ExtResource("5_b0o1h")
+
 [node name="HUDBase" type="CanvasLayer" parent="."]
 
 [node name="QuickViews" type="HBoxContainer" parent="HUDBase"]
@@ -183,17 +209,6 @@ horizontal_alignment = 2
 autowrap_mode = 2
 clip_text = true
 
-[node name="Toasts" type="VBoxContainer" parent="HUDBase"]
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_top = -250.0
-offset_right = 553.0
-offset_bottom = 250.0
-grow_vertical = 2
-size_flags_horizontal = 0
-theme = ExtResource("5_b0o1h")
-
 [node name="CurrentPhase" type="Label" parent="HUDBase"]
 anchors_preset = 10
 anchor_right = 1.0
@@ -221,12 +236,14 @@ max_value = 3.0
 show_percentage = false
 
 [node name="HUDSelected" type="CanvasLayer" parent="."]
+layer = 10
 follow_viewport_enabled = true
 
 [node name="RadialMenu" parent="HUDSelected" instance=ExtResource("2_xp2mg")]
 position = Vector2(-60, -60)
 
 [node name="HUDSelectors" type="CanvasLayer" parent="."]
+layer = 5
 
 [node name="SoundEffects" type="Node" parent="."]
 

@@ -80,6 +80,7 @@ func _ready():
 	pickup_spawner.spawn_function = create_pickup
 	weapon_spawner.spawn_function = create_weapon
 	start_time = str(int(Time.get_unix_time_from_system()))
+	$FadeOut/ColorRect.modulate = Color.TRANSPARENT
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 	Lobby.player_disconnected.connect(player_quits)
@@ -906,6 +907,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			new_replay.store_string(JSON.stringify(action_timeline))
 			if multiplayer.is_server() and not sent_final_message:
 				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
+				animate_fade.rpc()
 				sent_final_message = true
 			#if multiplayer.multiplayer_peer != null:
 				#multiplayer.multiplayer_peer.close()
@@ -1168,7 +1170,7 @@ func create_toast_update(server_text : String, client_text : String, add_sound_e
 	new_toast.input_text = server_text if multiplayer.is_server() else client_text
 	new_toast.color = color
 	#print(server_text + " | " + client_text + " | " + str(color))
-	$HUDBase/Toasts.add_child(new_toast)
+	$HUDToasts/Toasts.add_child(new_toast)
 	if add_sound_effect:
 		_round_update.play()
 		pass
@@ -1212,6 +1214,12 @@ func reward_team(team_id):
 		GameSettings.winning_agents.append(ag_name_local)
 
 
+@rpc("authority", "call_local")
+func animate_fade():
+	var twe = create_tween()
+	twe.tween_property($FadeOut/ColorRect, "modulate", Color.WHITE, 2.5).from(Color.TRANSPARENT)
+
+
 @rpc("any_peer", "call_local", "reliable")
 func player_is_ready(id):
 	if id == 1:
@@ -1253,7 +1261,7 @@ func _on_pickup_spawner_despawned(node: Node) -> void:
 
 
 func _on_yes_forfeit_pressed() -> void:
-	if multiplayer.multiplayer_peer != null:
+	if multiplayer.has_multiplayer_peer():
 		multiplayer.multiplayer_peer.close()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
