@@ -1159,18 +1159,18 @@ func player_quits(peer_id):
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
 	if all_server_dead and all_client_dead:
 		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
-	elif all_server_dead or client_progress == 3:
+	if not all_client_dead and (all_server_dead or client_progress == ProgressParts.SURVIVORS_EXFILTRATED):
 		if all_server_dead:
 			create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
 		if multiplayer.is_server():
 			print("REWARDING CLIENT TEAM")
 			reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
-	if all_client_dead or server_progress == 3:
+	if not all_server_dead and (all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED):
 		if all_client_dead:
 			create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
 		print("REWARDING SERVER TEAM")
 		reward_team(1)
-	return all_server_dead or all_client_dead or server_progress == 3 or client_progress == 3
+	return all_server_dead or all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED or client_progress == ProgressParts.SURVIVORS_EXFILTRATED
 
 
 @rpc("authority", "reliable")
@@ -1181,9 +1181,7 @@ func reward_team(team_id):
 		if ag.state == Agent.States.DEAD: # only the survivors
 			continue
 		var ag_name_local = ag.name.split("_", true, 1)[1]
-		for check in Lobby.player_info.agents:
-			if check.name == ag_name_local:
-				check.mission_count += 1
+		GameSettings.winning_agents.append(ag_name_local)
 
 
 @rpc("any_peer", "call_local", "reliable")

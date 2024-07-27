@@ -11,9 +11,6 @@ extends ColorRect
 @onready var _review_items_list : ItemList = $ReviewScreen/AgentDetails/HBox/Items
 @onready var _review_weapons_list : ItemList = $ReviewScreen/AgentDetails/HBox/Weapons
 
-@onready var _review_save_agents : Button
-@onready var _review_recruit_new_agent : Button
-
 var review_selected_agent : int = -1
 
 var user_data = {}
@@ -29,10 +26,14 @@ func _ready() -> void:
 	$MainMenu.visible = true
 	load_user()
 	load_agents()
-	Lobby.player_info = {
-		name = user_data.name,
-		agents = agents,
-	}
+	if len(GameSettings.winning_agents) > 0:
+		for winner in GameSettings.winning_agents:
+			for check in agents:
+				if check.name == winner:
+					check.mission_count += 1
+					break
+		GameSettings.winning_agents = []
+		save_agents()
 	_populate_agent_list()
 	Lobby.player_connected.connect(_on_player_connect)
 	Lobby.player_disconnected.connect(_on_player_disconnect)
@@ -111,6 +112,10 @@ func _on_join_pressed() -> void:
 	_start_button.visible = false
 	GameSettings.other_player_id = 1
 	GameSettings.local_mode = false
+	Lobby.player_info = {
+		name = user_data.name,
+		agents = agents,
+	}
 	Lobby.join_game()
 	$MainMenu.visible = false
 	$HostScreen.visible = true
@@ -122,7 +127,10 @@ func _on_host_pressed() -> void:
 	_ready_button.visible = false
 	_start_button.visible = true
 	GameSettings.local_mode = false
-
+	Lobby.player_info = {
+		name = user_data.name,
+		agents = agents,
+	}
 	Lobby.create_game()
 	$HostScreen.visible = true
 
@@ -135,7 +143,7 @@ func _on_review_agents_pressed() -> void:
 func _populate_agent_list():
 	_player_agents.clear()
 	_review_agents_list.clear()
-	for agent in Lobby.player_info.agents:
+	for agent in agents:
 		_player_agents.add_item(agent.name)
 		_review_agents_list.add_item(agent.name)
 
