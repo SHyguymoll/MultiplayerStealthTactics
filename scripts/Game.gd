@@ -889,7 +889,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			if save_dir == null:
 				DirAccess.make_dir_absolute("user://replays")
 				save_dir.open("user://replays")
-			var new_replay = FileAccess.open(start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
+			var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
 			new_replay.store_string(JSON.stringify(action_timeline))
 			if multiplayer.is_server():
 				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO)
