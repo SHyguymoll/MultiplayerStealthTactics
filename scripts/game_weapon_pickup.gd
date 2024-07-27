@@ -18,15 +18,16 @@ func _ready():
 
 
 func _process(_d) -> void:
-	if generate_weapon and multiplayer.is_server():
-		var wep_id = attached_wep.split("_", true, 1)[1]
-		$"../..".weapon_spawner.spawn({
-			wep_id = wep_id,
-			wep_name = name,
-			loaded_ammo = GameRefs.WEP[wep_id].ammo,
-			reserve_ammo = GameRefs.WEP[wep_id].ammo * 3,
-		})
-		generate_weapon = false
+	if generate_weapon:
+		if multiplayer.is_server():
+			var wep_id = attached_wep.split("_", true, 1)[1]
+			$"../..".weapon_spawner.spawn({
+				wep_id = wep_id,
+				wep_name = name,
+				loaded_ammo = GameRefs.WEP[wep_id].ammo,
+				reserve_ammo = GameRefs.WEP[wep_id].ammo * 3,
+			})
+			generate_weapon = false
 		return
 	if GameRefs.get_weapon_node(attached_wep) == null:
 		return

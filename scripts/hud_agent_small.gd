@@ -38,6 +38,8 @@ func update_weapon_res(new_val):
 
 
 func _physics_process(delta: float) -> void:
+	if ref_ag == null:
+		return
 	if ref_ag.in_incapacitated_state() and not ref_ag.percieved_by_friendly:
 		_state_tex.texture = GameRefs.STE.unknown
 		return
