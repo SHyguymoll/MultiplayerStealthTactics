@@ -837,31 +837,23 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			if multiplayer.is_server():
 				track_objective_completion()
 			# create selectors and otherwise prepare for selection
-			var server_agent_count := 0
-			var client_agent_count := 0
-			var dead_server_agents := 0
-			var dead_client_agents := 0
+			var server_team_dead = true
+			var client_team_dead = true
 			for ag in ($Agents.get_children() as Array[Agent]):
-				if ag.player_id == 1:
-					server_agent_count += 1
-				else:
-					client_agent_count += 1
 				ag.action_done = Agent.ActionDoneness.NOT_DONE
 				if multiplayer.is_server():
 					set_agent_action.rpc(ag.name, [])
 				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
 					create_agent_selector(ag)
 					ag.flash_outline(Color.ORCHID)
-				if ag.state == Agent.States.DEAD:
+				if ag.state != Agent.States.DEAD:
 					if ag.player_id == 1:
-						dead_server_agents += 1
+						server_team_dead = false
 					else:
-						dead_client_agents += 1
+						client_team_dead = false
 			# checking win condition and stuff here
-			if not player_has_won(dead_server_agents == server_agent_count, dead_client_agents == client_agent_count):
+			if not player_has_won(server_team_dead, client_team_dead):
 				show_hud()
-				#if event occurred: TODO
-					#_round_update.play()
 				if $HUDSelectors.get_child_count() == 0 and check_incap:
 					_on_execute_pressed() # run the execute function since the player can't do anything
 			else:
