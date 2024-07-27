@@ -884,7 +884,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
 			new_replay.store_string(JSON.stringify(action_timeline))
 			if multiplayer.is_server():
-				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO)
+				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
 			multiplayer.multiplayer_peer.close()
 			$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
 			open_pause_menu()
@@ -1124,6 +1124,7 @@ func create_toast_update(server_text : String, client_text : String, add_sound_e
 	var new_toast : ToastMessage = toast_scene.instantiate()
 	new_toast.input_text = server_text if multiplayer.is_server() else client_text
 	new_toast.color = color
+	print(server_text + " | " + client_text + " | " + str(color))
 	$HUDBase/Toasts.add_child(new_toast)
 	if add_sound_effect:
 		_round_update.play()
@@ -1131,11 +1132,19 @@ func create_toast_update(server_text : String, client_text : String, add_sound_e
 
 
 func player_quits(peer_id):
+	if game_phase == GamePhases.COMPLETION or server_progress == 3 or client_progress == 3:
+		return
 	create_toast_update("ENEMY HAS FORFEITED, MISSION SUCCESS", "ENEMY HAS FORFEITED, MISSION SUCCESS", false)
 	_update_game_phase(GamePhases.COMPLETION)
 
 
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
+	if all_server_dead and all_client_dead:
+		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
+	elif all_server_dead:
+		create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
+	if all_client_dead:
+		create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
 	return all_server_dead or all_client_dead or server_progress == 3 or client_progress == 3
 
 
