@@ -118,6 +118,7 @@ var mark_for_drop := {}
 var mark_for_dead := false
 var try_grab_pickup := false
 var mark_for_grenade_throw := false
+var ungrabbable = false
 @export var step_seen : int = 0
 @export var noticed : int = 0
 
@@ -206,6 +207,7 @@ func perform_action():
 		GameActions.LOOK_AROUND:
 			target_direction = get_required_y_rotation(queued_action[1])
 		GameActions.CHANGE_ITEM:
+			ungrabbable = true
 			selected_item = queued_action[1]
 			if selected_item == -1:
 				return
@@ -381,7 +383,10 @@ func take_damage(amount : int, is_stun : bool = false):
 	if is_stun:
 		stun_health = max(0, stun_health - amount)
 		stun_time = 30 if stun_health > 0 else 300
-		_anim_state.travel("B_Hurt_Slammed")
+		if stun_health > 0:
+			_anim_state.travel("B_Hurt_Slammed")
+		else:
+			_anim_state.travel("B_Hurt_Collapse")
 		state = States.GRABBED
 		#queued_action.clear()
 	else:
@@ -393,7 +398,7 @@ func take_damage(amount : int, is_stun : bool = false):
 
 
 func select_hurt_animation():
-	if health == 0 or stun_health == 0:
+	if health == 0:
 		_anim_state.travel("B_Hurt_Collapse")
 		return
 	var cur_node = _anim_state.get_current_node()
@@ -479,7 +484,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 	if selected_item > -1 and held_items[selected_item] == "box":
 		_box_mesh.visible = true
 		_mesh.visible = false
-		target_visible_level = 0
+		target_visible_level = 1
 	else:
 		_box_mesh.visible = false
 		_mesh.visible = true

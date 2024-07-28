@@ -593,6 +593,12 @@ func determine_cqc_events():
 		if grabbee.in_incapacitated_state(): # don't grab people who're already on the ground
 			grabber._anim_state.travel("B_Stand_Attack_Whiff")
 			continue
+		if grabbee.selected_item > -1 and grabbee.held_items[grabbee.selected_item] == "box":
+			grabber._anim_state.travel("B_Stand_Attack_Whiff")  # don't grab boxes
+			continue
+		if grabbee.ungrabbable: # don't grab the ungrabbable
+			grabber._anim_state.travel("B_Stand_Attack_Whiff")
+			continue
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
 		grabbee.take_damage(3, true)
@@ -880,13 +886,14 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 						exfiltration_queue.append(actual_agent.name)
 			for agent_name in exfiltration_queue:
 				($Agents.get_node(str(agent_name)) as Agent).exfiltrate()
-			if multiplayer.is_server(): # more objective based updates here
-				track_objective_completion()
+			if multiplayer.is_server():
+				track_objective_completion() # objective based updates here
 			# create selectors and otherwise prepare for selection
 			var server_team_dead = true
 			var client_team_dead = true
 			for ag in ($Agents.get_children() as Array[Agent]):
 				ag.action_done = Agent.ActionDoneness.NOT_DONE
+				ag.ungrabbable = false
 				if multiplayer.is_server():
 					set_agent_action.rpc(ag.name, [])
 				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
