@@ -366,7 +366,14 @@ func _physics_process(delta: float) -> void:
 					match grenade.wep_id:
 						"grenade_frag":
 							print("KABOOM")
-							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 3.0, "grenade_frag")
+							for exploded in grenade._explosion_hitbox.get_overlapping_areas():
+								var attacked : Agent = exploded.get_parent()
+								if attacked.in_prone_state():
+									continue # prone agents dodge explosions for Reasons™
+								attacked.take_damage(5)
+								if multiplayer.is_server():
+									create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
+							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
 						"grenade_smoke":
 							print("FSSSSSH")
 						"grenade_noise":

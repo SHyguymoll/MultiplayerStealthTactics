@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://babrrxhvag7vl"]
+[gd_scene load_steps=19 format=3 uid="uid://babrrxhvag7vl"]
 
 [ext_resource type="Script" path="res://scripts/grenade.gd" id="1_an8ch"]
 [ext_resource type="Texture2D" uid="uid://rknp5rllix1t" path="res://assets/models/exports/textures/palettething.png" id="2_st031"]
@@ -218,6 +218,10 @@ properties/1/replication_mode = 2
 height = 0.111425
 radius = 0.066125
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_aeeos"]
+height = 3.0
+radius = 3.0
+
 [node name="Grenade" type="CharacterBody3D"]
 collision_layer = 32
 script = ExtResource("1_an8ch")
@@ -249,3 +253,10 @@ replication_config = SubResource("SceneReplicationConfig_75nm4")
 [node name="WorldCollision" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0284508, 0)
 shape = SubResource("CylinderShape3D_w0tjm")
+
+[node name="ExplosionHitbox" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 256
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ExplosionHitbox"]
+shape = SubResource("CylinderShape3D_aeeos")

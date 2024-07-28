@@ -1,6 +1,8 @@
 class_name Grenade
 extends CharacterBody3D
 
+@onready var _explosion_hitbox : Area3D = $ExplosionHitbox
+
 @export var server_knows : bool
 @export var client_knows : bool
 
