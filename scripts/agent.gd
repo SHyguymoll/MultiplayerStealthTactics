@@ -214,10 +214,11 @@ func perform_action():
 					state = States.STAND
 		GameActions.CHANGE_WEAPON:
 			selected_weapon = queued_action[1]
+			var actual_weapon = (held_weapons[selected_weapon] as String).split("_", true, 4)[3]
 			for weapon_mesh in _held_weapon_meshes:
 				_held_weapon_meshes[weapon_mesh].visible = false
-			if held_weapons[selected_weapon].wep_name != "fist":
-				_held_weapon_meshes[held_weapons[selected_weapon].wep_name].visible = true
+			if actual_weapon == "fist":
+				_held_weapon_meshes[actual_weapon].visible = true
 		GameActions.PICK_UP_WEAPON:
 			 # point to pickup before picking up pickup
 			var pickup = GameRefs.get_pickup_node(queued_action[1])
@@ -243,7 +244,7 @@ func perform_action():
 			state = States.USING_WEAPON
 			attack_step = AttackStep.ORIENTING
 		GameActions.RELOAD_WEAPON:
-			game_steps_since_execute = GameRefs.WEP[held_weapons[selected_weapon].wep_name].reload_time * -1
+			game_steps_since_execute = GameRefs.WEP[GameRefs.get_weapon_node(held_weapons[selected_weapon]).wep_id].reload_time * -1
 		GameActions.HALT:
 			if state in [States.RUN, States.WALK]:
 				_anim_state.travel("Stand")
@@ -533,10 +534,9 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			if game_steps_since_execute > 5:
 				action_complete()
 		GameActions.CHANGE_WEAPON:
-			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) == 0:
-				action_complete()
-			elif weapons_animation_blend.distance_squared_to(decide_weapon_blend()) < 0.01:
+			if weapons_animation_blend.distance_squared_to(decide_weapon_blend()) < 0.01:
 				weapons_animation_blend = decide_weapon_blend()
+				action_complete()
 		GameActions.USE_WEAPON: #TODO
 			match attack_step:
 				AttackStep.ORIENTING:
@@ -546,7 +546,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 						_attack_orient_transition()
 				AttackStep.ATTACKING:
 					visible_level = 100
-					match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
+					match GameRefs.WEP[GameRefs.get_weapon_node(held_weapons[selected_weapon]).wep_id].type:
 						GameRefs.WeaponTypes.THROWN:
 							if game_steps_since_execute == 30:
 								pass
@@ -589,7 +589,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			if game_steps_since_execute < -50:
 				weapons_animation_blend = weapons_animation_blend.lerp(Vector2.ONE, GENERAL_LERP_VAL)
 			if game_steps_since_execute == -20:
-				held_weapons[selected_weapon].reload_weapon()
+				GameRefs.get_weapon_node(held_weapons[selected_weapon]).reload_weapon()
 			if game_steps_since_execute > -20:
 				weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), GENERAL_LERP_VAL)
 			if game_steps_since_execute == 0:
@@ -601,7 +601,7 @@ func _attack_orient_transition():
 	game_steps_since_execute = 0
 	if _anim_state.get_current_node() == "Stand":
 		attack_step = AttackStep.ATTACKING
-		match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
+		match GameRefs.WEP[GameRefs.get_weapon_node(held_weapons[selected_weapon]).wep_id].type:
 			GameRefs.WeaponTypes.CQC:
 				state = States.CQC_GRAB
 			GameRefs.WeaponTypes.SMALL:
@@ -616,7 +616,7 @@ func _attack_orient_transition():
 			GameRefs.WeaponTypes.PLACED:
 				_anim_state.travel("Crouch")
 	elif _anim_state.get_current_node() == "Crouch":
-		match GameRefs.WEP[held_weapons[selected_weapon].wep_name].type:
+		match GameRefs.WEP[GameRefs.get_weapon_node(held_weapons[selected_weapon]).wep_id].type:
 			GameRefs.WeaponTypes.SMALL:
 				attack_step = AttackStep.ATTACKING
 				_anim_state.travel("B_Crouch_Attack_SmallArms")

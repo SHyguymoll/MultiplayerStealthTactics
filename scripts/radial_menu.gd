@@ -334,8 +334,9 @@ func button_menu_screen():
 				buttons[5] = ICONS.none
 
 			if not GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC):
-				if referenced_agent.held_weapons[
-						referenced_agent.selected_weapon].loaded_ammo == 0:
+				if GameRefs.get_weapon_node(
+						referenced_agent.held_weapons[
+							referenced_agent.selected_weapon]).loaded_ammo == 0:
 					buttons[5] = ICONS.reload_weapon
 
 			_ul.icon = buttons[0]

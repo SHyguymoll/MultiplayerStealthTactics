@@ -613,8 +613,8 @@ func determine_weapon_events():
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if agent.state != Agent.States.FIRE_GUN:
 			continue
-		agent.held_weapons[agent.selected_weapon].loaded_ammo -= 1
-		match agent.held_weapons[agent.selected_weapon].wep_id:
+		GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).loaded_ammo -= 1
+		match GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).wep_id:
 			"pistol":
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
 				create_sound_effect(agent.position, agent.player_id, 10, 0.25, 0.5, "pistol")
