@@ -301,7 +301,7 @@ func _physics_process(delta: float) -> void:
 				if len(agent.mark_for_drop) > 0 and multiplayer.is_server():
 					var new_drop = {
 						pos_x = agent.mark_for_drop.position.x,
-						pos_y = agent.mark_for_drop.position.y - 0.5,
+						pos_y = agent.mark_for_drop.position.y,
 						pos_z = agent.mark_for_drop.position.z,
 						server_knows = agent.player_id == 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
 						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
@@ -314,6 +314,22 @@ func _physics_process(delta: float) -> void:
 					if $Pickups.get_node_or_null(str(agent.queued_action[1])) != null:
 						$Pickups.get_node(str(agent.queued_action[1])).queue_free()
 					agent.try_grab_pickup = false
+				if multiplayer.is_server() and agent.mark_for_dead:
+					agent.mark_for_dead = false
+					var new_drop = {
+						pos_x = agent.mark_for_drop.position.x,
+						pos_y = agent.mark_for_drop.position.y,
+						pos_z = agent.mark_for_drop.position.z,
+						server_knows = agent.player_id == 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
+						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
+						wep_name = str(agent.mark_for_drop.wep_node),
+					}
+					for weapon in agent.held_weapons:
+						new_drop.server_knows = agent.player_id == 1 or $Weapons.get_node(str(weapon)).is_map_element()
+						new_drop.client_knows = agent.player_id != 1 or $Weapons.get_node(str(weapon)).is_map_element()
+						new_drop.wep_name = str(weapon)
+						pickup_spawner.spawn(new_drop)
+						new_drop.pos_y += 0.8
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
 			current_game_step += 1

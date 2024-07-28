@@ -114,6 +114,7 @@ enum States {
 @export var server_knows := false
 @export var client_knows := false
 var mark_for_drop := {}
+var mark_for_dead := false
 @export var try_grab_pickup := false
 
 enum AttackStep {
