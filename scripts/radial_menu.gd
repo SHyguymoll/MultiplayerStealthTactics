@@ -216,51 +216,51 @@ func determine_weapons():
 
 
 func determine_pickups():
-	if len(referenced_agent.detected.weapons) > 0:
-		_ul.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[0], "icon")
-		_ul_extra = referenced_agent.detected.weapons[0].name
+	if len(referenced_agent.detected_weapons) > 0:
+		_ul.icon = GameRefs.get_pickup_attribute(referenced_agent.detected_weapons[0], "icon")
+		_ul_extra = referenced_agent.detected_weapons[0].name
 	else:
 		_ul.icon = ICONS.none
 		_ul_extra = null
-	if len(referenced_agent.detected.weapons) > 1:
-		_u.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[1], "icon")
-		_u_extra = referenced_agent.detected.weapons[1].name
+	if len(referenced_agent.detected_weapons) > 1:
+		_u.icon = GameRefs.get_pickup_attribute(referenced_agent.detected_weapons[1], "icon")
+		_u_extra = referenced_agent.detected_weapons[1].name
 	else:
 		_u.icon = ICONS.none
 		_u_extra = null
-	if len(referenced_agent.detected.weapons) > 2:
-		_ur.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[2], "icon")
-		_ur_extra = referenced_agent.detected.weapons[2].name
+	if len(referenced_agent.detected_weapons) > 2:
+		_ur.icon = GameRefs.get_pickup_attribute(referenced_agent.detected_weapons[2], "icon")
+		_ur_extra = referenced_agent.detected_weapons[2].name
 	else:
 		_ur.icon = ICONS.none
 		_ur_extra = null
-	if len(referenced_agent.detected.weapons) > 3:
-		_l.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[3], "icon")
-		_l_extra = referenced_agent.detected.weapons[3].name
+	if len(referenced_agent.detected_weapons) > 3:
+		_l.icon = GameRefs.get_pickup_attribute(referenced_agent.detected_weapons[3], "icon")
+		_l_extra = referenced_agent.detected_weapons[3].name
 	else:
 		_l.icon = ICONS.none
 		_l_extra = null
-	if len(referenced_agent.detected.weapons) > 4:
-		_r.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[4], "icon")
-		_r_extra = referenced_agent.detected.weapons[4].name
+	if len(referenced_agent.detected_weapons) > 4:
+		_r.icon = GameRefs.get_pickup_attribute(referenced_agent.detected_weapons[4], "icon")
+		_r_extra = referenced_agent.detected_weapons[4].name
 	else:
 		_r.icon = ICONS.none
 		_r_extra = null
-	if len(referenced_agent.detected.weapons) > 5:
-		_dl.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[5], "icon")
-		_dl_extra = referenced_agent.detected.weapons[5].name
+	if len(referenced_agent.detected_weapons) > 5:
+		_dl.icon = GameRefs.get_pickup_attribute(referenced_agent.detected_weapons[5], "icon")
+		_dl_extra = referenced_agent.detected_weapons[5].name
 	else:
 		_dl.icon = ICONS.none
 		_dl_extra = null
-	if len(referenced_agent.detected.weapons) > 6:
-		_d.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[6], "icon")
-		_d_extra = referenced_agent.detected.weapons[6].name
+	if len(referenced_agent.detected_weapons) > 6:
+		_d.icon = GameRefs.get_pickup_attribute(referenced_agent.detected_weapons[6], "icon")
+		_d_extra = referenced_agent.detected_weapons[6].name
 	else:
 		_d.icon = ICONS.none
 		_d_extra = null
-	if len(referenced_agent.detected.weapons) > 7:
-		_dr.icon = GameRefs.get_pickup_attribute(referenced_agent.detected.weapons[7], "icon")
-		_dr_extra = referenced_agent.detected.weapons[7].name
+	if len(referenced_agent.detected_weapons) > 7:
+		_dr.icon = GameRefs.get_pickup_attribute(referenced_agent.detected_weapons[7], "icon")
+		_dr_extra = referenced_agent.detected_weapons[7].name
 	else:
 		_dr.icon = ICONS.none
 		_dr_extra = null
