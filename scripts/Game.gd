@@ -74,8 +74,7 @@ var end_time : String
 var sent_final_message = false
 var sent_reward = false
 
-func _ready():
-	# Preconfigure game.
+func _ready(): # Preconfigure game.
 	_radial_menu.visible = false
 	close_pause_menu()
 	ag_spawner.spawn_function = create_agent
@@ -91,10 +90,8 @@ func _ready():
 	Lobby.player_disconnected.connect(player_quits)
 
 
-# Called only on the server.
-func start_game():
-	# All peers are ready to receive RPCs in this scene.
-	await get_tree().create_timer(0.25).timeout #...after waiting for them to completely load in
+func start_game(): # Called only on the server.
+	await get_tree().create_timer(0.25).timeout # wait for peers to load in
 	ping.rpc()
 	server_populate_variables()
 	force_camera.rpc_id(
@@ -104,7 +101,6 @@ func start_game():
 	force_camera(
 		(game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position +
 		game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
-	#determine_nearby_pickups.rpc()
 	pass
 
 
@@ -130,7 +126,7 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.fov_target = new_fov
 
 
-func create_sound_effect(location : Vector3, player_id : int, lifetime : int, min_rad : float, max_rad : float, sound_id : String) -> void: #TODO
+func create_sound_effect(location : Vector3, player_id : int, lifetime : int, min_rad : float, max_rad : float, sound_id : String) -> void:
 	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
 	new_audio_event.position = location
 	new_audio_event.player_id = player_id
@@ -142,7 +138,7 @@ func create_sound_effect(location : Vector3, player_id : int, lifetime : int, mi
 	$AudioEvents.add_child(new_audio_event)
 
 
-func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void: #TODO
+func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void:
 	location.y = 3.0
 	var new_popup : GamePopup = popup_scene.instantiate()
 	new_popup.texture = texture
@@ -160,8 +156,6 @@ func update_text() -> void:
 
 func determine_sights():
 	for agent in ($Agents.get_children() as Array[Agent]):
-		if not agent.is_multiplayer_authority():
-			continue
 		var previously_detected = agent.detected.duplicate(true)
 		for detected in agent._eyes.get_overlapping_areas():
 			var par = detected.get_parent()
@@ -195,7 +189,7 @@ func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_leve
 func try_see_agent(spotter : Agent, spottee : Agent):
 	if spottee in spotter.detected:
 		return
-	if spotter.player_id == spottee.player_id and not spottee.in_incapacitated_state(): # that's your team, and they're fine
+	if spotter.player_id == spottee.player_id: # skip your team
 		return
 	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level)
 	if sight_chance > 0.7: # seent it
@@ -338,10 +332,10 @@ func _physics_process(delta: float) -> void:
 					agent.held_weapons.clear()
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
+			#if multiplayer.is_server():
 			current_game_step += 1
 			determine_sights()
 			determine_sounds()
-			#determine_nearby_pickups()
 			determine_indicator_removals()
 			if multiplayer.is_server():
 				for agent in ($Agents.get_children() as Array[Agent]):
@@ -463,20 +457,6 @@ func server_populate_variables(): #TODO
 			game_map.objective_params
 
 
-#@rpc("authority", "call_local", "reliable")
-#func create_all_raycasts():
-	#for agent_block in server_agents.keys():
-		#var agent = server_agents[agent_block]["agent_node"]
-		#for cli_agent_block in client_agents.keys():
-			#var cli_agent = client_agents[cli_agent_block]["agent_node"]
-			#var new_tracking_ray = tracking_raycast3d_scene.instantiate()
-			#new_tracking_ray.source = agent
-			#new_tracking_ray.sink = cli_agent
-			#new_tracking_ray.name = agent.name + "|" + cli_agent.name
-			#$RayCasts.add_child(new_tracking_ray)
-			#print("created ray ", new_tracking_ray)
-
-
 func append_action_timeline(agent : Agent):
 	if not action_timeline.has(current_game_step):
 		action_timeline[current_game_step] = {}
@@ -487,7 +467,7 @@ func append_action_timeline(agent : Agent):
 func ping():
 	print("{0}: pong!".format([multiplayer.multiplayer_peer.get_unique_id()]))
 
-#@rpc("authority", "call_local", "reliable")
+
 func create_agent(data) -> Agent: #TODO
 	var new_agent : Agent = agent_scene.instantiate()
 	new_agent.name = str(data.player_id) + "_" + str(data.agent_stats.name)
@@ -522,7 +502,6 @@ func create_agent(data) -> Agent: #TODO
 		new_agent.held_weapons.append(weapon_data.wep_name)
 	new_agent.visible = false
 	if multiplayer.get_unique_id() == data.player_id:
-		#new_agent.visible = true
 		if multiplayer.get_unique_id() == 1:
 			new_agent.server_knows = true
 		else:
@@ -652,7 +631,6 @@ func determine_weapon_events():
 	for attacker in (attackers.keys() as Array[Agent]):
 		attacker.state = Agent.States.USING_WEAPON
 		for hit in attackers[attacker]:
-			#create_popup(GameRefs.POPUP.spotted, hit[1], true)
 			if hit[0] == null: # hit a wall, make a sound event on the wall
 				create_sound_effect(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
 			else:
@@ -710,8 +688,7 @@ func show_hud():
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = _radial_menu.referenced_agent
 	_radial_menu.referenced_agent = null
-	# need to remove indicator if created
-	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
+	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)): # remove prev indicator
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
 	set_agent_action.rpc(ref_ag.name, decision_array)
@@ -767,7 +744,6 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = _radial_menu.referenced_agent
 	_radial_menu.referenced_agent = null
-	# need to remove indicator if created
 	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
@@ -802,7 +778,6 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = _radial_menu.referenced_agent
 	_radial_menu.referenced_agent = null
-	# need to remove indicator if created
 	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
@@ -848,8 +823,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			_phase_label.text = "SELECT ACTIONS"
 			_execute_button.disabled = false
 			_execute_button.text = "EXECUTE INSTRUCTIONS"
-			if multiplayer.is_server():
-				# update exfiltrations
+			if multiplayer.is_server(): # update exfiltrations
 				if server_progress == ProgressParts.ITEM_HELD:
 					var can_exfil = false
 					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
@@ -900,8 +874,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 						exfiltration_queue.append(actual_agent.name)
 			for agent_name in exfiltration_queue:
 				($Agents.get_node(str(agent_name)) as Agent).exfiltrate()
-			# more objective based updates here
-			if multiplayer.is_server():
+			if multiplayer.is_server(): # more objective based updates here
 				track_objective_completion()
 			# create selectors and otherwise prepare for selection
 			var server_team_dead = true
@@ -918,11 +891,10 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 						server_team_dead = false
 					else:
 						client_team_dead = false
-			# checking win condition and stuff here
-			if not player_has_won(server_team_dead, client_team_dead):
+			if not player_has_won(server_team_dead, client_team_dead): # win conditions
 				show_hud()
 				if $HUDSelectors.get_child_count() == 0 and check_incap:
-					_on_execute_pressed() # run the execute function since the player can't do anything
+					_on_execute_pressed() # run execute since the player can't do anything
 			else:
 				_update_game_phase(GamePhases.COMPLETION)
 		GamePhases.EXECUTION:
@@ -948,8 +920,6 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
 				animate_fade.rpc()
 				sent_final_message = true
-			#if multiplayer.multiplayer_peer != null:
-				#multiplayer.multiplayer_peer.close()
 			$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
 			open_pause_menu()
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
@@ -1098,126 +1068,11 @@ func set_client_progress(val : ProgressParts):
 	client_progress = val
 
 
-#func enemy_flag_completion(): #TODO redo this with the proper checks
-	#match server_progress:
-		#-1:
-			#create_toast_update.rpc(GameRefs.TXT.tf_intro, GameRefs.TXT.tf_intro, true)
-			#server_progress = 0
-		#0:
-			#for ag in ($Agents.get_children() as Array[Agent]):
-				#if ag.player_id != 1:
-					#continue
-				#if ag.state == Agent.States.DEAD:
-					#continue
-				#if "map_flag_client" in ag.held_weapons:
-					#create_toast_update.rpc(GameRefs.TXT.tf_y_get, GameRefs.TXT.tf_t_get, true)
-					#server_progress = 1
-					#break
-		#1:
-			#var flag_still_held = false
-			#var flag_captured = false
-			#for ag in ($Agents.get_children() as Array[Agent]):
-				#if ag.player_id != 1:
-					#continue
-				#if ag.state == Agent.States.DEAD:
-					#continue
-				#if "map_flag_client" in ag.held_weapons:
-					#flag_still_held = true
-					#if ag.state == Agent.States.EXFILTRATED:
-						#flag_captured = true
-					#break
-			#if not flag_still_held:
-				#create_toast_update.rpc(GameRefs.TXT.tf_y_lost, GameRefs.TXT.tf_t_lost, true)
-				#server_progress = 0
-				#return
-			#var agents_remain = false
-			#for ag in ($Agents.get_children() as Array[Agent]):
-				#if ag.player_id != 1:
-					#continue
-				#if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
-					#agents_remain = true
-					#break
-			#if flag_captured:
-				#if agents_remain:
-					#create_toast_update.rpc(GameRefs.TXT.tf_y_cap_agents_remain, GameRefs.TXT.tf_t_cap_agents_remain, true)
-					#server_progress = 2
-				#else:
-					#create_toast_update.rpc(GameRefs.TXT.tf_y_cap_left, GameRefs.TXT.tf_t_cap_left, true)
-					#server_progress = 3
-		#2:
-			#var agents_remain = false
-			#for ag in ($Agents.get_children() as Array[Agent]):
-				#if ag.player_id != 1:
-					#continue
-				#if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
-					#agents_remain = true
-					#break
-			#if not agents_remain:
-				#create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
-				#server_progress = 3
-	#match client_progress:
-		#-1:
-			#client_progress = 0
-		#0:
-			#for ag in ($Agents.get_children() as Array[Agent]):
-				#if ag.player_id == 1:
-					#continue
-				#if ag.state == Agent.States.DEAD:
-					#continue
-				#if "map_flag_server" in ag.held_weapons:
-					#create_toast_update.rpc(GameRefs.TXT.tf_t_get, GameRefs.TXT.tf_y_get, true)
-					#client_progress = 1
-					#break
-		#1:
-			#var flag_still_held = false
-			#var flag_captured = false
-			#for ag in ($Agents.get_children() as Array[Agent]):
-				#if ag.player_id == 1:
-					#continue
-				#if ag.state == Agent.States.DEAD:
-					#continue
-				#if "map_flag_server" in ag.held_weapons:
-					#flag_still_held = true
-					#if ag.state == Agent.States.EXFILTRATED:
-						#flag_captured = true
-					#break
-			#if not flag_still_held:
-				#create_toast_update.rpc(GameRefs.TXT.tf_t_lost, GameRefs.TXT.tf_y_lost, true)
-				#client_progress = 0
-				#return
-			#var agents_remain = false
-			#for ag in ($Agents.get_children() as Array[Agent]):
-				#if ag.player_id == 1:
-					#continue
-				#if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
-					#agents_remain = true
-					#break
-			#if flag_captured:
-				#if agents_remain:
-					#create_toast_update.rpc(GameRefs.TXT.tf_t_cap_agents_remain, GameRefs.TXT.tf_y_cap_agents_remain, true)
-					#client_progress = 2
-				#else:
-					#create_toast_update.rpc(GameRefs.TXT.tf_t_cap_left, GameRefs.TXT.tf_y_cap_left, true)
-					#client_progress = 3
-		#2:
-			#var agents_remain = false
-			#for ag in ($Agents.get_children() as Array[Agent]):
-				#if ag.player_id == 1:
-					#continue
-				#if not ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
-					#agents_remain = true
-					#break
-			#if not agents_remain:
-				#create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
-				#client_progress = 3
-
-
 @rpc("authority", "call_local")
 func create_toast_update(server_text : String, client_text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
 	var new_toast : ToastMessage = toast_scene.instantiate()
 	new_toast.input_text = server_text if multiplayer.is_server() else client_text
 	new_toast.color = color
-	#print(server_text + " | " + client_text + " | " + str(color))
 	$HUDToasts/Toasts.add_child(new_toast)
 	if add_sound_effect:
 		_round_update.play()
@@ -1231,7 +1086,6 @@ func player_quits(_peer_id):
 	_update_game_phase(GamePhases.COMPLETION)
 
 
-
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
 	if all_server_dead and all_client_dead:
 		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
@@ -1241,7 +1095,6 @@ func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
 		if multiplayer.is_server() and not sent_reward:
 			print("REWARDING CLIENT TEAM")
 			reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
-			#set_client_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
 			sent_reward = true
 	if not all_server_dead and (all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED):
 		if all_client_dead:
