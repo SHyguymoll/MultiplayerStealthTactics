@@ -29,7 +29,6 @@ layout_mode = 2
 size_flags_vertical = 3
 theme = ExtResource("5_jfh8m")
 step = 1.0
-fill_mode = 3
 show_percentage = false
 
 [node name="StunHealth" type="ProgressBar" parent="Textures"]
@@ -37,7 +36,6 @@ layout_mode = 2
 size_flags_vertical = 3
 theme = ExtResource("5_jfh8m")
 step = 1.0
-fill_mode = 3
 show_percentage = false
 
 [node name="Equipped" type="HBoxContainer" parent="Textures"]
