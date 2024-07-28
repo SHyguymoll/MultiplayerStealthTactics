@@ -216,10 +216,10 @@ func perform_action():
 					state = States.STAND
 		GameActions.CHANGE_WEAPON:
 			selected_weapon = queued_action[1]
-			var actual_weapon = (held_weapons[selected_weapon] as String).split("_", true, 4)[3]
+			var actual_weapon = (held_weapons[selected_weapon] as String).split("_", true, 3)[3]
 			for weapon_mesh in _held_weapon_meshes:
 				_held_weapon_meshes[weapon_mesh].visible = false
-			if actual_weapon == "fist":
+			if actual_weapon != "fist":
 				_held_weapon_meshes[actual_weapon].visible = true
 		GameActions.PICK_UP_WEAPON:
 			 # point to pickup before picking up pickup
@@ -502,10 +502,8 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			States.CRAWL:
 				velocity /= 2.5
 				visible_level += 10
-		#if _nav_agent.distance_to_target() < velocity.length(): # to always land on target
-			#velocity = velocity.normalized() * _nav_agent.distance_to_target()
 		move_and_slide()
-		if position.distance_to(queued_action[1]) < 0.3: #movement_speed / (1 if state == States.RUN else 2 if state in [States.WALK, States.CROUCH_WALK] else 2.5):
+		if position.distance_to(queued_action[1]) < 0.3 or game_steps_since_execute > 10*60:
 			position = _nav_agent.target_position
 			match state:
 				States.WALK, States.RUN:
@@ -530,8 +528,6 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 		if grabbing_agent != null:
 			global_position = grabbing_agent._cqc_anim_helper.global_position
 			global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
-	if game_steps_since_execute > 20*60:
-		action_complete(false, false)
 	if len(queued_action) == 0:
 		action_complete(true, true, single_mode)
 		return
@@ -668,10 +664,3 @@ func _on_animation_finished(anim_name: StringName) -> void:
 			action_complete()
 		GameActions.USE_WEAPON when anim_name in ["B_Crouch_Attack_SmallArms", "B_Crouch_Attack_BigArms", "B_Crouch_Attack_Grenade"]:
 			action_complete()
-
-
-#func _on_animation_started(anim_name: StringName) -> void:
-	#if anim_name == "B_Dead":
-		#agent_died.emit(self)
-	#if len(queued_action) == 0:
-		#return

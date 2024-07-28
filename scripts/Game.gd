@@ -128,6 +128,7 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.fov_target = new_fov
 
 
+@rpc("authority", "call_local", "reliable")
 func create_sound_effect(location : Vector3, player_id : int, lifetime : int, min_rad : float, max_rad : float, sound_id : String) -> void:
 	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
 	new_audio_event.position = location
@@ -237,13 +238,14 @@ func determine_sounds():
 				continue # skip already heard sounds
 			create_popup(GameRefs.POPUP.sound_unknown, audio_event.global_position)
 			audio_event.play_sound()
-		match agent.state:
-			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
-				create_sound_effect(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
-			Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
-				create_sound_effect(agent.position, agent.player_id, 13, 1.5, 2.75, "ag_step_loud")
-			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
-				create_sound_effect(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
+		if multiplayer.is_server():
+			match agent.state:
+				Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
+					create_sound_effect.rpc(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
+				Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
+					create_sound_effect.rpc(agent.position, agent.player_id, 13, 1.5, 2.75, "ag_step_loud")
+				Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
+					create_sound_effect.rpc(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
 		audio_event.update()
 
@@ -349,6 +351,7 @@ func _physics_process(delta: float) -> void:
 						pos_z = agent.position.z,
 						wep_name = try_name,
 						wep_id = GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).wep_id,
+						player_id = agent.player_id,
 						server_knows = agent.server_knows,
 						client_knows = agent.client_knows,
 						end_pos_x = agent.queued_action[1].x,
@@ -363,12 +366,14 @@ func _physics_process(delta: float) -> void:
 					match grenade.wep_id:
 						"grenade_frag":
 							print("KABOOM")
+							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 3.0, "grenade_frag")
 						"grenade_smoke":
 							print("FSSSSSH")
 						"grenade_noise":
-							print("WEEWOOWEEWOOWEEWOO")
-					grenades_in_existence.erase(grenade.name)
-					grenade.queue_free()
+							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
+					if multiplayer.is_server():
+						grenades_in_existence.erase(grenade.name)
+						grenade.queue_free()
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
 			#if multiplayer.is_server():
@@ -567,6 +572,7 @@ func create_grenade(data) -> Grenade:
 	new_grenade.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
 	new_grenade.name = data.wep_name
 	new_grenade.wep_id = data.wep_id
+	new_grenade.player_id = data.player_id
 	new_grenade.server_knows = data.server_knows
 	new_grenade.client_knows = data.client_knows
 	new_grenade.landing_position = Vector3(data.end_pos_x, data.end_pos_y, data.end_pos_z)
@@ -655,10 +661,12 @@ func determine_weapon_events():
 		match GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).wep_id:
 			"pistol":
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
-				create_sound_effect(agent.position, agent.player_id, 10, 0.25, 0.5, "pistol")
+				if multiplayer.is_server():
+					create_sound_effect.rpc(agent.position, agent.player_id, 10, 0.25, 0.5, "pistol")
 			"rifle":
 				attackers[agent] = [return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 0.2)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -0.2)),]
-				create_sound_effect(agent.position, agent.player_id, 10, 0.5, 1.5, "rifle")
+				if multiplayer.is_server():
+					create_sound_effect.rpc(agent.position, agent.player_id, 10, 0.5, 1.5, "rifle")
 			"shotgun":
 				attackers[agent] = [
 					return_attacked(
@@ -674,15 +682,18 @@ func determine_weapon_events():
 						slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)
 						),
 					]
-				create_sound_effect(agent.position, agent.player_id, 15, 2.25, 3.5, "shotgun")
+				if multiplayer.is_server():
+					create_sound_effect.rpc(agent.position, agent.player_id, 15, 2.25, 3.5, "shotgun")
 	for attacker in (attackers.keys() as Array[Agent]):
 		attacker.state = Agent.States.USING_WEAPON
 		for hit in attackers[attacker]:
 			if hit[0] == null: # hit a wall, make a sound event on the wall
-				create_sound_effect(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
+				if multiplayer.is_server():
+					create_sound_effect.rpc(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
 			else:
 				if not (hit[0] as Area3D).get_parent() is Agent: # still hit a wall
-					create_sound_effect(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
+					if multiplayer.is_server():
+						create_sound_effect.rpc(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
 				else: # actually hit an agent
 					var attacked : Agent = (hit[0] as Area3D).get_parent()
 					if attacker.player_id == attacked.player_id:
@@ -692,7 +703,8 @@ func determine_weapon_events():
 					if attacked.in_prone_state():
 						continue # skip prone agents
 					attacked.take_damage(GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"))
-					create_sound_effect(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
+					if multiplayer.is_server():
+						create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 
 
 func _hud_agent_details_actions(agent_selector : AgentSelector):

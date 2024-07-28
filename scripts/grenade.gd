@@ -10,6 +10,7 @@ extends CharacterBody3D
 var start_position : Vector3
 var landing_position : Vector3
 
+var player_id : int
 var wep_id : String
 
 func _ready() -> void:
@@ -30,6 +31,6 @@ func _tick() -> void:
 	visible = should_be_visible()
 	boom_time = boom_time - 1
 	global_position = start_position.lerp(landing_position, clamp(float(30 - boom_time)/30.0, 0.0, 1.0))
-	if multiplayer.is_server() and boom_time < -100:
+	if boom_time == -100:
 		explode = true
 

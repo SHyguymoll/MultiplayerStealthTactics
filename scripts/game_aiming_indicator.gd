@@ -37,9 +37,9 @@ func _on_animation_changed() -> void:
 func _physics_process(_d: float) -> void: #TODO
 	if not ind_set:
 		var ray_len = 10
-		if GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC):
+		if referenced_agent.queued_action[0] == Agent.GameActions.USE_WEAPON and GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC) or referenced_agent.queued_action[0] in [Agent.GameActions.LOOK_AROUND, Agent.GameActions.DROP_WEAPON]:
 			ray_len = 1
-		if GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.THROWN):
+		if referenced_agent.queued_action[0] == Agent.GameActions.USE_WEAPON and GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.THROWN):
 			ray_len = 5
 		var final_position = Vector2(
 			(_game_camera.position.x - referenced_agent.global_position.x),
