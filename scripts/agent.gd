@@ -419,7 +419,7 @@ func exfiltrate():
 
 
 func _physics_process(_d: float) -> void:
-	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, GENERAL_LERP_VAL)
+	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, GENERAL_LERP_VAL / 3.0)
 	#$DebugLabel3D.text = str(target_visible_level) + "\n" + str(_pickup_range.get_overlapping_areas())
 	if not in_incapacitated_state():
 		var detected_weapons = []
