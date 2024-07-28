@@ -705,7 +705,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme = ExtResource("1_s0wmi")
 theme_override_font_sizes/font_size = 32
-placeholder_text = "enter ip here..."
+placeholder_text = "127.0.0.1"
 
 [node name="ReviewAgents" type="Button" parent="MainMenu/VBoxContainer"]
 layout_mode = 2

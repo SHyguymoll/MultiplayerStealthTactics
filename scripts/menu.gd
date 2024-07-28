@@ -109,9 +109,7 @@ func load_agents():
 
 func _on_join_pressed() -> void:
 	if $MainMenu/VBoxContainer/JoinH/LineEdit.text.is_empty():
-		$MainMenu/VBoxContainer/JoinH/Join.text = "ENTER IP"
-		$MainMenu/TextChangeTimer.start()
-		return
+		$MainMenu/VBoxContainer/JoinH/LineEdit.text = $MainMenu/VBoxContainer/JoinH/LineEdit.placeholder_text
 	$HostScreen/Label.text = "Waiting for Host..."
 	_ready_button.visible = true
 	_start_button.visible = false

@@ -1,10 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=11 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
 [ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
 [ext_resource type="PackedScene" uid="uid://mr6n3d2nksvr" path="res://scenes/maps/game_map.tscn" id="2_ow13f"]
 [ext_resource type="PackedScene" uid="uid://d4hiq2jbaabj5" path="res://scenes/hud_radial_menu.tscn" id="2_xp2mg"]
 [ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="5_b0o1h"]
+[ext_resource type="AudioStream" uid="uid://1fq0sr4rihl0" path="res://assets/sounds/music/Mission In Progress.wav" id="6_cnxum"]
 [ext_resource type="AudioStream" uid="uid://duphq4x6qqx0h" path="res://assets/sounds/objective/round_update.wav" id="7_t43ju"]
 [ext_resource type="AudioStream" uid="uid://dlgqsvrw4auka" path="res://assets/sounds/objective/actions_submitted.wav" id="8_ujb0t"]
 [ext_resource type="AudioStream" uid="uid://dkvuukd233rug" path="res://assets/sounds/objective/action_stepped.wav" id="9_1bflo"]
@@ -93,6 +94,7 @@ offset_right = 143.0
 offset_bottom = 163.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.811765, 0, 0.811765, 0.235294)
 
 [node name="CurrentPhase" type="Label" parent="PauseMenu/ColorRect"]
@@ -121,6 +123,7 @@ offset_right = 48.5
 offset_bottom = 111.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 alignment = 1
 
 [node name="YesForfeit" type="Button" parent="PauseMenu/ColorRect/VBoxContainer"]
@@ -132,6 +135,7 @@ text = "YES"
 
 [node name="HSeparator" type="HSeparator" parent="PauseMenu/ColorRect/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 30
 
 [node name="NoForfeit" type="Button" parent="PauseMenu/ColorRect/VBoxContainer"]
@@ -165,6 +169,7 @@ offset_right = 553.0
 offset_bottom = 250.0
 grow_vertical = 2
 size_flags_horizontal = 0
+mouse_filter = 2
 theme = ExtResource("5_b0o1h")
 
 [node name="HUDBase" type="CanvasLayer" parent="."]
@@ -176,6 +181,7 @@ anchor_bottom = 1.0
 offset_top = -196.0
 offset_right = 612.0
 grow_vertical = 0
+mouse_filter = 2
 
 [node name="Execute" type="Button" parent="HUDBase"]
 anchors_preset = 3
@@ -223,6 +229,7 @@ autowrap_mode = 2
 offset_top = 50.0
 offset_right = 512.0
 offset_bottom = 98.0
+mouse_filter = 2
 theme = ExtResource("5_b0o1h")
 max_value = 3.0
 show_percentage = false
@@ -231,6 +238,7 @@ show_percentage = false
 offset_top = 105.0
 offset_right = 512.0
 offset_bottom = 153.0
+mouse_filter = 2
 theme = ExtResource("5_b0o1h")
 max_value = 3.0
 show_percentage = false
@@ -245,10 +253,16 @@ position = Vector2(-60, -60)
 [node name="HUDSelectors" type="CanvasLayer" parent="."]
 layer = 5
 
+[node name="Music" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_cnxum")
+volume_db = -20.0
+autoplay = true
+
 [node name="SoundEffects" type="Node" parent="."]
 
 [node name="RoundUpdate" type="AudioStreamPlayer" parent="SoundEffects"]
 stream = ExtResource("7_t43ju")
+max_polyphony = 3
 
 [node name="ActionsSubmitted" type="AudioStreamPlayer" parent="SoundEffects"]
 stream = ExtResource("8_ujb0t")
