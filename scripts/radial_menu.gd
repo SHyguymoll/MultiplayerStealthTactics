@@ -4,6 +4,7 @@ extends Node2D
 signal decision_made(decision_array : Array)
 signal movement_decision_made(decision_array : Array)
 signal aiming_decision_made(decision_array : Array)
+signal no_decision_made()
 
 const TWEEN_TIME = 0.2
 const ICON_DIST = 32
@@ -398,6 +399,7 @@ func _button_pressed_metadata(button : Button, extra):
 		ICONS.none:
 			_action_can.play()
 			button_collapse_animation()
+			no_decision_made.emit()
 		ICONS.cancel_back:
 			if current_screen in ["swap_item", "menu_weapon"]:
 				_menu_nav.play()
@@ -414,6 +416,7 @@ func _button_pressed_metadata(button : Button, extra):
 			else:
 				_action_can.play()
 				button_collapse_animation()
+				no_decision_made.emit()
 		ICONS.swap_item:
 			_menu_nav.play()
 			current_screen = "swap_item"

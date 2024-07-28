@@ -310,4 +310,5 @@ replication_config = SubResource("SceneReplicationConfig_pu7ty")
 [connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
 [connection signal="decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
 [connection signal="movement_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_movement_decision_made"]
+[connection signal="no_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_no_decision_made"]
 [connection signal="timeout" from="ColdBootTimer" to="." method="_on_cold_boot_timer_timeout"]

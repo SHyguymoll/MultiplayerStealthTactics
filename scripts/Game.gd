@@ -685,7 +685,8 @@ func _hud_agent_details_actions(agent_selector : AgentSelector):
 	_radial_menu.referenced_agent = agent
 	_radial_menu.position = agent_selector.position
 	_radial_menu.init_menu()
-	pass
+	_execute_button.visible = false
+	_execute_button.disabled = true
 
 
 func hide_hud():
@@ -759,6 +760,8 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
 	update_text()
+	_execute_button.visible = true
+	_execute_button.disabled = false
 
 
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
@@ -792,6 +795,8 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
 	update_text()
+	_execute_button.visible = true
+	_execute_button.disabled = false
 
 
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
@@ -824,6 +829,13 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
 	update_text()
+	_execute_button.visible = true
+	_execute_button.disabled = false
+
+
+func _on_radial_menu_no_decision_made() -> void:
+	_execute_button.visible = true
+	_execute_button.disabled = false
 
 
 @rpc("authority", "call_local", "reliable")
