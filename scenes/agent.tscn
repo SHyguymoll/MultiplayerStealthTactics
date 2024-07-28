@@ -78,18 +78,15 @@ properties/15/replication_mode = 1
 properties/16/path = NodePath(".:held_items")
 properties/16/spawn = true
 properties/16/replication_mode = 1
-properties/17/path = NodePath(".:try_grab_pickup")
+properties/17/path = NodePath(".:held_weapons")
 properties/17/spawn = true
 properties/17/replication_mode = 1
-properties/18/path = NodePath(".:held_weapons")
+properties/18/path = NodePath("Agent/Box:visible")
 properties/18/spawn = true
 properties/18/replication_mode = 1
-properties/19/path = NodePath("Agent/Box:visible")
+properties/19/path = NodePath("Agent/game_rig/Skeleton3D/Mesh:visible")
 properties/19/spawn = true
 properties/19/replication_mode = 1
-properties/20/path = NodePath("Agent/game_rig/Skeleton3D/Mesh:visible")
-properties/20/spawn = true
-properties/20/replication_mode = 1
 
 [sub_resource type="Animation" id="Animation_ftnhh"]
 resource_name = "B_Crawl"

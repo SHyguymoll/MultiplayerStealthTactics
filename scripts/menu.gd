@@ -41,10 +41,6 @@ func _ready() -> void:
 	pass
 
 
-#func _process(delta: float) -> void:
-	#$HostScreen/DebugPrint.text = str(GameSettings.selected_agents) + "\n" + str(GameSettings.client_selected_agents) + "\n" + str(Lobby.players)
-
-
 func save_user():
 	var file = FileAccess.open("user://player.mstd", FileAccess.WRITE)
 	var json_data = JSON.stringify(user_data)

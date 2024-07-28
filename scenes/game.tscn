@@ -34,6 +34,8 @@ spawn_path = NodePath("../Agents")
 
 [node name="Agents" type="Node3D" parent="."]
 
+[node name="Pickups" type="Node3D" parent="."]
+
 [node name="PickupSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
 spawn_path = NodePath("../Pickups")
@@ -44,7 +46,11 @@ spawn_path = NodePath("../Pickups")
 _spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
 spawn_path = NodePath("../Weapons")
 
-[node name="Pickups" type="Node3D" parent="."]
+[node name="Grenades" type="Node3D" parent="."]
+
+[node name="GrenadeSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+spawn_path = NodePath("../Grenades")
 
 [node name="World" type="Node3D" parent="."]
 
@@ -134,6 +140,7 @@ theme_override_font_sizes/font_size = 64
 text = "YES"
 
 [node name="HSeparator" type="HSeparator" parent="PauseMenu/ColorRect/VBoxContainer"]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 30

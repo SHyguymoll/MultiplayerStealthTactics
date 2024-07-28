@@ -115,7 +115,8 @@ enum States {
 @export var client_knows := false
 var mark_for_drop := {}
 var mark_for_dead := false
-@export var try_grab_pickup := false
+var try_grab_pickup := false
+var mark_for_grenade_throw := false
 
 enum AttackStep {
 	ORIENTING,
@@ -549,7 +550,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 					match GameRefs.WEP[GameRefs.get_weapon_node(held_weapons[selected_weapon]).wep_id].type:
 						GameRefs.WeaponTypes.THROWN:
 							if game_steps_since_execute == 30:
-								pass
+								mark_for_grenade_throw = true
 						GameRefs.WeaponTypes.PLACED:
 							if game_steps_since_execute == 20:
 								_anim_state.travel("Stand")

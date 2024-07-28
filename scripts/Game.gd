@@ -12,6 +12,7 @@ var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
 var popup_scene = preload("res://scenes/game_popup.tscn")
 var audio_event_scene = preload("res://scenes/game_audio_event.tscn")
 var weapon_pickup_scene = preload("res://scenes/weapon_pickup.tscn")
+var grenade_scene = preload("res://scenes/grenade.tscn")
 
 var server_ready_bool := false
 var client_ready_bool := false
@@ -54,6 +55,7 @@ enum ProgressParts {
 @onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
 @onready var pickup_spawner : MultiplayerSpawner = $PickupSpawner
 @onready var weapon_spawner : MultiplayerSpawner = $WeaponSpawner
+@onready var grenade_spawner : MultiplayerSpawner = $GrenadeSpawner
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu
@@ -79,6 +81,7 @@ func _ready():
 	ag_spawner.spawn_function = create_agent
 	pickup_spawner.spawn_function = create_pickup
 	weapon_spawner.spawn_function = create_weapon
+	grenade_spawner.spawn_function = create_grenade
 	start_time = str(int(Time.get_unix_time_from_system()))
 	$FadeOut/ColorRect.modulate = Color.TRANSPARENT
 	$HUDBase/HurryUp.visible = false
@@ -540,6 +543,16 @@ func create_weapon(data) -> GameWeapon:
 	new_weapon.loaded_ammo = data.loaded_ammo
 	new_weapon.reserve_ammo = data.reserve_ammo
 	return new_weapon
+
+
+func create_grenade(data) -> Grenade:
+	var new_grenade : Grenade = grenade_scene.instantiate()
+	new_grenade.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_grenade.server_knows = data.server_knows
+	new_grenade.client_knows = data.client_knows
+	new_grenade.name = data.wep_name
+	new_grenade.wep_id = data.wep_id
+	return new_grenade
 
 
 func create_pickup(data) -> WeaponPickup:
