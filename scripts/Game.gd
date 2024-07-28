@@ -325,12 +325,15 @@ func _physics_process(delta: float) -> void:
 						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
 						wep_name = str(agent.mark_for_drop.wep_node),
 					}
-					for weapon in agent.held_weapons:
+					for weapon in (agent.held_weapons as Array[String]):
+						if weapon.contains("fist"):
+							continue
 						new_drop.server_knows = agent.player_id == 1 or $Weapons.get_node(str(weapon)).is_map_element()
 						new_drop.client_knows = agent.player_id != 1 or $Weapons.get_node(str(weapon)).is_map_element()
 						new_drop.wep_name = str(weapon)
 						pickup_spawner.spawn(new_drop)
 						new_drop.pos_y += 0.8
+					agent.held_weapons.clear()
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
 			current_game_step += 1
