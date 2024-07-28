@@ -1099,21 +1099,40 @@ func player_quits(_peer_id):
 	_update_game_phase(GamePhases.COMPLETION)
 
 
+@rpc("authority", "call_remote", "reliable")
+func victory_jingle():
+	$Music/InProgress.stop()
+	$Music/Victory.play()
+
+
+@rpc("authority", "call_remote", "reliable")
+func failure_jingle():
+	$Music/InProgress.stop()
+	$Music/Failure.play()
+
+
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
 	if all_server_dead and all_client_dead:
 		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
+		failure_jingle()
+		failure_jingle.rpc()
 	if not all_client_dead and (all_server_dead or client_progress == ProgressParts.SURVIVORS_EXFILTRATED):
 		if all_server_dead:
 			create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
 		if multiplayer.is_server() and not sent_reward:
 			print("REWARDING CLIENT TEAM")
 			reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
+			victory_jingle.rpc()
+			failure_jingle()
 			sent_reward = true
 	if not all_server_dead and (all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED):
 		if all_client_dead:
 			create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
 		print("REWARDING SERVER TEAM")
 		reward_team(1)
+		victory_jingle()
+		if multiplayer.is_server():
+			failure_jingle.rpc()
 	return all_server_dead or all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED or client_progress == ProgressParts.SURVIVORS_EXFILTRATED
 
 
