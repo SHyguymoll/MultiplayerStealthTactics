@@ -158,6 +158,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ReviewScreen" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -623,7 +624,6 @@ item_5/text = ""
 item_5/icon = ExtResource("15_hj263")
 
 [node name="MainMenu" type="Control" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -668,23 +668,44 @@ anchor_left = 0.5
 anchor_top = 0.624
 anchor_right = 0.5
 anchor_bottom = 0.624
-offset_left = -248.0
+offset_left = -374.0
 offset_top = 0.407959
-offset_right = 248.0
+offset_right = 374.0
 offset_bottom = 304.408
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="Host" type="Button" parent="MainMenu/VBoxContainer"]
+[node name="HostH" type="HBoxContainer" parent="MainMenu/VBoxContainer"]
 layout_mode = 2
+
+[node name="Host" type="Button" parent="MainMenu/VBoxContainer/HostH"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme = ExtResource("1_s0wmi")
 text = "HOST GAME"
 
-[node name="Join" type="Button" parent="MainMenu/VBoxContainer"]
+[node name="CheckBox" type="CheckBox" parent="MainMenu/VBoxContainer/HostH"]
 layout_mode = 2
 theme = ExtResource("1_s0wmi")
+theme_override_constants/h_separation = 10
+text = "LAN?"
+
+[node name="JoinH" type="HBoxContainer" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+
+[node name="Join" type="Button" parent="MainMenu/VBoxContainer/JoinH"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
 text = "JOIN GAME"
+
+[node name="LineEdit" type="LineEdit" parent="MainMenu/VBoxContainer/JoinH"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 32
+placeholder_text = "enter ip here..."
 
 [node name="ReviewAgents" type="Button" parent="MainMenu/VBoxContainer"]
 layout_mode = 2
@@ -712,7 +733,7 @@ one_shot = true
 [connection signal="pressed" from="ReviewScreen/FireAgent" to="." method="_on_fire_agent_pressed"]
 [connection signal="item_selected" from="ReviewScreen/AgentDetails/HBox/Items" to="." method="_on_items_item_selected"]
 [connection signal="item_selected" from="ReviewScreen/AgentDetails/HBox/Weapons" to="." method="_on_weapons_item_selected"]
-[connection signal="pressed" from="MainMenu/VBoxContainer/Host" to="." method="_on_host_pressed"]
-[connection signal="pressed" from="MainMenu/VBoxContainer/Join" to="." method="_on_join_pressed"]
+[connection signal="pressed" from="MainMenu/VBoxContainer/HostH/Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="MainMenu/VBoxContainer/JoinH/Join" to="." method="_on_join_pressed"]
 [connection signal="pressed" from="MainMenu/VBoxContainer/ReviewAgents" to="." method="_on_review_agents_pressed"]
 [connection signal="timeout" from="MainMenu/TextChangeTimer" to="." method="_on_text_change_timer_timeout"]

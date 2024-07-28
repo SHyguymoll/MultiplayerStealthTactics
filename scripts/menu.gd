@@ -24,6 +24,7 @@ func _ready() -> void:
 	$SettingsScreen.visible = false
 	$ReviewScreen.visible = false
 	$MainMenu.visible = true
+	$MainMenu/VBoxContainer/HostH/CheckBox.button_pressed = false
 	load_user()
 	load_agents()
 	if len(GameSettings.winning_agents) > 0:
@@ -107,36 +108,45 @@ func load_agents():
 
 
 func _on_join_pressed() -> void:
+	if $MainMenu/VBoxContainer/JoinH/LineEdit.text.is_empty():
+		$MainMenu/VBoxContainer/JoinH/Join.text = "ENTER IP"
+		$MainMenu/TextChangeTimer.start()
+		return
 	$HostScreen/Label.text = "Waiting for Host..."
 	_ready_button.visible = true
 	_start_button.visible = false
 	GameSettings.other_player_id = 1
-	GameSettings.local_mode = false
 	Lobby.player_info = {
 		name = user_data.name,
 		agents = agents,
 	}
-	Lobby.join_game()
-	$MainMenu.visible = false
-	$HostScreen.visible = true
+	if Lobby.join_game($MainMenu/VBoxContainer/JoinH/LineEdit.text) == 0:
+		$MainMenu.visible = false
+		$HostScreen.visible = true
+	else:
+		$MainMenu/VBoxContainer/JoinH/Join.text = "IP ERROR"
+		$MainMenu/TextChangeTimer.start()
 
 
 func _on_host_pressed() -> void:
 	if len(agents) == 0:
-		$MainMenu/VBoxContainer/Host.text = "Recruit an Agent first!"
-		$MainMenu/VBoxContainer/Join.text = "Recruit an Agent first!"
+		$MainMenu/VBoxContainer/HostH/Host.text = "Recruit an Agent first!"
+		$MainMenu/VBoxContainer/JoinH/Join.text = "Recruit an Agent first!"
 		$MainMenu/TextChangeTimer.start()
 		return
-	$HostScreen/Label.text = "Waiting for Opponent..."
+	$HostScreen/Label.text = "Waiting for Opponent... "
 	$MainMenu.visible = false
 	_ready_button.visible = false
 	_start_button.visible = true
-	GameSettings.local_mode = false
 	Lobby.player_info = {
 		name = user_data.name,
 		agents = agents,
 	}
-	Lobby.create_game()
+	Lobby.create_game(0, $MainMenu/VBoxContainer/HostH/CheckBox.button_pressed)
+	$HostScreen/Label.text += Lobby.extern_addr
+	if Lobby.extern_addr.is_empty():
+		$HostScreen/Label.text += "FUCK SOMETHING BROKE"
+
 	$HostScreen.visible = true
 
 
@@ -262,6 +272,7 @@ func _on_quit_pressed() -> void:
 		Lobby.players.clear()
 	else:
 		Lobby.players.erase(GameSettings.other_player_id)
+		Lobby.destroy_upnp_thing()
 	Lobby.remove_multiplayer_peer()
 	GameSettings.other_player_id = 0
 	get_tree().reload_current_scene()
@@ -424,6 +435,6 @@ func _on_save_roster_pressed() -> void:
 
 
 func _on_text_change_timer_timeout() -> void:
-	$MainMenu/VBoxContainer/Host.text = "HOST GAME"
-	$MainMenu/VBoxContainer/Join.text = "JOIN GAME"
+	$MainMenu/VBoxContainer/HostH/Host.text = "HOST GAME"
+	$MainMenu/VBoxContainer/JoinH/Join.text = "JOIN GAME"
 

@@ -7,7 +7,7 @@ signal player_connected(peer_id, player_info)
 signal player_disconnected(peer_id)
 signal server_disconnected
 
-const PORT = 7000
+const PORT = 6780
 const DEFAULT_SERVER_IP = "127.0.0.1" # IPv4 localhost
 const MAX_CONNECTIONS = 2
 
@@ -23,8 +23,6 @@ var player_info = {}
 
 var players_loaded = 0
 
-
-
 func _ready():
 	multiplayer.peer_connected.connect(_on_player_connected)
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)
@@ -33,7 +31,7 @@ func _ready():
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 
 
-func join_game(address = ""):
+func join_game(address = "") -> int:
 	if address.is_empty():
 		address = DEFAULT_SERVER_IP
 	var peer = ENetMultiplayerPeer.new()
@@ -41,9 +39,33 @@ func join_game(address = ""):
 	if error:
 		return error
 	multiplayer.multiplayer_peer = peer
+	return 0
 
 
-func create_game(max_connections = 0):
+var upnp : UPNP
+var extern_addr : String
+
+func create_upnp_thing():
+	upnp = UPNP.new()
+	if upnp.discover() == UPNP.UPNP_RESULT_SUCCESS:
+		if upnp.get_gateway() and upnp.get_gateway().is_valid_gateway():
+			var res_udp = upnp.add_port_mapping(PORT, 0, "godot_SOLOMONGAME", "UDP")
+			var res_tcp = upnp.add_port_mapping(PORT, 0, "godot_SOLOMONGAME", "TCP")
+			if not res_udp == UPNP.UPNP_RESULT_SUCCESS:
+				upnp.add_port_mapping(PORT, 0, "", "UDP")
+			if not res_tcp == UPNP.UPNP_RESULT_SUCCESS:
+				upnp.add_port_mapping(PORT, 0, "", "TCP")
+	extern_addr = upnp.query_external_address()
+
+func destroy_upnp_thing():
+	upnp.delete_port_mapping(PORT, "UDP")
+	upnp.delete_port_mapping(PORT, "TCP")
+
+func create_game(max_connections = 0, lan_mode = false):
+	if lan_mode:
+		extern_addr = DEFAULT_SERVER_IP
+	else:
+		create_upnp_thing()
 	var peer = ENetMultiplayerPeer.new()
 	var error
 	if max_connections > 0:
