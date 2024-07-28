@@ -518,14 +518,14 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			global_position = grabbing_agent._cqc_anim_helper.global_position
 			global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
 	if game_steps_since_execute > 20*60:
-		action_complete(false, false, single_mode)
+		action_complete(false, false)
 	if len(queued_action) == 0:
 		action_complete(true, true, single_mode)
 		return
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
 			rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
-			if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1:
+			if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1:
 				rotation.y = target_direction
 				action_complete()
 		GameActions.CHANGE_ITEM:
@@ -540,7 +540,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			match attack_step:
 				AttackStep.ORIENTING:
 					rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
-					if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1:
+					if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1:
 						rotation.y = target_direction
 						_attack_orient_transition()
 				AttackStep.ATTACKING:
