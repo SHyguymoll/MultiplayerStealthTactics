@@ -930,13 +930,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				agent.perform_action()
 			await get_tree().create_timer(0.10).timeout
 		GamePhases.COMPLETION:
-			action_timeline[current_game_step] = "END"
-			end_time = str(int(Time.get_unix_time_from_system()))
-			var save_dir = DirAccess.open("user://replays")
-			if save_dir == null:
-				DirAccess.make_dir_absolute("user://replays")
-			var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
-			new_replay.store_string(JSON.stringify(action_timeline))
+			save_replay()
 			if multiplayer.is_server() and not sent_final_message:
 				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
 				animate_fade.rpc()
@@ -948,6 +942,15 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
 
+
+func save_replay():
+	action_timeline[current_game_step] = "END"
+	end_time = str(int(Time.get_unix_time_from_system()))
+	var save_dir = DirAccess.open("user://replays")
+	if save_dir == null:
+		DirAccess.make_dir_absolute("user://replays")
+	var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
+	new_replay.store_string(JSON.stringify(action_timeline))
 
 
 func track_objective_completion():
@@ -1301,6 +1304,7 @@ func _on_pickup_spawner_despawned(node: Node) -> void:
 func _on_yes_forfeit_pressed() -> void:
 	if multiplayer.has_multiplayer_peer():
 		multiplayer.multiplayer_peer.close()
+	save_replay()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 
