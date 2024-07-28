@@ -701,35 +701,36 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	var final_text_string := ""
+	var clean_name = extract_name(ref_ag.name)
 	match decision_array[0]:
 		Agent.GameActions.GO_STAND:
-			final_text_string = "{0}: Stand Up".format([ref_ag.name])
+			final_text_string = "{0}: Stand Up".format([clean_name])
 		Agent.GameActions.GO_CROUCH:
-			final_text_string = "{0}: Crouch".format([ref_ag.name])
+			final_text_string = "{0}: Crouch".format([clean_name])
 		Agent.GameActions.GO_PRONE:
-			final_text_string = "{0}: Go Prone".format([ref_ag.name])
+			final_text_string = "{0}: Go Prone".format([clean_name])
 		Agent.GameActions.LOOK_AROUND:
-			final_text_string = "{0}: Survey Area".format([ref_ag.name])
+			final_text_string = "{0}: Survey Area".format([clean_name])
 		Agent.GameActions.CHANGE_ITEM:
-			final_text_string = "{0}: Equip ".format([ref_ag.name])
+			final_text_string = "{0}: Equip ".format([clean_name])
 			if decision_array[1] == -1:
-				final_text_string = "{0}: Unequip Item".format([ref_ag.name])
+				final_text_string = "{0}: Unequip Item".format([clean_name])
 			else:
 				final_text_string += GameRefs.ITM[ref_ag.held_items[decision_array[1]]].name
 		Agent.GameActions.CHANGE_WEAPON:
 			final_text_string = "{0}: Switch to {1}".format([
-				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
+				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
-				ref_ag.name, GameRefs.get_pickup_attribute(GameRefs.get_pickup_node(decision_array[1]), "name")])
+				clean_name, GameRefs.get_pickup_attribute(GameRefs.get_pickup_node(decision_array[1]), "name")])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
-				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
+				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.RELOAD_WEAPON:
 			final_text_string = "{0}: Reload {1}".format([
-				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
+				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 		Agent.GameActions.HALT:
-			final_text_string = "{0}: Stop ".format([ref_ag.name])
+			final_text_string = "{0}: Stop ".format([clean_name])
 			match ref_ag.state:
 				Agent.States.RUN:
 					final_text_string += "Running"
@@ -765,15 +766,16 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator.position)
 	var final_text_string := ""
+	var clean_name = extract_name(ref_ag.name)
 	match decision_array[0]:
 		Agent.GameActions.RUN_TO_POS:
-			final_text_string = "{0}: Run ".format([ref_ag.name])
+			final_text_string = "{0}: Run ".format([clean_name])
 		Agent.GameActions.WALK_TO_POS:
-			final_text_string = "{0}: Walk ".format([ref_ag.name])
+			final_text_string = "{0}: Walk ".format([clean_name])
 		Agent.GameActions.CROUCH_WALK_TO_POS:
-			final_text_string = "{0}: Sneak ".format([ref_ag.name])
+			final_text_string = "{0}: Sneak ".format([clean_name])
 		Agent.GameActions.CRAWL_TO_POS:
-			final_text_string = "{0}: Crawl ".format([ref_ag.name])
+			final_text_string = "{0}: Crawl ".format([clean_name])
 	final_text_string += "to New Position"
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
@@ -799,15 +801,16 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator._indicator.global_position)
 	var final_text_string := ""
+	var clean_name = extract_name(ref_ag.name)
 	match decision_array[0]:
 		Agent.GameActions.LOOK_AROUND:
-			final_text_string = "{0}: Look at Position".format([ref_ag.name])
+			final_text_string = "{0}: Look at Position".format([clean_name])
 		Agent.GameActions.USE_WEAPON:
 			final_text_string = "{0}: Use {1} at Position".format(
-				[ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, ref_ag.selected_weapon, "name")])
+				[clean_name, GameRefs.get_held_weapon_attribute(ref_ag, ref_ag.selected_weapon, "name")])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
-				ref_ag.name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
+				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
 	update_text()
