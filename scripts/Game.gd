@@ -292,8 +292,6 @@ func _physics_process(delta: float) -> void:
 			$World/Camera3D as Camera3D).unproject_position(
 					selector.referenced_agent.position)
 				(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
-			if multiplayer.is_server() and server_ready_bool and client_ready_bool:
-				_update_game_phase.rpc(GamePhases.EXECUTION)
 			if game_is_actually_over_check:
 				_update_game_phase(GamePhases.COMPLETION)
 		GamePhases.EXECUTION:
@@ -1264,6 +1262,8 @@ func player_is_ready(id):
 		client_ready_bool = true
 		if multiplayer.is_server():
 			$HUDBase/HurryUp.visible = true
+	if multiplayer.is_server() and server_ready_bool and client_ready_bool:
+		_update_game_phase.rpc(GamePhases.EXECUTION)
 
 
 @rpc("any_peer", "call_local", "reliable")
