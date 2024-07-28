@@ -1,8 +1,9 @@
-[gd_scene load_steps=38 format=3 uid="uid://bokbyc6n8xxeu"]
+[gd_scene load_steps=39 format=3 uid="uid://bokbyc6n8xxeu"]
 
 [ext_resource type="Script" path="res://scripts/game_weapon_pickup.gd" id="2_hqexf"]
 [ext_resource type="Texture2D" uid="uid://rknp5rllix1t" path="res://assets/models/exports/textures/palettething.png" id="3_e8605"]
 [ext_resource type="Material" uid="uid://6kvgqc45bkpu" path="res://assets/models/materials/agent_outline.tres" id="3_edff4"]
+[ext_resource type="Material" uid="uid://bp6trppwv7l7l" path="res://assets/models/materials/map_element_outline.tres" id="4_4c4f3"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hmf60"]
 resource_name = "WeaponSolids"
@@ -647,21 +648,21 @@ transform = Transform3D(0.0540789, -0.998537, 0, 0.369206, 0.0199955, 0.929133, 
 visible = false
 mesh = SubResource("ArrayMesh_w7aac")
 skeleton = NodePath("")
-surface_material_override/1 = ExtResource("3_edff4")
+surface_material_override/1 = ExtResource("4_4c4f3")
 
 [node name="flag_server" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.0540789, -0.998537, 0, 0.369206, 0.0199955, 0.929133, -0.927773, -0.0502464, 0.369747, 0.0507122, 0, -0.041996)
 visible = false
 mesh = SubResource("ArrayMesh_m2f7p")
 skeleton = NodePath("")
-surface_material_override/1 = ExtResource("3_edff4")
+surface_material_override/1 = ExtResource("4_4c4f3")
 
 [node name="flag_client" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.0540789, -0.998537, 0, 0.369206, 0.0199955, 0.929133, -0.927773, -0.0502464, 0.369747, 0.0507122, 0, -0.041996)
 visible = false
 mesh = SubResource("ArrayMesh_142q1")
 skeleton = NodePath("")
-surface_material_override/1 = ExtResource("3_edff4")
+surface_material_override/1 = ExtResource("4_4c4f3")
 
 [node name="PickupViewable" type="Area3D" parent="."]
 collision_layer = 2080
