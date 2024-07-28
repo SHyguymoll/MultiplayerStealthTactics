@@ -236,6 +236,8 @@ func return_icon(agent : Agent, is_wep : bool):
 			return ITM.none.icon
 		return get_held_weapon_attribute(agent, agent.selected_weapon, "icon")
 	else:
+		if agent.selected_item == -1:
+			return ITM.none.icon
 		return ITM.get(agent.held_items[agent.selected_item]).icon
 
 
@@ -247,3 +249,7 @@ func get_name_from_icon(icon : Texture2D):
 		if WEP[check].icon == icon:
 			return check
 	return null
+
+
+func extract_agent_name(agent_name : String):
+	return agent_name.split("_")[1]

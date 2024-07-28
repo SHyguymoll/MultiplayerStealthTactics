@@ -4,6 +4,7 @@ extends Control
 const REMAIN_DIV = 3
 const DELTA_DIV = 0.85
 
+@onready var _label : Label = $Textures/Label
 @onready var _state_tex : TextureRect = $Textures/AgentState
 @onready var _wep_tex : TextureRect = $Textures/Equipped/Weapon
 @onready var _itm_tex : TextureRect = $Textures/Equipped/Item
@@ -52,10 +53,12 @@ func _physics_process(delta: float) -> void:
 			_state_tex.texture = GameRefs.STE.stunned
 		Agent.States.DEAD:
 			_state_tex.texture = GameRefs.STE.dead
-	_wep_tex.texture = GameRefs.return_icon(ref_ag, true)
+	if len(ref_ag.held_weapons) > 0:
+		_wep_tex.texture = GameRefs.return_icon(ref_ag, true)
 	if len(ref_ag.held_items) > 0:
 		_itm_tex.texture = GameRefs.return_icon(ref_ag, false)
 
+	_label.text = GameRefs.extract_agent_name(ref_ag.name)
 	_health_bar.value = ref_ag.health
 	_stun_health_bar.value = ref_ag.stun_health
 	if _wep_in_bar.value < _wep_in_bar.max_value/REMAIN_DIV:

@@ -688,10 +688,6 @@ func show_hud():
 	twe.tween_property(_ag_insts, "position:x", 1059, 0.25).from(1638)
 
 
-func extract_name(agent_name : String):
-	return agent_name.split("_")[1]
-
-
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = _radial_menu.referenced_agent
 	_radial_menu.referenced_agent = null
@@ -701,7 +697,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	var final_text_string := ""
-	var clean_name = extract_name(ref_ag.name)
+	var clean_name = GameRefs.extract_agent_name(ref_ag.name)
 	match decision_array[0]:
 		Agent.GameActions.GO_STAND:
 			final_text_string = "{0}: Stand Up".format([clean_name])
@@ -766,7 +762,7 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator.position)
 	var final_text_string := ""
-	var clean_name = extract_name(ref_ag.name)
+	var clean_name = GameRefs.extract_agent_name(ref_ag.name)
 	match decision_array[0]:
 		Agent.GameActions.RUN_TO_POS:
 			final_text_string = "{0}: Run ".format([clean_name])
@@ -801,7 +797,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator._indicator.global_position)
 	var final_text_string := ""
-	var clean_name = extract_name(ref_ag.name)
+	var clean_name = GameRefs.extract_agent_name(ref_ag.name)
 	match decision_array[0]:
 		Agent.GameActions.LOOK_AROUND:
 			final_text_string = "{0}: Look at Position".format([clean_name])

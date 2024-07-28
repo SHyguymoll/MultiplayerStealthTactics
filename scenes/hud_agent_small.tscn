@@ -20,6 +20,13 @@ script = ExtResource("1_hl6qc")
 [node name="Textures" type="VBoxContainer" parent="."]
 layout_mode = 2
 
+[node name="Label" type="Label" parent="Textures"]
+layout_mode = 2
+theme = ExtResource("5_jfh8m")
+theme_override_font_sizes/font_size = 16
+text = "NAME"
+horizontal_alignment = 1
+
 [node name="AgentState" type="TextureRect" parent="Textures"]
 layout_mode = 2
 texture = ExtResource("2_hsxc8")
