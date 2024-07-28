@@ -517,6 +517,8 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 		if grabbing_agent != null:
 			global_position = grabbing_agent._cqc_anim_helper.global_position
 			global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
+	if game_steps_since_execute > 20*60:
+		action_complete(false, false, single_mode)
 	if len(queued_action) == 0:
 		action_complete(true, true, single_mode)
 		return
