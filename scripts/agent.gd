@@ -561,6 +561,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 						GameRefs.WeaponTypes.THROWN:
 							if game_steps_since_execute == 30:
 								mark_for_grenade_throw = true
+								GameRefs.get_weapon_node(held_weapons[selected_weapon]).reload_weapon()
 						GameRefs.WeaponTypes.PLACED:
 							if game_steps_since_execute == 20:
 								_anim_state.travel("Stand")

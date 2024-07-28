@@ -50,6 +50,7 @@ enum ProgressParts {
 @export var server_progress : ProgressParts = ProgressParts.INTRO
 @export var client_progress : ProgressParts = ProgressParts.INTRO
 
+@export var grenades_in_existence = []
 @export var exfiltration_queue = []
 
 @onready var _camera : GameCamera = $World/Camera3D
@@ -213,6 +214,12 @@ func try_see_element(spotter : Agent, element : Node3D):
 			spotter.sounds.spotted_element.play()
 		elif spotter.player_id != 1 and element.client_knows != true:
 			element.client_knows = true
+	elif element is Grenade:
+		if spotter.player_id == 1 and element.server_knows != true:
+			element.server_knows = true
+			spotter.sounds.spotted_agent.play()
+		elif spotter.player_id != 1 and element.client_knows != true:
+			element.client_knows = true
 	else:
 		element.visible = true
 		spotter.sounds.spotted_element.play()
@@ -332,6 +339,36 @@ func _physics_process(delta: float) -> void:
 						pickup_spawner.spawn(new_drop)
 						new_drop.pos_y += 0.8
 					agent.held_weapons.clear()
+				if multiplayer.is_server() and agent.mark_for_grenade_throw:
+					var try_name = agent.held_weapons[agent.selected_weapon]
+					while try_name in grenades_in_existence:
+						try_name += "N"
+					var grenade_data = {
+						pos_x = agent.position.x,
+						pos_y = agent.position.y,
+						pos_z = agent.position.z,
+						wep_name = try_name,
+						wep_id = GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).wep_id,
+						server_knows = agent.server_knows,
+						client_knows = agent.client_knows,
+						end_pos_x = agent.queued_action[1].x,
+						end_pos_y = agent.queued_action[1].y,
+						end_pos_z = agent.queued_action[1].z,
+					}
+					grenade_spawner.spawn(grenade_data)
+					agent.mark_for_grenade_throw = false
+			for grenade in ($Grenades.get_children() as Array[Grenade]):
+				grenade._tick()
+				if grenade.explode:
+					match grenade.wep_id:
+						"grenade_frag":
+							print("KABOOM")
+						"grenade_smoke":
+							print("FSSSSSH")
+						"grenade_noise":
+							print("WEEWOOWEEWOOWEEWOO")
+					grenades_in_existence.erase(grenade.name)
+					grenade.queue_free()
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
 			#if multiplayer.is_server():
@@ -528,10 +565,11 @@ func create_weapon(data) -> GameWeapon:
 func create_grenade(data) -> Grenade:
 	var new_grenade : Grenade = grenade_scene.instantiate()
 	new_grenade.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
-	new_grenade.server_knows = data.server_knows
-	new_grenade.client_knows = data.client_knows
 	new_grenade.name = data.wep_name
 	new_grenade.wep_id = data.wep_id
+	new_grenade.server_knows = data.server_knows
+	new_grenade.client_knows = data.client_knows
+	new_grenade.landing_position = Vector3(data.end_pos_x, data.end_pos_y, data.end_pos_z)
 	return new_grenade
 
 

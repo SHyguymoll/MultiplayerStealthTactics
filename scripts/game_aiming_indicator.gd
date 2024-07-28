@@ -36,9 +36,11 @@ func _on_animation_changed() -> void:
 
 func _physics_process(_d: float) -> void: #TODO
 	if not ind_set:
-		var ray_len = 1000
+		var ray_len = 10
 		if GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC):
 			ray_len = 1
+		if GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.THROWN):
+			ray_len = 5
 		var final_position = Vector2(
 			(_game_camera.position.x - referenced_agent.global_position.x),
 			(_game_camera.position.z - referenced_agent.global_position.z),
