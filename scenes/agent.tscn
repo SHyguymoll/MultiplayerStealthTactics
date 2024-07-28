@@ -87,6 +87,12 @@ properties/18/replication_mode = 1
 properties/19/path = NodePath("Agent/game_rig/Skeleton3D/Mesh:visible")
 properties/19/spawn = true
 properties/19/replication_mode = 1
+properties/20/path = NodePath(".:noticed")
+properties/20/spawn = true
+properties/20/replication_mode = 1
+properties/21/path = NodePath(".:step_seen")
+properties/21/spawn = true
+properties/21/replication_mode = 1
 
 [sub_resource type="Animation" id="Animation_ftnhh"]
 resource_name = "B_Crawl"
@@ -18740,7 +18746,6 @@ texture = ExtResource("4_k5gu7")
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 path_desired_distance = 3.0
 avoidance_enabled = true
-debug_enabled = true
 
 [node name="CQCAnimationHelper" type="Node3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0.48)
@@ -18761,8 +18766,6 @@ stream = ExtResource("7_rs5ra")
 [node name="SpottedAgent" type="AudioStreamPlayer3D" parent="ClientsideSoundEffects"]
 stream = ExtResource("7_rs5ra")
 
-[connection signal="area_entered" from="Ears" to="." method="_on_ears_area_entered"]
-[connection signal="area_entered" from="PickupRange" to="." method="_on_ears_area_entered"]
 [connection signal="animation_finished" from="AnimationTree" to="." method="_on_animation_finished"]
 
 [editable path="Agent"]

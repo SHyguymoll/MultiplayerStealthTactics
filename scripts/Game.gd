@@ -35,6 +35,7 @@ enum SelectionSteps {
 }
 var selection_step : SelectionSteps = SelectionSteps.BASE
 
+const REMEMBER_TILL = 150
 
 @export var game_map : GameMap
 
@@ -156,27 +157,16 @@ func update_text() -> void:
 
 func determine_sights():
 	for agent in ($Agents.get_children() as Array[Agent]):
-		var previously_detected = agent.detected.duplicate(true)
+		if agent.player_id != multiplayer.get_unique_id():
+			continue
 		for detected in agent._eyes.get_overlapping_areas():
 			var par = detected.get_parent()
-			if par in previously_detected.glanced:
-				previously_detected.glanced.erase(par)
-			if par in previously_detected.spotted:
-				previously_detected.spotted.erase(par)
-				continue
 			if par is Agent:
 				if agent == par: # of course you can see yourself
 					continue
 				try_see_agent(agent, par)
 			else:
 				try_see_element(agent, par)
-		for to_remove in previously_detected.spotted:
-			if to_remove.get_parent() is Agent:
-				if agent.player_id == 1:
-					set_agent_server_visibility(to_remove.get_parent().name, false)
-				else:
-					set_agent_client_visibility(to_remove.get_parent().name, false)
-			create_popup(GameRefs.POPUP.sight_unknown, to_remove.position)
 
 
 func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_level : int) -> float:
@@ -187,22 +177,25 @@ func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_leve
 
 
 func try_see_agent(spotter : Agent, spottee : Agent):
-	if spottee in spotter.detected:
-		return
 	if spotter.player_id == spottee.player_id: # skip your team
 		return
 	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level)
 	if sight_chance > 0.7: # seent it
+		if current_game_step - spottee.step_seen < REMEMBER_TILL and spottee.step_seen > 0:
+			set_agent_step_seen.rpc(spottee.name, current_game_step)
+			return
+		set_agent_step_seen.rpc(spottee.name, current_game_step)
 		if spotter.player_id == 1:
 			set_agent_server_visibility.rpc(spottee.name, true)
 		else:
 			set_agent_client_visibility.rpc(spottee.name, true)
 		create_popup(GameRefs.POPUP.spotted, spottee.position, true)
-		spotter.detected.spotted.append(spottee)
 		if spotter.player_id != spottee.player_id:
 			spotter.sounds.spotted_agent.play()
 	elif sight_chance > 1.0/3.0: # almost seent it
-		spotter.detected.glanced.append(spottee)
+		if spottee.noticed > 0:
+			return
+		set_agent_notice.rpc(spottee.name, 10)
 		var p_offset = -0.1/sight_chance
 		var x_off = randf_range(-p_offset, p_offset)
 		var z_off = randf_range(-p_offset, p_offset)
@@ -237,7 +230,6 @@ func determine_sounds():
 				continue # skip already heard sounds
 			create_popup(GameRefs.POPUP.sound_unknown, audio_event.global_position)
 			audio_event.play_sound()
-
 		match agent.state:
 			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
 				create_sound_effect(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
@@ -295,6 +287,16 @@ func _physics_process(delta: float) -> void:
 			determine_weapon_events()
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
+				#agent._debug_label.text = str(agent.target_visible_level) + "\n" + str(agent.noticed) + "\n" + str(current_game_step - agent.step_seen) + " : " + str(agent.step_seen)
+				if current_game_step - agent.step_seen == REMEMBER_TILL:
+					if agent.player_id == 1:
+						set_agent_client_visibility.rpc(agent.name, false)
+						if not multiplayer.is_server():
+							create_popup(GameRefs.POPUP.sight_unknown, agent.position)
+					else:
+						set_agent_server_visibility.rpc(agent.name, false)
+						if multiplayer.is_server():
+							create_popup(GameRefs.POPUP.sight_unknown, agent.position)
 				if len(agent.mark_for_drop) > 0 and multiplayer.is_server():
 					var new_drop = {
 						pos_x = agent.mark_for_drop.position.x,
@@ -594,6 +596,7 @@ func determine_cqc_events():
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
 		grabbee.take_damage(3, true)
+		grabbee.step_seen = current_game_step
 		pass
 
 func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
@@ -683,6 +686,10 @@ func show_hud():
 	twe.tween_property(_execute_button, "position:y", 825, 0.25).from(970)
 	#twe.tween_property(_quick_views, "position:y", 712, 0.25).from(920)
 	twe.tween_property(_ag_insts, "position:x", 1059, 0.25).from(1638)
+
+
+func extract_name(agent_name : String):
+	return agent_name.split("_")[1]
 
 
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
@@ -1141,6 +1148,15 @@ func player_is_ready(id):
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_action(agent_name : String, action : Array):
 	$Agents.get_node(agent_name).queued_action = action
+
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_notice(agent_name : String, new_noticed : int):
+	$Agents.get_node(agent_name).noticed = new_noticed
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_step_seen(agent_name : String, new_step_seen : int):
+	$Agents.get_node(agent_name).step_seen = new_step_seen
 
 
 @rpc("any_peer", "call_local", "reliable")

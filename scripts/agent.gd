@@ -37,6 +37,7 @@ var player_id : int
 @onready var _custom_skin_mat : StandardMaterial3D
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat : StandardMaterial3D
+@onready var _debug_label : Label3D = $DebugLabel3D
 @onready var _eyes : Area3D = $Eyes
 @onready var _eye_cone : ConvexPolygonShape3D = $Eyes/CollisionShape3D.shape
 @onready var _ears : Area3D = $Ears
@@ -117,6 +118,8 @@ var mark_for_drop := {}
 var mark_for_dead := false
 var try_grab_pickup := false
 var mark_for_grenade_throw := false
+@export var step_seen : int = 0
+@export var noticed : int = 0
 
 enum AttackStep {
 	ORIENTING,
@@ -125,11 +128,7 @@ enum AttackStep {
 }
 @export var attack_step := AttackStep.ORIENTING
 
-@export var detected : Dictionary = {
-	glanced=[],
-	spotted=[],
-	weapons=[],
-}
+@export var detected_weapons = []
 
 func in_incapacitated_state() -> bool:
 	return state in [States.GRABBED, States.STUNNED, States.DEAD, States.EXFILTRATED]
@@ -420,22 +419,28 @@ func exfiltrate():
 	twe.tween_property($Agent, "position:y", 10.0, 2.0).from_current()
 
 
-
 func _physics_process(_d: float) -> void:
 	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, GENERAL_LERP_VAL / 3.0)
-	#$DebugLabel3D.text = str(target_visible_level) + "\n" + str(_pickup_range.get_overlapping_areas())
 	if not in_incapacitated_state():
-		var detected_weapons = []
+		detected_weapons = []
 		for overlap in _pickup_range.get_overlapping_areas():
 			detected_weapons.append(overlap.get_parent())
-		detected.weapons = detected_weapons
+
+
+func should_be_visible():
+	if server_knows and multiplayer.is_server():
+		return true
+	if client_knows and not multiplayer.is_server():
+		return true
+	return false
 
 
 func _game_step(delta: float, single_mode : bool = false) -> void:
 	# update agent generally
 	game_steps_since_execute += 1
+	noticed = max(noticed - 1, 0)
 	if not single_mode:
-		visible = server_knows and multiplayer.is_server() or client_knows and not multiplayer.is_server()
+		visible = should_be_visible()
 	if single_mode or not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly) or selected_item == -1:
 		_active_item_icon.visible = false
 	elif selected_item > -1:

@@ -1,8 +1,6 @@
 class_name GamePopup
 extends Sprite3D
 
-@onready var _detect_area : Area3D
-
 func disappear():
 	var twe = create_tween()
 	twe.set_parallel(true)
