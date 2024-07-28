@@ -58,6 +58,7 @@ spawn_path = NodePath("../Grenades")
 
 [node name="Camera3D" type="Camera3D" parent="World"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 15, 0)
+current = true
 script = ExtResource("2_f2a8t")
 
 [node name="RayCast3D" type="RayCast3D" parent="World/Camera3D"]

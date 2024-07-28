@@ -22,3 +22,7 @@ enum Objectives {
 
 @export var server_exfiltrate_zone : Area3D
 @export var client_exfiltrate_zone : Area3D
+
+func _ready():
+	for spawn in $Spawns.get_children() as Array[Sprite3D]:
+		spawn.get_child(0).visible = false

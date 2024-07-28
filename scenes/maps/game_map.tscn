@@ -1,10 +1,9 @@
-[gd_scene load_steps=13 format=3 uid="uid://mr6n3d2nksvr"]
+[gd_scene load_steps=12 format=3 uid="uid://mr6n3d2nksvr"]
 
 [ext_resource type="Script" path="res://scripts/game_map.gd" id="1_8s54t"]
 [ext_resource type="PackedScene" uid="uid://b75vsmb8bkx" path="res://assets/models/exports/map_basic.glb" id="2_cn121"]
 [ext_resource type="PackedScene" uid="uid://bjndhsqm2lc7p" path="res://assets/models/exports/map_basic_nav.glb" id="3_2c5nq"]
 [ext_resource type="Texture2D" uid="uid://q6p0rkij3vfr" path="res://assets/sprites/game_popups/debug_agspawn_server.png" id="4_mmrrv"]
-[ext_resource type="Texture2D" uid="uid://d4mlypqhq31vj" path="res://assets/sprites/game_popups/debug_agspawn_client.png" id="5_cx0bu"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_todys"]
 size = Vector3(3.48346, 1, 0.856445)
@@ -102,56 +101,94 @@ shape = SubResource("BoxShape3D_ycwvl")
 
 [node name="Spawns" type="Node3D" parent="."]
 
-[node name="Server1" type="Sprite3D" parent="Spawns"]
+[node name="Server1" type="Node3D" parent="Spawns"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.90223, 0.665981, -11.9257)
+
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/Server1"]
 billboard = 1
 double_sided = false
 texture = ExtResource("4_mmrrv")
 
-[node name="Server2" type="Sprite3D" parent="Spawns"]
+[node name="Server2" type="Node3D" parent="Spawns"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.655941, 0.665981, -11.9257)
+
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/Server2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.24629, 0, 0)
 billboard = 1
+double_sided = false
 texture = ExtResource("4_mmrrv")
 
-[node name="Server3" type="Sprite3D" parent="Spawns"]
+[node name="Server3" type="Node3D" parent="Spawns"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.61221, 0.665981, -11.9257)
+
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/Server3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.51444, 0, 0)
 billboard = 1
+double_sided = false
 texture = ExtResource("4_mmrrv")
 
-[node name="Server4" type="Sprite3D" parent="Spawns"]
+[node name="Server4" type="Node3D" parent="Spawns"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7929, 0.665981, -11.9257)
+
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/Server4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.69513, 0, 0)
 billboard = 1
+double_sided = false
 texture = ExtResource("4_mmrrv")
 
-[node name="ServerDebug" type="Sprite3D" parent="Spawns"]
+[node name="ServerDebug" type="Node3D" parent="Spawns"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.06112, 0.66598, -1.22804)
+
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/ServerDebug"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.15889, 1.01328e-06, -10.6977)
 billboard = 1
+double_sided = false
 texture = ExtResource("4_mmrrv")
 
-[node name="Client1" type="Sprite3D" parent="Spawns"]
+[node name="Client1" type="Node3D" parent="Spawns"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1.53053, 0.665981, 12.2249)
-billboard = 1
-texture = ExtResource("5_cx0bu")
 
-[node name="Client2" type="Sprite3D" parent="Spawns"]
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/Client1"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0.371698, 0, 24.1506)
+billboard = 1
+double_sided = false
+texture = ExtResource("4_mmrrv")
+
+[node name="Client2" type="Node3D" parent="Spawns"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -0.524753, 0.665981, 12.2249)
-billboard = 1
-texture = ExtResource("5_cx0bu")
 
-[node name="Client3" type="Sprite3D" parent="Spawns"]
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/Client2"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 1.37747, 0, 24.1506)
+billboard = 1
+double_sided = false
+texture = ExtResource("4_mmrrv")
+
+[node name="Client3" type="Node3D" parent="Spawns"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.524752, 0.665981, 12.2249)
-billboard = 1
-texture = ExtResource("5_cx0bu")
 
-[node name="Client4" type="Sprite3D" parent="Spawns"]
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/Client3"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 2.42698, 0, 24.1506)
+billboard = 1
+double_sided = false
+texture = ExtResource("4_mmrrv")
+
+[node name="Client4" type="Node3D" parent="Spawns"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 1.53053, 0.665981, 12.2249)
-billboard = 1
-texture = ExtResource("5_cx0bu")
 
-[node name="ClientDebug" type="Sprite3D" parent="Spawns"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -3.02666, 0.665981, 9.96137)
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/Client4"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 3.43276, 0, 24.1506)
 billboard = 1
-texture = ExtResource("5_cx0bu")
+double_sided = false
+texture = ExtResource("4_mmrrv")
+
+[node name="ClientDebug" type="Node3D" parent="Spawns"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -3.02666, 0.665981, 9.96137)
+
+[node name="DebugIcon" type="Sprite3D" parent="Spawns/ClientDebug"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -1.12443, 0, 21.8871)
+billboard = 1
+double_sided = false
+texture = ExtResource("4_mmrrv")
 
 [editable path="map_basic"]
 [editable path="map_basic_nav"]
