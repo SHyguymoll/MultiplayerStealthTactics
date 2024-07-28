@@ -83,7 +83,8 @@ func _ready():
 	weapon_spawner.spawn_function = create_weapon
 	grenade_spawner.spawn_function = create_grenade
 	start_time = str(int(Time.get_unix_time_from_system()))
-	$FadeOut/ColorRect.modulate = Color.TRANSPARENT
+	$FadeOut.visible = true
+	$FadeOut/ColorRect.modulate = Color.WHITE
 	$HUDBase/HurryUp.visible = false
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
@@ -1250,9 +1251,12 @@ func reward_team(team_id):
 
 
 @rpc("authority", "call_local")
-func animate_fade():
+func animate_fade(in_out := true):
 	var twe = create_tween()
-	twe.tween_property($FadeOut/ColorRect, "modulate", Color.WHITE, 2.5).from(Color.TRANSPARENT)
+	if in_out:
+		twe.tween_property($FadeOut/ColorRect, "modulate", Color.WHITE, 2.5).from(Color.TRANSPARENT)
+	else:
+		twe.tween_property($FadeOut/ColorRect, "modulate", Color.TRANSPARENT, 2.5).from(Color.WHITE)
 
 
 @rpc("any_peer", "call_local", "reliable")
@@ -1295,6 +1299,7 @@ func _on_execute_pressed() -> void:
 
 func _on_cold_boot_timer_timeout() -> void:
 	_update_game_phase(GamePhases.SELECTION, false)
+	animate_fade(false)
 
 
 func _on_pickup_spawner_despawned(node: Node) -> void:

@@ -154,7 +154,6 @@ text = "NO"
 
 [node name="FadeOut" type="CanvasLayer" parent="."]
 layer = 90
-visible = false
 
 [node name="ColorRect" type="ColorRect" parent="FadeOut"]
 anchors_preset = 15
