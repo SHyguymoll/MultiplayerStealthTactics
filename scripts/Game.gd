@@ -81,6 +81,7 @@ func _ready():
 	weapon_spawner.spawn_function = create_weapon
 	start_time = str(int(Time.get_unix_time_from_system()))
 	$FadeOut/ColorRect.modulate = Color.TRANSPARENT
+	$HUDBase/HurryUp.visible = false
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 	Lobby.player_disconnected.connect(player_quits)
@@ -898,6 +899,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			else:
 				_update_game_phase(GamePhases.COMPLETION)
 		GamePhases.EXECUTION:
+			$HUDBase/HurryUp.visible = false
 			for selector in $HUDSelectors.get_children(): # remove previous selectors
 				selector.queue_free()
 			for agent in ($Agents.get_children() as Array[Agent]):
@@ -1240,8 +1242,12 @@ func animate_fade():
 func player_is_ready(id):
 	if id == 1:
 		server_ready_bool = true
+		if not multiplayer.is_server():
+			$HUDBase/HurryUp.visible = true
 	else:
 		client_ready_bool = true
+		if multiplayer.is_server():
+			$HUDBase/HurryUp.visible = true
 
 
 @rpc("any_peer", "call_local", "reliable")

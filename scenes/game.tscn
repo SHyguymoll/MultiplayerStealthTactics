@@ -147,6 +147,7 @@ text = "NO"
 
 [node name="FadeOut" type="CanvasLayer" parent="."]
 layer = 90
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="FadeOut"]
 anchors_preset = 15
@@ -212,6 +213,25 @@ grow_vertical = 2
 theme = ExtResource("5_b0o1h")
 theme_override_font_sizes/font_size = 48
 horizontal_alignment = 2
+autowrap_mode = 2
+clip_text = true
+
+[node name="HurryUp" type="Label" parent="HUDBase"]
+anchors_preset = -1
+anchor_left = 0.44
+anchor_top = 1.0
+anchor_right = 0.44
+anchor_bottom = 1.0
+offset_left = -139.28
+offset_top = -112.0
+offset_right = 139.72
+grow_horizontal = 0
+grow_vertical = 2
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 48
+text = "OTHER PLAYER
+IS WAITING"
+horizontal_alignment = 1
 autowrap_mode = 2
 clip_text = true
 
