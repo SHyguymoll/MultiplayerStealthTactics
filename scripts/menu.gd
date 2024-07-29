@@ -221,15 +221,16 @@ func synchronize_agents(selected : Array):
 		_enemy_agents.add_child(new_notif)
 
 
-func _on_player_connect(peer_id, _player_info):
+func _on_player_connect(peer_id, player_info):
 	if peer_id == 1: # self joined, disregard
 		return
 	GameSettings.other_player_id = multiplayer.get_remote_sender_id()
+	GameSettings.other_player_name = player_info.name
 	if multiplayer.is_server():
-		$HostScreen/Label.text = "Player found! " + str(GameSettings.other_player_id)
+		$HostScreen/Label.text = "Player found! " + str(player_info.name)
 		synchronize_agents.rpc_id(GameSettings.other_player_id, GameSettings.selected_agents)
 	else:
-		$HostScreen/Label.text = "Host found! " + str(GameSettings.other_player_id)
+		$HostScreen/Label.text = "Host found! " + str(player_info.name)
 
 
 func _on_player_disconnect(id):

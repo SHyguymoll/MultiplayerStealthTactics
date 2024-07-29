@@ -91,6 +91,12 @@ func _ready(): # Preconfigure game.
 	$FadeOut/ColorRect.modulate = Color.WHITE
 	$HUDBase/HurryUp.visible = false
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
+	if multiplayer.is_server():
+		$HUDBase/ServerPlayerName.text = Lobby.player_info.name
+		$HUDBase/ClientPlayerName.text = GameSettings.other_player_name
+	else:
+		$HUDBase/ServerPlayerName.text = GameSettings.other_player_name
+		$HUDBase/ClientPlayerName.text = Lobby.player_info.name
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 	Lobby.player_disconnected.connect(player_quits)
 

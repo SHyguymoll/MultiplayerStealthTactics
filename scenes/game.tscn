@@ -95,6 +95,7 @@ directional_shadow_mode = 0
 
 [node name="PauseMenu" type="CanvasLayer" parent="."]
 layer = 100
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="PauseMenu"]
 anchors_preset = 8
@@ -162,6 +163,7 @@ text = "NO"
 
 [node name="FadeOut" type="CanvasLayer" parent="."]
 layer = 90
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="FadeOut"]
 anchors_preset = 15
@@ -179,9 +181,9 @@ layer = 95
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_top = -250.0
+offset_top = -225.0
 offset_right = 553.0
-offset_bottom = 250.0
+offset_bottom = 254.0
 grow_vertical = 2
 size_flags_horizontal = 0
 mouse_filter = 2
@@ -252,26 +254,48 @@ clip_text = true
 [node name="CurrentPhase" type="Label" parent="HUDBase"]
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 1.0
+offset_left = 461.0
+offset_right = -461.0
+offset_bottom = 49.0
 grow_horizontal = 2
 theme = ExtResource("5_b0o1h")
 theme_override_font_sizes/font_size = 48
 horizontal_alignment = 1
 autowrap_mode = 2
 
+[node name="ServerPlayerName" type="Label" parent="HUDBase"]
+offset_right = 361.0
+offset_bottom = 51.0
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 48
+text = "SERVER PLAYER"
+autowrap_mode = 2
+clip_text = true
+
 [node name="ProgressBarServer" type="ProgressBar" parent="HUDBase"]
-offset_top = 50.0
-offset_right = 512.0
-offset_bottom = 98.0
+offset_left = 2.0
+offset_top = 56.0
+offset_right = 514.0
+offset_bottom = 104.0
 mouse_filter = 2
 theme = ExtResource("5_b0o1h")
 max_value = 3.0
 show_percentage = false
 
+[node name="ClientPlayerName" type="Label" parent="HUDBase"]
+offset_top = 110.0
+offset_right = 361.0
+offset_bottom = 161.0
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 48
+text = "CLIENT PLAYER"
+autowrap_mode = 2
+clip_text = true
+
 [node name="ProgressBarClient" type="ProgressBar" parent="HUDBase"]
-offset_top = 105.0
+offset_top = 166.0
 offset_right = 512.0
-offset_bottom = 153.0
+offset_bottom = 214.0
 mouse_filter = 2
 theme = ExtResource("5_b0o1h")
 max_value = 3.0
