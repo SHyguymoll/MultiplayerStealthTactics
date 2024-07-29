@@ -7,15 +7,15 @@ radius = 3.5
 height = 3.0
 
 [sub_resource type="Curve" id="Curve_kl72o"]
-_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.0697674, 0.868132), 2.11394, 1.04234, 0, 0, Vector2(0.683721, 0.89011), -0.35002, -0.908707, 0, 0, Vector2(1, 0), -2.90786, 0.0, 0, 0]
-point_count = 4
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.0697674, 0.868132), 2.11394, 1.04234, 0, 0, Vector2(1, 0), -2.90786, 0.0, 0, 0]
+point_count = 3
 
 [sub_resource type="Curve" id="Curve_ou5jq"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.102326, 0.912088), 1.40008, 1.40008, 0, 0, Vector2(0.655814, 0.67033), -0.118132, -0.118132, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
 point_count = 4
 
 [sub_resource type="Curve" id="Curve_1v4pm"]
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.0883721, 0.0659339), -0.281266, -0.281266, 0, 0, Vector2(0.75814, 0.0659339), 0.186524, 0.186524, 0, 0, Vector2(1, 1), 9.5749, 0.0, 0, 0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.0837209, 0.098901), -0.281266, -0.281266, 0, 0, Vector2(0.869767, 0.164835), 0.545224, 0.545224, 0, 0, Vector2(1, 1), 9.5749, 0.0, 0, 0]
 point_count = 4
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_3p7sy"]

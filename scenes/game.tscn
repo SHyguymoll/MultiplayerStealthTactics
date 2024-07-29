@@ -69,7 +69,6 @@ script = ExtResource("2_f2a8t")
 
 [node name="RayCast3D" type="RayCast3D" parent="World/Camera3D"]
 target_position = Vector3(0, 0, -1000)
-collision_mask = 32
 debug_shape_custom_color = Color(0.615686, 0.839216, 0, 1)
 debug_shape_thickness = 1
 

@@ -48,7 +48,7 @@ func _process(_d: float) -> void:
 			(final_position.y * sensitivity/get_viewport().size.y)
 	), quickness)
 	ground_height = ($RayCast3D as RayCast3D).get_collision_point().y
-	$Label.text = "POS: " + str(Vector3(position.x, ground_height, position.z))
+	$Label.text = "POS: " + str(Vector3(position.x, ground_height, position.z)) + "\n" + str(ground_height)
 	fov = lerpf(fov, fov_target, quickness)
 
 
