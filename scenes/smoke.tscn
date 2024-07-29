@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3 uid="uid://brtbfw2plui6g"]
+
+[ext_resource type="Script" path="res://scripts/smoke.gd" id="1_upq5s"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_32g65"]
+radius = 3.5
+height = 3.0
+
+[sub_resource type="Curve" id="Curve_kl72o"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.0697674, 0.868132), 2.11394, 1.04234, 0, 0, Vector2(0.683721, 0.89011), -0.35002, -0.908707, 0, 0, Vector2(1, 0), -2.90786, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Curve" id="Curve_ou5jq"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.102326, 0.912088), 1.40008, 1.40008, 0, 0, Vector2(0.655814, 0.67033), -0.118132, -0.118132, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Curve" id="Curve_1v4pm"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.0883721, 0.0659339), -0.281266, -0.281266, 0, 0, Vector2(0.75814, 0.0659339), 0.186524, 0.186524, 0, 0, Vector2(1, 1), 9.5749, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_3p7sy"]
+height = 3.5
+radius = 3.25
+
+[node name="Smoke" type="MeshInstance3D"]
+mesh = SubResource("SphereMesh_32g65")
+script = ExtResource("1_upq5s")
+smoke_rad_curve = SubResource("Curve_kl72o")
+smoke_hei_curve = SubResource("Curve_ou5jq")
+trans_curve = SubResource("Curve_1v4pm")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 256
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("CylinderShape3D_3p7sy")

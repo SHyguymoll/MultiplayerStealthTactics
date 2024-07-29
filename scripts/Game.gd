@@ -13,6 +13,7 @@ var popup_scene = preload("res://scenes/game_popup.tscn")
 var audio_event_scene = preload("res://scenes/game_audio_event.tscn")
 var weapon_pickup_scene = preload("res://scenes/weapon_pickup.tscn")
 var grenade_scene = preload("res://scenes/grenade.tscn")
+var smoke_scene = preload("res://scenes/smoke.tscn")
 
 var server_ready_bool := false
 var client_ready_bool := false
@@ -58,6 +59,7 @@ enum ProgressParts {
 @onready var pickup_spawner : MultiplayerSpawner = $PickupSpawner
 @onready var weapon_spawner : MultiplayerSpawner = $WeaponSpawner
 @onready var grenade_spawner : MultiplayerSpawner = $GrenadeSpawner
+@onready var smoke_spawner : MultiplayerSpawner = $SmokeSpawner
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu
@@ -83,6 +85,7 @@ func _ready(): # Preconfigure game.
 	pickup_spawner.spawn_function = create_pickup
 	weapon_spawner.spawn_function = create_weapon
 	grenade_spawner.spawn_function = create_grenade
+	smoke_spawner.spawn_function = create_smoke
 	start_time = str(int(Time.get_unix_time_from_system()))
 	$FadeOut.visible = true
 	$FadeOut/ColorRect.modulate = Color.WHITE
@@ -160,6 +163,8 @@ func update_text() -> void:
 func determine_sights():
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if agent.player_id != multiplayer.get_unique_id():
+			continue
+		if agent.in_smoke:
 			continue
 		for detected in agent._eyes.get_overlapping_areas():
 			var par = detected.get_parent()
@@ -296,6 +301,7 @@ func _physics_process(delta: float) -> void:
 			determine_weapon_events()
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
+				agent.in_smoke = false
 				#agent._debug_label.text = str(agent.target_visible_level) + "\n" + str(agent.noticed) + "\n" + str(current_game_step - agent.step_seen) + " : " + str(agent.step_seen)
 				if current_game_step - agent.step_seen == REMEMBER_TILL:
 					if agent.player_id == 1:
@@ -365,7 +371,6 @@ func _physics_process(delta: float) -> void:
 				if grenade.explode:
 					match grenade.wep_id:
 						"grenade_frag":
-							print("KABOOM")
 							for exploded in grenade._explosion_hitbox.get_overlapping_areas():
 								var attacked : Agent = exploded.get_parent()
 								if attacked.in_prone_state():
@@ -375,12 +380,24 @@ func _physics_process(delta: float) -> void:
 									create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
 						"grenade_smoke":
-							print("FSSSSSH")
+							smoke_spawner.spawn({
+								pos_x = grenade.position.x,
+								pos_y = grenade.position.y,
+								pos_z = grenade.position.z,
+								wep_name = grenade.name,
+							})
+							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
 						"grenade_noise":
 							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
 					if multiplayer.is_server():
 						grenades_in_existence.erase(grenade.name)
 						grenade.queue_free()
+			for smoke in ($Smokes.get_children() as Array[Smoke]):
+				smoke._tick()
+				for caught in smoke.col_area.get_overlapping_areas():
+					caught.get_parent().in_smoke = true
+				if multiplayer.is_server() and smoke.lifetime > 205:
+					smoke.queue_free()
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
 			#if multiplayer.is_server():
@@ -584,6 +601,14 @@ func create_grenade(data) -> Grenade:
 	new_grenade.client_knows = data.client_knows
 	new_grenade.landing_position = Vector3(data.end_pos_x, data.end_pos_y, data.end_pos_z)
 	return new_grenade
+
+
+func create_smoke(data) -> Smoke:
+	var new_smoke : Smoke = smoke_scene.instantiate()
+	new_smoke.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_smoke.name = data.wep_name
+	return new_smoke
+	pass
 
 
 func create_pickup(data) -> WeaponPickup:

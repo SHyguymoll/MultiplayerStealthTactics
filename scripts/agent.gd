@@ -119,6 +119,7 @@ var mark_for_dead := false
 var try_grab_pickup := false
 var mark_for_grenade_throw := false
 var ungrabbable = false
+var in_smoke = false
 @export var step_seen : int = 0
 @export var noticed : int = 0
 
@@ -505,6 +506,8 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 		move_and_slide()
 		if position.distance_to(queued_action[1]) < 0.3 or game_steps_since_execute > 10*60:
 			position = _nav_agent.target_position
+			if game_steps_since_execute > 10*60:
+				position.y = 0.0
 			match state:
 				States.WALK, States.RUN:
 					_anim_state.travel("Stand")
