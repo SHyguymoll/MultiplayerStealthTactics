@@ -375,8 +375,8 @@ func _physics_process(delta: float) -> void:
 								var attacked : Agent = exploded.get_parent()
 								if attacked.in_prone_state():
 									continue # prone agents dodge explosions for Reasons™
-								attacked.take_damage(5)
 								if multiplayer.is_server():
+									damage_agent.rpc(attacked.name, 5, false)
 									create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
 						"grenade_smoke":
@@ -608,7 +608,6 @@ func create_smoke(data) -> Smoke:
 	new_smoke.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
 	new_smoke.name = data.wep_name
 	return new_smoke
-	pass
 
 
 func create_pickup(data) -> WeaponPickup:
@@ -677,7 +676,8 @@ func determine_cqc_events():
 			continue
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
-		grabbee.take_damage(3, true)
+		if multiplayer.is_server():
+			damage_agent.rpc(grabbee.name, 3, true)
 		grabbee.step_seen = current_game_step
 		pass
 
@@ -734,8 +734,8 @@ func determine_weapon_events():
 						continue # skip already attacked agents
 					if attacked.in_prone_state():
 						continue # skip prone agents
-					attacked.take_damage(GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"))
 					if multiplayer.is_server():
+						damage_agent.rpc(attacked.name, GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"), false)
 						create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 
 
@@ -1194,27 +1194,31 @@ func failure_jingle():
 
 
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
-	if all_server_dead and all_client_dead:
+	if all_server_dead and all_client_dead and not sent_reward:
 		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
 		failure_jingle()
-		failure_jingle.rpc()
+		if multiplayer.is_server():
+			failure_jingle.rpc()
+		sent_reward = true
 	if not all_client_dead and (all_server_dead or client_progress == ProgressParts.SURVIVORS_EXFILTRATED):
-		if all_server_dead:
-			create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
 		if multiplayer.is_server() and not sent_reward:
+			if all_server_dead:
+				create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
 			print("REWARDING CLIENT TEAM")
 			reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
 			victory_jingle.rpc()
 			failure_jingle()
 			sent_reward = true
 	if not all_server_dead and (all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED):
-		if all_client_dead:
-			create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
-		print("REWARDING SERVER TEAM")
-		reward_team(1)
-		victory_jingle()
-		if multiplayer.is_server():
-			failure_jingle.rpc()
+		if not sent_reward:
+			if all_client_dead:
+				create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
+			print("REWARDING SERVER TEAM")
+			reward_team(1)
+			victory_jingle()
+			if multiplayer.is_server():
+				failure_jingle.rpc()
+			sent_reward = true
 	return all_server_dead or all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED or client_progress == ProgressParts.SURVIVORS_EXFILTRATED
 
 
@@ -1274,6 +1278,11 @@ func set_agent_server_visibility(agent_name : String, visibility : bool):
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_client_visibility(agent_name : String, visibility : bool):
 	$Agents.get_node(agent_name).client_knows = visibility
+
+
+@rpc("authority", "call_local", "reliable")
+func damage_agent(agent_name : String, damage_amt : int, stun : bool):
+	($Agents.get_node(agent_name) as Agent).take_damage(damage_amt, stun)
 
 
 func _on_execute_pressed() -> void:

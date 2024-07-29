@@ -393,7 +393,7 @@ func take_damage(amount : int, is_stun : bool = false):
 		#queued_action.clear()
 	else:
 		health = max(0, health - amount)
-		stun_time = 60 if health > 0 else 300
+		stun_time = 10
 		select_hurt_animation()
 		state = States.HURT if health > 0 else States.DEAD
 		#queued_action.clear()
