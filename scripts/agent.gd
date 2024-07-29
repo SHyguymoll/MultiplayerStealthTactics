@@ -37,6 +37,7 @@ var player_id : int
 @onready var _custom_skin_mat : StandardMaterial3D
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat : StandardMaterial3D
+@warning_ignore("unused_private_class_variable")
 @onready var _debug_label : Label3D = $DebugLabel3D
 @onready var _eyes : Area3D = $Eyes
 @onready var _eye_cone : ConvexPolygonShape3D = $Eyes/CollisionShape3D.shape

@@ -1,6 +1,7 @@
 class_name Grenade
 extends CharacterBody3D
 
+@warning_ignore("unused_private_class_variable")
 @onready var _explosion_hitbox : Area3D = $ExplosionHitbox
 
 @export var server_knows : bool
