@@ -433,3 +433,7 @@ func _on_text_change_timer_timeout() -> void:
 	$MainMenu/VBoxContainer/HostH/Host.text = "HOST GAME"
 	$MainMenu/VBoxContainer/JoinH/Join.text = "JOIN GAME"
 
+
+
+func _on_back_circle_animation_finished() -> void:
+	$MainMenu/BackCircle.play("shine" if randf() < 1.5/6.0 else "no_shine")
