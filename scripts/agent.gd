@@ -377,7 +377,7 @@ func decide_weapon_blend() -> Vector2:
 func take_damage(amount : int, is_stun : bool = false):
 	if is_stun:
 		stun_health = max(0, stun_health - amount)
-		stun_time = 30 if stun_health > 0 else 300
+		stun_time = 30 if stun_health > 0 else 120
 		if stun_health > 0:
 			_anim_state.travel("B_Hurt_Slammed")
 		else:
