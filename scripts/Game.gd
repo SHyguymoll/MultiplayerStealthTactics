@@ -112,7 +112,6 @@ func start_game(): # Called only on the server.
 	force_camera(
 		(game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position +
 		game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
-	pass
 
 
 func open_pause_menu():
@@ -261,18 +260,6 @@ func determine_sounds():
 		audio_event.update()
 
 
-@rpc("authority", "call_local", "reliable")
-func determine_nearby_pickups():
-	for agent in ($Agents.get_children() as Array[Agent]):
-		if agent.in_incapacitated_state():
-			continue
-		var detected_weapons = []
-		for overlap in agent._pickup_range.get_overlapping_areas():
-			detected_weapons.append(overlap.get_parent())
-		agent.detected.weapons = detected_weapons
-	pass
-
-
 func determine_indicator_removals():
 	for ind in $ClientsideIndicators.get_children():
 		if ind is AimingIndicator or ind is MovementIndicator:
@@ -303,7 +290,6 @@ func _physics_process(delta: float) -> void:
 				_update_game_phase(GamePhases.COMPLETION)
 		GamePhases.EXECUTION:
 			determine_cqc_events()
-			#determine_nearby_pickups()
 			determine_weapon_events()
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
@@ -328,7 +314,9 @@ func _physics_process(delta: float) -> void:
 						wep_name = str(agent.mark_for_drop.wep_node),
 					}
 					pickup_spawner.spawn(new_drop)
-					agent.held_weapons.erase(agent.mark_for_drop.wep_node)
+					#agent.held_weapons.erase(agent.mark_for_drop.wep_node)
+					if multiplayer.is_server():
+						remove_weapon_from_agent.rpc(agent.name, agent.mark_for_drop.wep_node)
 					agent.mark_for_drop.clear()
 				if multiplayer.is_server() and agent.try_grab_pickup and len(agent.queued_action) > 1:
 					if $Pickups.get_node_or_null(str(agent.queued_action[1])) != null:
@@ -685,7 +673,6 @@ func determine_cqc_events():
 		if multiplayer.is_server():
 			damage_agent.rpc(grabbee.name, 3, true)
 		grabbee.step_seen = current_game_step
-		pass
 
 func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
 	return end_pos + start_pos.direction_to(end_pos).rotated(Vector3.DOWN, PI/2) * change
@@ -1204,11 +1191,10 @@ func failure_jingle():
 
 
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
-	if all_server_dead and all_client_dead and not sent_reward:
+	if all_server_dead and all_client_dead and multiplayer.is_server() and not sent_reward:
 		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
 		failure_jingle()
-		if multiplayer.is_server():
-			failure_jingle.rpc()
+		failure_jingle.rpc()
 		sent_reward = true
 	if not all_client_dead and (all_server_dead or client_progress == ProgressParts.SURVIVORS_EXFILTRATED):
 		if multiplayer.is_server() and not sent_reward:
@@ -1220,14 +1206,13 @@ func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
 			failure_jingle()
 			sent_reward = true
 	if not all_server_dead and (all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED):
-		if not sent_reward:
+		if multiplayer.is_server() and not sent_reward:
 			if all_client_dead:
 				create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
 			print("REWARDING SERVER TEAM")
 			reward_team(1)
 			victory_jingle()
-			if multiplayer.is_server():
-				failure_jingle.rpc()
+			failure_jingle.rpc()
 			sent_reward = true
 	return all_server_dead or all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED or client_progress == ProgressParts.SURVIVORS_EXFILTRATED
 
@@ -1264,6 +1249,11 @@ func player_is_ready(id):
 			$HUDBase/HurryUp.visible = true
 	if multiplayer.is_server() and server_ready_bool and client_ready_bool:
 		_update_game_phase.rpc(GamePhases.EXECUTION)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func remove_weapon_from_agent(agent_name : String, weapon_name : String):
+	$Agents.get_node(agent_name).held_weapons.erase(weapon_name)
 
 
 @rpc("any_peer", "call_local", "reliable")

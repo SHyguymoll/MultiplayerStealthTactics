@@ -432,6 +432,7 @@ func _physics_process(_d: float) -> void:
 		detected_weapons = []
 		for overlap in _pickup_range.get_overlapping_areas():
 			detected_weapons.append(overlap.get_parent())
+			overlap.get_parent().flash_weapon()
 
 
 func should_be_visible():

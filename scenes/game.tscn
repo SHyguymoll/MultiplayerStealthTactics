@@ -449,7 +449,8 @@ color = Color(0.219608, 0, 0.219608, 1)
 position = Vector2(806, 300)
 scale = Vector2(0.54, 0.54)
 sprite_frames = SubResource("SpriteFrames_25ism")
-animation = &"none"
+animation = &"victory"
+autoplay = "none"
 
 [node name="HUDToasts" type="CanvasLayer" parent="."]
 layer = 95
