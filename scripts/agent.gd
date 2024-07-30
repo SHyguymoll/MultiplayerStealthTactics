@@ -429,6 +429,7 @@ func _physics_process(_d: float) -> void:
 	$AgentIsActive.visible = not in_incapacitated_state()
 	$AgentIsStunned.visible = state == States.STUNNED
 	$AgentIsStunned.rotation.z += PI/20.0
+	$AgentIsDead.visible = state == States.DEAD
 
 
 func should_be_visible():
