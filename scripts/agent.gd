@@ -361,14 +361,6 @@ func _ready() -> void:
 		_held_weapon_meshes[weapon_mesh].visible = false
 	visible = server_knows and multiplayer.is_server() or client_knows and not multiplayer.is_server()
 
-	# debug
-	# debug_setup()
-
-
-func _process(_delta: float) -> void:
-	# debug_process()
-
-	pass
 
 func decide_weapon_blend() -> Vector2:
 	match GameRefs.get_held_weapon_attribute(self, selected_weapon, "type"):
@@ -434,6 +426,9 @@ func _physics_process(_d: float) -> void:
 		for overlap in _pickup_range.get_overlapping_areas():
 			detected_weapons.append(overlap.get_parent())
 			overlap.get_parent().flash_weapon()
+	$AgentIsActive.visible = not in_incapacitated_state()
+	$AgentIsStunned.visible = state == States.STUNNED
+	$AgentIsStunned.rotation.z += PI/20.0
 
 
 func should_be_visible():
