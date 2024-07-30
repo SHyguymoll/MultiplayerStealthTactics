@@ -353,6 +353,7 @@ func _ready() -> void:
 	_box_mesh.set_surface_override_material(2, _outline_mat)
 	_box_mesh.visible = false
 	# other visuals
+	$CQCAnimationHelper/Sprite3D.visible = false
 	_anim_state.start("Stand")
 	_anim.advance(0)
 	_active_item_icon.texture = null

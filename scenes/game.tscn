@@ -1,4 +1,4 @@
-[gd_scene load_steps=77 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=78 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
 [ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
@@ -74,6 +74,20 @@
 [ext_resource type="Texture2D" uid="uid://lhmyl8fa7o8i" path="res://assets/sprites/mission_success_frames/0029.png" id="65_2v4s6"]
 [ext_resource type="Texture2D" uid="uid://caadf4xjj58aj" path="res://assets/sprites/mission_success_frames/0030.png" id="66_q3u35"]
 [ext_resource type="Texture2D" uid="uid://c6e5op4hie5k5" path="res://assets/sprites/mission_success_frames/0031.png" id="67_kjulw"]
+
+[sub_resource type="Environment" id="Environment_bedr1"]
+background_mode = 1
+background_color = Color(0.215686, 0, 0.176471, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.18
+reflected_light_source = 1
+ssao_radius = 4.96
+ssao_intensity = 3.48
+ssao_power = 0.675937
+fog_light_color = Color(1, 1, 1, 1)
+fog_light_energy = 0.0
+volumetric_fog_emission = Color(1, 1, 1, 1)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_25ism"]
 animations = [{
@@ -346,6 +360,7 @@ debug_shape_custom_color = Color(0.615686, 0.839216, 0, 1)
 debug_shape_thickness = 1
 
 [node name="Label" type="Label" parent="World/Camera3D"]
+visible = false
 offset_right = 40.0
 offset_bottom = 23.0
 theme = ExtResource("5_b0o1h")
@@ -353,10 +368,8 @@ theme_override_font_sizes/font_size = 32
 
 [node name="GameMap" parent="World" instance=ExtResource("2_ow13f")]
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
-light_color = Color(0.317647, 0.317647, 0.317647, 1)
-directional_shadow_mode = 0
+[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
+environment = SubResource("Environment_bedr1")
 
 [node name="ClientsideIndicators" type="Node3D" parent="."]
 

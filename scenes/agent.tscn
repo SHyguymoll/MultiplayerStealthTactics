@@ -18709,6 +18709,7 @@ max_value = 1.0
 
 [node name="DebugLabel3D" type="Label3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.24062, 0)
+visible = false
 billboard = 1
 font = ExtResource("3_iugk5")
 font_size = 64
@@ -18751,6 +18752,7 @@ avoidance_enabled = true
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0.48)
 
 [node name="Sprite3D" type="Sprite3D" parent="CQCAnimationHelper"]
+visible = false
 pixel_size = 0.0045
 billboard = 1
 texture = ExtResource("5_ciyir")
