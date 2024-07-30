@@ -523,6 +523,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 		visible_level = 50
 		stun_time = max(0, stun_time - 1)
 		if stun_time == 0:
+			stun_health = 3
 			_anim_state.travel("Crouch")
 			state = States.CROUCH
 	if state == States.GRABBED:
