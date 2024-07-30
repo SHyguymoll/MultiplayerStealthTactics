@@ -1184,6 +1184,8 @@ func player_quits(_peer_id):
 	if game_phase == GamePhases.COMPLETION or server_progress > ProgressParts.NO_ADVANTAGE or client_progress > ProgressParts.NO_ADVANTAGE:
 		return
 	create_toast_update("ENEMY HAS FORFEITED, MISSION SUCCESS", "ENEMY HAS FORFEITED, MISSION SUCCESS", false)
+	$FadeOut/ColorRect/AnimatedSprite2D.animation = "victory"
+	animate_fade(true)
 	_update_game_phase(GamePhases.COMPLETION)
 
 
@@ -1191,12 +1193,14 @@ func player_quits(_peer_id):
 func victory_jingle():
 	$Music/InProgress.stop()
 	$Music/Victory.play()
+	$FadeOut/ColorRect/AnimatedSprite2D.animation = "victory"
 
 
 @rpc("authority", "call_remote", "reliable")
 func failure_jingle():
 	$Music/InProgress.stop()
 	$Music/Failure.play()
+	$FadeOut/ColorRect/AnimatedSprite2D.animation = "failure"
 
 
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
@@ -1241,11 +1245,16 @@ func reward_team(team_id):
 
 @rpc("authority", "call_local")
 func animate_fade(in_out := true):
-	var twe = create_tween()
+	var twe := create_tween()
 	if in_out:
-		twe.tween_property($FadeOut/ColorRect, "modulate", Color.WHITE, 2.5).from(Color.TRANSPARENT)
+		twe.tween_property($FadeOut/ColorRect, "modulate", Color.WHITE, 1.5).from(Color.TRANSPARENT)
 	else:
-		twe.tween_property($FadeOut/ColorRect, "modulate", Color.TRANSPARENT, 2.5).from(Color.WHITE)
+		twe.tween_property($FadeOut/ColorRect, "modulate", Color.TRANSPARENT, 1.5).from(Color.WHITE)
+		twe.finished.connect(animate_finale_sprite)
+
+
+func animate_finale_sprite():
+	$FadeOut/ColorRect/AnimatedSprite2D.play()
 
 
 @rpc("any_peer", "call_local", "reliable")
