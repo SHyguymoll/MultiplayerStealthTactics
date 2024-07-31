@@ -210,11 +210,14 @@ func perform_action():
 		GameActions.CHANGE_ITEM:
 			ungrabbable = true
 			_mesh.visible = true
-			match held_items[selected_item]:
-				"box":
-					$Agent/Box.visible = false
-				"body_armor":
-					$Agent/game_rig/Skeleton3D/Helmet.visible = false
+			if selected_item > -1:
+				match held_items[selected_item]:
+					"box":
+						$Agent/Box.visible = false
+					"body_armor":
+						$Agent/game_rig/Skeleton3D/Helmet.visible = false
+					"cigar":
+						$Agent/game_rig/Skeleton3D/Cigar.visible = false
 			selected_item = queued_action[1]
 			if selected_item == -1:
 				return
@@ -225,6 +228,8 @@ func perform_action():
 					state = States.STAND
 				"body_armor":
 					$Agent/game_rig/Skeleton3D/Helmet.visible = true
+				"cigar":
+					$Agent/game_rig/Skeleton3D/Cigar.visible = true
 		GameActions.CHANGE_WEAPON:
 			selected_weapon = queued_action[1]
 			var actual_weapon = (held_weapons[selected_weapon] as String).split("_", true, 3)[3]
@@ -363,6 +368,8 @@ func _ready() -> void:
 	$Agent/Box.visible = false
 	$Agent/game_rig/Skeleton3D/Helmet.set_surface_override_material(1, _outline_mat)
 	$Agent/game_rig/Skeleton3D/Helmet.visible = false
+	$Agent/game_rig/Skeleton3D/Cigar.set_surface_override_material(1, _outline_mat)
+	$Agent/game_rig/Skeleton3D/Cigar.visible = false
 	# other visuals
 	$CQCAnimationHelper/Sprite3D.visible = false
 	_anim_state.start("Stand")
@@ -493,8 +500,13 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 	visible_level = clamp(visible_level, 0, 100)
 	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
 	# update agent specifically
-	if selected_item > -1 and held_items[selected_item] == "box":
-		target_visible_level = 1
+	if selected_item > -1:
+		match held_items[selected_item]:
+			"box":
+				target_visible_level = 1
+			"cigar":
+				if game_steps_since_execute % 50 == 0 and not in_incapacitated_state():
+					stun_health = min(5, stun_health + 1)
 	if in_moving_state():
 		if selected_item > -1 and held_items[selected_item] == "box":
 			target_visible_level = 150
