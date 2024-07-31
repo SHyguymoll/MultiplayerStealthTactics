@@ -835,10 +835,16 @@ item_2/text = ""
 item_2/icon = ExtResource("6_et3gt")
 item_3/text = ""
 item_3/icon = ExtResource("7_hl2io")
+item_3/selectable = false
+item_3/disabled = true
 item_4/text = ""
 item_4/icon = ExtResource("8_2028b")
+item_4/selectable = false
+item_4/disabled = true
 item_5/text = ""
 item_5/icon = ExtResource("9_3k1c4")
+item_5/selectable = false
+item_5/disabled = true
 
 [node name="Weapons" type="ItemList" parent="ReviewScreen/AgentDetails/HBox"]
 layout_mode = 2
