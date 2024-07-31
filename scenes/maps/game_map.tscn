@@ -1,9 +1,10 @@
-[gd_scene load_steps=12 format=3 uid="uid://mr6n3d2nksvr"]
+[gd_scene load_steps=13 format=3 uid="uid://mr6n3d2nksvr"]
 
 [ext_resource type="Script" path="res://scripts/game_map.gd" id="1_8s54t"]
 [ext_resource type="PackedScene" uid="uid://b75vsmb8bkx" path="res://assets/models/exports/map_basic.glb" id="2_cn121"]
 [ext_resource type="PackedScene" uid="uid://bjndhsqm2lc7p" path="res://assets/models/exports/map_basic_nav.glb" id="3_2c5nq"]
 [ext_resource type="Texture2D" uid="uid://q6p0rkij3vfr" path="res://assets/sprites/game_popups/debug_agspawn_server.png" id="4_mmrrv"]
+[ext_resource type="Texture2D" uid="uid://d21xwf6xdm7oi" path="res://assets/sprites/game_popups/exfiltrate.png" id="4_w0f1y"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_todys"]
 size = Vector3(3.48346, 1, 0.856445)
@@ -91,6 +92,18 @@ collision_mask = 8
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ServerExfil"]
 shape = SubResource("BoxShape3D_ycwvl")
 
+[node name="Sprite3D" type="Sprite3D" parent="ServerExfil"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 4.22311, 0.836327, 0)
+texture_filter = 0
+texture = ExtResource("4_w0f1y")
+region_rect = Rect2(0, 0, 256, 256)
+
+[node name="Sprite3D2" type="Sprite3D" parent="ServerExfil"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -4.47363, 0.836327, 0)
+texture_filter = 0
+texture = ExtResource("4_w0f1y")
+region_rect = Rect2(0, 0, 256, 256)
+
 [node name="ClientExfil" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.806, 12.5044)
 collision_layer = 16
@@ -98,6 +111,18 @@ collision_mask = 16
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="ClientExfil"]
 shape = SubResource("BoxShape3D_ycwvl")
+
+[node name="Sprite3D3" type="Sprite3D" parent="ClientExfil"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 4.22311, 0.836381, 0)
+texture_filter = 0
+texture = ExtResource("4_w0f1y")
+region_rect = Rect2(0, 0, 256, 256)
+
+[node name="Sprite3D4" type="Sprite3D" parent="ClientExfil"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -4.47363, 0.836381, 0)
+texture_filter = 0
+texture = ExtResource("4_w0f1y")
+region_rect = Rect2(0, 0, 256, 256)
 
 [node name="Spawns" type="Node3D" parent="."]
 
