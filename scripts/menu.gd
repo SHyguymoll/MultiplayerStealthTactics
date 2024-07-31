@@ -96,6 +96,9 @@ func load_agents():
 # no more than 2
 			},
 		]
+		_on_recruit_agent_pressed()
+		_on_recruit_agent_pressed()
+		_on_recruit_agent_pressed()
 		save_agents()
 		file = FileAccess.open("user://agents.mstd", FileAccess.READ)
 	var agent_file = JSON.parse_string(file.get_as_text(true))
