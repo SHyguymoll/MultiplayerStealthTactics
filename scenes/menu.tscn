@@ -412,7 +412,7 @@ grow_vertical = 2
 [node name="ReviewItemList" type="ItemList" parent="ReviewScreen"]
 layout_mode = 2
 offset_left = 78.0
-offset_top = 5.0
+offset_top = 69.0
 offset_right = 737.0
 offset_bottom = 821.0
 size_flags_horizontal = 3
@@ -871,6 +871,16 @@ item_4/text = ""
 item_4/icon = ExtResource("14_r5mbe")
 item_5/text = ""
 item_5/icon = ExtResource("15_hj263")
+
+[node name="XOName" type="Label" parent="ReviewScreen"]
+offset_left = 92.0
+offset_top = 18.0
+offset_right = 731.0
+offset_bottom = 55.0
+theme = ExtResource("1_s0wmi")
+theme_override_font_sizes/font_size = 36
+text = "<NAME>'S ROSTER"
+horizontal_alignment = 1
 
 [node name="MainMenu" type="Control" parent="."]
 layout_mode = 1

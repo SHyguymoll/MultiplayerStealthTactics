@@ -58,6 +58,7 @@ func load_user():
 		save_user()
 		file = FileAccess.open("user://player.mstd", FileAccess.READ)
 	user_data = JSON.parse_string(file.get_as_text(true))
+	$ReviewScreen/XOName.text = user_data.name + "'S ROSTER"
 
 
 func save_agents():
