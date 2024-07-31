@@ -137,12 +137,11 @@ func force_camera(new_pos, new_fov = -1.0):
 
 
 @rpc("authority", "call_local", "reliable")
-func create_sound_effect(location : Vector3, player_id : int, lifetime : int, min_rad : float, max_rad : float, sound_id : String) -> void:
+func create_sound_effect(location : Vector3, player_id : int, lifetime : int, _min_rad : float, max_rad : float, sound_id : String) -> void:
 	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
 	new_audio_event.position = location
 	new_audio_event.player_id = player_id
 	new_audio_event.max_radius = max_rad
-	new_audio_event.min_radius = min_rad
 	new_audio_event.lifetime = lifetime
 	new_audio_event.max_lifetime = lifetime
 	new_audio_event.selected_audio = sound_id

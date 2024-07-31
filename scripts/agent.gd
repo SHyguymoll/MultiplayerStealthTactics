@@ -361,7 +361,7 @@ func _ready() -> void:
 	_mesh.set_surface_override_material(1, _outline_mat)
 	$Agent/Box.set_surface_override_material(2, _outline_mat)
 	$Agent/Box.visible = false
-	$Agent/game_rig/Skeleton3D/Helmet.set_surface_override_material(2, _outline_mat)
+	$Agent/game_rig/Skeleton3D/Helmet.set_surface_override_material(1, _outline_mat)
 	$Agent/game_rig/Skeleton3D/Helmet.visible = false
 	# other visuals
 	$CQCAnimationHelper/Sprite3D.visible = false

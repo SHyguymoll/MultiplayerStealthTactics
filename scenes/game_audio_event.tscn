@@ -1,9 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://gvwevpp5oysy"]
+[gd_scene load_steps=4 format=3 uid="uid://gvwevpp5oysy"]
 
 [ext_resource type="Script" path="res://scripts/game_audio_event.gd" id="1_ou1ld"]
+[ext_resource type="Texture2D" uid="uid://dqvewayo17i2n" path="res://assets/sprites/game_popups/sound_impact.png" id="2_kclhh"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_kgyoq"]
-height = 7.0
+height = 5.0
 radius = 1.0
 
 [node name="AudioEvent" type="Node3D"]
@@ -15,5 +16,10 @@ collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
 shape = SubResource("CylinderShape3D_kgyoq")
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.47384, 0)
+pixel_size = 0.008
+texture = ExtResource("2_kclhh")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]

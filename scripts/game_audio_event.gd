@@ -8,7 +8,6 @@ var player_id : int
 var max_lifetime : int
 var lifetime : int
 var radius : float
-var min_radius : float
 var max_radius : float
 var selected_audio : String
 
@@ -17,7 +16,7 @@ var heard := false
 func _ready():
 	_area_shape.shape = CylinderShape3D.new()
 	_area_shape.shape.height = 7.0
-	_area_shape.shape.radius = min_radius
+	_area_shape.shape.radius = 0.001
 	_audio_node.stream = GameRefs.AUDIO.get(selected_audio, null)
 	if player_id == multiplayer.get_unique_id():
 		play_sound()
@@ -25,8 +24,9 @@ func _ready():
 
 func update():
 	lifetime = max(lifetime - 1, 0)
-	radius = lerpf(min_radius, max_radius, float(max_lifetime - lifetime)/float(max_lifetime))
+	radius = lerpf(0.001, max_radius, float(max_lifetime - lifetime)/float(max_lifetime))
 	_area_shape.shape.radius = radius
+	$Sprite3D.scale = Vector3(radius, radius, radius)
 	if lifetime == 0:
 		_area_shape.disabled = true
 		if not _audio_node.playing:
