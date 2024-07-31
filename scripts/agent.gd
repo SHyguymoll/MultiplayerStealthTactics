@@ -33,7 +33,6 @@ var player_id : int
 @onready var _anim : AnimationTree = $AnimationTree
 @onready var _anim_state : AnimationNodeStateMachinePlayback = _anim.get("parameters/playback")
 @onready var _mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Mesh
-@onready var _box_mesh : MeshInstance3D = $Agent/Box
 @onready var _custom_skin_mat : StandardMaterial3D
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat : StandardMaterial3D
@@ -210,12 +209,22 @@ func perform_action():
 			target_direction = get_required_y_rotation(queued_action[1])
 		GameActions.CHANGE_ITEM:
 			ungrabbable = true
+			_mesh.visible = true
+			match held_items[selected_item]:
+				"box":
+					$Agent/Box.visible = false
+				"body_armor":
+					$Agent/game_rig/Skeleton3D/Helmet.visible = false
 			selected_item = queued_action[1]
 			if selected_item == -1:
 				return
 			match held_items[selected_item]:
 				"box":
+					$Agent/Box.visible = true
+					_mesh.visible = false
 					state = States.STAND
+				"body_armor":
+					$Agent/game_rig/Skeleton3D/Helmet.visible = true
 		GameActions.CHANGE_WEAPON:
 			selected_weapon = queued_action[1]
 			var actual_weapon = (held_weapons[selected_weapon] as String).split("_", true, 3)[3]
@@ -350,8 +359,10 @@ func _ready() -> void:
 	# outline shader
 	_outline_mat = _outline_mat_base.duplicate()
 	_mesh.set_surface_override_material(1, _outline_mat)
-	_box_mesh.set_surface_override_material(2, _outline_mat)
-	_box_mesh.visible = false
+	$Agent/Box.set_surface_override_material(2, _outline_mat)
+	$Agent/Box.visible = false
+	$Agent/game_rig/Skeleton3D/Helmet.set_surface_override_material(2, _outline_mat)
+	$Agent/game_rig/Skeleton3D/Helmet.visible = false
 	# other visuals
 	$CQCAnimationHelper/Sprite3D.visible = false
 	_anim_state.start("Stand")
@@ -385,7 +396,7 @@ func take_damage(amount : int, is_stun : bool = false):
 		state = States.GRABBED
 		#queued_action.clear()
 	else:
-		health = max(0, health - amount)
+		health = max(0, health - max(1, amount/2)) if selected_item > -1 and held_items[selected_item] != "body_armor" else max(0, health - amount)
 		stun_time = 10
 		select_hurt_animation()
 		state = States.HURT if health > 0 else States.DEAD
@@ -415,7 +426,8 @@ func exfiltrate():
 	var twe = create_tween()
 	twe.set_parallel()
 	twe.tween_property(_mesh, "transparency", 1.0, 2.0).from(0.0)
-	twe.tween_property(_box_mesh, "transparency", 1.0, 2.0).from(0.0)
+	twe.tween_property($Agent/Box, "transparency", 1.0, 2.0).from(0.0)
+	twe.tween_property($Agent/game_rig/Skeleton3D/Helmet, "transparency", 1.0, 2.0).from(0.0)
 	twe.tween_property($Agent, "position:y", 10.0, 2.0).from_current()
 
 
@@ -482,12 +494,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
 	# update agent specifically
 	if selected_item > -1 and held_items[selected_item] == "box":
-		_box_mesh.visible = true
-		_mesh.visible = false
 		target_visible_level = 1
-	else:
-		_box_mesh.visible = false
-		_mesh.visible = true
 	if in_moving_state():
 		if selected_item > -1 and held_items[selected_item] == "box":
 			target_visible_level = 150
