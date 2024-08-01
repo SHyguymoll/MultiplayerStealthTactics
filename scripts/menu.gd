@@ -74,8 +74,8 @@ func load_agents():
 			{
 				name="Smoking Shark_32", # the agent's name
 				mission_count=0, # the number of missions that this agent has been used in
-				health=10, # the agent's health
-# value between 5 and 13
+				health=3, # the agent's health
+# value between 1 and 4
 				stun_health=5, # the agent's stun health
 # value between 3 and 8
 				view_dist=2.5, # how far the view cone extends from the agent
