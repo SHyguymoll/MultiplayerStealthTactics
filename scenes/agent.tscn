@@ -18747,12 +18747,15 @@ texture = ExtResource("5_ciyir")
 
 [node name="GlancedSomething" type="AudioStreamPlayer3D" parent="ClientsideSoundEffects"]
 stream = ExtResource("6_1rg8k")
+bus = &"SFX"
 
 [node name="SpottedElement" type="AudioStreamPlayer3D" parent="ClientsideSoundEffects"]
 stream = ExtResource("7_rs5ra")
+bus = &"SFX"
 
 [node name="SpottedAgent" type="AudioStreamPlayer3D" parent="ClientsideSoundEffects"]
 stream = ExtResource("7_rs5ra")
+bus = &"SFX"
 
 [node name="AgentIsActive" type="Sprite3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=79 format=3 uid="uid://tpqpwqi5p3an"]
+[gd_scene load_steps=82 format=3 uid="uid://tpqpwqi5p3an"]
 
 [ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="1_s0wmi"]
 [ext_resource type="Script" path="res://scripts/menu.gd" id="1_y43yw"]
@@ -77,6 +77,9 @@
 [ext_resource type="Texture2D" uid="uid://b3x3n6bwhuxn6" path="res://assets/sprites/main_menu_spinner_shine/0028.png" id="74_6pjmk"]
 [ext_resource type="Texture2D" uid="uid://ctvv6363jtdq0" path="res://assets/sprites/main_menu_spinner_shine/0029.png" id="75_pyws5"]
 [ext_resource type="Texture2D" uid="uid://rxwcac0x0kqn" path="res://assets/sprites/main_menu_spinner_shine/0030.png" id="76_vuwrm"]
+[ext_resource type="AudioStream" uid="uid://chc7uxln04icj" path="res://assets/sounds/menu/button_select.wav" id="78_j0bpn"]
+[ext_resource type="AudioStream" uid="uid://cfy3xoqmmov7" path="res://assets/sounds/menu/action_cancelled.wav" id="79_en5t4"]
+[ext_resource type="AudioStream" uid="uid://dlgqsvrw4auka" path="res://assets/sounds/objective/actions_submitted.wav" id="80_ylypx"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_c6ox6"]
 animations = [{
@@ -283,7 +286,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.211765, 0.0901961, 0.211765, 1)
+color = Color(0.298039, 0.0313726, 0.309804, 1)
 script = ExtResource("1_y43yw")
 
 [node name="HostScreen" type="Control" parent="."]
@@ -392,13 +395,78 @@ wait_time = 2.0
 one_shot = true
 
 [node name="SettingsScreen" type="Control" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="Back" type="Button" parent="SettingsScreen"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -146.0
+offset_top = -65.0
+grow_horizontal = 0
+grow_vertical = 0
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
+text = "BACK"
+
+[node name="V" type="VBoxContainer" parent="SettingsScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -481.0
+offset_top = -383.0
+offset_right = 481.0
+offset_bottom = 384.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="SettingsScreen/V"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+text = "MASTER AUDIO"
+horizontal_alignment = 1
+
+[node name="MasterAud" type="HSlider" parent="SettingsScreen/V"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+min_value = -73.0
+max_value = 0.0
+
+[node name="Label2" type="Label" parent="SettingsScreen/V"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+text = "MUSIC AUDIO"
+horizontal_alignment = 1
+
+[node name="MusicAud" type="HSlider" parent="SettingsScreen/V"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+min_value = -73.0
+max_value = 0.0
+
+[node name="Label3" type="Label" parent="SettingsScreen/V"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+text = "SOUND EFFECT AUDIO"
+horizontal_alignment = 1
+
+[node name="SFXAud" type="HSlider" parent="SettingsScreen/V"]
+layout_mode = 2
+theme = ExtResource("1_s0wmi")
+min_value = -73.0
+max_value = 0.0
 
 [node name="ReviewScreen" type="Control" parent="."]
 visible = false
@@ -884,6 +952,7 @@ text = "<NAME>'S ROSTER"
 horizontal_alignment = 1
 
 [node name="MainMenu" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -974,11 +1043,27 @@ text = "SETTINGS"
 wait_time = 5.0
 one_shot = true
 
+[node name="SelectSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("78_j0bpn")
+bus = &"SFX"
+
+[node name="SelectSound2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("79_en5t4")
+bus = &"SFX"
+
+[node name="SelectSound3" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("80_ylypx")
+bus = &"SFX"
+
 [connection signal="item_selected" from="HostScreen/PlayerAgents/ItemList" to="." method="_on_item_list_item_selected"]
 [connection signal="toggled" from="HostScreen/ButtonsHbox/Ready" to="." method="_on_ready_toggled"]
 [connection signal="pressed" from="HostScreen/ButtonsHbox/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="HostScreen/ButtonsHbox/Quit" to="." method="_on_quit_pressed"]
 [connection signal="timeout" from="HostScreen/TextReset" to="." method="_on_text_reset_timeout"]
+[connection signal="pressed" from="SettingsScreen/Back" to="." method="_on_back_pressed"]
+[connection signal="drag_ended" from="SettingsScreen/V/MasterAud" to="." method="_on_master_aud_drag_ended"]
+[connection signal="drag_ended" from="SettingsScreen/V/MusicAud" to="." method="_on_music_aud_drag_ended"]
+[connection signal="drag_ended" from="SettingsScreen/V/SFXAud" to="." method="_on_sfx_aud_drag_ended"]
 [connection signal="item_selected" from="ReviewScreen/ReviewItemList" to="." method="_on_review_item_list_item_selected"]
 [connection signal="pressed" from="ReviewScreen/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="ReviewScreen/RecruitAgent" to="." method="_on_recruit_agent_pressed"]
@@ -990,4 +1075,5 @@ one_shot = true
 [connection signal="pressed" from="MainMenu/VBoxContainer/HostH/Host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="MainMenu/VBoxContainer/JoinH/Join" to="." method="_on_join_pressed"]
 [connection signal="pressed" from="MainMenu/VBoxContainer/ReviewAgents" to="." method="_on_review_agents_pressed"]
+[connection signal="pressed" from="MainMenu/VBoxContainer/Settings" to="." method="_on_settings_pressed"]
 [connection signal="timeout" from="MainMenu/TextChangeTimer" to="." method="_on_text_change_timer_timeout"]

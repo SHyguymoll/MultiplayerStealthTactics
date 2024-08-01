@@ -110,6 +110,7 @@ func load_agents():
 func _on_join_pressed() -> void:
 	if $MainMenu/VBoxContainer/JoinH/LineEdit.text.is_empty():
 		$MainMenu/VBoxContainer/JoinH/LineEdit.text = $MainMenu/VBoxContainer/JoinH/LineEdit.placeholder_text
+	$SelectSound.play()
 	$HostScreen/Label.text = "Waiting for Host..."
 	_ready_button.visible = true
 	_start_button.visible = false
@@ -127,6 +128,7 @@ func _on_join_pressed() -> void:
 
 
 func _on_host_pressed() -> void:
+	$SelectSound.play()
 	if len(agents) == 0:
 		$MainMenu/VBoxContainer/HostH/Host.text = "Recruit an Agent first!"
 		$MainMenu/VBoxContainer/JoinH/Join.text = "Recruit an Agent first!"
@@ -149,6 +151,7 @@ func _on_host_pressed() -> void:
 
 
 func _on_review_agents_pressed() -> void:
+	$SelectSound.play()
 	$MainMenu.visible = false
 	$ReviewScreen.visible = true
 	review_selected_agent = -1
@@ -190,6 +193,7 @@ func _on_item_list_item_selected(index: int) -> void:
 
 @rpc("any_peer", "call_local")
 func add_agent(agent_index, is_server):
+	$SelectSound.play()
 	if is_server:
 		GameSettings.selected_agents.append(agent_index)
 		if not multiplayer.is_server():
@@ -206,6 +210,7 @@ func add_agent(agent_index, is_server):
 
 @rpc("any_peer", "call_local")
 func remove_agent(agent_index, is_server):
+	$SelectSound.play()
 	if is_server:
 		GameSettings.selected_agents.erase(agent_index)
 		if not multiplayer.is_server():
@@ -228,6 +233,7 @@ func synchronize_agents(selected : Array):
 func _on_player_connect(peer_id, player_info):
 	if peer_id == 1: # self joined, disregard
 		return
+	$SelectSound3.play()
 	GameSettings.other_player_id = multiplayer.get_remote_sender_id()
 	GameSettings.other_player_name = player_info.name
 	if multiplayer.is_server():
@@ -249,6 +255,7 @@ func _on_ready_toggled(toggled_on: bool) -> void:
 		_ready_button.set_pressed_no_signal(false)
 		_text_reset_timer.start()
 		return
+	$SelectSound.play()
 	_update_readiness.rpc_id(1, toggled_on)
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -265,6 +272,7 @@ func _on_start_pressed() -> void: # server-only
 
 
 func _on_quit_pressed() -> void:
+	$SelectSound2.play()
 	$HostScreen.visible = false
 	$MainMenu.visible = true
 	if not multiplayer.is_server():
@@ -278,6 +286,7 @@ func _on_quit_pressed() -> void:
 
 
 func _on_back_pressed() -> void:
+	$SelectSound.play()
 	$SettingsScreen.visible = false
 	$ReviewScreen.visible = false
 	$ReviewScreen/FireAgent.disabled = true
@@ -290,6 +299,7 @@ func _on_text_reset_timeout() -> void:
 	_start_button.text = "START"
 
 func _on_review_item_list_item_selected(index: int) -> void:
+	$SelectSound.play()
 	if review_selected_agent > -1:
 		_review_agents_list.set_item_text(review_selected_agent, _review_agents_list.get_item_text(review_selected_agent).trim_suffix(" <"))
 	review_selected_agent = index
@@ -370,6 +380,7 @@ func reverse_get_index_from_name(icon_name : String):
 func _on_items_item_selected(index: int) -> void:
 	if review_selected_agent == -1:
 		return
+	$SelectSound.play()
 	var actual_name = GameRefs.get_name_from_icon(_review_items_list.get_item_icon(index))
 	if actual_name in agents[review_selected_agent].held_items:
 		agents[review_selected_agent].held_items.erase(actual_name)
@@ -385,6 +396,7 @@ func _on_items_item_selected(index: int) -> void:
 func _on_weapons_item_selected(index: int) -> void:
 	if review_selected_agent == -1:
 		return
+	$SelectSound.play()
 	var actual_name = GameRefs.get_name_from_icon(_review_weapons_list.get_item_icon(index))
 	if actual_name in agents[review_selected_agent].held_weapons:
 		agents[review_selected_agent].held_weapons.erase(actual_name)
@@ -421,6 +433,7 @@ func _on_recruit_agent_pressed() -> void:
 func _on_fire_agent_pressed() -> void:
 	if review_selected_agent > -1:
 		agents.remove_at(review_selected_agent)
+		$SelectSound2.play()
 		review_selected_agent -= 1
 	$ReviewScreen/FireAgent.disabled = true
 	_populate_agent_list()
@@ -431,6 +444,7 @@ func _on_fire_agent_pressed() -> void:
 
 func _on_save_roster_pressed() -> void:
 	save_agents()
+	$SelectSound.play()
 
 
 func _on_text_change_timer_timeout() -> void:
@@ -438,6 +452,44 @@ func _on_text_change_timer_timeout() -> void:
 	$MainMenu/VBoxContainer/JoinH/Join.text = "JOIN GAME"
 
 
-
 func _on_back_circle_animation_finished() -> void:
 	$MainMenu/BackCircle.play("shine" if randf() < 1.5/6.0 else "no_shine")
+
+
+func _on_settings_pressed() -> void:
+	$MainMenu.visible = false
+	$SettingsScreen/V/MasterAud.value = AudioServer.get_bus_volume_db(0)
+	$SettingsScreen/V/MusicAud.value = AudioServer.get_bus_volume_db(1)
+	$SettingsScreen/V/SFXAud.value = AudioServer.get_bus_volume_db(2)
+	$SettingsScreen.visible = true
+	$SelectSound.play()
+
+
+func _on_master_aud_drag_ended(value_changed: bool) -> void:
+	if value_changed:
+		if $SettingsScreen/V/MasterAud.value < -72:
+			AudioServer.set_bus_mute(0, true)
+		else:
+			AudioServer.set_bus_mute(0, false)
+			AudioServer.set_bus_volume_db(0, $SettingsScreen/V/MasterAud.value)
+		$SelectSound.play()
+
+
+func _on_music_aud_drag_ended(value_changed: bool) -> void:
+	if value_changed:
+		if $SettingsScreen/V/MusicAud.value < -72:
+			AudioServer.set_bus_mute(1, true)
+		else:
+			AudioServer.set_bus_mute(1, false)
+			AudioServer.set_bus_volume_db(1, $SettingsScreen/V/MusicAud.value)
+		$SelectSound.play()
+
+
+func _on_sfx_aud_drag_ended(value_changed: bool) -> void:
+	if value_changed:
+		if $SettingsScreen/V/SFXAud.value < -72:
+			AudioServer.set_bus_mute(2, true)
+		else:
+			AudioServer.set_bus_mute(2, false)
+			AudioServer.set_bus_volume_db(2, $SettingsScreen/V/SFXAud.value)
+		$SelectSound.play()
