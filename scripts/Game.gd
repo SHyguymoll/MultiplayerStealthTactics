@@ -190,8 +190,15 @@ func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_leve
 func try_see_agent(spotter : Agent, spottee : Agent):
 	if spotter.player_id == spottee.player_id: # skip your team
 		return
-	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level)
-	if sight_chance > 0.7: # seent it
+	var instant_spot = false
+	var instant_fail = false
+	if spottee.selected_item > -1 and spottee.held_items[spottee.selected_item] == "box":
+		if spottee.in_moving_state():
+			instant_spot = true
+		else:
+			instant_fail = true
+	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level) * float(not instant_fail)
+	if sight_chance > 0.7 or instant_spot: # seent it
 		if current_game_step - spottee.step_seen < REMEMBER_TILL and spottee.step_seen > 0:
 			set_agent_step_seen.rpc(spottee.name, current_game_step)
 			return
