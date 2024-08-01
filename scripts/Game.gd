@@ -301,7 +301,7 @@ func _physics_process(delta: float) -> void:
 				agent._game_step(delta)
 				agent.in_smoke = false
 				#agent._debug_label.text = str(agent.target_visible_level) + "\n" + str(agent.noticed) + "\n" + str(current_game_step - agent.step_seen) + " : " + str(agent.step_seen)
-				if current_game_step - agent.step_seen == REMEMBER_TILL:
+				if current_game_step - agent.step_seen == REMEMBER_TILL and agent.visible:
 					if agent.player_id == 1:
 						set_agent_client_visibility.rpc(agent.name, false)
 						if not multiplayer.is_server():
@@ -328,25 +328,17 @@ func _physics_process(delta: float) -> void:
 					if $Pickups.get_node_or_null(str(agent.queued_action[1])) != null:
 						$Pickups.get_node(str(agent.queued_action[1])).queue_free()
 					agent.try_grab_pickup = false
-				if multiplayer.is_server() and agent.mark_for_dead:
-					agent.mark_for_dead = false
+				if multiplayer.is_server() and agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
 					var new_drop = {
-						pos_x = agent.mark_for_drop.position.x,
-						pos_y = agent.mark_for_drop.position.y,
-						pos_z = agent.mark_for_drop.position.z,
-						server_knows = agent.player_id == 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
-						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
-						wep_name = str(agent.mark_for_drop.wep_node),
+						pos_x = agent.global_position.x + (randf() - 0.5),
+						pos_y = agent.global_position.y,
+						pos_z = agent.global_position.z + (randf() - 0.5),
+						server_knows = agent.player_id == 1 or $Weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
+						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
+						wep_name = str(agent.held_weapons[1]),
 					}
-					for weapon in (agent.held_weapons as Array[String]):
-						if weapon.contains("fist"):
-							continue
-						new_drop.server_knows = agent.player_id == 1 or $Weapons.get_node(str(weapon)).is_map_element()
-						new_drop.client_knows = agent.player_id != 1 or $Weapons.get_node(str(weapon)).is_map_element()
-						new_drop.wep_name = str(weapon)
-						pickup_spawner.spawn(new_drop)
-						new_drop.pos_y += 0.8
-					agent.held_weapons.clear()
+					pickup_spawner.spawn(new_drop)
+					agent.held_weapons.remove_at(1)
 				if multiplayer.is_server() and agent.mark_for_grenade_throw:
 					var try_name = agent.held_weapons[agent.selected_weapon]
 					while try_name in grenades_in_existence:
@@ -378,7 +370,8 @@ func _physics_process(delta: float) -> void:
 								if multiplayer.is_server():
 									damage_agent.rpc(attacked.name, 5, false)
 									create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
-							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
+							if multiplayer.is_server():
+								create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
 						"grenade_smoke":
 							smoke_spawner.spawn({
 								pos_x = grenade.position.x,
@@ -386,9 +379,11 @@ func _physics_process(delta: float) -> void:
 								pos_z = grenade.position.z,
 								wep_name = grenade.name,
 							})
-							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
+							if multiplayer.is_server():
+								create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
 						"grenade_noise":
-							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
+							if multiplayer.is_server():
+								create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
 					if multiplayer.is_server():
 						grenades_in_existence.erase(grenade.name)
 						grenade.queue_free()
@@ -962,8 +957,6 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				_update_game_phase(GamePhases.COMPLETION)
 		GamePhases.EXECUTION:
 			$HUDBase/HurryUp.visible = false
-			for selector in $HUDSelectors.get_children(): # remove previous selectors
-				selector.queue_free()
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.action_text = ""
 			update_text()
@@ -1264,6 +1257,8 @@ func _on_execute_pressed() -> void:
 	_actions_submitted.play()
 	_execute_button.disabled = true
 	_execute_button.text = "WAITING FOR OPPONENT"
+	for selector in $HUDSelectors.get_children():
+		selector.queue_free()
 	_radial_menu.button_collapse_animation()
 	hide_hud()
 	player_is_ready.rpc(multiplayer.get_unique_id())

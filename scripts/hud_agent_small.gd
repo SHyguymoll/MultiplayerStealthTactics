@@ -45,9 +45,6 @@ func _physics_process(delta: float) -> void:
 	$Textures/AgentState/Flash.color = Color(1, 1, 1, flash)
 	if ref_ag == null:
 		return
-	if ref_ag.in_incapacitated_state() and not ref_ag.percieved_by_friendly:
-		_state_tex.texture = GameRefs.STE.unknown
-		return
 	match ref_ag.state:
 		Agent.States.STAND, Agent.States.CROUCH, Agent.States.PRONE:
 			_state_tex.texture = GameRefs.STE.active

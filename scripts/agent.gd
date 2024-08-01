@@ -118,7 +118,6 @@ enum States {
 @export var server_knows := false
 @export var client_knows := false
 var mark_for_drop := {}
-var mark_for_dead := false
 var try_grab_pickup := false
 var mark_for_grenade_throw := false
 var ungrabbable = false
@@ -440,7 +439,8 @@ func exfiltrate():
 	twe.tween_property(_mesh, "transparency", 1.0, 2.0).from(0.0)
 	twe.tween_property($Agent/Box, "transparency", 1.0, 2.0).from(0.0)
 	twe.tween_property($Agent/game_rig/Skeleton3D/Helmet, "transparency", 1.0, 2.0).from(0.0)
-	twe.tween_property($Agent, "position:y", 10.0, 2.0).from_current()
+	twe.tween_property($Agent, "position:y", -10.0, 2.0).from_current()
+	twe.finished.connect(func(): visible = false)
 
 
 func _physics_process(_d: float) -> void:
