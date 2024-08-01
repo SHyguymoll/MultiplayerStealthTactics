@@ -597,8 +597,36 @@ properties/0/replication_mode = 2
 properties/1/path = NodePath(".:client_knows")
 properties/1/spawn = true
 properties/1/replication_mode = 2
+properties/2/path = NodePath("shotgun:visible")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath("rifle:visible")
+properties/3/spawn = true
+properties/3/replication_mode = 1
+properties/4/path = NodePath("pistol:visible")
+properties/4/spawn = true
+properties/4/replication_mode = 1
+properties/5/path = NodePath("grenade_frag:visible")
+properties/5/spawn = true
+properties/5/replication_mode = 1
+properties/6/path = NodePath("grenade_smoke:visible")
+properties/6/spawn = true
+properties/6/replication_mode = 1
+properties/7/path = NodePath("grenade_noise:visible")
+properties/7/spawn = true
+properties/7/replication_mode = 1
+properties/8/path = NodePath("flag_center:visible")
+properties/8/spawn = true
+properties/8/replication_mode = 1
+properties/9/path = NodePath("flag_server:visible")
+properties/9/spawn = true
+properties/9/replication_mode = 1
+properties/10/path = NodePath("flag_client:visible")
+properties/10/spawn = true
+properties/10/replication_mode = 1
 
 [node name="WeaponPickup" type="Node3D"]
+visible = false
 script = ExtResource("2_hqexf")
 
 [node name="shotgun" type="MeshInstance3D" parent="."]

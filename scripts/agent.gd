@@ -30,6 +30,9 @@ var player_id : int
 
 @export var skin_texture : String
 
+@onready var _vision_cone : Sprite3D = $AgentVision
+const VIS_CONE_BASE = Vector2(0.405, 0.98)
+
 @onready var _anim : AnimationTree = $AnimationTree
 @onready var _anim_state : AnimationNodeStateMachinePlayback = _anim.get("parameters/playback")
 @onready var _mesh : MeshInstance3D = $Agent/game_rig/Skeleton3D/Mesh
@@ -347,15 +350,17 @@ func debug_process():
 
 func _ready() -> void:
 	# set up sensors
-	_eye_cone.points[1] = Vector3(view_across, view_across, view_dist)
-	_eye_cone.points[2] = Vector3(-view_across, view_across, view_dist)
-	_eye_cone.points[3] = Vector3(view_across, -view_across, view_dist)
-	_eye_cone.points[4] = Vector3(-view_across, -view_across, view_dist)
+	_eye_cone.points[1] = Vector3(view_across, 1, view_dist)
+	_eye_cone.points[2] = Vector3(-view_across, 1, view_dist)
+	_eye_cone.points[3] = Vector3(view_across, 1, view_dist)
+	_eye_cone.points[4] = Vector3(-view_across, 1, view_dist)
 	if player_id == multiplayer.get_unique_id():
 		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
 	_ear_cylinder.radius = hearing_dist
 	_body.collision_layer += 8 if player_id == 1 else 16
 	# custom texture
+	if player_id != multiplayer.get_unique_id():
+		skin_texture = "res://assets/models/Skins/enemy_agent.png"
 	if skin_texture:
 		_custom_skin_mat = StandardMaterial3D.new()
 		var texture : Texture2D = load(skin_texture)
@@ -439,6 +444,8 @@ func exfiltrate():
 
 
 func _physics_process(_d: float) -> void:
+	var v_cone = Vector3(VIS_CONE_BASE.x * 2 * view_across, 1, VIS_CONE_BASE.y * view_dist/2.5)
+	_vision_cone.scale = v_cone
 	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, GENERAL_LERP_VAL / 3.0)
 	if not in_incapacitated_state():
 		detected_weapons = []
@@ -466,10 +473,9 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 	if not single_mode:
 		visible = should_be_visible()
 	if single_mode or not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly) or selected_item == -1:
-		_active_item_icon.visible = false
+		_active_item_icon.texture = null
 	elif selected_item > -1:
 		_active_item_icon.texture = GameRefs.ITM[held_items[selected_item]].icon
-		_active_item_icon.visible = true
 	visible_level = 100
 	if in_standing_state():
 		target_world_collide_height = 0.962

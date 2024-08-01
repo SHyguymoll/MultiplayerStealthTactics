@@ -26,3 +26,5 @@ enum Objectives {
 func _ready():
 	for spawn in $Spawns.get_children() as Array[Sprite3D]:
 		spawn.get_child(0).visible = false
+	$map_basic_nav.visible = false
+	$map_basic.visible = true

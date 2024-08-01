@@ -25,7 +25,7 @@ func _ready():
 			continue
 		weapon_mesh.set_surface_override_material(1, _outline_mat)
 		weapon_mesh.visible = false
-	visible = multiplayer.is_server() and server_knows or not multiplayer.is_server() and client_knows
+	visible = multiplayer.is_server() and server_knows or not multiplayer.is_server() and client_knows or name.begins_with("map_")
 
 
 func _process(_d) -> void:

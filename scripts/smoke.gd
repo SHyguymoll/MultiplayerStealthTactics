@@ -19,8 +19,8 @@ func _ready() -> void:
 	transparency = 1.0
 
 func _tick():
-	mesh_shape.radius = remap(smoke_rad_curve.sample(float(lifetime)/200), 0.0, 1.0, 0.001, 5.0)
-	mesh_shape.height = remap(smoke_hei_curve.sample(float(lifetime)/200), 0.0, 1.0, 0.001, 3.5)
-	transparency = trans_curve.sample(float(lifetime)/200)
+	mesh_shape.radius = remap(smoke_rad_curve.sample(float(lifetime)/400), 0.0, 1.0, 0.001, 5.0)
+	mesh_shape.height = remap(smoke_hei_curve.sample(float(lifetime)/400), 0.0, 1.0, 0.001, 3.5)
+	transparency = trans_curve.sample(float(lifetime)/400)
 	collision.radius = max(mesh_shape.radius - 0.25, 0.001)
 	lifetime += 1

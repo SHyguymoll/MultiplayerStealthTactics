@@ -1,4 +1,4 @@
-[gd_scene load_steps=126 format=3 uid="uid://oitco668lkwj"]
+[gd_scene load_steps=127 format=3 uid="uid://oitco668lkwj"]
 
 [ext_resource type="Script" path="res://scripts/agent.gd" id="1_qe0u1"]
 [ext_resource type="PackedScene" uid="uid://c2d2uqv4wgbv7" path="res://assets/models/exports/Agent.gltf" id="2_bu3bb"]
@@ -10,9 +10,10 @@
 [ext_resource type="Texture2D" uid="uid://bw1hgctukifxg" path="res://assets/sprites/game_popups/agent_active.png" id="8_jowv5"]
 [ext_resource type="Texture2D" uid="uid://yg2jqvru0vsy" path="res://assets/sprites/game_popups/agent_dead.png" id="9_6ccb4"]
 [ext_resource type="Texture2D" uid="uid://4eclieiqk1g1" path="res://assets/sprites/game_popups/agent_dizzy.png" id="9_qm2d1"]
+[ext_resource type="Texture2D" uid="uid://dqlwi4x2n0pvo" path="res://assets/sprites/game_popups/agent_vision.png" id="11_1jsy6"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_fpakf"]
-points = PackedVector3Array(0, 0, 0, -1, 1, 3, 1, 1, 3, 1, -1, 3, -1, -1, 3)
+points = PackedVector3Array(0, 0, 0, -0.5, 1, 2.5, 0.5, 1, 2.5, 0.5, -1, 2.5, -0.5, -1, 2.5)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_bpqx0"]
 radius = 1.625
@@ -18485,6 +18486,12 @@ axis_lock_angular_z = true
 platform_floor_layers = 4294901761
 script = ExtResource("1_qe0u1")
 
+[node name="AgentVision" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0560442, 0)
+offset = Vector2(0, -128)
+axis = 1
+texture = ExtResource("11_1jsy6")
+
 [node name="Eyes" type="Area3D" parent="."]
 collision_layer = 0
 collision_mask = 32
@@ -18724,6 +18731,7 @@ collide_with_bodies = false
 
 [node name="ActiveItem" type="Sprite3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.18837, 0)
+visible = false
 pixel_size = 0.003
 billboard = 1
 texture = ExtResource("4_k5gu7")

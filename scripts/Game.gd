@@ -489,40 +489,6 @@ func server_populate_variables(): #TODO
 		data.pos_z = game_map.agent_spawn_client_4.position.z
 		data.rot_y = game_map.agent_spawn_client_4.rotation.y
 		ag_spawner.spawn(data)
-	# game map stuff
-	data.clear()
-	data.pickup = {}
-	data.pickup.generate_weapon = true
-	data.weapon = {}
-	match game_map.objective:
-		game_map.Objectives.CAPTURE_ENEMY_FLAG:
-			# create server's flag
-			data.pickup.pos_x = game_map.objective_params[0]
-			data.pickup.pos_y = game_map.objective_params[1]
-			data.pickup.pos_z = game_map.objective_params[2]
-			data.pickup.server_knows = true
-			data.pickup.client_knows = false
-			data.pickup.wep_name = "map_flag_server"
-			pickup_spawner.spawn(data.pickup)
-			# create client's flag
-			data.pickup.pos_x = game_map.objective_params[3]
-			data.pickup.pos_y = game_map.objective_params[4]
-			data.pickup.pos_z = game_map.objective_params[5]
-			data.pickup.server_knows = false
-			data.pickup.client_knows = true
-			data.pickup.wep_name = "map_flag_client"
-			pickup_spawner.spawn(data.pickup)
-		game_map.Objectives.CAPTURE_CENTRAL_FLAG:
-			# create central flag
-			data.pickup.pos_x = game_map.objective_params[0]
-			data.pickup.pos_y = game_map.objective_params[1]
-			data.pickup.pos_z = game_map.objective_params[2]
-			data.pickup.server_knows = true
-			data.pickup.client_knows = true
-			data.pickup.wep_name = "map_flag_center"
-			pickup_spawner.spawn(data.pickup)
-		game_map.Objectives.TARGET_DEFEND:
-			game_map.objective_params
 
 
 func append_action_timeline(agent : Agent):
@@ -750,6 +716,9 @@ func _hud_agent_details_actions(agent_selector : AgentSelector):
 		print(multiplayer.get_unique_id(), ": agent is knocked out with no eyes on them")
 		return
 	agent.flash_outline(Color.AQUA)
+	for small_hud in ($HUDBase/QuickViews.get_children()):
+		if small_hud.ref_ag == agent:
+			small_hud.flash = 1.0
 	_radial_menu.referenced_agent = agent
 	_radial_menu.position = agent_selector.position
 	_radial_menu.init_menu()
@@ -1303,6 +1272,41 @@ func _on_execute_pressed() -> void:
 func _on_cold_boot_timer_timeout() -> void:
 	_update_game_phase(GamePhases.SELECTION, false)
 	animate_fade(false)
+	if not multiplayer.is_server():
+		return
+	var data : Dictionary
+	data.pickup = {}
+	data.pickup.generate_weapon = true
+	data.weapon = {}
+	match game_map.objective:
+		game_map.Objectives.CAPTURE_ENEMY_FLAG:
+			# create server's flag
+			data.pickup.pos_x = game_map.objective_params[0]
+			data.pickup.pos_y = game_map.objective_params[1]
+			data.pickup.pos_z = game_map.objective_params[2]
+			data.pickup.server_knows = true
+			data.pickup.client_knows = false
+			data.pickup.wep_name = "map_flag_server"
+			pickup_spawner.spawn(data.pickup)
+			# create client's flag
+			data.pickup.pos_x = game_map.objective_params[3]
+			data.pickup.pos_y = game_map.objective_params[4]
+			data.pickup.pos_z = game_map.objective_params[5]
+			data.pickup.server_knows = false
+			data.pickup.client_knows = true
+			data.pickup.wep_name = "map_flag_client"
+			pickup_spawner.spawn(data.pickup)
+		game_map.Objectives.CAPTURE_CENTRAL_FLAG:
+			# create central flag
+			data.pickup.pos_x = game_map.objective_params[0]
+			data.pickup.pos_y = game_map.objective_params[1]
+			data.pickup.pos_z = game_map.objective_params[2]
+			data.pickup.server_knows = true
+			data.pickup.client_knows = true
+			data.pickup.wep_name = "map_flag_center"
+			pickup_spawner.spawn(data.pickup)
+		game_map.Objectives.TARGET_DEFEND:
+			game_map.objective_params
 
 
 func _on_pickup_spawner_despawned(node: Node) -> void:
