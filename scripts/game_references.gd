@@ -42,7 +42,7 @@ const WEP := {
 		cooldown_time = 40,
 		reload_time = 250,
 		ammo = 6,
-		damage = 5,
+		damage = 2,
 		},
 	grenade_smoke = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/grenade_smoke.png"),
@@ -60,7 +60,7 @@ const WEP := {
 		cooldown_time = 30,
 		reload_time = 5,
 		ammo = 1,
-		damage = 4,
+		damage = 2,
 		},
 	grenade_noise = {
 		icon = preload("res://assets/sprites/hud_agent_small/weapons/noise_maker.png"),

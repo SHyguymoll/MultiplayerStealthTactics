@@ -416,7 +416,7 @@ func _on_recruit_agent_pressed() -> void:
 	agents.append({
 				name=ADJECTIVE.pick_random() + " " + ANIMAL.pick_random() + "_" + str(int(fmod(Time.get_unix_time_from_system(), 1.0) * 100)),
 				mission_count=0,
-				health=randi_range(5, 10),
+				health=randi_range(1, 4),
 				stun_health=randi_range(3, 5),
 				view_dist=randf_range(2.00, 2.75),
 				view_across=randf_range(0.8, 0.9),

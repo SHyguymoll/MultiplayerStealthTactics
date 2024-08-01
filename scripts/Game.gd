@@ -368,7 +368,7 @@ func _physics_process(delta: float) -> void:
 								if attacked.in_prone_state():
 									continue # prone agents dodge explosions for Reasons™
 								if multiplayer.is_server():
-									damage_agent.rpc(attacked.name, 5, false)
+									damage_agent.rpc(attacked.name, 2, false)
 									create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 							if multiplayer.is_server():
 								create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
@@ -692,7 +692,7 @@ func determine_weapon_events():
 						continue # same team can block bullets but won't take damage
 					if attacked.stun_time > 0:
 						continue # skip already attacked agents
-					if attacked.in_prone_state():
+					if attacked.in_prone_state() or attacked.state == Agent.States.DEAD:
 						continue # skip prone agents
 					if multiplayer.is_server():
 						damage_agent.rpc(attacked.name, GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"), false)
