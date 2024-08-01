@@ -338,7 +338,7 @@ func _physics_process(delta: float) -> void:
 						wep_name = str(agent.held_weapons[1]),
 					}
 					pickup_spawner.spawn(new_drop)
-					agent.held_weapons.remove_at(1)
+					remove_weapon_from_agent.rpc(agent.name, new_drop.wep_name)
 				if multiplayer.is_server() and agent.mark_for_grenade_throw:
 					var try_name = agent.held_weapons[agent.selected_weapon]
 					while try_name in grenades_in_existence:

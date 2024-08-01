@@ -528,6 +528,19 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 				velocity /= 2.5
 				visible_level += 10
 		move_and_slide()
+		if len(queued_action) < 2:
+			match state:
+				States.WALK, States.RUN:
+					_anim_state.travel("Stand")
+					state = States.STAND
+				States.CROUCH_WALK:
+					_anim_state.travel("Crouch")
+					state = States.CROUCH
+				States.CRAWL:
+					_anim_state.travel("B_Prone")
+					state = States.PRONE
+			action_complete()
+			return
 		if position.distance_to(queued_action[1]) < 0.3 or game_steps_since_execute > 10*60:
 			position = _nav_agent.target_position
 			if game_steps_since_execute > 10*60:
