@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://bdnyhebpqwdr6" path="res://assets/sprites/game_popups/spotted.png" id="5_ciyir"]
 [ext_resource type="AudioStream" uid="uid://d0e1mgvv6n3j" path="res://assets/sounds/agent/noticed_sight.wav" id="6_1rg8k"]
 [ext_resource type="AudioStream" uid="uid://bpdw6bnylxcjh" path="res://assets/sounds/agent/detected_element.wav" id="7_rs5ra"]
-[ext_resource type="Texture2D" uid="uid://c1a4tc5047oxv" path="res://assets/sprites/game_popups/animated/movement/0.png" id="8_fcrk5"]
+[ext_resource type="Texture2D" uid="uid://bw1hgctukifxg" path="res://assets/sprites/game_popups/agent_active.png" id="8_jowv5"]
 [ext_resource type="Texture2D" uid="uid://yg2jqvru0vsy" path="res://assets/sprites/game_popups/agent_dead.png" id="9_6ccb4"]
 [ext_resource type="Texture2D" uid="uid://4eclieiqk1g1" path="res://assets/sprites/game_popups/agent_dizzy.png" id="9_qm2d1"]
 
@@ -18754,7 +18754,7 @@ stream = ExtResource("7_rs5ra")
 
 [node name="AgentIsActive" type="Sprite3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
-texture = ExtResource("8_fcrk5")
+texture = ExtResource("8_jowv5")
 
 [node name="AgentIsDead" type="Sprite3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 1.30344, 0)

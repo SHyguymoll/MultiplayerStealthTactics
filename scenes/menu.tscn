@@ -873,6 +873,7 @@ item_5/text = ""
 item_5/icon = ExtResource("15_hj263")
 
 [node name="XOName" type="Label" parent="ReviewScreen"]
+layout_mode = 0
 offset_left = 92.0
 offset_top = 18.0
 offset_right = 731.0
