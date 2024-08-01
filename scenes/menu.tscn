@@ -468,6 +468,18 @@ theme = ExtResource("1_s0wmi")
 min_value = -73.0
 max_value = 0.0
 
+[node name="HardReset" type="Button" parent="SettingsScreen"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -65.0
+offset_right = 298.0
+grow_vertical = 0
+size_flags_horizontal = 3
+theme = ExtResource("1_s0wmi")
+text = "HARD RESET"
+
 [node name="ReviewScreen" type="Control" parent="."]
 visible = false
 layout_mode = 1
@@ -1064,6 +1076,7 @@ bus = &"SFX"
 [connection signal="drag_ended" from="SettingsScreen/V/MasterAud" to="." method="_on_master_aud_drag_ended"]
 [connection signal="drag_ended" from="SettingsScreen/V/MusicAud" to="." method="_on_music_aud_drag_ended"]
 [connection signal="drag_ended" from="SettingsScreen/V/SFXAud" to="." method="_on_sfx_aud_drag_ended"]
+[connection signal="pressed" from="SettingsScreen/HardReset" to="." method="_on_hard_reset_pressed"]
 [connection signal="item_selected" from="ReviewScreen/ReviewItemList" to="." method="_on_review_item_list_item_selected"]
 [connection signal="pressed" from="ReviewScreen/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="ReviewScreen/RecruitAgent" to="." method="_on_recruit_agent_pressed"]

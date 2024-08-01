@@ -461,6 +461,8 @@ func _on_settings_pressed() -> void:
 	$SettingsScreen/V/MasterAud.value = AudioServer.get_bus_volume_db(0)
 	$SettingsScreen/V/MusicAud.value = AudioServer.get_bus_volume_db(1)
 	$SettingsScreen/V/SFXAud.value = AudioServer.get_bus_volume_db(2)
+	$SettingsScreen/HardReset.disabled = false
+	$SettingsScreen/HardReset.text = "HARD RESET"
 	$SettingsScreen.visible = true
 	$SelectSound.play()
 
@@ -493,3 +495,16 @@ func _on_sfx_aud_drag_ended(value_changed: bool) -> void:
 			AudioServer.set_bus_mute(2, false)
 			AudioServer.set_bus_volume_db(2, $SettingsScreen/V/SFXAud.value)
 		$SelectSound.play()
+
+
+func _on_hard_reset_pressed() -> void:
+	match $SettingsScreen/HardReset.text:
+		"HARD RESET":
+			$SettingsScreen/HardReset.text = "Are you sure?"
+		"Are you sure?":
+			DirAccess.remove_absolute("user://player.mstd")
+			DirAccess.remove_absolute("user://agents.mstd")
+			load_user()
+			load_agents()
+			$SettingsScreen/HardReset.text = "Reset Complete."
+			$SettingsScreen/HardReset.disabled = true
