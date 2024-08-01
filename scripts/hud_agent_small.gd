@@ -62,7 +62,7 @@ func _physics_process(delta: float) -> void:
 	_label.text = GameRefs.extract_agent_name(ref_ag.name)
 	_health_bar.value = ref_ag.health
 	_stun_health_bar.value = ref_ag.stun_health
-	if ref_ag.selected_weapon < -1:
+	if ref_ag.selected_weapon == -1:
 		return
 	_wep_in_bar.max_value = GameRefs.get_weapon_attribute(GameRefs.get_weapon_node(ref_ag.held_weapons[ref_ag.selected_weapon]), "ammo")
 	_wep_in_bar.value = GameRefs.get_weapon_node(ref_ag.held_weapons[ref_ag.selected_weapon]).loaded_ammo
