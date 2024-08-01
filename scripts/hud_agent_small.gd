@@ -54,14 +54,16 @@ func _physics_process(delta: float) -> void:
 			_state_tex.texture = GameRefs.STE.stunned
 		Agent.States.DEAD:
 			_state_tex.texture = GameRefs.STE.dead
-	if len(ref_ag.held_weapons) > 0:
+	if ref_ag.state != Agent.States.DEAD and len(ref_ag.held_weapons) > 0:
 		_wep_tex.texture = GameRefs.return_icon(ref_ag, true)
-	if len(ref_ag.held_items) > 0:
+	if ref_ag.state != Agent.States.DEAD and len(ref_ag.held_items) > 0:
 		_itm_tex.texture = GameRefs.return_icon(ref_ag, false)
 
 	_label.text = GameRefs.extract_agent_name(ref_ag.name)
 	_health_bar.value = ref_ag.health
 	_stun_health_bar.value = ref_ag.stun_health
+	if ref_ag.state == Agent.States.DEAD:
+		return
 	if ref_ag.selected_weapon == -1:
 		return
 	_wep_in_bar.max_value = GameRefs.get_weapon_attribute(GameRefs.get_weapon_node(ref_ag.held_weapons[ref_ag.selected_weapon]), "ammo")
