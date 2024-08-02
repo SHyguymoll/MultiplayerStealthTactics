@@ -424,8 +424,8 @@ func _on_recruit_agent_pressed() -> void:
 				hearing_dist=randf_range(0.8, 1.5),
 				movement_dist=randf_range(4.0, 6.0),
 				movement_speed=randf_range(1.25, 2.7),
-				held_items=[],
-				held_weapons=[],
+				held_items=["box", "body_armor"],
+				held_weapons=["pistol", "grenade_smoke"],
 			})
 	_populate_agent_list()
 
