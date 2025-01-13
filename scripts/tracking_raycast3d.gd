@@ -20,4 +20,3 @@ func _physics_process(_d: float) -> void:
 			#new_tracking_ray.name = agent.name + "|" + cli_agent.name
 			#$RayCasts.add_child(new_tracking_ray)
 			#print("created ray ", new_tracking_ray)
-

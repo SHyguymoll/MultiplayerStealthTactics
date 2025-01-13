@@ -89,4 +89,3 @@ func _physics_process(delta: float) -> void:
 	else:
 		if _wep_res_bar.modulate.s != 0.0:
 			_wep_res_bar.modulate.s = 0.0
-

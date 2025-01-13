@@ -36,4 +36,3 @@ func _tick() -> void:
 	global_position = start_position.lerp(landing_position, clamp(float(30 - boom_time)/30.0, 0.0, 1.0))
 	if boom_time == -100:
 		explode = true
-

@@ -58,4 +58,3 @@ func _animate(delta: float) -> void:
 			continue
 		weapon_mesh.rotation.y += delta * 3
 		weapon_mesh.position.y = position_y
-
