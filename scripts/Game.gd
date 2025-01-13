@@ -99,10 +99,15 @@ func _ready(): # Preconfigure game.
 		$HUDBase/ClientPlayerName.text = Lobby.player_info.name
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 	Lobby.player_disconnected.connect(player_quits)
+	if not multiplayer.is_server():
+		client_is_loaded.rpc_id(1)
 
+@rpc("any_peer")
+func client_is_loaded():
+	($MultiplayerLoadTimer as Timer).start()
 
 func start_game(): # Called only on the server.
-	await get_tree().create_timer(0.25).timeout # wait for peers to load in
+	await ($MultiplayerLoadTimer as Timer).timeout # wait for client to load in
 	ping.rpc()
 	server_populate_variables()
 	force_camera.rpc_id(
