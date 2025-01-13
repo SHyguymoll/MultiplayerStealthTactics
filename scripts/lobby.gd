@@ -7,10 +7,18 @@ signal player_connected(peer_id, player_info)
 signal player_disconnected(peer_id)
 signal server_disconnected
 
-const PORT = 6780
+# Server details
 const DEFAULT_SERVER_IP = "127.0.0.1" # IPv4 localhost
+const PORT_MIN = 6780
+const PORT_MAX = 9999
 const MAX_CONNECTIONS = 2
 
+var upnp : UPNP
+var port : int = 6780
+var extern_addr : String
+var lan_mode : bool
+
+# Game details
 # This will contain player info for every player,
 # with the keys being each player's unique IDs.
 var players = {}
@@ -49,41 +57,44 @@ func _ready():
 
 func join_game(address = "") -> int:
 	if address.is_empty():
-		address = DEFAULT_SERVER_IP
+		return ERR_UNCONFIGURED
 	var peer = ENetMultiplayerPeer.new()
-	var error = peer.create_client(address, PORT)
+	port = int(address.split(":")[1])
+	address = address.split(":")[0]
+	var error = peer.create_client(address, port)
 	if error:
 		return error
 	multiplayer.multiplayer_peer = peer
 	return 0
 
 
-var upnp : UPNP
-var extern_addr : String
-
 func create_upnp_thing():
 	upnp = UPNP.new()
 	if upnp.discover() == UPNP.UPNP_RESULT_SUCCESS:
 		if upnp.get_gateway() and upnp.get_gateway().is_valid_gateway():
-			var res_udp = upnp.add_port_mapping(PORT, 0, "godot_SOLOMONGAME", "UDP")
-			var res_tcp = upnp.add_port_mapping(PORT, 0, "godot_SOLOMONGAME", "TCP")
+			var res_udp = upnp.add_port_mapping(port, 0, "godot_multiplayerstealthtactics", "UDP")
+			var res_tcp = upnp.add_port_mapping(port, 0, "godot_multiplayerstealthtactics", "TCP")
 			if not res_udp == UPNP.UPNP_RESULT_SUCCESS:
-				upnp.add_port_mapping(PORT, 0, "", "UDP")
+				upnp.add_port_mapping(port, 0, "", "UDP")
 			if not res_tcp == UPNP.UPNP_RESULT_SUCCESS:
-				upnp.add_port_mapping(PORT, 0, "", "TCP")
+				upnp.add_port_mapping(port, 0, "", "TCP")
 	extern_addr = upnp.query_external_address()
 
 func destroy_upnp_thing():
-	upnp.delete_port_mapping(PORT, "UDP")
-	upnp.delete_port_mapping(PORT, "TCP")
+	if lan_mode: #there is no upnp in lan world, networks make sense here
+		return
+	upnp.delete_port_mapping(port, "UDP")
+	upnp.delete_port_mapping(port, "TCP")
 
-func create_game(max_connections = 0, lan_mode = false):
+func create_game(max_connections = 0, is_lan = false):
+	port = randi_range(PORT_MIN, PORT_MAX)
+	lan_mode = is_lan
 	if lan_mode:
-		extern_addr = DEFAULT_SERVER_IP
-	else:
+		extern_addr = DEFAULT_SERVER_IP + ":" + str(port)
+	else: # internet game, UPNP is a stopgap until something a little less crap can be used
 		create_upnp_thing()
 	var peer = ENetMultiplayerPeer.new()
-	var error = peer.create_server(PORT, MAX_CONNECTIONS)
+	var error = peer.create_server(port, MAX_CONNECTIONS)
 	if error:
 		return error
 	multiplayer.multiplayer_peer = peer

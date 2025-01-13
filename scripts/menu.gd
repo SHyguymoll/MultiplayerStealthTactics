@@ -108,8 +108,11 @@ func load_agents():
 
 
 func _on_join_pressed() -> void:
-	if $MainMenu/VBoxContainer/JoinH/LineEdit.text.is_empty():
-		$MainMenu/VBoxContainer/JoinH/LineEdit.text = $MainMenu/VBoxContainer/JoinH/LineEdit.placeholder_text
+	if ($MainMenu/VBoxContainer/JoinH/LineEdit.text as String) == "127.0.0.1:????":
+		$MainMenu/VBoxContainer/JoinH/LineEdit.text = "SPECIFY PORT"
+		$SelectSound2.play()
+		$MainMenu/TextChangeTimer.start()
+		return
 	$SelectSound.play()
 	$HostScreen/Label.text = "Waiting for Host..."
 	_ready_button.visible = true
@@ -119,7 +122,7 @@ func _on_join_pressed() -> void:
 		name = user_data.name,
 		agents = agents,
 	}
-	if Lobby.join_game($MainMenu/VBoxContainer/JoinH/LineEdit.text) == 0:
+	if Lobby.join_game($MainMenu/VBoxContainer/JoinH/LineEdit.text) == OK:
 		$MainMenu.visible = false
 		$HostScreen.visible = true
 	else:
@@ -450,6 +453,7 @@ func _on_save_roster_pressed() -> void:
 func _on_text_change_timer_timeout() -> void:
 	$MainMenu/VBoxContainer/HostH/Host.text = "HOST GAME"
 	$MainMenu/VBoxContainer/JoinH/Join.text = "JOIN GAME"
+	$MainMenu/VBoxContainer/JoinH/LineEdit.text = "127.0.0.1:????"
 
 
 func _on_back_circle_animation_finished() -> void:

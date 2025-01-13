@@ -395,6 +395,7 @@ wait_time = 2.0
 one_shot = true
 
 [node name="SettingsScreen" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -907,21 +908,15 @@ max_columns = 3
 same_column_width = true
 icon_mode = 0
 icon_scale = 0.8
-item_0/text = ""
 item_0/icon = ExtResource("4_88vtr")
-item_1/text = ""
 item_1/icon = ExtResource("5_0dyx8")
-item_2/text = ""
 item_2/icon = ExtResource("6_et3gt")
-item_3/text = ""
 item_3/icon = ExtResource("7_hl2io")
 item_3/selectable = false
 item_3/disabled = true
-item_4/text = ""
 item_4/icon = ExtResource("8_2028b")
 item_4/selectable = false
 item_4/disabled = true
-item_5/text = ""
 item_5/icon = ExtResource("9_3k1c4")
 item_5/selectable = false
 item_5/disabled = true
@@ -939,17 +934,11 @@ item_count = 6
 max_columns = 3
 icon_mode = 0
 icon_scale = 0.8
-item_0/text = ""
 item_0/icon = ExtResource("10_bw4bd")
-item_1/text = ""
 item_1/icon = ExtResource("11_cqf6n")
-item_2/text = ""
 item_2/icon = ExtResource("12_sk1ki")
-item_3/text = ""
 item_3/icon = ExtResource("13_ttbev")
-item_4/text = ""
 item_4/icon = ExtResource("14_r5mbe")
-item_5/text = ""
 item_5/icon = ExtResource("15_hj263")
 
 [node name="XOName" type="Label" parent="ReviewScreen"]
@@ -964,7 +953,6 @@ text = "<NAME>'S ROSTER"
 horizontal_alignment = 1
 
 [node name="MainMenu" type="Control" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -1039,7 +1027,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme = ExtResource("1_s0wmi")
 theme_override_font_sizes/font_size = 32
-placeholder_text = "127.0.0.1"
+text = "127.0.0.1:????"
 
 [node name="ReviewAgents" type="Button" parent="MainMenu/VBoxContainer"]
 layout_mode = 2
