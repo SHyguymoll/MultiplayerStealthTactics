@@ -247,7 +247,7 @@ func _on_player_connect(peer_id, player_info):
 
 
 func _on_player_disconnect(id):
-	$HostScreen/Label.text = "Lost connection to {0}!".format([id])
+	$HostScreen/Label.text = "Lost connection to {0}!".format(["Host" if id == 1 else "Client"])
 	for extra in _enemy_agents.get_children():
 		extra.queue_free()
 
