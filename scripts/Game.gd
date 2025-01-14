@@ -187,9 +187,15 @@ func determine_sights():
 				try_see_element(agent, par)
 
 
+func log10(x: float) -> float:
+	return log(x) / log(10)
+
+
 func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_level : int) -> float:
-	var dist = clampf(remap(spotter.position.distance_to(spottee_pos), 0.0, spotter.view_dist, 0.0, 1.0), 0.0, 1.0)
-	var exponent = ((1.5 * dist)/(log(visible_level)/log(10)))
+	var dist = clampf(
+		remap(spotter.position.distance_to(spottee_pos), 0.0, spotter.view_dist, 0.0, 1.0),
+		0.0, 1.0)
+	var exponent = ((1.5 * dist)/(log10(visible_level)))
 	var inv_eye = 1.0/spotter.eye_strength
 	return maxf(1.0/(inv_eye**exponent), 0.01)
 
