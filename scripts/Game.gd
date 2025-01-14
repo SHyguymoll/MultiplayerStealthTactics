@@ -1144,7 +1144,7 @@ func create_toast_update(server_text : String, client_text : String, add_sound_e
 func player_quits(_peer_id):
 	if game_phase == GamePhases.COMPLETION or server_progress > ProgressParts.NO_ADVANTAGE or client_progress > ProgressParts.NO_ADVANTAGE:
 		return
-	create_toast_update("ENEMY HAS FORFEITED, MISSION SUCCESS", "ENEMY HAS FORFEITED, MISSION SUCCESS", false)
+	create_toast_update(GameRefs.TXT.forfeit, GameRefs.TXT.forfeit, false)
 	$FadeOut/ColorRect/AnimatedSprite2D.play("victory")
 	animate_fade(true)
 	_update_game_phase(GamePhases.COMPLETION)

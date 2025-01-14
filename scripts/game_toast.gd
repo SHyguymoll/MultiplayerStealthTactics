@@ -24,10 +24,8 @@ func underscore_to_text(given_text : String, underscore_percentage : float):
 	if underscore_percentage < 1.00:
 		_audio.play()
 	return (
-		given_text.substr(
-			0,
-			int(float(input_text.length()) * underscore_percentage)
-			)
+		given_text.substr(0,
+			int(float(input_text.length()) * underscore_percentage))
 		+ "".rpad(
 			ceil(float(given_text.length()) * (1 - underscore_percentage)),
 			"_")
