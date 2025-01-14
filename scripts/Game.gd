@@ -990,8 +990,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 func save_replay():
 	action_timeline[current_game_step] = "END"
 	end_time = str(int(Time.get_unix_time_from_system()))
-	var save_dir = DirAccess.open("user://replays")
-	if save_dir == null:
+	if DirAccess.open("user://replays") == null:
 		DirAccess.make_dir_absolute("user://replays")
 	var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
 	new_replay.store_string(JSON.stringify(action_timeline))
