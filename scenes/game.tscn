@@ -637,13 +637,13 @@ bus = &"Music"
 
 [node name="ColdBootTimer" type="Timer" parent="."]
 one_shot = true
-autostart = true
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_pu7ty")
 
 [node name="MultiplayerLoadTimer" type="Timer" parent="."]
 wait_time = 0.1
+one_shot = true
 
 [connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]
 [connection signal="pressed" from="PauseMenu/ColorRect/VBoxContainer/YesForfeit" to="." method="_on_yes_forfeit_pressed"]

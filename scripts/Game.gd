@@ -29,6 +29,7 @@ enum GamePhases {
 	COMPLETION,
 }
 @export var game_phase : GamePhases = GamePhases.SELECTION
+
 enum SelectionSteps {
 	BASE,
 	MOVEMENT,
@@ -117,6 +118,7 @@ func start_game(): # Called only on the server.
 	force_camera(
 		(game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position +
 		game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
+	($ColdBootTimer as Timer).start()
 
 
 func open_pause_menu():
