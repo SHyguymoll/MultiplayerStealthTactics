@@ -466,6 +466,10 @@ func should_be_visible():
 	return false
 
 
+func within_target() -> bool:
+	return abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1
+
+
 func _game_step(delta: float, single_mode : bool = false) -> void:
 	# update agent generally
 	game_steps_since_execute += 1
@@ -575,7 +579,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 	match queued_action[0]:
 		GameActions.LOOK_AROUND:
 			rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
-			if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1:
+			if within_target():
 				rotation.y = target_direction
 				action_complete()
 		GameActions.CHANGE_ITEM:
@@ -589,7 +593,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			match attack_step:
 				AttackStep.ORIENTING:
 					rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
-					if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1:
+					if within_target():
 						rotation.y = target_direction
 						_attack_orient_transition()
 				AttackStep.ATTACKING:
@@ -612,7 +616,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			match attack_step:
 				AttackStep.ORIENTING:
 					rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
-					if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1:
+					if within_target():
 						rotation.y = target_direction
 						attack_step = AttackStep.BACKPACKING
 						game_steps_since_execute = 0
@@ -626,7 +630,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 						action_complete()
 		GameActions.DROP_WEAPON:
 			rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
-			if abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1:
+			if within_target():
 				rotation.y = target_direction
 				mark_for_drop = {
 					position = queued_action[2],
