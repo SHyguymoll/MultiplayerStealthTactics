@@ -353,12 +353,12 @@ func _ready() -> void:
 	_eye_cone.points[2] = Vector3(-view_across, 1, view_dist)
 	_eye_cone.points[3] = Vector3(view_across, 1, view_dist)
 	_eye_cone.points[4] = Vector3(-view_across, 1, view_dist)
-	if player_id == multiplayer.get_unique_id():
+	if owned():
 		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
 	_ear_cylinder.radius = hearing_dist
 	_body.collision_layer += 8 if player_id == 1 else 16
 	# custom texture
-	if player_id != multiplayer.get_unique_id():
+	if not owned():
 		skin_texture = "res://assets/models/Skins/enemy_agent.png"
 	if skin_texture:
 		_custom_skin_mat = StandardMaterial3D.new()
@@ -381,7 +381,7 @@ func _ready() -> void:
 	_active_item_icon.texture = null
 	for weapon_mesh in _held_weapon_meshes:
 		_held_weapon_meshes[weapon_mesh].visible = false
-	visible = server_knows and multiplayer.is_server() or client_knows and not multiplayer.is_server()
+	visible = owned()
 
 
 func decide_weapon_blend() -> Vector2:
@@ -405,13 +405,13 @@ func take_damage(amount : int, is_stun : bool = false):
 		else:
 			_anim_state.travel("B_Hurt_Collapse")
 		state = States.GRABBED
-		#queued_action.clear()
 	else:
-		health = max(0, health - max(1, amount/2)) if selected_item > -1 and held_items[selected_item] != "body_armor" else max(0, health - amount)
+		if selected_item > -1 and held_items[selected_item] != "body_armor":
+			amount = max(1, amount/2)
+		health = max(0, health - amount)
 		stun_time = 10
 		select_hurt_animation()
 		state = States.HURT if health > 0 else States.DEAD
-		#queued_action.clear()
 
 
 func select_hurt_animation():

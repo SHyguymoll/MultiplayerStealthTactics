@@ -1032,7 +1032,7 @@ func check_weapon_holder_exfil(server_team : bool, item_name : String) -> bool:
 func check_full_team_exfil_or_dead(server_team : bool):
 	var count = 0
 	for ag in ($Agents.get_children() as Array[Agent]):
-		if ag.player_id != 1 and server_team or ag.player_id == 1 and not server_team:
+		if not ag.owned():
 			continue
 		count += 1
 		if ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
