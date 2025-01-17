@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://ckcsdsq46mb4p"]
+
+[ext_resource type="Script" path="res://scripts/spawn_point.gd" id="1_actow"]
+[ext_resource type="Texture2D" uid="uid://d4mlypqhq31vj" path="res://assets/sprites/game_popups/debug_agspawn_client.png" id="2_pourx"]
+
+[node name="SpawnPoint" type="Node3D"]
+script = ExtResource("1_actow")
+
+[node name="DebugIcon" type="Sprite3D" parent="."]
+billboard = 1
+double_sided = false
+texture = ExtResource("2_pourx")
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+exclude_parent = false
+target_position = Vector3(0, -5, 0)
+collide_with_areas = true
+collide_with_bodies = false
