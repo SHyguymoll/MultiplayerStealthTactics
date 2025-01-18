@@ -1,21 +1,20 @@
-[gd_scene load_steps=7 format=3 uid="uid://cmp5i0lkbpfbn"]
+[gd_scene load_steps=6 format=3 uid="uid://cmp5i0lkbpfbn"]
 
 [ext_resource type="Script" path="res://scripts/exfil_zone.gd" id="1_cde5i"]
-[ext_resource type="Texture2D" uid="uid://d21xwf6xdm7oi" path="res://assets/sprites/game_popups/exfiltrate.png" id="2_oc666"]
 [ext_resource type="Shader" uid="uid://7k1e88u2c1y2" path="res://assets/models/materials/exfil_zone.tres" id="3_x58t7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ycwvl"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_1voi1"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_evq8x"]
 render_priority = 0
 shader = ExtResource("3_x58t7")
-shader_parameter/oscillation_rate = 1.59
-shader_parameter/color = Color(0.541176, 0.168627, 0.886275, 1)
+shader_parameter/oscillation_rate = 1.0
+shader_parameter/color = Color(0, 0, 0, 1)
 shader_parameter/edge = 0.1
 shader_parameter/col_shape = Vector2(1, 1)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_17cwr"]
-material = SubResource("ShaderMaterial_1voi1")
+[sub_resource type="PlaneMesh" id="PlaneMesh_24r16"]
+material = SubResource("ShaderMaterial_evq8x")
 size = Vector2(1, 1)
 subdivide_width = 8
 subdivide_depth = 8
@@ -24,26 +23,11 @@ subdivide_depth = 8
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("1_cde5i")
-oscillation_rate = 1.59
 collision_shape = Vector3(1, 1, 1)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_ycwvl")
 
-[node name="Sprite3D" type="Sprite3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 4.22311, 0.836327, 0)
-visible = false
-texture_filter = 0
-texture = ExtResource("2_oc666")
-region_rect = Rect2(0, 0, 256, 256)
-
-[node name="Sprite3D2" type="Sprite3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -4.47363, 0.836327, 0)
-visible = false
-texture_filter = 0
-texture = ExtResource("2_oc666")
-region_rect = Rect2(0, 0, 256, 256)
-
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
-mesh = SubResource("PlaneMesh_17cwr")
+mesh = SubResource("PlaneMesh_24r16")

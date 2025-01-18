@@ -86,7 +86,6 @@ default_input_values = [0, 0.25, 1, 0.0]
 
 [sub_resource type="VisualShaderNodeColorParameter" id="VisualShaderNodeColorParameter_p2ave"]
 parameter_name = "color"
-default_value_enabled = true
 default_value = Color(0.541176, 0.168627, 0.886275, 1)
 
 [sub_resource type="VisualShaderNodeStep" id="VisualShaderNodeStep_0u8ne"]
@@ -97,7 +96,7 @@ code = "shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
 
 uniform float oscillation_rate = 1;
-uniform vec4 color : source_color = vec4(0.541176, 0.168627, 0.886275, 1.000000);
+uniform vec4 color : source_color;
 uniform float edge = 0.10000000149012;
 uniform vec2 col_shape = vec2(1.000000, 1.000000);
 
@@ -109,7 +108,7 @@ void fragment() {
 
 
 // FloatConstant:28
-	float n_out28p0 = 3.141593;
+	float n_out28p0 = 3.141590;
 
 
 // FloatOp:27
@@ -226,7 +225,7 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(297.599, 14.2398)
+nodes/vertex/0/position = Vector2(520, 160)
 nodes/fragment/0/position = Vector2(1440, 280)
 nodes/fragment/5/node = SubResource("VisualShaderNodeInput_qefe8")
 nodes/fragment/5/position = Vector2(-1020, 520)
@@ -280,4 +279,5 @@ nodes/fragment/31/node = SubResource("VisualShaderNodeFloatOp_pick7")
 nodes/fragment/31/position = Vector2(300, -480)
 nodes/fragment/32/node = SubResource("VisualShaderNodeFloatParameter_o60jt")
 nodes/fragment/32/position = Vector2(-500, -300)
-nodes/fragment/connections = PackedInt32Array(6, 0, 11, 0, 9, 0, 11, 1, 12, 0, 6, 0, 12, 0, 9, 0, 5, 1, 13, 0, 12, 0, 14, 0, 5, 2, 15, 0, 12, 0, 16, 0, 11, 0, 17, 0, 16, 0, 18, 1, 14, 0, 18, 0, 18, 0, 17, 1, 17, 0, 19, 0, 19, 0, 0, 1, 13, 0, 21, 0, 20, 1, 21, 1, 21, 0, 14, 1, 20, 1, 22, 1, 5, 1, 22, 0, 22, 0, 6, 1, 20, 2, 23, 1, 15, 0, 23, 0, 23, 0, 16, 1, 5, 2, 24, 0, 24, 0, 9, 1, 20, 2, 24, 1, 25, 0, 27, 0, 28, 0, 27, 1, 7, 0, 29, 1, 26, 0, 30, 0, 30, 0, 29, 0, 29, 0, 0, 0, 27, 0, 31, 0, 31, 0, 26, 0, 32, 0, 31, 1)
+nodes/fragment/connections = PackedInt32Array(6, 0, 11, 0, 9, 0, 11, 1, 12, 0, 6, 0, 12, 0, 9, 0, 5, 1, 13, 0, 12, 0, 14, 0, 5, 2, 15, 0, 12, 0, 16, 0, 11, 0, 17, 0, 16, 0, 18, 1, 14, 0, 18, 0, 18, 0, 17, 1, 17, 0, 19, 0, 19, 0, 0, 1, 13, 0, 21, 0, 20, 1, 21, 1, 21, 0, 14, 1, 20, 1, 22, 1, 5, 1, 22, 0, 22, 0, 6, 1, 20, 2, 23, 1, 15, 0, 23, 0, 23, 0, 16, 1, 5, 2, 24, 0, 24, 0, 9, 1, 20, 2, 24, 1, 25, 0, 27, 0, 28, 0, 27, 1, 26, 0, 30, 0, 30, 0, 29, 0, 27, 0, 31, 0, 31, 0, 26, 0, 32, 0, 31, 1, 7, 0, 29, 1, 29, 0, 0, 0)
+nodes/light/0/position = Vector2(400, 160)
