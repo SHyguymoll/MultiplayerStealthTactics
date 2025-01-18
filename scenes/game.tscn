@@ -1,4 +1,4 @@
-[gd_scene load_steps=78 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=79 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
 [ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
@@ -74,6 +74,7 @@
 [ext_resource type="Texture2D" uid="uid://lhmyl8fa7o8i" path="res://assets/sprites/mission_success_frames/0029.png" id="65_2v4s6"]
 [ext_resource type="Texture2D" uid="uid://caadf4xjj58aj" path="res://assets/sprites/mission_success_frames/0030.png" id="66_q3u35"]
 [ext_resource type="Texture2D" uid="uid://c6e5op4hie5k5" path="res://assets/sprites/mission_success_frames/0031.png" id="67_kjulw"]
+[ext_resource type="Script" path="res://scripts/MultiplayerHandler.gd" id="75_f35fg"]
 
 [sub_resource type="Environment" id="Environment_bedr1"]
 background_mode = 1
@@ -644,6 +645,9 @@ replication_config = SubResource("SceneReplicationConfig_pu7ty")
 [node name="MultiplayerLoadTimer" type="Timer" parent="."]
 wait_time = 0.1
 one_shot = true
+
+[node name="MultiplayerHandler" type="Node" parent="."]
+script = ExtResource("75_f35fg")
 
 [connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]
 [connection signal="pressed" from="PauseMenu/ColorRect/VBoxContainer/YesForfeit" to="." method="_on_yes_forfeit_pressed"]
