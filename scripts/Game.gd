@@ -5,6 +5,7 @@ extends Node3D
 var aiming_icon_scene = preload("res://scenes/game_aiming_indicator.tscn")
 var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
 var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
+var popup_scene = preload("res://scenes/game_popup.tscn")
 
 enum SelectionSteps {
 	BASE,
@@ -48,7 +49,7 @@ func force_camera(new_pos, new_fov = -1.0):
 
 
 func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void:
-	location.y = 3.0
+	location.y += 3.0
 	var new_popup : GamePopup = popup_scene.instantiate()
 	new_popup.texture = texture
 	new_popup.position = location
@@ -98,7 +99,7 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 			instant_fail = true
 	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level) * float(not instant_fail)
 	if sight_chance > 0.7 or instant_spot: # seent it
-		if current_game_step - spottee.step_seen < REMEMBER_TILL and spottee.step_seen > 0:
+		if server.current_game_step - spottee.step_seen < server.REMEMBER_TILL and spottee.step_seen > 0:
 			set_agent_step_seen.rpc(spottee.name, current_game_step)
 			return
 		set_agent_step_seen.rpc(spottee.name, current_game_step)
@@ -332,17 +333,6 @@ func ping():
 	print("{0}: pong!".format([multiplayer.multiplayer_peer.get_unique_id()]))
 
 
-func create_agent_selector(agent : Agent):
-	# check if selector already exists
-	for s in ($HUDSelectors.get_children() as Array[AgentSelector]):
-		if s.referenced_agent == agent:
-			return
-	var new_selector = agent_selector_scene.instantiate()
-	new_selector.referenced_agent = agent
-	new_selector.agent_selected.connect(_hud_agent_details_actions)
-	$HUDSelectors.add_child(new_selector)
-
-
 func return_attacked(attacker : Agent, location : Vector3):
 	var space_state = get_world_3d().direct_space_state
 	var origin = attacker._body.global_position
@@ -449,49 +439,8 @@ func determine_weapon_events():
 						create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 
 
-func _hud_agent_details_actions(agent_selector : AgentSelector):
-	if game_phase != GamePhases.SELECTION:
-		print(multiplayer.get_unique_id(), ": not in SELECTION MODE")
-		return
-	if selection_step != SelectionSteps.BASE:
-		print(multiplayer.get_unique_id(), ": not on SelectionStep.BASE")
-		return
-	var agent = agent_selector.referenced_agent
-	if agent.in_incapacitated_state() and not agent.percieved_by_friendly:
-		print(multiplayer.get_unique_id(), ": agent is knocked out with no eyes on them")
-		return
-	agent.flash_outline(Color.AQUA)
-	for small_hud in ($HUDBase/QuickViews.get_children()):
-		if small_hud.ref_ag == agent:
-			small_hud.flash = 1.0
-	_radial_menu.referenced_agent = agent
-	_radial_menu.position = agent_selector.position
-	_radial_menu.init_menu()
-	_execute_button.visible = false
-	_execute_button.disabled = true
-
-
-func hide_hud():
-	var twe = create_tween()
-	twe.set_parallel(true)
-	twe.set_trans(Tween.TRANS_CUBIC)
-	twe.tween_property(_execute_button, "position:y", 970, 0.25).from(825)
-	#twe.tween_property(_quick_views, "position:y", 920, 0.25).from(712)
-	twe.tween_property(_ag_insts, "position:x", 1638, 0.25).from(1059)
-
-
-func show_hud():
-	var twe = create_tween()
-	twe.set_parallel(true)
-	twe.set_trans(Tween.TRANS_SINE)
-	twe.tween_property(_execute_button, "position:y", 825, 0.25).from(970)
-	#twe.tween_property(_quick_views, "position:y", 712, 0.25).from(920)
-	twe.tween_property(_ag_insts, "position:x", 1059, 0.25).from(1638)
-
-
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
-	var ref_ag : Agent = _radial_menu.referenced_agent
-	_radial_menu.referenced_agent = null
+	var ref_ag : Agent = ui.pop_radial_menu_agent()
 	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)): # remove prev indicator
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
@@ -647,6 +596,17 @@ func check_weapon_holder_exfil(item_name : String) -> bool:
 	return false
 
 
+func check_full_team_exfil_or_dead():
+	var count = 0
+	for ag in ($Agents.get_children() as Array[Agent]):
+		if not ag.is_multiplayer_authority():
+			continue
+		count += 1
+		if ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
+			count -= 1
+	return count == 0
+
+
 func player_quits(_peer_id):
 	if game_phase == GamePhases.COMPLETION or server_progress > ProgressParts.NO_ADVANTAGE or client_progress > ProgressParts.NO_ADVANTAGE:
 		return
@@ -720,40 +680,6 @@ func player_is_ready(id):
 			$HUDBase/HurryUp.visible = true
 	if multiplayer.is_server() and server_ready_bool and client_ready_bool:
 		_update_game_phase.rpc(GamePhases.EXECUTION)
-
-
-@rpc("any_peer", "call_local", "reliable")
-func remove_weapon_from_agent(agent_name : String, weapon_name : String):
-	$Agents.get_node(agent_name).held_weapons.erase(weapon_name)
-
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_action(agent_name : String, action : Array):
-	$Agents.get_node(agent_name).queued_action = action
-
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_notice(agent_name : String, new_noticed : int):
-	$Agents.get_node(agent_name).noticed = new_noticed
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_step_seen(agent_name : String, new_step_seen : int):
-	$Agents.get_node(agent_name).step_seen = new_step_seen
-
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_server_visibility(agent_name : String, visibility : bool):
-	$Agents.get_node(agent_name).server_knows = visibility
-
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_client_visibility(agent_name : String, visibility : bool):
-	$Agents.get_node(agent_name).client_knows = visibility
-
-
-@rpc("authority", "call_local", "reliable")
-func damage_agent(agent_name : String, damage_amt : int, stun : bool):
-	($Agents.get_node(agent_name) as Agent).take_damage(damage_amt, stun)
 
 
 func _on_execute_pressed() -> void:

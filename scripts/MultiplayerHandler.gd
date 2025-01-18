@@ -270,16 +270,6 @@ func create_sound_effect(location : Vector3, player_id : int, lifetime : int, _m
 	new_audio_event.selected_audio = sound_id
 	$AudioEvents.add_child(new_audio_event)
 
-func check_full_team_exfil_or_dead(server_team : bool):
-	var count = 0
-	for ag in ($Agents.get_children() as Array[Agent]):
-		if not ag.owned():
-			continue
-		count += 1
-		if ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
-			count -= 1
-	return count == 0
-
 
 @rpc("authority", "call_local")
 func create_toast_update(server_text : String, client_text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
@@ -308,7 +298,7 @@ func of_comp_server():
 				create_toast_update.rpc(GameRefs.TXT.of_y_get, GameRefs.TXT.of_t_get, true)
 				set_server_progress.rpc(ProgressParts.ITEM_HELD)
 				return
-			if not check_full_team_exfil_or_dead(true):
+			if not game.check_full_team_exfil_or_dead(true):
 				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 				set_server_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
 				return
@@ -321,7 +311,7 @@ func of_comp_server():
 				set_server_progress.rpc(ProgressParts.NO_ADVANTAGE)
 				return
 			if game.check_weapon_holder_exfil("map_flag_center"):
-				if not check_full_team_exfil_or_dead(true):
+				if not game.check_full_team_exfil_or_dead(true):
 					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 					set_server_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
 					return
@@ -329,7 +319,7 @@ func of_comp_server():
 				set_server_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
 				return
 		ProgressParts.OBJECTIVE_COMPLETE: # a server team member has escaped with the flag
-			if check_full_team_exfil_or_dead(true):
+			if game.check_full_team_exfil_or_dead(true):
 				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
 				set_server_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
 
@@ -345,7 +335,7 @@ func of_comp_client():
 				create_toast_update.rpc(GameRefs.TXT.of_t_get, GameRefs.TXT.of_y_get, true)
 				set_client_progress.rpc(ProgressParts.ITEM_HELD)
 				return
-			if not check_full_team_exfil_or_dead(false):
+			if not game.check_full_team_exfil_or_dead():
 				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 				set_client_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
 				return
@@ -353,12 +343,12 @@ func of_comp_client():
 			set_client_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
 			return
 		ProgressParts.ITEM_HELD: # the client team has the flag
-			if not check_agents_for_weapon(false, "map_flag_center"):
+			if not game.check_agents_for_weapon("map_flag_center"):
 				create_toast_update.rpc(GameRefs.TXT.of_t_lost, GameRefs.TXT.of_y_lost, true)
 				set_client_progress.rpc(ProgressParts.NO_ADVANTAGE)
 				return
-			if check_weapon_holder_exfil(false, "map_flag_center"):
-				if not check_full_team_exfil_or_dead(false):
+			if game.check_weapon_holder_exfil("map_flag_center"):
+				if not game.check_full_team_exfil_or_dead():
 					ui.create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 					set_client_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
 					return
@@ -366,7 +356,7 @@ func of_comp_client():
 				set_client_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
 				return
 		ProgressParts.OBJECTIVE_COMPLETE: # a client team member has escaped with the flag
-			if check_full_team_exfil_or_dead(false):
+			if game.check_full_team_exfil_or_dead():
 				create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
 				set_client_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
 
@@ -453,15 +443,15 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				if multiplayer.is_server():
 					set_agent_action.rpc(ag.name, [])
 				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
-					create_agent_selector(ag)
+					ui.create_agent_selector(ag)
 					ag.flash_outline(Color.ORCHID)
 				if ag.state != Agent.States.DEAD:
 					if ag.player_id == 1:
 						server_team_dead = false
 					else:
 						client_team_dead = false
-			if not player_has_won(server_team_dead, client_team_dead): # win conditions
-				show_hud()
+			if not game.player_has_won(server_team_dead, client_team_dead): # win conditions
+				ui.show_hud()
 				if $HUDSelectors.get_child_count() == 0 and check_incap:
 					_on_execute_pressed() # run execute since the player can't do anything
 			else:
@@ -491,3 +481,37 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			open_pause_menu()
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
+
+
+@rpc("any_peer", "call_local", "reliable")
+func remove_weapon_from_agent(agent_name : String, weapon_name : String):
+	$Agents.get_node(agent_name).held_weapons.erase(weapon_name)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_action(agent_name : String, action : Array):
+	$Agents.get_node(agent_name).queued_action = action
+
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_notice(agent_name : String, new_noticed : int):
+	$Agents.get_node(agent_name).noticed = new_noticed
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_step_seen(agent_name : String, new_step_seen : int):
+	$Agents.get_node(agent_name).step_seen = new_step_seen
+
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_server_visibility(agent_name : String, visibility : bool):
+	$Agents.get_node(agent_name).server_knows = visibility
+
+
+@rpc("any_peer", "call_local", "reliable")
+func set_agent_client_visibility(agent_name : String, visibility : bool):
+	$Agents.get_node(agent_name).client_knows = visibility
+
+
+@rpc("authority", "call_local", "reliable")
+func damage_agent(agent_name : String, damage_amt : int, stun : bool):
+	($Agents.get_node(agent_name) as Agent).take_damage(damage_amt, stun)

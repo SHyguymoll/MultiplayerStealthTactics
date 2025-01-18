@@ -23,6 +23,8 @@ var audio_event_scene = preload("res://scenes/game_audio_event.tscn")
 var toast_scene = preload("res://scenes/toast.tscn")
 var agent_selector_scene = preload("res://scenes/agent_selector.tscn")
 
+@onready var server = $"../MultiplayerHandler"
+@onready var game = $".."
 
 func _ready() -> void:
 	radial_menu.visible = false
@@ -82,3 +84,54 @@ func pop_radial_menu_agent() -> Agent:
 	var ret = radial_menu.referenced_agent
 	radial_menu.clear_ref_ag()
 	return ret
+
+
+func create_agent_selector(agent : Agent):
+	# check if selector already exists
+	for s in ($HUDSelectors.get_children() as Array[AgentSelector]):
+		if s.referenced_agent == agent:
+			return
+	var new_selector = agent_selector_scene.instantiate()
+	new_selector.referenced_agent = agent
+	new_selector.agent_selected.connect(_hud_agent_details_actions)
+	$HUDSelectors.add_child(new_selector)
+
+
+func _hud_agent_details_actions(agent_selector : AgentSelector):
+	if server.game_phase != server.GamePhases.SELECTION:
+		print(multiplayer.get_unique_id(), ": not in SELECTION MODE")
+		return
+	if server.selection_step != server.SelectionSteps.BASE:
+		print(multiplayer.get_unique_id(), ": not on SelectionStep.BASE")
+		return
+	var agent = agent_selector.referenced_agent
+	if agent.in_incapacitated_state() and not agent.percieved_by_friendly:
+		print(multiplayer.get_unique_id(), ": agent is knocked out with no eyes on them")
+		return
+	agent.flash_outline(Color.AQUA)
+	for small_hud in ($HUDBase/QuickViews.get_children()):
+		if small_hud.ref_ag == agent:
+			small_hud.flash = 1.0
+	radial_menu.referenced_agent = agent
+	radial_menu.position = agent_selector.position
+	radial_menu.init_menu()
+	execute_button.visible = false
+	execute_button.disabled = true
+
+
+func hide_hud():
+	var twe = create_tween()
+	twe.set_parallel(true)
+	twe.set_trans(Tween.TRANS_CUBIC)
+	twe.tween_property(execute_button, "position:y", 970, 0.25).from(825)
+	#twe.tween_property(_quick_views, "position:y", 920, 0.25).from(712)
+	twe.tween_property(ag_insts, "position:x", 1638, 0.25).from(1059)
+
+
+func show_hud():
+	var twe = create_tween()
+	twe.set_parallel(true)
+	twe.set_trans(Tween.TRANS_SINE)
+	twe.tween_property(execute_button, "position:y", 825, 0.25).from(970)
+	#twe.tween_property(_quick_views, "position:y", 712, 0.25).from(920)
+	twe.tween_property(ag_insts, "position:x", 1059, 0.25).from(1638)
