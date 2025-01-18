@@ -60,6 +60,10 @@ var _dr_extra
 @onready var _action_can : AudioStreamPlayer = $ActionCancelled
 
 
+func clear_ref_ag():
+	referenced_agent = null
+
+
 func button_spread_animation():
 	var mid = _m.size.x/-2
 	_disable_all_buttons()

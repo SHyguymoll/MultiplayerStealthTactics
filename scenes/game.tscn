@@ -1,4 +1,4 @@
-[gd_scene load_steps=79 format=3 uid="uid://ch5a0i5hokoj8"]
+[gd_scene load_steps=80 format=3 uid="uid://ch5a0i5hokoj8"]
 
 [ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
 [ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
@@ -74,6 +74,7 @@
 [ext_resource type="Texture2D" uid="uid://lhmyl8fa7o8i" path="res://assets/sprites/mission_success_frames/0029.png" id="65_2v4s6"]
 [ext_resource type="Texture2D" uid="uid://caadf4xjj58aj" path="res://assets/sprites/mission_success_frames/0030.png" id="66_q3u35"]
 [ext_resource type="Texture2D" uid="uid://c6e5op4hie5k5" path="res://assets/sprites/mission_success_frames/0031.png" id="67_kjulw"]
+[ext_resource type="Script" path="res://scripts/UI.gd" id="68_kct0c"]
 [ext_resource type="Script" path="res://scripts/MultiplayerHandler.gd" id="75_f35fg"]
 
 [sub_resource type="Environment" id="Environment_bedr1"]
@@ -89,6 +90,20 @@ ssao_power = 0.675937
 fog_light_color = Color(1, 1, 1, 1)
 fog_light_energy = 0.0
 volumetric_fog_emission = Color(1, 1, 1, 1)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pu7ty"]
+properties/0/path = NodePath(".:action_timeline")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+properties/1/path = NodePath(".:game_phase")
+properties/1/spawn = true
+properties/1/replication_mode = 2
+properties/2/path = NodePath(".:server_progress")
+properties/2/spawn = true
+properties/2/replication_mode = 1
+properties/3/path = NodePath(".:client_progress")
+properties/3/spawn = true
+properties/3/replication_mode = 1
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_25ism"]
 animations = [{
@@ -300,22 +315,14 @@ animations = [{
 "speed": 24.0
 }]
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pu7ty"]
-properties/0/path = NodePath(".:action_timeline")
-properties/0/spawn = true
-properties/0/replication_mode = 2
-properties/1/path = NodePath(".:game_phase")
-properties/1/spawn = true
-properties/1/replication_mode = 2
-properties/2/path = NodePath(".:server_progress")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath(".:client_progress")
-properties/3/spawn = true
-properties/3/replication_mode = 1
-
 [node name="Game" type="Node3D" node_paths=PackedStringArray("game_map")]
 script = ExtResource("1_re23i")
+action_timeline = null
+game_phase = null
+server_progress = null
+client_progress = null
+grenades_in_existence = null
+exfiltration_queue = null
 game_map = NodePath("World/GameMap")
 
 [node name="Agents" type="Node3D" parent="."]
@@ -380,10 +387,32 @@ environment = SubResource("Environment_bedr1")
 
 [node name="Popups" type="Node3D" parent="."]
 
-[node name="PauseMenu" type="CanvasLayer" parent="."]
+[node name="ColdBootTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_pu7ty")
+
+[node name="MultiplayerLoadTimer" type="Timer" parent="."]
+wait_time = 0.1
+one_shot = true
+
+[node name="MultiplayerHandler" type="Node" parent="."]
+script = ExtResource("75_f35fg")
+action_timeline = null
+game_phase = null
+server_progress = null
+client_progress = null
+grenades_in_existence = null
+exfiltration_queue = null
+
+[node name="UI" type="Node2D" parent="."]
+script = ExtResource("68_kct0c")
+
+[node name="PauseMenu" type="CanvasLayer" parent="UI"]
 layer = 100
 
-[node name="ColorRect" type="ColorRect" parent="PauseMenu"]
+[node name="ColorRect" type="ColorRect" parent="UI/PauseMenu"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -398,7 +427,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.811765, 0, 0.811765, 0.235294)
 
-[node name="CurrentPhase" type="Label" parent="PauseMenu/ColorRect"]
+[node name="CurrentPhase" type="Label" parent="UI/PauseMenu/ColorRect"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -411,7 +440,7 @@ text = "FORFEIT?"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/ColorRect"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/PauseMenu/ColorRect"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -427,30 +456,30 @@ grow_vertical = 2
 mouse_filter = 2
 alignment = 1
 
-[node name="YesForfeit" type="Button" parent="PauseMenu/ColorRect/VBoxContainer"]
+[node name="YesForfeit" type="Button" parent="UI/PauseMenu/ColorRect/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 0
 theme = ExtResource("5_b0o1h")
 theme_override_font_sizes/font_size = 64
 text = "YES"
 
-[node name="HSeparator" type="HSeparator" parent="PauseMenu/ColorRect/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="UI/PauseMenu/ColorRect/VBoxContainer"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 30
 
-[node name="NoForfeit" type="Button" parent="PauseMenu/ColorRect/VBoxContainer"]
+[node name="NoForfeit" type="Button" parent="UI/PauseMenu/ColorRect/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 8
 theme = ExtResource("5_b0o1h")
 theme_override_font_sizes/font_size = 64
 text = "NO"
 
-[node name="FadeOut" type="CanvasLayer" parent="."]
+[node name="FadeOut" type="CanvasLayer" parent="UI"]
 layer = 90
 
-[node name="ColorRect" type="ColorRect" parent="FadeOut"]
+[node name="ColorRect" type="ColorRect" parent="UI/FadeOut"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -459,17 +488,17 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.219608, 0, 0.219608, 1)
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="FadeOut/ColorRect"]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="UI/FadeOut/ColorRect"]
 position = Vector2(806, 300)
 scale = Vector2(0.54, 0.54)
 sprite_frames = SubResource("SpriteFrames_25ism")
 animation = &"victory"
 autoplay = "none"
 
-[node name="HUDToasts" type="CanvasLayer" parent="."]
+[node name="HUDToasts" type="CanvasLayer" parent="UI"]
 layer = 95
 
-[node name="Toasts" type="VBoxContainer" parent="HUDToasts"]
+[node name="Toasts" type="VBoxContainer" parent="UI/HUDToasts"]
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
@@ -481,9 +510,9 @@ size_flags_horizontal = 0
 mouse_filter = 2
 theme = ExtResource("5_b0o1h")
 
-[node name="HUDBase" type="CanvasLayer" parent="."]
+[node name="HUDBase" type="CanvasLayer" parent="UI"]
 
-[node name="QuickViews" type="HBoxContainer" parent="HUDBase"]
+[node name="QuickViews" type="HBoxContainer" parent="UI/HUDBase"]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -492,7 +521,7 @@ offset_right = 612.0
 grow_vertical = 0
 mouse_filter = 2
 
-[node name="Execute" type="Button" parent="HUDBase"]
+[node name="Execute" type="Button" parent="UI/HUDBase"]
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -507,7 +536,7 @@ theme_override_font_sizes/font_size = 82
 text = "EXECUTE INSTRUCTIONS"
 alignment = 2
 
-[node name="AgentInstructions" type="Label" parent="HUDBase"]
+[node name="AgentInstructions" type="Label" parent="UI/HUDBase"]
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
@@ -524,7 +553,7 @@ horizontal_alignment = 2
 autowrap_mode = 2
 clip_text = true
 
-[node name="HurryUp" type="Label" parent="HUDBase"]
+[node name="HurryUp" type="Label" parent="UI/HUDBase"]
 anchors_preset = -1
 anchor_left = 0.44
 anchor_top = 1.0
@@ -543,7 +572,7 @@ horizontal_alignment = 1
 autowrap_mode = 2
 clip_text = true
 
-[node name="CurrentPhase" type="Label" parent="HUDBase"]
+[node name="CurrentPhase" type="Label" parent="UI/HUDBase"]
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 461.0
@@ -555,7 +584,7 @@ theme_override_font_sizes/font_size = 48
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="ServerPlayerName" type="Label" parent="HUDBase"]
+[node name="ServerPlayerName" type="Label" parent="UI/HUDBase"]
 offset_right = 361.0
 offset_bottom = 51.0
 theme = ExtResource("5_b0o1h")
@@ -564,7 +593,7 @@ text = "SERVER PLAYER"
 autowrap_mode = 2
 clip_text = true
 
-[node name="ProgressBarServer" type="ProgressBar" parent="HUDBase"]
+[node name="ProgressBarServer" type="ProgressBar" parent="UI/HUDBase"]
 offset_left = 2.0
 offset_top = 56.0
 offset_right = 514.0
@@ -574,7 +603,7 @@ theme = ExtResource("5_b0o1h")
 max_value = 3.0
 show_percentage = false
 
-[node name="ClientPlayerName" type="Label" parent="HUDBase"]
+[node name="ClientPlayerName" type="Label" parent="UI/HUDBase"]
 offset_top = 110.0
 offset_right = 361.0
 offset_bottom = 161.0
@@ -584,7 +613,7 @@ text = "CLIENT PLAYER"
 autowrap_mode = 2
 clip_text = true
 
-[node name="ProgressBarClient" type="ProgressBar" parent="HUDBase"]
+[node name="ProgressBarClient" type="ProgressBar" parent="UI/HUDBase"]
 offset_top = 166.0
 offset_right = 512.0
 offset_bottom = 214.0
@@ -593,68 +622,55 @@ theme = ExtResource("5_b0o1h")
 max_value = 3.0
 show_percentage = false
 
-[node name="HUDSelected" type="CanvasLayer" parent="."]
+[node name="HUDSelected" type="CanvasLayer" parent="UI"]
 layer = 10
 follow_viewport_enabled = true
 
-[node name="RadialMenu" parent="HUDSelected" instance=ExtResource("2_xp2mg")]
+[node name="RadialMenu" parent="UI/HUDSelected" instance=ExtResource("2_xp2mg")]
 position = Vector2(-60, -60)
 
-[node name="HUDSelectors" type="CanvasLayer" parent="."]
+[node name="HUDSelectors" type="CanvasLayer" parent="UI"]
 layer = 5
 
-[node name="SoundEffects" type="Node" parent="."]
+[node name="SoundEffects" type="Node" parent="UI"]
 
-[node name="RoundUpdate" type="AudioStreamPlayer" parent="SoundEffects"]
+[node name="RoundUpdate" type="AudioStreamPlayer" parent="UI/SoundEffects"]
 stream = ExtResource("7_t43ju")
 max_polyphony = 3
 bus = &"SFX"
 
-[node name="ActionsSubmitted" type="AudioStreamPlayer" parent="SoundEffects"]
+[node name="ActionsSubmitted" type="AudioStreamPlayer" parent="UI/SoundEffects"]
 stream = ExtResource("8_ujb0t")
 bus = &"SFX"
 
-[node name="RoundEnded" type="AudioStreamPlayer" parent="SoundEffects"]
+[node name="RoundEnded" type="AudioStreamPlayer" parent="UI/SoundEffects"]
 stream = ExtResource("9_1bflo")
 bus = &"SFX"
 
-[node name="Music" type="Node" parent="."]
+[node name="Music" type="Node" parent="UI"]
 
-[node name="InProgress" type="AudioStreamPlayer" parent="Music"]
+[node name="InProgress" type="AudioStreamPlayer" parent="UI/Music"]
 stream = ExtResource("6_cnxum")
 volume_db = -20.0
 autoplay = true
 bus = &"Music"
 
-[node name="Victory" type="AudioStreamPlayer" parent="Music"]
+[node name="Victory" type="AudioStreamPlayer" parent="UI/Music"]
 stream = ExtResource("10_4po6k")
 volume_db = -20.0
 bus = &"Music"
 
-[node name="Failure" type="AudioStreamPlayer" parent="Music"]
+[node name="Failure" type="AudioStreamPlayer" parent="UI/Music"]
 stream = ExtResource("11_87rki")
 volume_db = -20.0
 bus = &"Music"
 
-[node name="ColdBootTimer" type="Timer" parent="."]
-one_shot = true
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_pu7ty")
-
-[node name="MultiplayerLoadTimer" type="Timer" parent="."]
-wait_time = 0.1
-one_shot = true
-
-[node name="MultiplayerHandler" type="Node" parent="."]
-script = ExtResource("75_f35fg")
-
 [connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]
-[connection signal="pressed" from="PauseMenu/ColorRect/VBoxContainer/YesForfeit" to="." method="_on_yes_forfeit_pressed"]
-[connection signal="pressed" from="PauseMenu/ColorRect/VBoxContainer/NoForfeit" to="." method="_on_no_forfeit_pressed"]
-[connection signal="pressed" from="HUDBase/Execute" to="." method="_on_execute_pressed"]
-[connection signal="aiming_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
-[connection signal="decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
-[connection signal="movement_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_movement_decision_made"]
-[connection signal="no_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_no_decision_made"]
 [connection signal="timeout" from="ColdBootTimer" to="." method="_on_cold_boot_timer_timeout"]
+[connection signal="pressed" from="UI/PauseMenu/ColorRect/VBoxContainer/YesForfeit" to="." method="_on_yes_forfeit_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/ColorRect/VBoxContainer/NoForfeit" to="." method="_on_no_forfeit_pressed"]
+[connection signal="pressed" from="UI/HUDBase/Execute" to="." method="_on_execute_pressed"]
+[connection signal="aiming_decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
+[connection signal="decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
+[connection signal="movement_decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_movement_decision_made"]
+[connection signal="no_decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_no_decision_made"]
