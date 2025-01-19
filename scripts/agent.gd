@@ -282,10 +282,6 @@ func agent_is_done(doneness : Agent.ActionDoneness):
 	action_done = doneness
 
 
-func owned() -> bool:
-	return player_id == multiplayer.get_unique_id()
-
-
 func action_complete(successfully : bool = true, no_flash : bool = false, single_mode : bool = false):
 	if not single_mode:
 		agent_is_done.rpc(ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL)
@@ -353,12 +349,12 @@ func _ready() -> void:
 	_eye_cone.points[2] = Vector3(-view_across, 1, view_dist)
 	_eye_cone.points[3] = Vector3(view_across, 1, view_dist)
 	_eye_cone.points[4] = Vector3(-view_across, 1, view_dist)
-	if owned():
+	if is_multiplayer_authority():
 		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
 	_ear_cylinder.radius = hearing_dist
 	_body.collision_layer += 8 if player_id == 1 else 16
 	# custom texture
-	if not owned():
+	if not is_multiplayer_authority():
 		skin_texture = "res://assets/models/Skins/enemy_agent.png"
 	if skin_texture:
 		_custom_skin_mat = StandardMaterial3D.new()
@@ -381,7 +377,7 @@ func _ready() -> void:
 	_active_item_icon.texture = null
 	for weapon_mesh in _held_weapon_meshes:
 		_held_weapon_meshes[weapon_mesh].visible = false
-	visible = owned()
+	visible = is_multiplayer_authority()
 
 
 func decide_weapon_blend() -> Vector2:
