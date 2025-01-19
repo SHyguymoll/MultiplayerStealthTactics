@@ -20,8 +20,8 @@ enum Objectives {
 @export var objective : Objectives
 @export var objective_params : Array
 
-@export var server_exfiltrate_zone : Area3D
-@export var client_exfiltrate_zone : Area3D
+@export var server_exfiltrate_zone : ExfilZone
+@export var client_exfiltrate_zone : ExfilZone
 
 func _ready():
 	for spawn in $Spawns.get_children() as Array[SpawnPoint]:
