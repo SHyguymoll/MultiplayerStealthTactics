@@ -5,17 +5,22 @@ extends Node2D
 @onready var execute_button : Button = $HUDBase/Execute
 @onready var phase_label : Label = $HUDBase/CurrentPhase
 @onready var ag_insts : Label = $HUDBase/AgentInstructions
+@onready var hurry_up : Label = $HUDBase/HurryUp
 
 @onready var serv_name : Label = $HUDBase/ServerPlayerName
 @onready var clie_name : Label = $HUDBase/ClientPlayerName
-# Player progress bars
 @onready var serv_prog : ProgressBar = $HUDBase/ProgressBarServer
 @onready var clie_prog : ProgressBar = $HUDBase/ProgressBarClient
-
 
 @onready var round_update : AudioStreamPlayer = $SoundEffects/RoundUpdate
 @onready var round_ended : AudioStreamPlayer = $SoundEffects/RoundEnded
 @onready var actions_submitted : AudioStreamPlayer = $SoundEffects/ActionsSubmitted
+
+@onready var music_progress : AudioStreamPlayer = $Music/InProgress
+@onready var music_victory : AudioStreamPlayer = $Music/Victory
+@onready var music_failure : AudioStreamPlayer = $Music/Failure
+
+@onready var gameover_anim : AnimatedSprite2D = $FadeOut/ColorRect/AnimatedSprite2D
 
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 var popup_scene = preload("res://scenes/game_popup.tscn")
@@ -29,6 +34,17 @@ var agent_selector_scene = preload("res://scenes/agent_selector.tscn")
 func _ready() -> void:
 	radial_menu.visible = false
 	close_pause_menu()
+
+
+func _physics_process(delta: float) -> void:
+	serv_prog.value = lerpf(serv_prog.value, float(server.server_progress), 0.2)
+	clie_prog.value = lerpf(clie_prog.value, float(server.client_progress), 0.2)
+
+
+func _process(_d: float) -> void:
+	if Input.is_action_just_pressed("pause_menu"):
+		open_pause_menu()
+
 
 func animate_fade(in_out := true):
 	var twe := create_tween()
@@ -135,3 +151,21 @@ func show_hud():
 	twe.tween_property(execute_button, "position:y", 825, 0.25).from(970)
 	#twe.tween_property(_quick_views, "position:y", 712, 0.25).from(920)
 	twe.tween_property(ag_insts, "position:x", 1059, 0.25).from(1638)
+
+
+func show_hurryup():
+	pass
+
+
+func _on_no_forfeit_pressed() -> void:
+	close_pause_menu()
+
+
+func _on_execute_pressed() -> void:
+	actions_submitted.play()
+	execute_button.disabled = true
+	execute_button.text = "WAITING FOR OPPONENT"
+	for selector in $HUDSelectors.get_children():
+		selector.queue_free()
+	radial_menu.button_collapse_animation()
+	hide_hud()

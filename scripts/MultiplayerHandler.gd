@@ -48,6 +48,10 @@ enum ProgressParts {
 var server_ready_bool := false
 var client_ready_bool := false
 
+
+var sent_final_message = false
+var sent_reward = false
+
 @onready var ui = $"../UI"
 @onready var game = $".."
 
@@ -82,7 +86,7 @@ func player_quits(_peer_id):
 	create_toast_update(GameRefs.TXT.forfeit, GameRefs.TXT.forfeit, false)
 	$FadeOut/ColorRect/AnimatedSprite2D.play("victory")
 	ui.animate_fade(true)
-	_update_game_phase(GamePhases.COMPLETION)
+	update_game_phase(GamePhases.COMPLETION)
 
 
 func init_game(): #TODO
@@ -170,6 +174,64 @@ func init_game(): #TODO
 	game.force_camera(
 		(game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position +
 		game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
+
+
+func _on_cold_boot_timer_timeout() -> void:
+	if not multiplayer.is_server():
+		return
+	var data : Dictionary
+	data.pickup = {}
+	data.pickup.generate_weapon = true
+	data.weapon = {}
+	match game_map.objective:
+		game_map.Objectives.CAPTURE_ENEMY_FLAG:
+			# create server's flag
+			data.pickup.pos_x = game_map.objective_params[0]
+			data.pickup.pos_y = game_map.objective_params[1]
+			data.pickup.pos_z = game_map.objective_params[2]
+			data.pickup.server_knows = true
+			data.pickup.client_knows = false
+			data.pickup.wep_name = "map_flag_server"
+			pickup_spawner.spawn(data.pickup)
+			# create client's flag
+			data.pickup.pos_x = game_map.objective_params[3]
+			data.pickup.pos_y = game_map.objective_params[4]
+			data.pickup.pos_z = game_map.objective_params[5]
+			data.pickup.server_knows = false
+			data.pickup.client_knows = true
+			data.pickup.wep_name = "map_flag_client"
+			pickup_spawner.spawn(data.pickup)
+		game_map.Objectives.CAPTURE_CENTRAL_FLAG:
+			# create central flag
+			data.pickup.pos_x = game_map.objective_params[0]
+			data.pickup.pos_y = game_map.objective_params[1]
+			data.pickup.pos_z = game_map.objective_params[2]
+			data.pickup.server_knows = true
+			data.pickup.client_knows = true
+			data.pickup.wep_name = "map_flag_center"
+			pickup_spawner.spawn(data.pickup)
+		game_map.Objectives.TARGET_DEFEND:
+			game_map.objective_params
+	update_game_phase.rpc(GamePhases.SELECTION, false)
+	animate_fade.rpc(false)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func player_is_ready(id):
+	if id == 1:
+		server_ready_bool = true
+		if not multiplayer.is_server():
+			ui.hurry_up.visible = true
+	else:
+		client_ready_bool = true
+		if multiplayer.is_server():
+			ui.hurry_up.visible = true
+	if multiplayer.is_server() and server_ready_bool and client_ready_bool:
+		update_game_phase.rpc(GamePhases.EXECUTION)
+
+
+func _on_execute_pressed() -> void:
+	player_is_ready.rpc(multiplayer.get_unique_id())
 
 
 @rpc("authority", "call_local")
@@ -361,6 +423,64 @@ func of_comp_client():
 				set_client_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
 
 
+func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
+	if all_server_dead and all_client_dead and multiplayer.is_server() and not sent_reward:
+		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
+		failure_jingle()
+		failure_jingle.rpc()
+		sent_reward = true
+	if not all_client_dead and (all_server_dead or client_progress == ProgressParts.SURVIVORS_EXFILTRATED):
+		if multiplayer.is_server() and not sent_reward:
+			if all_server_dead:
+				create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
+			print("REWARDING CLIENT TEAM")
+			reward_team.rpc_id(GameSettings.other_player_id)
+			victory_jingle.rpc()
+			failure_jingle()
+			sent_reward = true
+	if not all_server_dead and (all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED):
+		if multiplayer.is_server() and not sent_reward:
+			if all_client_dead:
+				create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
+			print("REWARDING SERVER TEAM")
+			reward_team()
+			victory_jingle()
+			failure_jingle.rpc()
+			sent_reward = true
+	return all_server_dead or all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED or client_progress == ProgressParts.SURVIVORS_EXFILTRATED
+
+
+@rpc("authority", "call_remote", "reliable")
+func victory_jingle():
+	ui.music_progress.stop()
+	ui.music_victory.play()
+	ui.gameover_anim.play("victory")
+
+
+@rpc("authority", "call_remote", "reliable")
+func failure_jingle():
+	ui.music_progress.stop()
+	ui.music_failure.play()
+	ui.gameover_anim.play("failure")
+
+
+@rpc("authority", "reliable")
+func reward_team():
+	for ag in ($Agents.get_children() as Array[Agent]):
+		if not ag.is_multiplayer_authority(): # pick the right team
+			continue
+		if ag.state == Agent.States.DEAD: # only the survivors
+			continue
+		var ag_name_local = ag.name.split("_", true, 1)[1]
+		GameSettings.winning_agents.append(ag_name_local)
+
+
+func append_action_timeline(agent : Agent):
+	if not action_timeline.has(current_game_step):
+		action_timeline[current_game_step] = {}
+	action_timeline[current_game_step][agent.name] = agent.queued_action
+
+
 @rpc("authority", "call_local", "reliable")
 func set_server_progress(val : ProgressParts):
 	server_progress = val
@@ -372,7 +492,7 @@ func set_client_progress(val : ProgressParts):
 
 
 @rpc("authority", "call_local", "reliable")
-func _update_game_phase(new_phase: GamePhases, check_incap := true):
+func update_game_phase(new_phase: GamePhases, check_incap := true):
 	await get_tree().create_timer(0.1).timeout
 	game_phase = new_phase
 	match new_phase:
@@ -455,13 +575,13 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				if $HUDSelectors.get_child_count() == 0 and check_incap:
 					_on_execute_pressed() # run execute since the player can't do anything
 			else:
-				_update_game_phase(GamePhases.COMPLETION)
+				update_game_phase(GamePhases.COMPLETION)
 		GamePhases.EXECUTION:
 			$HUDBase/HurryUp.visible = false
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.action_text = ""
-			update_text()
-			_phase_label.text = "EXECUTING ACTIONS..."
+			ui.update_text()
+			ui.phase_label.text = "EXECUTING ACTIONS..."
 			server_ready_bool = false
 			client_ready_bool = false
 			# populate agents with actions, as well as action_timeline
@@ -472,13 +592,13 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				agent.perform_action()
 			await get_tree().create_timer(0.10).timeout
 		GamePhases.COMPLETION:
-			save_replay()
+			game.save_replay()
 			if multiplayer.is_server() and not sent_final_message:
 				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
 				animate_fade.rpc()
 				sent_final_message = true
 			$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
-			open_pause_menu()
+			ui.open_pause_menu()
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
 			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
 

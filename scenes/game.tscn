@@ -315,15 +315,8 @@ animations = [{
 "speed": 24.0
 }]
 
-[node name="Game" type="Node3D" node_paths=PackedStringArray("game_map")]
+[node name="Game" type="Node3D"]
 script = ExtResource("1_re23i")
-action_timeline = null
-game_phase = null
-server_progress = null
-client_progress = null
-grenades_in_existence = null
-exfiltration_queue = null
-game_map = NodePath("World/GameMap")
 
 [node name="Agents" type="Node3D" parent="."]
 
@@ -399,12 +392,6 @@ one_shot = true
 
 [node name="MultiplayerHandler" type="Node" parent="."]
 script = ExtResource("75_f35fg")
-action_timeline = null
-game_phase = null
-server_progress = null
-client_progress = null
-grenades_in_existence = null
-exfiltration_queue = null
 
 [node name="UI" type="Node2D" parent="."]
 script = ExtResource("68_kct0c")
@@ -668,8 +655,9 @@ bus = &"Music"
 [connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]
 [connection signal="timeout" from="ColdBootTimer" to="." method="_on_cold_boot_timer_timeout"]
 [connection signal="pressed" from="UI/PauseMenu/ColorRect/VBoxContainer/YesForfeit" to="." method="_on_yes_forfeit_pressed"]
-[connection signal="pressed" from="UI/PauseMenu/ColorRect/VBoxContainer/NoForfeit" to="." method="_on_no_forfeit_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/ColorRect/VBoxContainer/NoForfeit" to="UI" method="_on_no_forfeit_pressed"]
 [connection signal="pressed" from="UI/HUDBase/Execute" to="." method="_on_execute_pressed"]
+[connection signal="pressed" from="UI/HUDBase/Execute" to="UI" method="_on_execute_pressed"]
 [connection signal="aiming_decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_aiming_decision_made"]
 [connection signal="decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
 [connection signal="movement_decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_movement_decision_made"]
