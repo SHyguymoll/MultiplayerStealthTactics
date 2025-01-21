@@ -393,18 +393,9 @@ func determine_weapon_events():
 					server.create_sound_effect.rpc(agent.position, agent.player_id, 10, 0.5, 1.5, "rifle")
 			"shotgun":
 				attackers[agent] = [
-					return_attacked(
-						agent,
-						slide_end_pos(agent._body.global_position, agent.queued_action[1], 1.0)
-						),
-					return_attacked(
-						agent,
-						agent.queued_action[1]
-						),
-					return_attacked(
-						agent,
-						slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)
-						),
+					return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 1.0)),
+					return_attacked(agent, agent.queued_action[1]),
+					return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)),
 					]
 				if multiplayer.is_server():
 					server.create_sound_effect.rpc(agent.position, agent.player_id, 15, 2.25, 3.5, "shotgun")
