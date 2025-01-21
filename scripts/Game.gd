@@ -46,8 +46,12 @@ func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = fal
 		new_popup.disappear()
 
 
+func agent_children() -> Array[Agent]:
+	return $Agents.get_children() as Array[Agent]
+
+
 func determine_sights():
-	for agent in ($Agents.get_children() as Array[Agent]):
+	for agent in agent_children():
 		if agent.player_id != multiplayer.get_unique_id():
 			continue
 		if agent.in_smoke:
@@ -131,7 +135,7 @@ func try_see_element(spotter : Agent, element : Node3D):
 
 
 func determine_sounds():
-	for agent in ($Agents.get_children() as Array[Agent]):
+	for agent in agent_children():
 		if agent.in_incapacitated_state():
 			continue # incapped agents are deaf
 		for detected in agent._ears.get_overlapping_areas():
@@ -186,7 +190,7 @@ func _physics_process(delta: float) -> void:
 		server.GamePhases.EXECUTION:
 			determine_cqc_events()
 			determine_weapon_events()
-			for agent in ($Agents.get_children() as Array[Agent]):
+			for agent in agent_children():
 				agent._game_step(delta)
 				agent.in_smoke = false
 				#agent._debug_label.text = str(agent.target_visible_level) + "\n" + str(agent.noticed) + "\n" + str(current_game_step - agent.step_seen) + " : " + str(agent.step_seen)
@@ -290,12 +294,12 @@ func _physics_process(delta: float) -> void:
 			determine_sounds()
 			determine_indicator_removals()
 			if multiplayer.is_server():
-				for agent in ($Agents.get_children() as Array[Agent]):
+				for agent in agent_children():
 					if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 						return
 				server.update_game_phase.rpc(server.GamePhases.SELECTION)
 		server.GamePhases.COMPLETION:
-			for ag in ($Agents.get_children() as Array[Agent]):
+			for ag in agent_children():
 				ag.visible = true
 				ag.queued_action.clear()
 				if ag.in_standing_state():
@@ -327,7 +331,7 @@ func return_attacked(attacker : Agent, location : Vector3):
 
 func determine_cqc_events():
 	var cqc_actors = {}
-	for agent in ($Agents.get_children() as Array[Agent]):
+	for agent in agent_children():
 		if agent.state != Agent.States.CQC_GRAB:
 			continue
 		cqc_actors[agent] = return_attacked(agent, agent.queued_action[1])[0]
@@ -365,7 +369,7 @@ func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
 
 func determine_weapon_events():
 	var attackers = {}
-	for agent in ($Agents.get_children() as Array[Agent]):
+	for agent in agent_children():
 		if agent.state != Agent.States.FIRE_GUN:
 			continue
 		GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).loaded_ammo -= 1
@@ -551,7 +555,7 @@ func save_replay():
 
 
 func check_agents_for_weapon(item_name : String) -> bool:
-	for ag in ($Agents.get_children() as Array[Agent]):
+	for ag in agent_children():
 		if not ag.is_multiplayer_authority():
 			continue
 		if ag.state == Agent.States.DEAD:
@@ -562,7 +566,7 @@ func check_agents_for_weapon(item_name : String) -> bool:
 
 
 func check_weapon_holder_exfil(item_name : String) -> bool:
-	for ag in ($Agents.get_children() as Array[Agent]):
+	for ag in agent_children():
 		if not ag.is_multiplayer_authority():
 			continue
 		if ag.state == Agent.States.DEAD:
@@ -576,7 +580,7 @@ func check_weapon_holder_exfil(item_name : String) -> bool:
 
 func check_full_team_exfil_or_dead():
 	var count = 0
-	for ag in ($Agents.get_children() as Array[Agent]):
+	for ag in agent_children():
 		if not ag.is_multiplayer_authority():
 			continue
 		count += 1
