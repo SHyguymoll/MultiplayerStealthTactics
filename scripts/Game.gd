@@ -19,6 +19,13 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 @onready var ui = $UI
 @onready var server = $MultiplayerHandler
 
+@onready var weapons : Node = $Weapons
+
+@onready var agents : Node3D = $Agents
+@onready var pickups : Node3D = $Pickups
+@onready var grenades : Node3D = $Grenades
+@onready var smokes : Node3D = $Smokes
+
 func start_game(): # Called only on the server.
 	await ($MultiplayerLoadTimer as Timer).timeout # wait for client to load in
 	ping.rpc()
@@ -47,7 +54,7 @@ func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = fal
 
 
 func agent_children() -> Array[Agent]:
-	return $Agents.get_children() as Array[Agent]
+	return agents.get_children() as Array[Agent]
 
 
 func determine_sights():
@@ -208,8 +215,8 @@ func _physics_process(delta: float) -> void:
 						pos_x = agent.mark_for_drop.position.x,
 						pos_y = agent.mark_for_drop.position.y,
 						pos_z = agent.mark_for_drop.position.z,
-						server_knows = agent.player_id == 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
-						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
+						server_knows = agent.player_id == 1 or weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
+						client_knows = agent.player_id != 1 or weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
 						wep_name = str(agent.mark_for_drop.wep_node),
 					}
 					server.pickup_spawner.spawn(new_drop)
@@ -218,16 +225,16 @@ func _physics_process(delta: float) -> void:
 						server.remove_weapon_from_agent.rpc(agent.name, agent.mark_for_drop.wep_node)
 					agent.mark_for_drop.clear()
 				if multiplayer.is_server() and agent.try_grab_pickup and len(agent.queued_action) > 1:
-					if $Pickups.get_node_or_null(str(agent.queued_action[1])) != null:
-						$Pickups.get_node(str(agent.queued_action[1])).queue_free()
+					if pickups.get_node_or_null(str(agent.queued_action[1])) != null:
+						pickups.get_node(str(agent.queued_action[1])).queue_free()
 					agent.try_grab_pickup = false
 				if multiplayer.is_server() and agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
 					var new_drop = {
 						pos_x = agent.global_position.x + (randf() - 0.5),
 						pos_y = agent.global_position.y,
 						pos_z = agent.global_position.z + (randf() - 0.5),
-						server_knows = agent.player_id == 1 or $Weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
-						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
+						server_knows = agent.player_id == 1 or weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
+						client_knows = agent.player_id != 1 or weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
 						wep_name = str(agent.held_weapons[1]),
 					}
 					server.pickup_spawner.spawn(new_drop)
@@ -251,7 +258,7 @@ func _physics_process(delta: float) -> void:
 					}
 					server.grenade_spawner.spawn(grenade_data)
 					agent.mark_for_grenade_throw = false
-			for grenade in ($Grenades.get_children() as Array[Grenade]):
+			for grenade in (grenades.get_children() as Array[Grenade]):
 				grenade._tick()
 				if grenade.explode:
 					match grenade.wep_id:
@@ -280,13 +287,13 @@ func _physics_process(delta: float) -> void:
 					if multiplayer.is_server():
 						server.grenades_in_existence.erase(grenade.name)
 						grenade.queue_free()
-			for smoke in ($Smokes.get_children() as Array[Smoke]):
+			for smoke in (smokes.get_children() as Array[Smoke]):
 				smoke._tick()
 				for caught in smoke.col_area.get_overlapping_areas():
 					caught.get_parent().in_smoke = true
 				if multiplayer.is_server() and smoke.lifetime > 205:
 					smoke.queue_free()
-			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
+			for pickup in (pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
 			#if multiplayer.is_server():
 			server.current_game_step += 1
