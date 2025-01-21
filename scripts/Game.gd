@@ -73,8 +73,10 @@ func determine_sights():
 				try_see_element(agent, par)
 
 
+const l_10 = log(10)
+
 func log10(x: float) -> float:
-	return log(x) / log(10)
+	return log(x) / l_10
 
 
 func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_level : int) -> float:
