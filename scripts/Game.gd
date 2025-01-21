@@ -16,17 +16,8 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 
 @onready var _camera : GameCamera = $World/Camera3D
 
-var start_time : String
-var end_time : String
-
 @onready var ui = $UI
 @onready var server = $MultiplayerHandler
-
-func _ready(): # Preconfigure game.
-	start_time = str(int(Time.get_unix_time_from_system()))
-	$FadeOut.visible = true
-	$FadeOut/ColorRect.modulate = Color.WHITE
-	$HUDBase/HurryUp.visible = false
 
 func start_game(): # Called only on the server.
 	await ($MultiplayerLoadTimer as Timer).timeout # wait for client to load in
@@ -549,10 +540,10 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 
 func save_replay():
 	server.action_timeline[server.current_game_step] = "END"
-	end_time = str(int(Time.get_unix_time_from_system()))
+	var end_time = str(int(Time.get_unix_time_from_system()))
 	if DirAccess.open("user://replays") == null:
 		DirAccess.make_dir_absolute("user://replays")
-	var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
+	var new_replay = FileAccess.open("user://replays/" + server.start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
 	new_replay.store_string(JSON.stringify(server.action_timeline))
 
 

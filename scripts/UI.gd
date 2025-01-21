@@ -7,6 +7,9 @@ extends Node2D
 @onready var ag_insts : Label = $HUDBase/AgentInstructions
 @onready var hurry_up : Label = $HUDBase/HurryUp
 
+@onready var fadeout_base = $FadeOut
+@onready var fadeout_rect = $FadeOut/ColorRect
+
 @onready var serv_name : Label = $HUDBase/ServerPlayerName
 @onready var clie_name : Label = $HUDBase/ClientPlayerName
 @onready var serv_prog : ProgressBar = $HUDBase/ProgressBarServer
@@ -32,6 +35,9 @@ var agent_selector_scene = preload("res://scenes/agent_selector.tscn")
 @onready var game = $".."
 
 func _ready() -> void:
+	fadeout_base.visible = true
+	fadeout_rect.modulate = Color.WHITE
+	hurry_up.visible = false
 	radial_menu.visible = false
 	close_pause_menu()
 

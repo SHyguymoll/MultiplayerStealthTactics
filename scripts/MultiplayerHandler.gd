@@ -22,6 +22,9 @@ var audio_event_scene = preload("res://scenes/game_audio_event.tscn")
 }
 var current_game_step := 0
 
+var start_time : String
+var end_time : String
+
 enum GamePhases {
 	SELECTION,
 	EXECUTION,
@@ -56,6 +59,7 @@ var sent_reward = false
 @onready var game = $".."
 
 func _ready() -> void:
+	start_time = str(int(Time.get_unix_time_from_system()))
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
 	if multiplayer.is_server():
 		ui.serv_name.text = Lobby.player_info.name
