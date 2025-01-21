@@ -14,7 +14,7 @@ enum SelectionSteps {
 }
 var selection_step : SelectionSteps = SelectionSteps.BASE
 
-@onready var _camera : GameCamera = $World/Camera3D
+@onready var camera : GameCamera = $World/Camera3D
 
 @onready var ui = $UI
 @onready var server = $MultiplayerHandler
@@ -29,11 +29,11 @@ func start_game(): # Called only on the server.
 @rpc("authority", "call_remote", "reliable")
 func force_camera(new_pos, new_fov = -1.0):
 	if new_pos is Vector2:
-		$World/Camera3D.final_position = new_pos * Vector2(get_viewport().size/$World/Camera3D.sensitivity)
+		camera.final_position = new_pos * Vector2(get_viewport().size/camera.sensitivity)
 	elif new_pos is Vector3:
-		$World/Camera3D.final_position = Vector2(new_pos.x, new_pos.z) * Vector2(get_viewport().size/$World/Camera3D.sensitivity)
+		camera.final_position = Vector2(new_pos.x, new_pos.z) * Vector2(get_viewport().size/camera.sensitivity)
 	if new_fov != -1.0:
-		$World/Camera3D.fov_target = new_fov
+		camera.fov_target = new_fov
 
 
 func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void:
@@ -164,22 +164,25 @@ func determine_indicator_removals():
 					ind._fail()
 
 
+func verify_game_completeness() -> bool:
+	for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
+		if selector.referenced_agent == null: # the only case where the agent is null is the one where the node was destroyed by the server disconnecting
+			for selector_to_free in $HUDSelectors.get_children() as Array[AgentSelector]:
+				selector_to_free.queue_free()
+			return true
+	return false
+
+
 func _physics_process(delta: float) -> void:
 	match server.game_phase:
 		server.GamePhases.SELECTION:
-			var game_is_actually_over_check = false
-			for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
-				if selector.referenced_agent == null: # the only case where the agent is null is the one where the node was destroyed by the server disconnecting
-					game_is_actually_over_check = true
-					for selector_to_free in $HUDSelectors.get_children() as Array[AgentSelector]:
-						selector_to_free.queue_free()
-					break
-				selector.position = (
-			$World/Camera3D as Camera3D).unproject_position(
-					selector.referenced_agent.position)
-				(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
-			if game_is_actually_over_check:
+			if verify_game_completeness():
 				server._update_game_phase(server.GamePhases.COMPLETION)
+			else:
+				for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
+					selector.position = camera.unproject_position(
+						selector.referenced_agent.position)
+					selector.collide.shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/camera.fov
 		server.GamePhases.EXECUTION:
 			determine_cqc_events()
 			determine_weapon_events()

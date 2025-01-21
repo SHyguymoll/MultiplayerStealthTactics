@@ -3,6 +3,8 @@ extends Area2D
 
 var referenced_agent : Agent
 
+@onready var collide = $CollisionShape2D
+
 signal agent_selected(selector : AgentSelector)
 
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
