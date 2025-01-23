@@ -64,6 +64,11 @@ var _outline_mat : StandardMaterial3D
 	flag_client = $Agent/game_rig/Skeleton3D/FlagClient,
 }
 
+@onready var item_body_armor = $Agent/game_rig/Skeleton3D/Helmet
+@onready var item_box = $Agent/Box
+@onready var item_cigar = $Agent/game_rig/Skeleton3D/Cigar
+
+
 @onready var sounds = {
 	glanced = ($ClientsideSoundEffects/GlancedSomething as AudioStreamPlayer3D),
 	spotted_element = ($ClientsideSoundEffects/SpottedElement as AudioStreamPlayer3D),
@@ -213,23 +218,23 @@ func perform_action():
 			if selected_item > -1:
 				match held_items[selected_item]:
 					"box":
-						$Agent/Box.visible = false
+						item_box.visible = false
 					"body_armor":
-						$Agent/game_rig/Skeleton3D/Helmet.visible = false
+						item_body_armor.visible = false
 					"cigar":
-						$Agent/game_rig/Skeleton3D/Cigar.visible = false
+						item_cigar.visible = false
 			selected_item = queued_action[1]
 			if selected_item == -1:
 				return
 			match held_items[selected_item]:
 				"box":
-					$Agent/Box.visible = true
+					item_box.visible = true
 					_mesh.visible = false
 					state = States.STAND if can_stand() else States.CROUCH
 				"body_armor":
-					$Agent/game_rig/Skeleton3D/Helmet.visible = true
+					item_body_armor.visible = true
 				"cigar":
-					$Agent/game_rig/Skeleton3D/Cigar.visible = true
+					item_cigar.visible = true
 		GameActions.CHANGE_WEAPON:
 			selected_weapon = queued_action[1]
 			var actual_weapon = (held_weapons[selected_weapon] as String).split("_", true, 3)[3]
@@ -313,12 +318,12 @@ func _ready() -> void:
 	# outline shader
 	_outline_mat = _outline_mat_base.duplicate()
 	_mesh.set_surface_override_material(1, _outline_mat)
-	$Agent/Box.set_surface_override_material(2, _outline_mat)
-	$Agent/Box.visible = false
-	$Agent/game_rig/Skeleton3D/Helmet.set_surface_override_material(1, _outline_mat)
-	$Agent/game_rig/Skeleton3D/Helmet.visible = false
-	$Agent/game_rig/Skeleton3D/Cigar.set_surface_override_material(1, _outline_mat)
-	$Agent/game_rig/Skeleton3D/Cigar.visible = false
+	item_box.set_surface_override_material(2, _outline_mat)
+	item_box.visible = false
+	item_body_armor.set_surface_override_material(1, _outline_mat)
+	item_body_armor.visible = false
+	item_cigar.set_surface_override_material(1, _outline_mat)
+	item_cigar.visible = false
 	# other visuals
 	$CQCAnimationHelper/Sprite3D.visible = false
 	_anim_state.start("Stand")
@@ -382,8 +387,8 @@ func exfiltrate():
 	var twe = create_tween()
 	twe.set_parallel()
 	twe.tween_property(_mesh, "transparency", 1.0, 2.0).from(0.0)
-	twe.tween_property($Agent/Box, "transparency", 1.0, 2.0).from(0.0)
-	twe.tween_property($Agent/game_rig/Skeleton3D/Helmet, "transparency", 1.0, 2.0).from(0.0)
+	twe.tween_property(item_box, "transparency", 1.0, 2.0).from(0.0)
+	twe.tween_property(item_body_armor, "transparency", 1.0, 2.0).from(0.0)
 	twe.tween_property($Agent, "position:y", -10.0, 2.0).from_current()
 	twe.finished.connect(func(): visible = false)
 
