@@ -186,137 +186,159 @@ func verify_game_completeness() -> bool:
 	return false
 
 
+func selection_phase(delta : float):
+	if verify_game_completeness():
+		server._update_game_phase(server.GamePhases.COMPLETION)
+		return
+	for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
+		selector.position = camera.unproject_position(
+			selector.referenced_agent.position)
+		selector.collide.shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/camera.fov
+
+
+func execution_phase(delta : float):
+	determine_cqc_events()
+	determine_weapon_events()
+	for agent in agent_children():
+		agent._game_step(delta)
+		agent.in_smoke = false
+		if server.current_game_step - agent.step_seen == server.REMEMBER_TILL and agent.visible:
+			if agent.player_id == 1:
+				server.set_agent_client_visibility.rpc(agent.name, false)
+				if not multiplayer.is_server():
+					create_popup(GameRefs.POPUP.sight_unknown, agent.position)
+			else:
+				server.set_agent_server_visibility.rpc(agent.name, false)
+				if multiplayer.is_server():
+					create_popup(GameRefs.POPUP.sight_unknown, agent.position)
+		if len(agent.mark_for_drop) > 0 and multiplayer.is_server():
+			var new_drop = {
+				pos_x = agent.mark_for_drop.position.x,
+				pos_y = agent.mark_for_drop.position.y,
+				pos_z = agent.mark_for_drop.position.z,
+				server_knows = agent.player_id == 1 or weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
+				client_knows = agent.player_id != 1 or weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
+				wep_name = str(agent.mark_for_drop.wep_node),
+			}
+			server.pickup_spawner.spawn(new_drop)
+			#agent.held_weapons.erase(agent.mark_for_drop.wep_node)
+			if multiplayer.is_server():
+				server.remove_weapon_from_agent.rpc(agent.name, agent.mark_for_drop.wep_node)
+			agent.mark_for_drop.clear()
+		if multiplayer.is_server() and agent.try_grab_pickup and len(agent.queued_action) > 1:
+			if pickups.get_node_or_null(str(agent.queued_action[1])) != null:
+				pickups.get_node(str(agent.queued_action[1])).queue_free()
+			agent.try_grab_pickup = false
+		if multiplayer.is_server() and agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
+			var new_drop = {
+				pos_x = agent.global_position.x + (randf() - 0.5),
+				pos_y = agent.global_position.y,
+				pos_z = agent.global_position.z + (randf() - 0.5),
+				server_knows = agent.player_id == 1 or weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
+				client_knows = agent.player_id != 1 or weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
+				wep_name = str(agent.held_weapons[1]),
+			}
+			server.pickup_spawner.spawn(new_drop)
+			server.remove_weapon_from_agent.rpc(agent.name, new_drop.wep_name)
+		if multiplayer.is_server() and agent.mark_for_grenade_throw:
+			var try_name = agent.held_weapons[agent.selected_weapon]
+			while try_name in server.grenades_in_existence:
+				try_name += "N"
+			var grenade_data = {
+				pos_x = agent.position.x,
+				pos_y = agent.position.y,
+				pos_z = agent.position.z,
+				wep_name = try_name,
+				wep_id = GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).wep_id,
+				player_id = agent.player_id,
+				server_knows = agent.server_knows,
+				client_knows = agent.client_knows,
+				end_pos_x = agent.queued_action[1].x,
+				end_pos_y = agent.queued_action[1].y,
+				end_pos_z = agent.queued_action[1].z,
+			}
+			server.grenade_spawner.spawn(grenade_data)
+			agent.mark_for_grenade_throw = false
+	for grenade in (grenades.get_children() as Array[Grenade]):
+		grenade._tick()
+		if grenade.explode:
+			match grenade.wep_id:
+				"grenade_frag":
+					for exploded in grenade._explosion_hitbox.get_overlapping_areas():
+						var attacked : Agent = exploded.get_parent()
+						if attacked.in_prone_state():
+							continue # prone agents dodge explosions for Reasons™
+						if multiplayer.is_server():
+							server.damage_agent.rpc(attacked.name, 2, false)
+							server.create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
+					if multiplayer.is_server():
+						server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
+				"grenade_smoke":
+					server.smoke_spawner.spawn({
+						pos_x = grenade.position.x,
+						pos_y = grenade.position.y,
+						pos_z = grenade.position.z,
+						wep_name = grenade.name,
+					})
+					if multiplayer.is_server():
+						server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
+				"grenade_noise":
+					if multiplayer.is_server():
+						server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
+			if multiplayer.is_server():
+				server.grenades_in_existence.erase(grenade.name)
+				grenade.queue_free()
+	for smoke in (smokes.get_children() as Array[Smoke]):
+		smoke._tick()
+		for caught in smoke.col_area.get_overlapping_areas():
+			caught.get_parent().in_smoke = true
+		if multiplayer.is_server() and smoke.lifetime > 205:
+			smoke.queue_free()
+	for pickup in (pickups.get_children() as Array[WeaponPickup]):
+		pickup._animate(delta)
+	#if multiplayer.is_server():
+	server.current_game_step += 1
+	determine_sights()
+	determine_sounds()
+	determine_indicator_removals()
+	if multiplayer.is_server():
+		for agent in agent_children():
+			if agent.action_done == Agent.ActionDoneness.NOT_DONE:
+				return
+		server.update_game_phase.rpc(server.GamePhases.SELECTION)
+
+
+func resolution_step(): #TODO
+	pass
+	# if team still around
+	server.game_phase = server.GamePhases.SELECTION
+	return
+	# else do completion step
+
+
+func completion_phase(delta):
+	for ag in agent_children():
+		ag.visible = true
+		ag.queued_action.clear()
+		if ag.in_standing_state():
+			ag.state = Agent.States.STAND
+		elif ag.in_crouching_state():
+			ag.state = Agent.States.CROUCH
+		elif ag.in_prone_state():
+			ag.state = Agent.States.PRONE
+		ag._game_step(delta, true)
+
+
 func _physics_process(delta: float) -> void:
 	match server.game_phase:
 		server.GamePhases.SELECTION:
-			if verify_game_completeness():
-				server._update_game_phase(server.GamePhases.COMPLETION)
-			else:
-				for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
-					selector.position = camera.unproject_position(
-						selector.referenced_agent.position)
-					selector.collide.shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/camera.fov
+			selection_phase(delta)
 		server.GamePhases.EXECUTION:
-			determine_cqc_events()
-			determine_weapon_events()
-			for agent in agent_children():
-				agent._game_step(delta)
-				agent.in_smoke = false
-				if server.current_game_step - agent.step_seen == server.REMEMBER_TILL and agent.visible:
-					if agent.player_id == 1:
-						server.set_agent_client_visibility.rpc(agent.name, false)
-						if not multiplayer.is_server():
-							create_popup(GameRefs.POPUP.sight_unknown, agent.position)
-					else:
-						server.set_agent_server_visibility.rpc(agent.name, false)
-						if multiplayer.is_server():
-							create_popup(GameRefs.POPUP.sight_unknown, agent.position)
-				if len(agent.mark_for_drop) > 0 and multiplayer.is_server():
-					var new_drop = {
-						pos_x = agent.mark_for_drop.position.x,
-						pos_y = agent.mark_for_drop.position.y,
-						pos_z = agent.mark_for_drop.position.z,
-						server_knows = agent.player_id == 1 or weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
-						client_knows = agent.player_id != 1 or weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
-						wep_name = str(agent.mark_for_drop.wep_node),
-					}
-					server.pickup_spawner.spawn(new_drop)
-					#agent.held_weapons.erase(agent.mark_for_drop.wep_node)
-					if multiplayer.is_server():
-						server.remove_weapon_from_agent.rpc(agent.name, agent.mark_for_drop.wep_node)
-					agent.mark_for_drop.clear()
-				if multiplayer.is_server() and agent.try_grab_pickup and len(agent.queued_action) > 1:
-					if pickups.get_node_or_null(str(agent.queued_action[1])) != null:
-						pickups.get_node(str(agent.queued_action[1])).queue_free()
-					agent.try_grab_pickup = false
-				if multiplayer.is_server() and agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
-					var new_drop = {
-						pos_x = agent.global_position.x + (randf() - 0.5),
-						pos_y = agent.global_position.y,
-						pos_z = agent.global_position.z + (randf() - 0.5),
-						server_knows = agent.player_id == 1 or weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
-						client_knows = agent.player_id != 1 or weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
-						wep_name = str(agent.held_weapons[1]),
-					}
-					server.pickup_spawner.spawn(new_drop)
-					server.remove_weapon_from_agent.rpc(agent.name, new_drop.wep_name)
-				if multiplayer.is_server() and agent.mark_for_grenade_throw:
-					var try_name = agent.held_weapons[agent.selected_weapon]
-					while try_name in server.grenades_in_existence:
-						try_name += "N"
-					var grenade_data = {
-						pos_x = agent.position.x,
-						pos_y = agent.position.y,
-						pos_z = agent.position.z,
-						wep_name = try_name,
-						wep_id = GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).wep_id,
-						player_id = agent.player_id,
-						server_knows = agent.server_knows,
-						client_knows = agent.client_knows,
-						end_pos_x = agent.queued_action[1].x,
-						end_pos_y = agent.queued_action[1].y,
-						end_pos_z = agent.queued_action[1].z,
-					}
-					server.grenade_spawner.spawn(grenade_data)
-					agent.mark_for_grenade_throw = false
-			for grenade in (grenades.get_children() as Array[Grenade]):
-				grenade._tick()
-				if grenade.explode:
-					match grenade.wep_id:
-						"grenade_frag":
-							for exploded in grenade._explosion_hitbox.get_overlapping_areas():
-								var attacked : Agent = exploded.get_parent()
-								if attacked.in_prone_state():
-									continue # prone agents dodge explosions for Reasons™
-								if multiplayer.is_server():
-									server.damage_agent.rpc(attacked.name, 2, false)
-									server.create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
-							if multiplayer.is_server():
-								server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
-						"grenade_smoke":
-							server.smoke_spawner.spawn({
-								pos_x = grenade.position.x,
-								pos_y = grenade.position.y,
-								pos_z = grenade.position.z,
-								wep_name = grenade.name,
-							})
-							if multiplayer.is_server():
-								server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
-						"grenade_noise":
-							if multiplayer.is_server():
-								server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
-					if multiplayer.is_server():
-						server.grenades_in_existence.erase(grenade.name)
-						grenade.queue_free()
-			for smoke in (smokes.get_children() as Array[Smoke]):
-				smoke._tick()
-				for caught in smoke.col_area.get_overlapping_areas():
-					caught.get_parent().in_smoke = true
-				if multiplayer.is_server() and smoke.lifetime > 205:
-					smoke.queue_free()
-			for pickup in (pickups.get_children() as Array[WeaponPickup]):
-				pickup._animate(delta)
-			#if multiplayer.is_server():
-			server.current_game_step += 1
-			determine_sights()
-			determine_sounds()
-			determine_indicator_removals()
-			if multiplayer.is_server():
-				for agent in agent_children():
-					if agent.action_done == Agent.ActionDoneness.NOT_DONE:
-						return
-				server.update_game_phase.rpc(server.GamePhases.SELECTION)
+			execution_phase(delta)
+		server.GamePhases.RESOLUTION:
+			resolution_step()
 		server.GamePhases.COMPLETION:
-			for ag in agent_children():
-				ag.visible = true
-				ag.queued_action.clear()
-				if ag.in_standing_state():
-					ag.state = Agent.States.STAND
-				elif ag.in_crouching_state():
-					ag.state = Agent.States.CROUCH
-				elif ag.in_prone_state():
-					ag.state = Agent.States.PRONE
-				ag._game_step(delta, true)
+			completion_phase(delta)
 
 
 @rpc("call_local")

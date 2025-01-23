@@ -28,6 +28,7 @@ var end_time : String
 enum GamePhases {
 	SELECTION,
 	EXECUTION,
+	RESOLUTION,
 	COMPLETION,
 }
 @export var game_phase : GamePhases = GamePhases.SELECTION
