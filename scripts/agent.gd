@@ -18,7 +18,7 @@ var movement_speed : float = 2.75 #movement speed when running (divided by 2 for
 
 var player_id : int
 
-@export var visible_level : int = 50 #bounded from 0 to 100, based on current state
+@export var visible_level : int = 50 #bounded from 0 (INVISIBLE) to 100 (COMPLETELY VISIBLE), based on current state
 
 @export var held_items : Array = [] #max length should be 3, only uses Strings
 @export var held_weapons : Array = [] #max length should be 3 (including fist), also only uses Strings
@@ -225,7 +225,7 @@ func perform_action():
 				"box":
 					$Agent/Box.visible = true
 					_mesh.visible = false
-					state = States.STAND
+					state = States.STAND if can_stand() else States.CROUCH
 				"body_armor":
 					$Agent/game_rig/Skeleton3D/Helmet.visible = true
 				"cigar":
@@ -401,6 +401,22 @@ func _physics_process(_d: float) -> void:
 	$AgentIsStunned.visible = state == States.STUNNED
 	$AgentIsStunned.rotation.z += PI/20.0
 	$AgentIsDead.visible = state == States.DEAD
+
+
+func calculate_sight_chance(): #TODO
+	pass
+
+
+func try_see(): #TODO
+	pass
+
+
+func look(): #TODO
+	pass
+
+
+func listen(): #TODO
+	pass
 
 
 func should_be_visible():
