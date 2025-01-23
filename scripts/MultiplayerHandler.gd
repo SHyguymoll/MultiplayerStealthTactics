@@ -25,13 +25,7 @@ var current_game_step := 0
 var start_time : String
 var end_time : String
 
-enum GamePhases {
-	SELECTION,
-	EXECUTION,
-	RESOLUTION,
-	COMPLETION,
-}
-@export var game_phase : GamePhases = GamePhases.SELECTION
+
 const REMEMBER_TILL = 150
 
 enum ProgressParts {
@@ -57,7 +51,7 @@ var sent_final_message = false
 var sent_reward = false
 
 @onready var ui = $"../UI"
-@onready var game = $".."
+@onready var game : Game = $".."
 
 func _ready() -> void:
 	start_time = str(int(Time.get_unix_time_from_system()))
@@ -86,12 +80,12 @@ func client_is_loaded():
 
 
 func player_quits(_peer_id):
-	if game_phase == GamePhases.COMPLETION or server_progress > ProgressParts.NO_ADVANTAGE or client_progress > ProgressParts.NO_ADVANTAGE:
+	if game.phase == Game.Phases.COMPLETION or server_progress > ProgressParts.NO_ADVANTAGE or client_progress > ProgressParts.NO_ADVANTAGE:
 		return
 	create_toast_update(GameRefs.TXT.forfeit, GameRefs.TXT.forfeit, false)
 	$FadeOut/ColorRect/AnimatedSprite2D.play("victory")
 	ui.animate_fade(true)
-	update_game_phase(GamePhases.COMPLETION)
+	update_game_phase(Game.Phases.COMPLETION)
 
 
 func init_game(): #TODO
@@ -217,7 +211,7 @@ func _on_cold_boot_timer_timeout() -> void:
 			pickup_spawner.spawn(data.pickup)
 		game_map.Objectives.TARGET_DEFEND:
 			game_map.objective_params
-	update_game_phase.rpc(GamePhases.SELECTION, false)
+	update_game_phase.rpc(Game.Phases.SELECTION, false)
 	animate_fade.rpc(false)
 
 
@@ -232,7 +226,7 @@ func player_is_ready(id):
 		if multiplayer.is_server():
 			ui.hurry_up.visible = true
 	if multiplayer.is_server() and server_ready_bool and client_ready_bool:
-		update_game_phase.rpc(GamePhases.EXECUTION)
+		update_game_phase.rpc(Game.Phases.EXECUTION)
 
 
 func _on_execute_pressed() -> void:
@@ -365,7 +359,7 @@ func of_comp_server():
 				create_toast_update.rpc(GameRefs.TXT.of_y_get, GameRefs.TXT.of_t_get, true)
 				set_server_progress.rpc(ProgressParts.ITEM_HELD)
 				return
-			if not game.check_full_team_exfil_or_dead(true):
+			if not game.check_full_team_exfil_or_dead():
 				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 				set_server_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
 				return
@@ -378,7 +372,7 @@ func of_comp_server():
 				set_server_progress.rpc(ProgressParts.NO_ADVANTAGE)
 				return
 			if game.check_weapon_holder_exfil("map_flag_center"):
-				if not game.check_full_team_exfil_or_dead(true):
+				if not game.check_full_team_exfil_or_dead():
 					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 					set_server_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
 					return
@@ -386,7 +380,7 @@ func of_comp_server():
 				set_server_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
 				return
 		ProgressParts.OBJECTIVE_COMPLETE: # a server team member has escaped with the flag
-			if game.check_full_team_exfil_or_dead(true):
+			if game.check_full_team_exfil_or_dead():
 				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
 				set_server_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
 
@@ -471,7 +465,7 @@ func failure_jingle():
 
 @rpc("authority", "reliable")
 func reward_team():
-	for ag in ($Agents.get_children() as Array[Agent]):
+	for ag in game.agent_children():
 		if not ag.is_multiplayer_authority(): # pick the right team
 			continue
 		if ag.state == Agent.States.DEAD: # only the survivors
@@ -497,115 +491,10 @@ func set_client_progress(val : ProgressParts):
 
 
 @rpc("authority", "call_local", "reliable")
-func update_game_phase(new_phase: GamePhases, check_incap := true):
+func update_game_phase(new_phase: Game.Phases, check_incap := true):
 	await get_tree().create_timer(0.1).timeout
-	game_phase = new_phase
-	match new_phase:
-		GamePhases.SELECTION:
-			ui.round_ended.play()
-			ui.phase_label.text = "SELECT ACTIONS"
-			ui.execute_button.disabled = false
-			ui.execute_button.text = "EXECUTE INSTRUCTIONS"
-			if multiplayer.is_server(): # update exfiltrations
-				if server_progress == ProgressParts.ITEM_HELD:
-					var can_exfil = false
-					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						for weap in actual_agent.held_weapons:
-							if (weap as String).begins_with("map_"):
-								can_exfil = true
-								break
-						if can_exfil:
-							break
-					if can_exfil:
-						for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
-							var actual_agent : Agent = detect.get_parent()
-							if actual_agent.state == Agent.States.DEAD:
-								continue
-							exfiltration_queue.append(actual_agent.name)
-				elif server_progress == ProgressParts.OBJECTIVE_COMPLETE:
-					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						exfiltration_queue.append(actual_agent.name)
-				if client_progress == ProgressParts.ITEM_HELD:
-					var can_exfil = false
-					for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						for weap in actual_agent.held_weapons:
-							if (weap as String).begins_with("map_"):
-								can_exfil = true
-								break
-						if can_exfil:
-							break
-					if can_exfil:
-						for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
-							var actual_agent : Agent = detect.get_parent()
-							if actual_agent.state == Agent.States.DEAD:
-								continue
-							exfiltration_queue.append(actual_agent.name)
-				elif client_progress == ProgressParts.OBJECTIVE_COMPLETE:
-					for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						exfiltration_queue.append(actual_agent.name)
-			for agent_name in exfiltration_queue:
-				($Agents.get_node(str(agent_name)) as Agent).exfiltrate()
-			if multiplayer.is_server():
-				track_objective_completion() # objective based updates here
-			# create selectors and otherwise prepare for selection
-			var server_team_dead = true
-			var client_team_dead = true
-			for ag in ($Agents.get_children() as Array[Agent]):
-				ag.action_done = Agent.ActionDoneness.NOT_DONE
-				ag.ungrabbable = false
-				if multiplayer.is_server():
-					set_agent_action.rpc(ag.name, [])
-				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
-					ui.create_agent_selector(ag)
-					ag.flash_outline(Color.ORCHID)
-				if ag.state != Agent.States.DEAD:
-					if ag.player_id == 1:
-						server_team_dead = false
-					else:
-						client_team_dead = false
-			if not game.player_has_won(server_team_dead, client_team_dead): # win conditions
-				ui.show_hud()
-				if $HUDSelectors.get_child_count() == 0 and check_incap:
-					_on_execute_pressed() # run execute since the player can't do anything
-			else:
-				update_game_phase(GamePhases.COMPLETION)
-		GamePhases.EXECUTION:
-			$HUDBase/HurryUp.visible = false
-			for agent in ($Agents.get_children() as Array[Agent]):
-				agent.action_text = ""
-			ui.update_text()
-			ui.phase_label.text = "EXECUTING ACTIONS..."
-			server_ready_bool = false
-			client_ready_bool = false
-			# populate agents with actions, as well as action_timeline
-			for agent in ($Agents.get_children() as Array[Agent]):
-				agent.agent_is_done.rpc(Agent.ActionDoneness.NOT_DONE)
-				if multiplayer.is_server():
-					append_action_timeline(agent)
-				agent.perform_action()
-			await get_tree().create_timer(0.10).timeout
-		GamePhases.COMPLETION:
-			game.save_replay()
-			if multiplayer.is_server() and not sent_final_message:
-				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
-				animate_fade.rpc()
-				sent_final_message = true
-			$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
-			ui.open_pause_menu()
-			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
-			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
+	game.phase = new_phase
+	game.transition_phase()
 
 
 @rpc("any_peer", "call_local", "reliable")

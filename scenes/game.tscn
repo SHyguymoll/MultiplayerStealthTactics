@@ -77,20 +77,6 @@
 [ext_resource type="Script" path="res://scripts/UI.gd" id="68_kct0c"]
 [ext_resource type="Script" path="res://scripts/MultiplayerHandler.gd" id="75_f35fg"]
 
-[sub_resource type="Environment" id="Environment_bedr1"]
-background_mode = 1
-background_color = Color(0.215686, 0, 0.176471, 1)
-ambient_light_source = 2
-ambient_light_color = Color(1, 1, 1, 1)
-ambient_light_energy = 0.18
-reflected_light_source = 1
-ssao_radius = 4.96
-ssao_intensity = 3.48
-ssao_power = 0.675937
-fog_light_color = Color(1, 1, 1, 1)
-fog_light_energy = 0.0
-volumetric_fog_emission = Color(1, 1, 1, 1)
-
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pu7ty"]
 properties/0/path = NodePath(".:action_timeline")
 properties/0/spawn = true
@@ -104,6 +90,20 @@ properties/2/replication_mode = 1
 properties/3/path = NodePath(".:client_progress")
 properties/3/spawn = true
 properties/3/replication_mode = 1
+
+[sub_resource type="Environment" id="Environment_bedr1"]
+background_mode = 1
+background_color = Color(0.215686, 0, 0.176471, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.18
+reflected_light_source = 1
+ssao_radius = 4.96
+ssao_intensity = 3.48
+ssao_power = 0.675937
+fog_light_color = Color(1, 1, 1, 1)
+fog_light_energy = 0.0
+volumetric_fog_emission = Color(1, 1, 1, 1)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_25ism"]
 animations = [{
@@ -318,35 +318,48 @@ animations = [{
 [node name="Game" type="Node3D"]
 script = ExtResource("1_re23i")
 
-[node name="Agents" type="Node3D" parent="."]
+[node name="ColdBootTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_pu7ty")
+
+[node name="MultiplayerLoadTimer" type="Timer" parent="."]
+wait_time = 0.1
+one_shot = true
+
+[node name="MultiplayerHandler" type="Node" parent="."]
+script = ExtResource("75_f35fg")
 
 [node name="AgentSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
 spawn_path = NodePath("../Agents")
 
-[node name="Pickups" type="Node3D" parent="."]
-
 [node name="PickupSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
 spawn_path = NodePath("../Pickups")
-
-[node name="Weapons" type="Node" parent="."]
 
 [node name="WeaponSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
 spawn_path = NodePath("../Weapons")
 
-[node name="Grenades" type="Node3D" parent="."]
-
 [node name="GrenadeSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
 spawn_path = NodePath("../Grenades")
 
-[node name="Smokes" type="Node3D" parent="."]
-
 [node name="SmokeSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
 spawn_path = NodePath("../Smokes")
+
+[node name="Agents" type="Node3D" parent="."]
+
+[node name="Pickups" type="Node3D" parent="."]
+
+[node name="Weapons" type="Node" parent="."]
+
+[node name="Grenades" type="Node3D" parent="."]
+
+[node name="Smokes" type="Node3D" parent="."]
 
 [node name="World" type="Node3D" parent="."]
 
@@ -379,19 +392,6 @@ environment = SubResource("Environment_bedr1")
 [node name="AudioEvents" type="Node3D" parent="."]
 
 [node name="Popups" type="Node3D" parent="."]
-
-[node name="ColdBootTimer" type="Timer" parent="."]
-one_shot = true
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_pu7ty")
-
-[node name="MultiplayerLoadTimer" type="Timer" parent="."]
-wait_time = 0.1
-one_shot = true
-
-[node name="MultiplayerHandler" type="Node" parent="."]
-script = ExtResource("75_f35fg")
 
 [node name="UI" type="Node2D" parent="."]
 script = ExtResource("68_kct0c")
@@ -652,8 +652,8 @@ stream = ExtResource("11_87rki")
 volume_db = -20.0
 bus = &"Music"
 
-[connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]
 [connection signal="timeout" from="ColdBootTimer" to="." method="_on_cold_boot_timer_timeout"]
+[connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]
 [connection signal="pressed" from="UI/PauseMenu/ColorRect/VBoxContainer/YesForfeit" to="." method="_on_yes_forfeit_pressed"]
 [connection signal="pressed" from="UI/PauseMenu/ColorRect/VBoxContainer/NoForfeit" to="UI" method="_on_no_forfeit_pressed"]
 [connection signal="pressed" from="UI/HUDBase/Execute" to="." method="_on_execute_pressed"]

@@ -14,6 +14,14 @@ enum SelectionSteps {
 }
 var selection_step : SelectionSteps = SelectionSteps.BASE
 
+enum Phases {
+	SELECTION,
+	EXECUTION,
+	RESOLUTION,
+	COMPLETION,
+}
+@export var phase : Phases = Phases.SELECTION
+
 @onready var camera : GameCamera = $World/Camera3D
 
 @onready var ui = $UI
@@ -25,6 +33,7 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 @onready var pickups : Node3D = $Pickups
 @onready var grenades : Node3D = $Grenades
 @onready var smokes : Node3D = $Smokes
+@onready var indicators : Node3D = $ClientsideIndicators
 
 func start_game(): # Called only on the server.
 	await ($MultiplayerLoadTimer as Timer).timeout # wait for client to load in
@@ -168,7 +177,7 @@ func determine_sounds():
 
 
 func determine_indicator_removals():
-	for ind in $ClientsideIndicators.get_children():
+	for ind in indicators.get_children():
 		if ind is AimingIndicator or ind is MovementIndicator:
 			match ind.referenced_agent.action_done:
 				Agent.ActionDoneness.SUCCESS:
@@ -188,7 +197,7 @@ func verify_game_completeness() -> bool:
 
 func selection_phase(delta : float):
 	if verify_game_completeness():
-		server._update_game_phase(server.GamePhases.COMPLETION)
+		server._update_game_phase(Phases.COMPLETION)
 		return
 	for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
 		selector.position = camera.unproject_position(
@@ -305,13 +314,13 @@ func execution_phase(delta : float):
 		for agent in agent_children():
 			if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 				return
-		server.update_game_phase.rpc(server.GamePhases.SELECTION)
+		server.update_game_phase.rpc(Phases.SELECTION)
 
 
 func resolution_step(): #TODO
 	pass
 	# if team still around
-	server.game_phase = server.GamePhases.SELECTION
+	phase = Phases.SELECTION
 	return
 	# else do completion step
 
@@ -329,16 +338,126 @@ func completion_phase(delta):
 		ag._game_step(delta, true)
 
 
+func transition_phase():
+	match phase:
+		Phases.SELECTION:
+			ui.round_ended.play()
+			ui.phase_label.text = "SELECT ACTIONS"
+			ui.execute_button.disabled = false
+			ui.execute_button.text = "EXECUTE INSTRUCTIONS"
+			if multiplayer.is_server(): # update exfiltrations
+				if server.server_progress == server.ProgressParts.ITEM_HELD:
+					var can_exfil = false
+					for detect in server.game_map.server_exfiltrate_zone.get_overlapping_areas():
+						var actual_agent : Agent = detect.get_parent()
+						if actual_agent.state == Agent.States.DEAD:
+							continue
+						for weap in actual_agent.held_weapons:
+							if (weap as String).begins_with("map_"):
+								can_exfil = true
+								break
+						if can_exfil:
+							break
+					if can_exfil:
+						for detect in server.game_map.server_exfiltrate_zone.get_overlapping_areas():
+							var actual_agent : Agent = detect.get_parent()
+							if actual_agent.state == Agent.States.DEAD:
+								continue
+							server.exfiltration_queue.append(actual_agent.name)
+				elif server.server_progress == server.ProgressParts.OBJECTIVE_COMPLETE:
+					for detect in server.game_map.server_exfiltrate_zone.get_overlapping_areas():
+						var actual_agent : Agent = detect.get_parent()
+						if actual_agent.state == Agent.States.DEAD:
+							continue
+						server.exfiltration_queue.append(actual_agent.name)
+				if server.client_progress == server.ProgressParts.ITEM_HELD:
+					var can_exfil = false
+					for detect in server.game_map.client_exfiltrate_zone.get_overlapping_areas():
+						var actual_agent : Agent = detect.get_parent()
+						if actual_agent.state == Agent.States.DEAD:
+							continue
+						for weap in actual_agent.held_weapons:
+							if (weap as String).begins_with("map_"):
+								can_exfil = true
+								break
+						if can_exfil:
+							break
+					if can_exfil:
+						for detect in server.game_map.client_exfiltrate_zone.get_overlapping_areas():
+							var actual_agent : Agent = detect.get_parent()
+							if actual_agent.state == Agent.States.DEAD:
+								continue
+							server.exfiltration_queue.append(actual_agent.name)
+				elif server.client_progress == server.ProgressParts.OBJECTIVE_COMPLETE:
+					for detect in server.game_map.client_exfiltrate_zone.get_overlapping_areas():
+						var actual_agent : Agent = detect.get_parent()
+						if actual_agent.state == Agent.States.DEAD:
+							continue
+						server.exfiltration_queue.append(actual_agent.name)
+			for agent_name in server.exfiltration_queue:
+				($Agents.get_node(str(agent_name)) as Agent).exfiltrate()
+			server.track_objective_completion() # objective based updates here
+		Phases.EXECUTION:
+			$HUDBase/HurryUp.visible = false
+			for agent in agent_children():
+				agent.action_text = ""
+			ui.update_text()
+			ui.phase_label.text = "EXECUTING ACTIONS..."
+			server.server_ready_bool = false
+			server.client_ready_bool = false
+			# populate agents with actions, as well as action_timeline
+			for agent in agent_children():
+				agent.agent_is_done.rpc(Agent.ActionDoneness.NOT_DONE)
+				server.append_action_timeline(agent)
+				agent.perform_action()
+			await get_tree().create_timer(0.10).timeout
+		Phases.RESOLUTION:
+			# create selectors and otherwise prepare for selection or completion
+			var server_team_dead = true
+			var client_team_dead = true
+			for ag in agent_children():
+				ag.action_done = Agent.ActionDoneness.NOT_DONE
+				ag.ungrabbable = false
+				if multiplayer.is_server():
+					server.set_agent_action.rpc(ag.name, [])
+				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
+					ui.create_agent_selector(ag)
+					ag.flash_outline(Color.ORCHID)
+				if ag.state != Agent.States.DEAD:
+					if ag.player_id == 1:
+						server_team_dead = false
+					else:
+						client_team_dead = false
+			if not server.player_has_won(server_team_dead, client_team_dead): # win conditions
+				ui.show_hud()
+				if ui.selectors.get_child_count() == 0 and server.check_incap:
+					ui._on_execute_pressed() # run execute since the player can't do anything
+				server.update_game_phase(Phases.SELECTION)
+			else:
+				server.update_game_phase(Phases.COMPLETION)
+		Phases.COMPLETION:
+			save_replay()
+			if multiplayer.is_server() and not server.sent_final_message:
+				server.create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
+				server.animate_fade.rpc()
+				server.sent_final_message = true
+			ui.pause_menu_phase.text = "EXIT"
+			ui.open_pause_menu()
+			ui.pause_menu_no.visible = false
+			ui.pause_menu_no.disabled = true
+
+
 func _physics_process(delta: float) -> void:
-	match server.game_phase:
-		server.GamePhases.SELECTION:
-			selection_phase(delta)
-		server.GamePhases.EXECUTION:
-			execution_phase(delta)
-		server.GamePhases.RESOLUTION:
-			resolution_step()
-		server.GamePhases.COMPLETION:
-			completion_phase(delta)
+	if phase == Phases.SELECTION:
+		selection_phase(delta)
+	if multiplayer.is_server():
+		match phase:
+			Phases.EXECUTION:
+				execution_phase(delta)
+			Phases.RESOLUTION:
+				resolution_step()
+			Phases.COMPLETION:
+				completion_phase(delta)
 
 
 @rpc("call_local")
@@ -445,9 +564,9 @@ func determine_weapon_events():
 
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = ui.pop_radial_menu_agent()
-	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)): # remove prev indicator
-		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
-		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
+	if indicators.get_node_or_null(String(ref_ag.name)): # remove prev indicator
+		indicators.get_node(String(ref_ag.name))._neutral()
+		indicators.get_node(String(ref_ag.name)).name += "_neutralling"
 	server.set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	var final_text_string := ""
@@ -501,16 +620,16 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = ui.pop_radial_menu_agent()
-	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
-		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
-		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
+	if indicators.get_node_or_null(String(ref_ag.name)):
+		indicators.get_node(String(ref_ag.name))._neutral()
+		indicators.get_node(String(ref_ag.name)).name += "_neutralling"
 	server.set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.MOVEMENT
 	var new_indicator = movement_icon_scene.instantiate()
 	new_indicator.referenced_agent = ref_ag
 	new_indicator.name = ref_ag.name
-	$ClientsideIndicators.add_child(new_indicator)
+	indicators.add_child(new_indicator)
 	await new_indicator.indicator_placed
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator.position)
@@ -535,16 +654,16 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	var ref_ag : Agent = ui.pop_radial_menu_agent()
-	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
-		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
-		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
+	if indicators.get_node_or_null(String(ref_ag.name)):
+		indicators.get_node(String(ref_ag.name))._neutral()
+		indicators.get_node(String(ref_ag.name)).name += "_neutralling"
 	server.set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.AIMING
 	var new_indicator = aiming_icon_scene.instantiate()
 	new_indicator.referenced_agent = ref_ag
 	new_indicator.name = ref_ag.name
-	$ClientsideIndicators.add_child(new_indicator)
+	indicators.add_child(new_indicator)
 	await new_indicator.indicator_placed
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator._indicator.global_position)
@@ -611,12 +730,12 @@ func check_full_team_exfil_or_dead():
 
 
 func player_quits(_peer_id):
-	if server.game_phase == server.GamePhases.COMPLETION or server.server_progress > server.ProgressParts.NO_ADVANTAGE or server.client_progress > server.ProgressParts.NO_ADVANTAGE:
+	if phase == Phases.COMPLETION or server.server_progress > server.ProgressParts.NO_ADVANTAGE or server.client_progress > server.ProgressParts.NO_ADVANTAGE:
 		return
 	server.create_toast_update(GameRefs.TXT.forfeit, GameRefs.TXT.forfeit, false)
 	$FadeOut/ColorRect/AnimatedSprite2D.play("victory")
 	ui.animate_fade(true)
-	server.update_game_phase(server.GamePhases.COMPLETION)
+	server.update_game_phase(Phases.COMPLETION)
 
 
 func _on_pickup_spawner_despawned(node: Node) -> void:
