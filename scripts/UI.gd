@@ -1,3 +1,4 @@
+class_name UI
 extends Node2D
 
 @onready var quick_views : HBoxContainer = $HUDBase/QuickViews
@@ -15,6 +16,8 @@ extends Node2D
 @onready var serv_prog : ProgressBar = $HUDBase/ProgressBarServer
 @onready var clie_prog : ProgressBar = $HUDBase/ProgressBarClient
 
+@onready var toasts : VBoxContainer = $HUDToasts/Toasts
+
 @onready var round_update : AudioStreamPlayer = $SoundEffects/RoundUpdate
 @onready var round_ended : AudioStreamPlayer = $SoundEffects/RoundEnded
 @onready var actions_submitted : AudioStreamPlayer = $SoundEffects/ActionsSubmitted
@@ -24,6 +27,13 @@ extends Node2D
 @onready var music_failure : AudioStreamPlayer = $Music/Failure
 
 @onready var gameover_anim : AnimatedSprite2D = $FadeOut/ColorRect/AnimatedSprite2D
+
+@onready var selectors : CanvasLayer = $HUDSelectors
+
+@onready var pause_menu : CanvasLayer = $PauseMenu
+@onready var pause_menu_yes : Button = $PauseMenu/ColorRect/VBoxContainer/YesForfeit
+@onready var pause_menu_no : Button = $PauseMenu/ColorRect/VBoxContainer/NoForfeit
+@onready var pause_menu_phase : Label = $PauseMenu/ColorRect/CurrentPhase
 
 var hud_agent_small_scene = preload("res://scenes/hud_agent_small.tscn")
 var popup_scene = preload("res://scenes/game_popup.tscn")
@@ -55,15 +65,15 @@ func _process(_d: float) -> void:
 func animate_fade(in_out := true):
 	var twe := create_tween()
 	if in_out:
-		twe.tween_property($FadeOut/ColorRect, "modulate", Color.WHITE, 1.5).from(Color.TRANSPARENT)
+		twe.tween_property(fadeout_rect, "modulate", Color.WHITE, 1.5).from(Color.TRANSPARENT)
 	else:
-		twe.tween_property($FadeOut/ColorRect, "modulate", Color.TRANSPARENT, 1.5).from(Color.WHITE)
+		twe.tween_property(fadeout_rect, "modulate", Color.TRANSPARENT, 1.5).from(Color.WHITE)
 
 func create_toast(text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
 	var new_toast : ToastMessage = toast_scene.instantiate()
 	new_toast.input_text = text
 	new_toast.color = color
-	$HUDToasts/Toasts.add_child(new_toast)
+	toasts.add_child(new_toast)
 	if add_sound_effect:
 		round_update.play()
 		pass
@@ -71,16 +81,16 @@ func create_toast(text : String, add_sound_effect : bool, color := Color(0.565, 
 
 
 func open_pause_menu():
-	if not $PauseMenu.visible:
-		$PauseMenu/ColorRect/VBoxContainer/YesForfeit.disabled = false
-		$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = false
-		$PauseMenu.visible = true
+	if not pause_menu.visible:
+		pause_menu_yes.disabled = false
+		pause_menu_no.disabled = false
+		pause_menu.visible = true
 
 
 func close_pause_menu():
-	$PauseMenu/ColorRect/VBoxContainer/YesForfeit.disabled = true
-	$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
-	$PauseMenu.visible = false
+	pause_menu_yes.disabled = true
+	pause_menu_no.disabled = true
+	pause_menu.visible = false
 
 
 func create_small_hud(data, new_agent):
@@ -93,7 +103,7 @@ func create_small_hud(data, new_agent):
 
 func update_text() -> void:
 	ag_insts.text = ""
-	for agent in ($Agents.get_children() as Array[Agent]):
+	for agent in game.agent_children():
 		if agent.is_multiplayer_authority():
 			ag_insts.text += agent.action_text + "\n"
 
@@ -110,13 +120,13 @@ func pop_radial_menu_agent() -> Agent:
 
 func create_agent_selector(agent : Agent):
 	# check if selector already exists
-	for s in ($HUDSelectors.get_children() as Array[AgentSelector]):
+	for s in (selectors.get_children() as Array[AgentSelector]):
 		if s.referenced_agent == agent:
 			return
 	var new_selector = agent_selector_scene.instantiate()
 	new_selector.referenced_agent = agent
 	new_selector.agent_selected.connect(_hud_agent_details_actions)
-	$HUDSelectors.add_child(new_selector)
+	selectors.add_child(new_selector)
 
 
 func _hud_agent_details_actions(agent_selector : AgentSelector):
@@ -131,7 +141,7 @@ func _hud_agent_details_actions(agent_selector : AgentSelector):
 		print(multiplayer.get_unique_id(), ": agent is knocked out with no eyes on them")
 		return
 	agent.flash_outline(Color.AQUA)
-	for small_hud in ($HUDBase/QuickViews.get_children()):
+	for small_hud in (quick_views.get_children()):
 		if small_hud.ref_ag == agent:
 			small_hud.flash = 1.0
 	radial_menu.referenced_agent = agent
@@ -171,7 +181,7 @@ func _on_execute_pressed() -> void:
 	actions_submitted.play()
 	execute_button.disabled = true
 	execute_button.text = "WAITING FOR OPPONENT"
-	for selector in $HUDSelectors.get_children():
+	for selector in selectors.get_children():
 		selector.queue_free()
 	radial_menu.button_collapse_animation()
 	hide_hud()
