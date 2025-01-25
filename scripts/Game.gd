@@ -101,14 +101,13 @@ func determine_sounds():
 			continue # incapped agents are deaf
 		for audio_effect_position in agent.listen():
 			create_popup(GameRefs.POPUP.sound_unknown, audio_effect_position)
-		if multiplayer.is_server():
-			match agent.state:
-				Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
-					server.create_sound_effect.rpc(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
-				Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
-					server.create_sound_effect.rpc(agent.position, agent.player_id, 13, 1.5, 2.75, "ag_step_loud")
-				Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
-					server.create_sound_effect.rpc(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
+		match agent.state:
+			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
+				server.create_sound_effect.rpc(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
+			Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
+				server.create_sound_effect.rpc(agent.position, agent.player_id, 13, 1.5, 2.75, "ag_step_loud")
+			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
+				server.create_sound_effect.rpc(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
 		audio_event.update()
 
@@ -151,13 +150,11 @@ func execution_phase(delta : float):
 		if current_game_step - agent.step_seen == REMEMBER_TILL and agent.visible:
 			if agent.player_id == 1:
 				server.set_agent_client_visibility.rpc(agent.name, false)
-				if not multiplayer.is_server():
-					create_popup(GameRefs.POPUP.sight_unknown, agent.position)
+				create_popup(GameRefs.POPUP.sight_unknown, agent.position)
 			else:
 				server.set_agent_server_visibility.rpc(agent.name, false)
-				if multiplayer.is_server():
-					create_popup(GameRefs.POPUP.sight_unknown, agent.position)
-		if len(agent.mark_for_drop) > 0 and multiplayer.is_server():
+				create_popup(GameRefs.POPUP.sight_unknown, agent.position)
+		if len(agent.mark_for_drop) > 0:
 			var new_drop = {
 				pos_x = agent.mark_for_drop.position.x,
 				pos_y = agent.mark_for_drop.position.y,
@@ -168,14 +165,13 @@ func execution_phase(delta : float):
 			}
 			server.pickup_spawner.spawn(new_drop)
 			#agent.held_weapons.erase(agent.mark_for_drop.wep_node)
-			if multiplayer.is_server():
-				server.remove_weapon_from_agent.rpc(agent.name, agent.mark_for_drop.wep_node)
+			server.remove_weapon_from_agent.rpc(agent.name, agent.mark_for_drop.wep_node)
 			agent.mark_for_drop.clear()
-		if multiplayer.is_server() and agent.try_grab_pickup and len(agent.queued_action) > 1:
+		if agent.try_grab_pickup and len(agent.queued_action) > 1:
 			if pickups.get_node_or_null(str(agent.queued_action[1])) != null:
 				pickups.get_node(str(agent.queued_action[1])).queue_free()
 			agent.try_grab_pickup = false
-		if multiplayer.is_server() and agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
+		if agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
 			var new_drop = {
 				pos_x = agent.global_position.x + (randf() - 0.5),
 				pos_y = agent.global_position.y,
@@ -186,7 +182,7 @@ func execution_phase(delta : float):
 			}
 			server.pickup_spawner.spawn(new_drop)
 			server.remove_weapon_from_agent.rpc(agent.name, new_drop.wep_name)
-		if multiplayer.is_server() and agent.mark_for_grenade_throw:
+		if agent.mark_for_grenade_throw:
 			var try_name = agent.held_weapons[agent.selected_weapon]
 			while try_name in server.grenades_in_existence:
 				try_name += "N"
@@ -214,11 +210,9 @@ func execution_phase(delta : float):
 						var attacked : Agent = exploded.get_parent()
 						if attacked.in_prone_state():
 							continue # prone agents dodge explosions for Reasons™
-						if multiplayer.is_server():
-							server.damage_agent.rpc(attacked.name, 2, false)
-							server.create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
-					if multiplayer.is_server():
-						server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
+						server.damage_agent.rpc(attacked.name, 2, false)
+						server.create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
+					server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
 				"grenade_smoke":
 					server.smoke_spawner.spawn({
 						pos_x = grenade.position.x,
@@ -226,32 +220,26 @@ func execution_phase(delta : float):
 						pos_z = grenade.position.z,
 						wep_name = grenade.name,
 					})
-					if multiplayer.is_server():
-						server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
+					server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
 				"grenade_noise":
-					if multiplayer.is_server():
-						server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
-			if multiplayer.is_server():
-				server.grenades_in_existence.erase(grenade.name)
-				grenade.queue_free()
+					server.create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
+			server.grenades_in_existence.erase(grenade.name)
+			grenade.queue_free()
 	for smoke in (smokes.get_children() as Array[Smoke]):
 		smoke._tick()
 		for caught in smoke.col_area.get_overlapping_areas():
 			caught.get_parent().in_smoke = true
-		if multiplayer.is_server() and smoke.lifetime > 205:
-			smoke.queue_free()
+		smoke.queue_free()
 	for pickup in (pickups.get_children() as Array[WeaponPickup]):
 		pickup._animate(delta)
-	#if multiplayer.is_server():
 	current_game_step += 1
 	determine_sights()
 	determine_sounds()
 	determine_indicator_removals()
-	if multiplayer.is_server():
-		for agent in agent_children():
-			if agent.action_done == Agent.ActionDoneness.NOT_DONE:
-				return
-		server.update_game_phase.rpc(Phases.SELECTION)
+	for agent in agent_children():
+		if agent.action_done == Agent.ActionDoneness.NOT_DONE:
+			return
+	server.update_game_phase.rpc(Phases.SELECTION)
 
 
 func resolution_step(): #TODO
@@ -282,55 +270,55 @@ func transition_phase():
 			ui.phase_label.text = "SELECT ACTIONS"
 			ui.execute_button.disabled = false
 			ui.execute_button.text = "EXECUTE INSTRUCTIONS"
-			if multiplayer.is_server(): # update exfiltrations
-				if server.server_progress == server.ProgressParts.ITEM_HELD:
-					var can_exfil = false
-					for detect in server.game_map.server_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						for weap in actual_agent.held_weapons:
-							if (weap as String).begins_with("map_"):
-								can_exfil = true
-								break
-						if can_exfil:
+			# update exfiltrations
+			if server.server_progress == server.ProgressParts.ITEM_HELD:
+				var can_exfil = false
+				for detect in server.game_map.server_exfiltrate_zone.get_overlapping_areas():
+					var actual_agent : Agent = detect.get_parent()
+					if actual_agent.state == Agent.States.DEAD:
+						continue
+					for weap in actual_agent.held_weapons:
+						if (weap as String).begins_with("map_"):
+							can_exfil = true
 							break
 					if can_exfil:
-						for detect in server.game_map.server_exfiltrate_zone.get_overlapping_areas():
-							var actual_agent : Agent = detect.get_parent()
-							if actual_agent.state == Agent.States.DEAD:
-								continue
-							server.exfiltration_queue.append(actual_agent.name)
-				elif server.server_progress == server.ProgressParts.OBJECTIVE_COMPLETE:
+						break
+				if can_exfil:
 					for detect in server.game_map.server_exfiltrate_zone.get_overlapping_areas():
 						var actual_agent : Agent = detect.get_parent()
 						if actual_agent.state == Agent.States.DEAD:
 							continue
 						server.exfiltration_queue.append(actual_agent.name)
-				if server.client_progress == server.ProgressParts.ITEM_HELD:
-					var can_exfil = false
-					for detect in server.game_map.client_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						for weap in actual_agent.held_weapons:
-							if (weap as String).begins_with("map_"):
-								can_exfil = true
-								break
-						if can_exfil:
+			elif server.server_progress == server.ProgressParts.OBJECTIVE_COMPLETE:
+				for detect in server.game_map.server_exfiltrate_zone.get_overlapping_areas():
+					var actual_agent : Agent = detect.get_parent()
+					if actual_agent.state == Agent.States.DEAD:
+						continue
+					server.exfiltration_queue.append(actual_agent.name)
+			if server.client_progress == server.ProgressParts.ITEM_HELD:
+				var can_exfil = false
+				for detect in server.game_map.client_exfiltrate_zone.get_overlapping_areas():
+					var actual_agent : Agent = detect.get_parent()
+					if actual_agent.state == Agent.States.DEAD:
+						continue
+					for weap in actual_agent.held_weapons:
+						if (weap as String).begins_with("map_"):
+							can_exfil = true
 							break
 					if can_exfil:
-						for detect in server.game_map.client_exfiltrate_zone.get_overlapping_areas():
-							var actual_agent : Agent = detect.get_parent()
-							if actual_agent.state == Agent.States.DEAD:
-								continue
-							server.exfiltration_queue.append(actual_agent.name)
-				elif server.client_progress == server.ProgressParts.OBJECTIVE_COMPLETE:
+						break
+				if can_exfil:
 					for detect in server.game_map.client_exfiltrate_zone.get_overlapping_areas():
 						var actual_agent : Agent = detect.get_parent()
 						if actual_agent.state == Agent.States.DEAD:
 							continue
 						server.exfiltration_queue.append(actual_agent.name)
+			elif server.client_progress == server.ProgressParts.OBJECTIVE_COMPLETE:
+				for detect in server.game_map.client_exfiltrate_zone.get_overlapping_areas():
+					var actual_agent : Agent = detect.get_parent()
+					if actual_agent.state == Agent.States.DEAD:
+						continue
+					server.exfiltration_queue.append(actual_agent.name)
 			for agent_name in server.exfiltration_queue:
 				($Agents.get_node(str(agent_name)) as Agent).exfiltrate()
 			server.track_objective_completion() # objective based updates here
@@ -355,8 +343,7 @@ func transition_phase():
 			for ag in agent_children():
 				ag.action_done = Agent.ActionDoneness.NOT_DONE
 				ag.ungrabbable = false
-				if multiplayer.is_server():
-					server.set_agent_action.rpc(ag.name, [])
+				server.set_agent_action.rpc(ag.name, [])
 				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
 					ui.create_agent_selector(ag)
 					ag.flash_outline(Color.ORCHID)
@@ -374,7 +361,7 @@ func transition_phase():
 				server.update_game_phase(Phases.COMPLETION)
 		Phases.COMPLETION:
 			save_replay()
-			if multiplayer.is_server() and not server.sent_final_message:
+			if not server.sent_final_message:
 				server.create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
 				server.animate_fade.rpc()
 				server.sent_final_message = true
@@ -385,9 +372,9 @@ func transition_phase():
 
 
 func _physics_process(delta: float) -> void:
-	if phase == Phases.SELECTION:
+	if phase == Phases.SELECTION: # Server and Client can do things here
 		selection_phase(delta)
-	if multiplayer.is_server():
+	if multiplayer.is_server(): # Server only handles this
 		match phase:
 			Phases.EXECUTION:
 				execution_phase(delta)
@@ -441,8 +428,7 @@ func determine_cqc_events():
 			continue
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
-		if multiplayer.is_server():
-			server.damage_agent.rpc(grabbee.name, 3, true)
+		server.damage_agent.rpc(grabbee.name, 3, true)
 		grabbee.step_seen = current_game_step
 
 func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
@@ -457,30 +443,25 @@ func determine_weapon_events():
 		match GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).wep_id:
 			"pistol":
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
-				if multiplayer.is_server():
-					server.create_sound_effect.rpc(agent.position, agent.player_id, 10, 0.25, 0.5, "pistol")
+				server.create_sound_effect.rpc(agent.position, agent.player_id, 10, 0.25, 0.5, "pistol")
 			"rifle":
 				attackers[agent] = [return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 0.2)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -0.2)),]
-				if multiplayer.is_server():
-					server.create_sound_effect.rpc(agent.position, agent.player_id, 10, 0.5, 1.5, "rifle")
+				server.create_sound_effect.rpc(agent.position, agent.player_id, 10, 0.5, 1.5, "rifle")
 			"shotgun":
 				attackers[agent] = [
 					return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 1.0)),
 					return_attacked(agent, agent.queued_action[1]),
 					return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)),
 					]
-				if multiplayer.is_server():
-					server.create_sound_effect.rpc(agent.position, agent.player_id, 15, 2.25, 3.5, "shotgun")
+				server.create_sound_effect.rpc(agent.position, agent.player_id, 15, 2.25, 3.5, "shotgun")
 	for attacker in (attackers.keys() as Array[Agent]):
 		attacker.state = Agent.States.USING_WEAPON
 		for hit in attackers[attacker]:
 			if hit[0] == null: # hit a wall, make a sound event on the wall
-				if multiplayer.is_server():
-					server.create_sound_effect.rpc(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
+				server.create_sound_effect.rpc(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
 			else:
 				if not (hit[0] as Area3D).get_parent() is Agent: # still hit a wall
-					if multiplayer.is_server():
-						server.create_sound_effect.rpc(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
+					server.create_sound_effect.rpc(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
 				else: # actually hit an agent
 					var attacked : Agent = (hit[0] as Area3D).get_parent()
 					if attacker.player_id == attacked.player_id:
@@ -489,9 +470,8 @@ func determine_weapon_events():
 						continue # skip already attacked agents
 					if attacked.in_prone_state() or attacked.state == Agent.States.DEAD:
 						continue # skip prone agents
-					if multiplayer.is_server():
-						server.damage_agent.rpc(attacked.name, GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"), false)
-						server.create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
+					server.damage_agent.rpc(attacked.name, GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"), false)
+					server.create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 
 
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
