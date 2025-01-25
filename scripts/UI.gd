@@ -9,7 +9,8 @@ extends Node2D
 @onready var hurry_up : Label = $HUDBase/HurryUp
 
 @onready var fadeout_base = $FadeOut
-@onready var fadeout_rect = $FadeOut/ColorRect
+@onready var fadeout_rect : ColorRect = $FadeOut/ColorRect
+@onready var fadeout_sprite : AnimatedSprite2D = $FadeOut/ColorRect/AnimatedSprite2D
 
 @onready var serv_name : Label = $HUDBase/ServerPlayerName
 @onready var clie_name : Label = $HUDBase/ClientPlayerName
@@ -167,10 +168,6 @@ func show_hud():
 	twe.tween_property(execute_button, "position:y", 825, 0.25).from(970)
 	#twe.tween_property(_quick_views, "position:y", 712, 0.25).from(920)
 	twe.tween_property(ag_insts, "position:x", 1059, 0.25).from(1638)
-
-
-func show_hurryup():
-	pass
 
 
 func _on_no_forfeit_pressed() -> void:
