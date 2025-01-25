@@ -74,98 +74,33 @@ func determine_sights():
 			continue
 		if agent.in_smoke:
 			continue
-		for detected in agent._eyes.get_overlapping_areas():
-			var par = detected.get_parent()
-			if par is Agent:
-				if agent == par: # of course you can see yourself
-					continue
-				try_see_agent(agent, par)
-			else:
-				try_see_element(agent, par)
-
-
-const l_10 = log(10)
-
-func log10(x: float) -> float:
-	return log(x) / l_10
-
-
-func calculate_sight_chance(spotter : Agent, spottee_pos : Vector3, visible_level : int) -> float:
-	var dist = clampf(
-		remap(spotter.position.distance_to(spottee_pos), 0.0, spotter.view_dist, 0.0, 1.0),
-		0.0, 1.0)
-	var exponent = ((1.5 * dist)/(log10(visible_level)))
-	var inv_eye = 1.0/spotter.eye_strength
-	return maxf(1.0/(inv_eye**exponent), 0.01)
-
-
-func try_see_agent(spotter : Agent, spottee : Agent):
-	if spotter.player_id == spottee.player_id: # skip your team
-		return
-	var instant_spot = false
-	var instant_fail = false
-	if spottee.selected_item > -1 and spottee.held_items[spottee.selected_item] == "box":
-		if spottee.in_moving_state():
-			instant_spot = true
-		else:
-			instant_fail = true
-	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level) * float(not instant_fail)
-	if sight_chance > 0.7 or instant_spot: # seent it
-		if server.current_game_step - spottee.step_seen < server.REMEMBER_TILL and spottee.step_seen > 0:
-			server.set_agent_step_seen.rpc(spottee.name, server.current_game_step)
-			return
-		server.set_agent_step_seen.rpc(spottee.name, server.current_game_step)
-		if spotter.player_id == 1:
-			server.set_agent_server_visibility.rpc(spottee.name, true)
-		else:
-			server.set_agent_client_visibility.rpc(spottee.name, true)
-		create_popup(GameRefs.POPUP.spotted, spottee.position, true)
-		if spotter.player_id != spottee.player_id:
-			spotter.sounds.spotted_agent.play()
-	elif sight_chance > 1.0/3.0: # almost seent it
-		if spottee.noticed > 0:
-			return
-		server.set_agent_notice.rpc(spottee.name, 10)
-		var p_offset = -0.1/sight_chance
-		var x_off = randf_range(-p_offset, p_offset)
-		var z_off = randf_range(-p_offset, p_offset)
-		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(x_off, 0, z_off))
-		spotter.sounds.glanced.play()
-
-
-func try_see_element(spotter : Agent, element : Node3D):
-	if element is GamePopup:
-		if calculate_sight_chance(spotter, element.global_position, 120) > 0.25:
-			element.disappear()
-	elif element is WeaponPickup:
-		if spotter.player_id == 1 and element.server_knows != true:
-			element.server_knows = true
-			spotter.sounds.spotted_element.play()
-		elif spotter.player_id != 1 and element.client_knows != true:
-			element.client_knows = true
-	elif element is Grenade:
-		if spotter.player_id == 1 and element.server_knows != true:
-			element.server_knows = true
-			spotter.sounds.spotted_agent.play()
-		elif spotter.player_id != 1 and element.client_knows != true:
-			element.client_knows = true
-	else:
-		element.visible = true
-		spotter.sounds.spotted_element.play()
+		var res_arr = agent.look(current_game_step)
+		for res in res_arr as Array[Agent.AgentSightResult]:
+			if res.spotted_agent:
+				if res.spotted_position: # spotted agent was only noticed
+					server.set_agent_notice.rpc(res.spotted_agent.name, 10)
+					create_popup(GameRefs.POPUP.sight_unknown, res.spotted_position)
+				else: # spotted agent was fully seen
+					if current_game_step - res.spotted_agent.step_seen < REMEMBER_TILL and res.spotted_agent.step_seen > 0:
+						server.set_agent_step_seen.rpc(res.spotted_agent.name, current_game_step)
+						continue
+					else:
+						server.set_agent_step_seen.rpc(res.spotted_agent.name, current_game_step)
+						if agent.player_id == 1:
+							server.set_agent_server_visibility.rpc(res.spotted_agent.name, true)
+						else:
+							server.set_agent_client_visibility.rpc(res.spotted_agent.name, true)
+						create_popup(GameRefs.POPUP.spotted, res.spotted_agent.position, true)
+			else: # spotted agent went unseen completely, disregard
+				continue
 
 
 func determine_sounds():
 	for agent in agent_children():
 		if agent.in_incapacitated_state():
 			continue # incapped agents are deaf
-		for detected in agent._ears.get_overlapping_areas():
-			var audio_event : GameAudioEvent = detected.get_parent()
-			if agent.player_id == audio_event.player_id:
-				continue # skip same team sources
-			if audio_event.heard:
-				continue # skip already heard sounds
-			create_popup(GameRefs.POPUP.sound_unknown, audio_event.global_position)
-			audio_event.play_sound()
+		for audio_effect_position in agent.listen():
+			create_popup(GameRefs.POPUP.sound_unknown, audio_effect_position)
 		if multiplayer.is_server():
 			match agent.state:
 				Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:

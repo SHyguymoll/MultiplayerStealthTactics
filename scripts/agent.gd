@@ -356,20 +356,102 @@ func _physics_process(_d: float) -> void:
 	$AgentIsDead.visible = state == States.DEAD
 
 
-func calculate_sight_chance(): #TODO
-	pass
+const l_10 = log(10)
+
+func log10(x: float) -> float:
+	return log(x) / l_10
+
+func calculate_sight_chance(pos: Vector3, vis_lvl: int): #TODO
+	var dist = clampf(
+		remap(position.distance_to(pos), 0.0, view_dist, 0.0, 1.0),
+		0.0, 1.0)
+	var exponent = ((1.5 * dist)/(log10(visible_level)))
+	var inv_eye = 1.0/eye_strength
+	return maxf(1.0/(inv_eye**exponent), 0.01)
 
 
-func try_see(): #TODO
-	pass
+class AgentSightResult:
+	var spotted_agent : Agent
+	var spotted_position : Vector3 # only set if spottee was just noticed, not seen
 
 
-func look(): #TODO
-	pass
+func try_spot_agent(spottee: Agent, cur_game_step : int) -> AgentSightResult:
+	if player_id == spottee.player_id: # skip your team
+		return
+	var instant_spot = false
+	var instant_fail = false
+	if spottee.selected_item > -1 and spottee.held_items[spottee.selected_item] == "box":
+		if spottee.in_moving_state():
+			instant_spot = true
+		else:
+			instant_fail = true
+	var sight_chance = calculate_sight_chance(spottee.position, spottee.visible_level) * float(not instant_fail)
+	if sight_chance > 0.7 or instant_spot: # seent it
+		var sight_res = AgentSightResult.new()
+		sight_res.spotted_agent = spottee
+		sounds.spotted_agent.play()
+		return sight_res
+	elif sight_chance > 1.0/3.0: # almost seent it
+		if spottee.noticed > 0:
+			return
+		var sight_res = AgentSightResult.new()
+		sight_res.spotted_agent = spottee
+		var p_offset = -0.1/sight_chance
+		var x_off = randf_range(-p_offset, p_offset)
+		var z_off = randf_range(-p_offset, p_offset)
+		sight_res.spotted_position = spottee.position + Vector3(x_off, 0, z_off)
+		sounds.glanced.play()
+		return sight_res
+	else: # didn't seent it
+		return null
+
+
+func try_spot_element(element : Node3D): #TODO
+	if element is GamePopup:
+		if calculate_sight_chance(element.global_position, 120) > 0.25:
+			element.disappear()
+	elif element is WeaponPickup:
+		if player_id == 1 and element.server_knows != true:
+			element.server_knows = true
+			sounds.spotted_element.play()
+		elif player_id != 1 and element.client_knows != true:
+			element.client_knows = true
+	elif element is Grenade:
+		if player_id == 1 and element.server_knows != true:
+			element.server_knows = true
+			sounds.spotted_agent.play()
+		elif player_id != 1 and element.client_knows != true:
+			element.client_knows = true
+	else:
+		element.visible = true
+		sounds.spotted_element.play()
+
+
+func look(cur_game_step: int) -> Array[AgentSightResult]:
+	var asr_arr = []
+	for detected in _eyes.get_overlapping_areas():
+		var par = detected.get_parent()
+		if par is Agent:
+			if self == par: # of course you can see yourself
+				continue
+			asr_arr.append(try_spot_agent(par, cur_game_step))
+		else:
+			try_spot_element(par)
+	return asr_arr
 
 
 func listen(): #TODO
-	pass
+	var heard_positions = []
+	for detected in _ears.get_overlapping_areas():
+		var audio_event : GameAudioEvent = detected.get_parent()
+		if player_id == audio_event.player_id:
+			continue # skip same team sources
+		if audio_event.heard:
+			continue # skip already heard sounds
+
+		audio_event.play_sound()
+		heard_positions.append(audio_event.global_position)
+	return heard_positions
 
 
 func should_be_visible():
