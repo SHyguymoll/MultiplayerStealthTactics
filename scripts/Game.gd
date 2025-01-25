@@ -67,6 +67,10 @@ func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = fal
 func agent_children() -> Array[Agent]:
 	return agents.get_children() as Array[Agent]
 
+func append_action_timeline(agent : Agent):
+	if not action_timeline.has(current_game_step):
+		action_timeline[current_game_step] = {}
+	action_timeline[current_game_step][agent.name] = agent.queued_action
 
 func determine_sights():
 	for agent in agent_children():
