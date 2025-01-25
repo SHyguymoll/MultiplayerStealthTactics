@@ -375,7 +375,7 @@ class AgentSightResult:
 	var spotted_position : Vector3 # only set if spottee was just noticed, not seen
 
 
-func try_spot_agent(spottee: Agent, cur_game_step : int) -> AgentSightResult:
+func try_spot_agent(spottee: Agent) -> AgentSightResult:
 	if player_id == spottee.player_id: # skip your team
 		return
 	var instant_spot = false
@@ -427,14 +427,14 @@ func try_spot_element(element : Node3D): #TODO
 		sounds.spotted_element.play()
 
 
-func look(cur_game_step: int) -> Array[AgentSightResult]:
-	var asr_arr = []
+func look() -> Array[AgentSightResult]:
+	var asr_arr : Array[AgentSightResult] = []
 	for detected in _eyes.get_overlapping_areas():
 		var par = detected.get_parent()
 		if par is Agent:
 			if self == par: # of course you can see yourself
 				continue
-			asr_arr.append(try_spot_agent(par, cur_game_step))
+			asr_arr.append(try_spot_agent(par))
 		else:
 			try_spot_element(par)
 	return asr_arr

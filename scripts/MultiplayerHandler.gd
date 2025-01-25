@@ -18,7 +18,7 @@ var audio_event_scene = preload("res://scenes/game_audio_event.tscn")
 
 # Other things needed to initialize and handle a game
 @onready var load_timer : Timer = $"../MultiplayerLoadTimer"
-
+@onready var cold_boot_timer : Timer = $"../ColdBootTimer"
 
 
 var start_time : String
@@ -81,7 +81,7 @@ func player_quits(_peer_id):
 	if game.phase == Game.Phases.COMPLETION or server_progress > ProgressParts.NO_ADVANTAGE or client_progress > ProgressParts.NO_ADVANTAGE:
 		return
 	create_toast_update(GameRefs.TXT.forfeit, GameRefs.TXT.forfeit, false)
-	$FadeOut/ColorRect/AnimatedSprite2D.play("victory")
+	ui.fadeout_sprite.play("victory")
 	ui.animate_fade(true)
 	update_game_phase(Game.Phases.COMPLETION)
 
@@ -92,10 +92,10 @@ func ping():
 
 
 func start_game():
-	await ($MultiplayerLoadTimer as Timer).timeout # wait for client to load in
+	await load_timer.timeout # wait for client to load in
 	ping.rpc()
 	init_game()
-	($ColdBootTimer as Timer).start()
+	cold_boot_timer.start()
 
 
 func init_game(): #TODO
@@ -331,7 +331,6 @@ func create_pickup(data) -> WeaponPickup:
 
 @rpc("authority", "call_local", "reliable")
 func create_sound_effect(location : Vector3, player_id : int, lifetime : int, _min_rad : float, max_rad : float, sound_id : String) -> void:
-	ui.create_sound_effect()
 	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
 	new_audio_event.position = location
 	new_audio_event.player_id = player_id
@@ -339,7 +338,7 @@ func create_sound_effect(location : Vector3, player_id : int, lifetime : int, _m
 	new_audio_event.lifetime = lifetime
 	new_audio_event.max_lifetime = lifetime
 	new_audio_event.selected_audio = sound_id
-	$AudioEvents.add_child(new_audio_event)
+	game.audio_events.add_child(new_audio_event)
 
 
 @rpc("authority", "call_local")
@@ -503,33 +502,33 @@ func update_game_phase(new_phase: Game.Phases, check_incap := true):
 
 @rpc("any_peer", "call_local", "reliable")
 func remove_weapon_from_agent(agent_name : String, weapon_name : String):
-	$Agents.get_node(agent_name).held_weapons.erase(weapon_name)
+	game.agents.get_node(agent_name).held_weapons.erase(weapon_name)
 
 
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_action(agent_name : String, action : Array):
-	$Agents.get_node(agent_name).queued_action = action
+	game.agents.get_node(agent_name).queued_action = action
 
 
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_notice(agent_name : String, new_noticed : int):
-	$Agents.get_node(agent_name).noticed = new_noticed
+	game.agents.get_node(agent_name).noticed = new_noticed
 
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_step_seen(agent_name : String, new_step_seen : int):
-	$Agents.get_node(agent_name).step_seen = new_step_seen
+	game.agents.get_node(agent_name).step_seen = new_step_seen
 
 
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_server_visibility(agent_name : String, visibility : bool):
-	$Agents.get_node(agent_name).server_knows = visibility
+	game.agents.get_node(agent_name).server_knows = visibility
 
 
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_client_visibility(agent_name : String, visibility : bool):
-	$Agents.get_node(agent_name).client_knows = visibility
+	game.agents.get_node(agent_name).client_knows = visibility
 
 
 @rpc("authority", "call_local", "reliable")
 func damage_agent(agent_name : String, damage_amt : int, stun : bool):
-	($Agents.get_node(agent_name) as Agent).take_damage(damage_amt, stun)
+	(game.agents.get_node(agent_name) as Agent).take_damage(damage_amt, stun)

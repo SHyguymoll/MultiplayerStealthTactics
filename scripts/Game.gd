@@ -41,6 +41,9 @@ enum Phases {
 @onready var smokes : Node3D = $Smokes
 @onready var indicators : Node3D = $ClientsideIndicators
 
+@onready var popups : Node3D = $Popups
+@onready var audio_events : Node3D = $AudioEvents
+
 func start_game(): # Called only on the server.
 	server.start_game()
 
@@ -59,13 +62,19 @@ func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = fal
 	var new_popup : GamePopup = popup_scene.instantiate()
 	new_popup.texture = texture
 	new_popup.position = location
-	$Popups.add_child(new_popup)
+	popups.add_child(new_popup)
 	if fleeting:
 		new_popup.disappear()
 
 
-func agent_children() -> Array[Agent]:
-	return agents.get_children() as Array[Agent]
+func agent_children() -> Array:
+	return agents.get_children()
+
+
+func append_action_timeline(agent : Agent):
+	if not action_timeline.has(current_game_step):
+		action_timeline[current_game_step] = {}
+	action_timeline[current_game_step][agent.name] = agent.queued_action
 
 
 func determine_sights():
@@ -74,7 +83,7 @@ func determine_sights():
 			continue
 		if agent.in_smoke:
 			continue
-		var res_arr = agent.look(current_game_step)
+		var res_arr = agent.look()
 		for res in res_arr as Array[Agent.AgentSightResult]:
 			if res.spotted_agent:
 				if res.spotted_position: # spotted agent was only noticed
@@ -109,7 +118,7 @@ func determine_sounds():
 					server.create_sound_effect.rpc(agent.position, agent.player_id, 13, 1.5, 2.75, "ag_step_loud")
 				Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
 					server.create_sound_effect.rpc(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
-	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
+	for audio_event in (audio_events.get_children() as Array[GameAudioEvent]):
 		audio_event.update()
 
 
@@ -124,9 +133,9 @@ func determine_indicator_removals():
 
 
 func verify_game_completeness() -> bool:
-	for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
+	for selector in ui.selectors.get_children() as Array[AgentSelector]:
 		if selector.referenced_agent == null: # the only case where the agent is null is the one where the node was destroyed by the server disconnecting
-			for selector_to_free in $HUDSelectors.get_children() as Array[AgentSelector]:
+			for selector_to_free in ui.selectors.get_children() as Array[AgentSelector]:
 				selector_to_free.queue_free()
 			return true
 	return false
@@ -136,7 +145,7 @@ func selection_phase(delta : float):
 	if verify_game_completeness():
 		server._update_game_phase(Phases.COMPLETION)
 		return
-	for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
+	for selector in ui.selectors.get_children() as Array[AgentSelector]:
 		selector.position = camera.unproject_position(
 			selector.referenced_agent.position)
 		selector.collide.shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/camera.fov
@@ -332,10 +341,10 @@ func transition_phase():
 							continue
 						server.exfiltration_queue.append(actual_agent.name)
 			for agent_name in server.exfiltration_queue:
-				($Agents.get_node(str(agent_name)) as Agent).exfiltrate()
+				(agents.get_node(str(agent_name)) as Agent).exfiltrate()
 			server.track_objective_completion() # objective based updates here
 		Phases.EXECUTION:
-			$HUDBase/HurryUp.visible = false
+			ui.hurry_up.visible = false
 			for agent in agent_children():
 				agent.action_text = ""
 			ui.update_text()
@@ -345,7 +354,7 @@ func transition_phase():
 			# populate agents with actions, as well as action_timeline
 			for agent in agent_children():
 				agent.agent_is_done.rpc(Agent.ActionDoneness.NOT_DONE)
-				server.append_action_timeline(agent)
+				append_action_timeline(agent)
 				agent.perform_action()
 			await get_tree().create_timer(0.10).timeout
 		Phases.RESOLUTION:
@@ -543,8 +552,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Crawling"
 		null:
 			ref_ag.queued_action = []
-	if ref_ag.is_multiplayer_authority():
-		ref_ag.action_text = final_text_string
+	ref_ag.action_text = final_text_string
 	ui.update_text()
 	ui.execute_button.visible = true
 	ui.execute_button.disabled = false
@@ -659,15 +667,6 @@ func check_full_team_exfil_or_dead():
 		if ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
 			count -= 1
 	return count == 0
-
-
-func player_quits(_peer_id):
-	if phase == Phases.COMPLETION or server.server_progress > server.ProgressParts.NO_ADVANTAGE or server.client_progress > server.ProgressParts.NO_ADVANTAGE:
-		return
-	server.create_toast_update(GameRefs.TXT.forfeit, GameRefs.TXT.forfeit, false)
-	$FadeOut/ColorRect/AnimatedSprite2D.play("victory")
-	ui.animate_fade(true)
-	server.update_game_phase(Phases.COMPLETION)
 
 
 func _on_pickup_spawner_despawned(node: Node) -> void:
