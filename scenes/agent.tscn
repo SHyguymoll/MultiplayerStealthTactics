@@ -1,7 +1,8 @@
-[gd_scene load_steps=88 format=3 uid="uid://oitco668lkwj"]
+[gd_scene load_steps=89 format=3 uid="uid://oitco668lkwj"]
 
 [ext_resource type="Script" path="res://scripts/agent.gd" id="1_qe0u1"]
 [ext_resource type="PackedScene" uid="uid://c2d2uqv4wgbv7" path="res://assets/models/exports/Agent.gltf" id="2_bu3bb"]
+[ext_resource type="Script" path="res://scripts/agent_anim_tree.gd" id="4_ierty"]
 [ext_resource type="Texture2D" uid="uid://cwqah8mx0lopn" path="res://assets/sprites/hud_agent_small/items/analyzer.png" id="4_k5gu7"]
 [ext_resource type="Texture2D" uid="uid://bdnyhebpqwdr6" path="res://assets/sprites/game_popups/spotted.png" id="5_ciyir"]
 [ext_resource type="AudioStream" uid="uid://d0e1mgvv6n3j" path="res://assets/sounds/agent/noticed_sight.wav" id="6_1rg8k"]
@@ -592,6 +593,7 @@ advance_expression_base_node = NodePath("..")
 anim_player = NodePath("../Agent/AnimationPlayer")
 parameters/Crouch/blend_position = Vector2(1, 1)
 parameters/Stand/blend_position = Vector2(1, 1)
+script = ExtResource("4_ierty")
 
 [node name="ProneCheck" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17, 0)
@@ -665,5 +667,6 @@ texture_filter = 0
 texture = ExtResource("9_qm2d1")
 
 [connection signal="animation_finished" from="AnimationTree" to="." method="_on_animation_finished"]
+[connection signal="animation_finished" from="AnimationTree" to="AnimationTree" method="_on_animation_finished"]
 
 [editable path="Agent"]
