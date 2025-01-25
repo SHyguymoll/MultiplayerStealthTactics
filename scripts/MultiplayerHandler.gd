@@ -1,3 +1,4 @@
+class_name GameServer
 extends Node
 
 # Multiplayer spawners
@@ -17,16 +18,13 @@ var audio_event_scene = preload("res://scenes/game_audio_event.tscn")
 
 # Other things needed to initialize and handle a game
 @onready var load_timer : Timer = $"../MultiplayerLoadTimer"
-@export var action_timeline := {
 
-}
-var current_game_step := 0
+
 
 var start_time : String
 var end_time : String
 
 
-const REMEMBER_TILL = 150
 
 enum ProgressParts {
 	INTRO = -1,
@@ -86,6 +84,18 @@ func player_quits(_peer_id):
 	$FadeOut/ColorRect/AnimatedSprite2D.play("victory")
 	ui.animate_fade(true)
 	update_game_phase(Game.Phases.COMPLETION)
+
+
+@rpc("call_local")
+func ping():
+	print("{0}: pong!".format([multiplayer.multiplayer_peer.get_unique_id()]))
+
+
+func start_game():
+	await ($MultiplayerLoadTimer as Timer).timeout # wait for client to load in
+	ping.rpc()
+	init_game()
+	($ColdBootTimer as Timer).start()
 
 
 func init_game(): #TODO
@@ -472,12 +482,6 @@ func reward_team():
 			continue
 		var ag_name_local = ag.name.split("_", true, 1)[1]
 		GameSettings.winning_agents.append(ag_name_local)
-
-
-func append_action_timeline(agent : Agent):
-	if not action_timeline.has(current_game_step):
-		action_timeline[current_game_step] = {}
-	action_timeline[current_game_step][agent.name] = agent.queued_action
 
 
 @rpc("authority", "call_local", "reliable")

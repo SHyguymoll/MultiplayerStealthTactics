@@ -130,10 +130,10 @@ func create_agent_selector(agent : Agent):
 
 
 func _hud_agent_details_actions(agent_selector : AgentSelector):
-	if server.game_phase != server.GamePhases.SELECTION:
+	if game.phase != Game.Phases.SELECTION:
 		print(multiplayer.get_unique_id(), ": not in SELECTION MODE")
 		return
-	if server.selection_step != server.SelectionSteps.BASE:
+	if game.selection_step != Game.SelectionSteps.BASE:
 		print(multiplayer.get_unique_id(), ": not on SelectionStep.BASE")
 		return
 	var agent = agent_selector.referenced_agent

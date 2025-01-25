@@ -7,6 +7,12 @@ var tracking_raycast3d_scene = preload("res://scenes/tracking_raycast3d.tscn")
 var movement_icon_scene = preload("res://scenes/game_movement_indicator.tscn")
 var popup_scene = preload("res://scenes/game_popup.tscn")
 
+@export var action_timeline := {
+
+}
+var current_game_step := 0
+const REMEMBER_TILL = 150
+
 enum SelectionSteps {
 	BASE,
 	MOVEMENT,
@@ -24,8 +30,8 @@ enum Phases {
 
 @onready var camera : GameCamera = $World/Camera3D
 
-@onready var ui = $UI
-@onready var server = $MultiplayerHandler
+@onready var ui : UI = $UI
+@onready var server : GameServer = $MultiplayerHandler
 
 @onready var weapons : Node = $Weapons
 
@@ -36,11 +42,7 @@ enum Phases {
 @onready var indicators : Node3D = $ClientsideIndicators
 
 func start_game(): # Called only on the server.
-	await ($MultiplayerLoadTimer as Timer).timeout # wait for client to load in
-	ping.rpc()
-	server.init_game()
-	($ColdBootTimer as Timer).start()
-
+	server.start_game()
 
 @rpc("authority", "call_remote", "reliable")
 func force_camera(new_pos, new_fov = -1.0):
@@ -211,7 +213,7 @@ func execution_phase(delta : float):
 	for agent in agent_children():
 		agent._game_step(delta)
 		agent.in_smoke = false
-		if server.current_game_step - agent.step_seen == server.REMEMBER_TILL and agent.visible:
+		if current_game_step - agent.step_seen == REMEMBER_TILL and agent.visible:
 			if agent.player_id == 1:
 				server.set_agent_client_visibility.rpc(agent.name, false)
 				if not multiplayer.is_server():
@@ -306,7 +308,7 @@ func execution_phase(delta : float):
 	for pickup in (pickups.get_children() as Array[WeaponPickup]):
 		pickup._animate(delta)
 	#if multiplayer.is_server():
-	server.current_game_step += 1
+	current_game_step += 1
 	determine_sights()
 	determine_sounds()
 	determine_indicator_removals()
@@ -460,11 +462,6 @@ func _physics_process(delta: float) -> void:
 				completion_phase(delta)
 
 
-@rpc("call_local")
-func ping():
-	print("{0}: pong!".format([multiplayer.multiplayer_peer.get_unique_id()]))
-
-
 func return_attacked(attacker : Agent, location : Vector3):
 	var space_state = get_world_3d().direct_space_state
 	var origin = attacker._body.global_position
@@ -511,7 +508,7 @@ func determine_cqc_events():
 		grabbee.grabbing_agent = grabber
 		if multiplayer.is_server():
 			server.damage_agent.rpc(grabbee.name, 3, true)
-		grabbee.step_seen = server.current_game_step
+		grabbee.step_seen = current_game_step
 
 func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
 	return end_pos + start_pos.direction_to(end_pos).rotated(Vector3.DOWN, PI/2) * change
@@ -686,12 +683,12 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 
 
 func save_replay():
-	server.action_timeline[server.current_game_step] = "END"
+	action_timeline[current_game_step] = "END"
 	var end_time = str(int(Time.get_unix_time_from_system()))
 	if DirAccess.open("user://replays") == null:
 		DirAccess.make_dir_absolute("user://replays")
 	var new_replay = FileAccess.open("user://replays/" + server.start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
-	new_replay.store_string(JSON.stringify(server.action_timeline))
+	new_replay.store_string(JSON.stringify(action_timeline))
 
 
 func check_agents_for_weapon(item_name : String) -> bool:
