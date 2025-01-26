@@ -15,6 +15,7 @@ const MAX_CONNECTIONS = 2
 
 var upnp : UPNP
 var port : int = 6780
+var port_known : bool
 var extern_addr : String
 var lan_mode : bool
 
@@ -87,7 +88,7 @@ func destroy_upnp_thing():
 	upnp.delete_port_mapping(port, "TCP")
 
 func create_game(max_connections = 0, is_lan = false):
-	port = randi_range(PORT_MIN, PORT_MAX)
+	port = port if port_known else randi_range(PORT_MIN, PORT_MAX)
 	lan_mode = is_lan
 	if lan_mode:
 		extern_addr = DEFAULT_SERVER_IP + ":" + str(port)

@@ -38,7 +38,44 @@ func _ready() -> void:
 	_populate_agent_list()
 	Lobby.player_connected.connect(_on_player_connect)
 	Lobby.player_disconnected.connect(_on_player_disconnect)
-	pass
+	# run arguments on load
+	var args = OS.get_cmdline_args()
+	if args.has("--mst-debug"):
+		$MainMenu/VBoxContainer/HostH/CheckBox.button_pressed = true
+		Lobby.port = 6969
+		Lobby.port_known = true
+		$MainMenu/VBoxContainer/JoinH/LineEdit.text = "127.0.0.1:6969"
+	if args.has("--host"):
+		if args.has("--join"):
+			printerr("ARGUMENTS CANNOT CONTAIN BOTH HOST AND JOIN")
+			return
+		if args.has("--mst-debug"):
+			_on_host_pressed()
+			return
+		else:
+			var port_search = RegEx.create_from_string("--port=(\\d+)")
+			for arg in args:
+				var search = port_search.search(arg)
+				if search:
+					Lobby.port = int(search.get_string(1))
+					Lobby.port_known = true
+					_on_host_pressed()
+					return
+	if args.has("--join"):
+		if args.has("--host"):
+			printerr("ARGUMENTS CANNOT CONTAIN BOTH HOST AND JOIN")
+			return
+		if args.has("--mst-debug"):
+			_on_join_pressed()
+			return
+		else:
+			var address_search = RegEx.create_from_string("--addr=((?:(?:localhost)|(?:\\d+\\.\\d+\\.\\d+\\.\\d+)):\\d+)")
+			for arg in args:
+				var search = address_search.search(arg)
+				if search:
+					$MainMenu/VBoxContainer/JoinH/LineEdit.text = search.get_string(1)
+					_on_join_pressed()
+					return
 
 
 func save_user():
