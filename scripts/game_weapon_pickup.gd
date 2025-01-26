@@ -32,7 +32,7 @@ func _process(_d) -> void:
 	if generate_weapon:
 		if multiplayer.is_server():
 			var wep_id = attached_wep.split("_", true, 1)[1]
-			$"../..".weapon_spawner.spawn({
+			($/root/Game/MultiplayerHandler as GameServer).weapon_spawner.spawn({
 				wep_id = wep_id,
 				wep_name = name,
 				loaded_ammo = GameRefs.WEP[wep_id].ammo,
