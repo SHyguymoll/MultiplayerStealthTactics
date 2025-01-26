@@ -100,7 +100,8 @@ func init_game(): #TODO
 		pos_z = spawn_pos.z,
 		rot_y = spawn_point.rotation.y,
 	}
-	ag_spawner.spawn(data)
+	var created_agent : Agent = ag_spawner.spawn(data)
+	ui.create_agent_selector(created_agent.name)
 	if len(GameSettings.selected_agents) > 1:
 		spawn_point = game_map.agent_spawn_server_2
 		spawn_pos = spawn_point.get_spawn_point()
@@ -109,7 +110,8 @@ func init_game(): #TODO
 		data.pos_y = spawn_pos.y
 		data.pos_z = spawn_pos.z
 		data.rot_y = spawn_point.rotation.y
-		ag_spawner.spawn(data)
+		created_agent = ag_spawner.spawn(data)
+		ui.create_agent_selector(created_agent.name)
 	if len(GameSettings.selected_agents) > 2:
 		spawn_point = game_map.agent_spawn_server_3
 		spawn_pos = spawn_point.get_spawn_point()
@@ -118,7 +120,8 @@ func init_game(): #TODO
 		data.pos_y = spawn_pos.y
 		data.pos_z = spawn_pos.z
 		data.rot_y = spawn_point.rotation.y
-		ag_spawner.spawn(data)
+		created_agent = ag_spawner.spawn(data)
+		ui.create_agent_selector(created_agent.name)
 	if len(GameSettings.selected_agents) > 3:
 		spawn_point = game_map.agent_spawn_server_4
 		spawn_pos = spawn_point.get_spawn_point()
@@ -127,7 +130,8 @@ func init_game(): #TODO
 		data.pos_y = spawn_pos.y
 		data.pos_z = spawn_pos.z
 		data.rot_y = spawn_point.rotation.y
-		ag_spawner.spawn(data)
+		created_agent = ag_spawner.spawn(data)
+		ui.create_agent_selector(created_agent.name)
 	# spawn client's agents
 	spawn_point = game_map.agent_spawn_client_1
 	spawn_pos = spawn_point.get_spawn_point()
@@ -137,7 +141,8 @@ func init_game(): #TODO
 	data.pos_y = spawn_pos.y
 	data.pos_z = spawn_pos.z
 	data.rot_y = spawn_point.rotation.y
-	ag_spawner.spawn(data)
+	created_agent = ag_spawner.spawn(data)
+	ui.create_agent_selector.rpc(created_agent.name)
 	if len(GameSettings.client_selected_agents) > 1:
 		spawn_point = game_map.agent_spawn_client_2
 		spawn_pos = spawn_point.get_spawn_point()
@@ -146,7 +151,8 @@ func init_game(): #TODO
 		data.pos_y = spawn_pos.y
 		data.pos_z = spawn_pos.z
 		data.rot_y = spawn_point.rotation.y
-		ag_spawner.spawn(data)
+		created_agent = ag_spawner.spawn(data)
+		ui.create_agent_selector.rpc(created_agent.name)
 	if len(GameSettings.client_selected_agents) > 2:
 		spawn_point = game_map.agent_spawn_client_3
 		spawn_pos = spawn_point.get_spawn_point()
@@ -155,7 +161,8 @@ func init_game(): #TODO
 		data.pos_y = spawn_pos.y
 		data.pos_z = spawn_pos.z
 		data.rot_y = spawn_point.rotation.y
-		ag_spawner.spawn(data)
+		created_agent = ag_spawner.spawn(data)
+		ui.create_agent_selector.rpc(created_agent.name)
 	if len(GameSettings.client_selected_agents) > 3:
 		spawn_point = game_map.agent_spawn_client_4
 		spawn_pos = spawn_point.get_spawn_point()
@@ -164,7 +171,8 @@ func init_game(): #TODO
 		data.pos_y = spawn_pos.y
 		data.pos_z = spawn_pos.z
 		data.rot_y = spawn_point.rotation.y
-		ag_spawner.spawn(data)
+		created_agent = ag_spawner.spawn(data)
+		ui.create_agent_selector.rpc(created_agent.name)
 	# point camera in right spot
 	game.force_camera.rpc_id(
 		GameSettings.other_player_id,
