@@ -44,18 +44,12 @@ var client_ready_bool := false
 var sent_final_message = false
 var sent_reward = false
 
-@onready var ui = $"../UI"
+@onready var ui : UI = $"../UI"
 @onready var game : Game = $".."
 
 func _ready() -> void:
 	start_time = str(int(Time.get_unix_time_from_system()))
 	multiplayer.multiplayer_peer = Lobby.multiplayer.multiplayer_peer
-	if multiplayer.is_server():
-		ui.serv_name.text = Lobby.player_info.name
-		ui.clie_name.text = GameSettings.other_player_name
-	else:
-		ui.serv_name.text = GameSettings.other_player_name
-		ui.clie_name.text = Lobby.player_info.name
 
 	ag_spawner.spawn_function = create_agent
 	pickup_spawner.spawn_function = create_pickup

@@ -46,6 +46,12 @@ var agent_selector_scene = preload("res://scenes/agent_selector.tscn")
 @onready var game = $".."
 
 func _ready() -> void:
+	if multiplayer.is_server():
+		serv_name.text = Lobby.player_info.name
+		clie_name.text = GameSettings.other_player_name
+	else:
+		serv_name.text = GameSettings.other_player_name
+		clie_name.text = Lobby.player_info.name
 	fadeout_base.visible = true
 	fadeout_rect.modulate = Color.WHITE
 	hurry_up.visible = false
