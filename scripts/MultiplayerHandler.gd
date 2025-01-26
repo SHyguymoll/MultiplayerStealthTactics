@@ -20,11 +20,8 @@ var audio_event_scene = preload("res://scenes/game_audio_event.tscn")
 @onready var load_timer : Timer = $"../MultiplayerLoadTimer"
 @onready var cold_boot_timer : Timer = $"../ColdBootTimer"
 
-
 var start_time : String
 var end_time : String
-
-
 
 enum ProgressParts {
 	INTRO = -1,
@@ -33,7 +30,6 @@ enum ProgressParts {
 	OBJECTIVE_COMPLETE = 2,
 	SURVIVORS_EXFILTRATED = 3,
 }
-
 @export var server_progress : ProgressParts = ProgressParts.INTRO
 @export var client_progress : ProgressParts = ProgressParts.INTRO
 

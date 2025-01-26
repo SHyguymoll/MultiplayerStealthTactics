@@ -246,15 +246,7 @@ func execution_phase(delta : float):
 	for agent in agent_children():
 		if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 			return
-	server.update_game_phase.rpc(Phases.SELECTION)
-
-
-func resolution_step(): #TODO
-	pass
-	# if team still around
-	phase = Phases.SELECTION
-	return
-	# else do completion step
+	server.update_game_phase.rpc(Phases.RESOLUTION)
 
 
 func completion_phase(delta):
@@ -364,8 +356,10 @@ func transition_phase():
 				if ui.selectors.get_child_count() == 0 and server.check_incap:
 					ui._on_execute_pressed() # run execute since the player can't do anything
 				server.update_game_phase(Phases.SELECTION)
+				return
 			else:
 				server.update_game_phase(Phases.COMPLETION)
+				return
 		Phases.COMPLETION:
 			save_replay()
 			if not server.sent_final_message:
@@ -385,8 +379,8 @@ func _physics_process(delta: float) -> void:
 		match phase:
 			Phases.EXECUTION:
 				execution_phase(delta)
-			Phases.RESOLUTION:
-				resolution_step()
+			#Phases.RESOLUTION: only needed for one moment, written here for consistency
+				#resolution_step()
 			Phases.COMPLETION:
 				completion_phase(delta)
 
