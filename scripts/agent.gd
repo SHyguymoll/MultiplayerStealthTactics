@@ -428,7 +428,7 @@ func try_spot_element(element : Node3D): #TODO
 
 
 func look() -> Array[AgentSightResult]:
-	var asr_arr = []
+	var asr_arr : Array[AgentSightResult] = []
 	for detected in _eyes.get_overlapping_areas():
 		var par = detected.get_parent()
 		if par is Agent:
