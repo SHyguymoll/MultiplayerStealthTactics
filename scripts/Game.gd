@@ -67,8 +67,8 @@ func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = fal
 		new_popup.disappear()
 
 
-func agent_children() -> Array[Agent]:
-	return agents.get_children() as Array[Agent]
+func agent_children():
+	return (agents.get_children() as Array[Agent])
 
 func append_action_timeline(agent : Agent):
 	if not action_timeline.has(current_game_step):
