@@ -119,7 +119,9 @@ func pop_radial_menu_agent() -> Agent:
 	return ret
 
 
-func create_agent_selector(agent : Agent):
+@rpc("authority", "call_remote")
+func create_agent_selector(agent_name : String):
+	var agent = (game.agents.get_node(str(agent_name)) as Agent)
 	# check if selector already exists
 	for s in (selectors.get_children() as Array[AgentSelector]):
 		if s.referenced_agent == agent:
