@@ -219,7 +219,7 @@ func _on_cold_boot_timer_timeout() -> void:
 			pickup_spawner.spawn(data.pickup)
 		game_map.Objectives.TARGET_DEFEND:
 			game_map.objective_params
-	update_game_phase.rpc(Game.Phases.SELECTION, false)
+	update_game_phase.rpc(Game.Phases.SELECTION)
 	animate_fade.rpc(false)
 
 
@@ -492,7 +492,7 @@ func set_client_progress(val : ProgressParts):
 
 
 @rpc("authority", "call_local", "reliable")
-func update_game_phase(new_phase: Game.Phases, check_incap := true):
+func update_game_phase(new_phase: Game.Phases):
 	await get_tree().create_timer(0.1).timeout
 	game.phase = new_phase
 	game.transition_phase()
