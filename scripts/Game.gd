@@ -332,7 +332,7 @@ func transition_phase():
 			# populate agents with actions, as well as action_timeline
 			for agent in agent_children():
 				agent.agent_is_done.rpc(Agent.ActionDoneness.NOT_DONE)
-				server.append_action_timeline(agent)
+				append_action_timeline(agent)
 				agent.perform_action()
 			await get_tree().create_timer(0.10).timeout
 		Phases.RESOLUTION:
@@ -344,7 +344,7 @@ func transition_phase():
 				ag.ungrabbable = false
 				server.set_agent_action.rpc(ag.name, [])
 				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
-					ui.create_agent_selector(ag)
+					ui.create_agent_selector(ag.name)
 					ag.flash_outline(Color.ORCHID)
 				if ag.state != Agent.States.DEAD:
 					if ag.player_id == 1:
@@ -524,8 +524,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Crawling"
 		null:
 			ref_ag.queued_action = []
-	if ref_ag.is_multiplayer_authority():
-		ref_ag.action_text = final_text_string
+	ref_ag.action_text = final_text_string
 	ui.update_text()
 	ui.execute_button.visible = true
 	ui.execute_button.disabled = false

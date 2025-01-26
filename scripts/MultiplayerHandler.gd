@@ -329,7 +329,6 @@ func create_pickup(data) -> WeaponPickup:
 
 @rpc("authority", "call_local", "reliable")
 func create_sound_effect(location : Vector3, player_id : int, lifetime : int, _min_rad : float, max_rad : float, sound_id : String) -> void:
-	ui.create_sound_effect()
 	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
 	new_audio_event.position = location
 	new_audio_event.player_id = player_id
