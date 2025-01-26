@@ -81,7 +81,7 @@ func determine_sights():
 			continue
 		if agent.in_smoke:
 			continue
-		var res_arr = agent.look(current_game_step)
+		var res_arr = agent.look()
 		for res in res_arr as Array[Agent.AgentSightResult]:
 			if res.spotted_agent:
 				if res.spotted_position: # spotted agent was only noticed
