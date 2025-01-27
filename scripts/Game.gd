@@ -247,7 +247,7 @@ func execution_phase(delta : float):
 		if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 			return
 	print("{0}: all agents done trans to resolution".format([str(multiplayer.get_unique_id())]))
-	server.update_game_phase.rpc(Phases.RESOLUTION)
+	update_game_phase(Phases.RESOLUTION)
 
 
 func completion_phase(delta):
@@ -261,6 +261,11 @@ func completion_phase(delta):
 		elif ag.in_prone_state():
 			ag.state = Agent.States.PRONE
 		ag._game_step(delta, true)
+
+
+func update_game_phase(new_phase: Phases):
+	phase = new_phase
+	transition_phase()
 
 
 func transition_phase():
@@ -359,10 +364,10 @@ func transition_phase():
 					else:
 						client_team_dead = false
 			if not server.player_has_won(server_team_dead, client_team_dead): # win conditions
-				server.update_game_phase(Phases.SELECTION)
+				update_game_phase(Phases.SELECTION)
 				return
 			else:
-				server.update_game_phase(Phases.COMPLETION)
+				update_game_phase(Phases.COMPLETION)
 				return
 		Phases.COMPLETION:
 			save_replay()
@@ -596,6 +601,12 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
 	if ref_ag.is_multiplayer_authority():
 		ref_ag.action_text = final_text_string
+	ui.update_text()
+	ui.execute_button.visible = true
+	ui.execute_button.disabled = false
+
+
+func _on_radial_menu_no_decision_made() -> void:
 	ui.update_text()
 	ui.execute_button.visible = true
 	ui.execute_button.disabled = false
