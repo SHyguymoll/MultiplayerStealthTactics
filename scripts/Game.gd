@@ -246,6 +246,7 @@ func execution_phase(delta : float):
 	for agent in agent_children():
 		if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 			return
+	print("{0}: all agents done trans to resolution".format([str(multiplayer.get_unique_id())]))
 	server.update_game_phase.rpc(Phases.RESOLUTION)
 
 
@@ -263,12 +264,18 @@ func completion_phase(delta):
 
 
 func transition_phase():
+	print("{0}: {1}".format([str(multiplayer.get_unique_id()), str(Phases.keys()[phase])]))
 	match phase:
 		Phases.SELECTION:
 			ui.round_ended.play()
 			ui.phase_label.text = "SELECT ACTIONS"
 			ui.execute_button.disabled = false
 			ui.execute_button.text = "EXECUTE INSTRUCTIONS"
+			ui.show_hud()
+			if ui.selectors.get_child_count() == 0:
+				ui._on_execute_pressed() # run execute since the player can't do anything
+			if not multiplayer.is_server(): # Client bouncer for server to do business
+				return
 			# update exfiltrations
 			if server.server_progress == server.ProgressParts.ITEM_HELD:
 				var can_exfil = false
@@ -352,9 +359,6 @@ func transition_phase():
 					else:
 						client_team_dead = false
 			if not server.player_has_won(server_team_dead, client_team_dead): # win conditions
-				ui.show_hud()
-				if ui.selectors.get_child_count() == 0 and server.check_incap:
-					ui._on_execute_pressed() # run execute since the player can't do anything
 				server.update_game_phase(Phases.SELECTION)
 				return
 			else:

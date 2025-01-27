@@ -493,7 +493,6 @@ func set_client_progress(val : ProgressParts):
 
 @rpc("authority", "call_local", "reliable")
 func update_game_phase(new_phase: Game.Phases):
-	await get_tree().create_timer(0.1).timeout
 	game.phase = new_phase
 	game.transition_phase()
 
@@ -506,6 +505,8 @@ func remove_weapon_from_agent(agent_name : String, weapon_name : String):
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_action(agent_name : String, action : Array):
 	game.agents.get_node(agent_name).queued_action = action
+	print("{0}: {1}".format([multiplayer.get_unique_id(),
+		str(game.agents.get_node(agent_name).queued_action)]))
 
 
 @rpc("any_peer", "call_local", "reliable")
