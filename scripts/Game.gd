@@ -281,6 +281,22 @@ func transition_phase():
 				ui._on_execute_pressed() # run execute since the player can't do anything
 			if not multiplayer.is_server(): # Client bouncer for server to do business
 				return
+		Phases.EXECUTION:
+			ui.hurry_up.visible = false
+			for agent in agent_children():
+				print("{0}: {1}".format([agent.name, str(agent.queued_action)]))
+				agent.action_text = ""
+			ui.update_text()
+			ui.phase_label.text = "EXECUTING ACTIONS..."
+			server.server_ready_bool = false
+			server.client_ready_bool = false
+			# populate agents with actions, as well as action_timeline
+			for agent in agent_children():
+				agent.agent_is_done.rpc(Agent.ActionDoneness.NOT_DONE)
+				append_action_timeline(agent)
+				agent.perform_action()
+			await get_tree().create_timer(0.10).timeout
+		Phases.RESOLUTION:
 			# update exfiltrations
 			if server.server_progress == server.ProgressParts.ITEM_HELD:
 				var can_exfil = false
@@ -333,21 +349,6 @@ func transition_phase():
 			for agent_name in server.exfiltration_queue:
 				(agents.get_node(str(agent_name)) as Agent).exfiltrate()
 			server.track_objective_completion() # objective based updates here
-		Phases.EXECUTION:
-			ui.hurry_up.visible = false
-			for agent in agent_children():
-				agent.action_text = ""
-			ui.update_text()
-			ui.phase_label.text = "EXECUTING ACTIONS..."
-			server.server_ready_bool = false
-			server.client_ready_bool = false
-			# populate agents with actions, as well as action_timeline
-			for agent in agent_children():
-				agent.agent_is_done.rpc(Agent.ActionDoneness.NOT_DONE)
-				append_action_timeline(agent)
-				agent.perform_action()
-			await get_tree().create_timer(0.10).timeout
-		Phases.RESOLUTION:
 			# create selectors and otherwise prepare for selection or completion
 			var server_team_dead = true
 			var client_team_dead = true
@@ -355,9 +356,12 @@ func transition_phase():
 				ag.action_done = Agent.ActionDoneness.NOT_DONE
 				ag.ungrabbable = false
 				server.set_agent_action.rpc(ag.name, [])
-				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
-					ui.create_agent_selector(ag.name)
-					ag.flash_outline(Color.ORCHID)
+				if not ag.in_incapacitated_state():
+					if ag.owned():
+						ui.create_agent_selector(ag.name)
+						ag.flash_outline(Color.ORCHID)
+					else:
+						ui.create_agent_selector.rpc_id(GameSettings.other_player_id, ag.name)
 				if ag.state != Agent.States.DEAD:
 					if ag.player_id == 1:
 						server_team_dead = false
@@ -365,6 +369,7 @@ func transition_phase():
 						client_team_dead = false
 			if not server.player_has_won(server_team_dead, client_team_dead): # win conditions
 				update_game_phase(Phases.SELECTION)
+				server.game_execution_complete.rpc()
 				return
 			else:
 				update_game_phase(Phases.COMPLETION)
@@ -566,7 +571,7 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.CRAWL_TO_POS:
 			final_text_string = "{0}: Crawl ".format([clean_name])
 	final_text_string += "to New Position"
-	if ref_ag.is_multiplayer_authority():
+	if ref_ag.owned():
 		ref_ag.action_text = final_text_string
 	ui.update_text()
 	ui.execute_button.visible = true
@@ -599,7 +604,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
 				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
-	if ref_ag.is_multiplayer_authority():
+	if ref_ag.owned():
 		ref_ag.action_text = final_text_string
 	ui.update_text()
 	ui.execute_button.visible = true
@@ -623,7 +628,7 @@ func save_replay():
 
 func check_agents_for_weapon(item_name : String) -> bool:
 	for ag in agent_children():
-		if not ag.is_multiplayer_authority():
+		if not ag.owned():
 			continue
 		if ag.state == Agent.States.DEAD:
 			continue
@@ -634,7 +639,7 @@ func check_agents_for_weapon(item_name : String) -> bool:
 
 func check_weapon_holder_exfil(item_name : String) -> bool:
 	for ag in agent_children():
-		if not ag.is_multiplayer_authority():
+		if not ag.owned():
 			continue
 		if ag.state == Agent.States.DEAD:
 			continue
@@ -648,7 +653,7 @@ func check_weapon_holder_exfil(item_name : String) -> bool:
 func check_full_team_exfil_or_dead():
 	var count = 0
 	for ag in agent_children():
-		if not ag.is_multiplayer_authority():
+		if not ag.owned():
 			continue
 		count += 1
 		if ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:

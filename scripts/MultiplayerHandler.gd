@@ -133,9 +133,9 @@ func init_game(): #TODO
 		created_agent = ag_spawner.spawn(data)
 		ui.create_agent_selector(created_agent.name)
 	# spawn client's agents
+	data.player_id = GameSettings.other_player_id
 	spawn_point = game_map.agent_spawn_client_1
 	spawn_pos = spawn_point.get_spawn_point()
-	data.player_id = GameSettings.other_player_id
 	data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[0]]
 	data.pos_x = spawn_pos.x
 	data.pos_y = spawn_pos.y
@@ -237,6 +237,11 @@ func player_is_ready(id):
 		game.update_game_phase(Game.Phases.EXECUTION)
 
 
+@rpc("authority", "call_remote", "reliable")
+func game_execution_complete():
+	game.transition_phase() # call for client to catch up
+
+
 func _on_execute_pressed() -> void:
 	player_is_ready.rpc(multiplayer.get_unique_id())
 
@@ -252,7 +257,7 @@ func create_agent(data) -> Agent: #TODO
 
 	new_agent.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
 	new_agent.rotation.y = data.rot_y
-	new_agent.set_multiplayer_authority(data.player_id)
+	#new_agent.set_multiplayer_authority(data.player_id)
 	new_agent.player_id = data.player_id
 	new_agent.health = data.agent_stats.health
 	new_agent.stun_health = data.agent_stats.stun_health
