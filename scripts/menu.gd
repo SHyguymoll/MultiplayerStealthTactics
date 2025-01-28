@@ -41,10 +41,13 @@ func _ready() -> void:
 	# run arguments on load
 	var args = OS.get_cmdline_args()
 	if args.has("--mst-debug"):
-		$MainMenu/VBoxContainer/HostH/CheckBox.button_pressed = true
+		$MainMenu/VBoxContainer/HostH/CheckBox.button_pressed = true # set up for LAN host
 		Lobby.port = 6969
 		Lobby.port_known = true
-		$MainMenu/VBoxContainer/JoinH/LineEdit.text = "127.0.0.1:6969"
+		$MainMenu/VBoxContainer/JoinH/LineEdit.text = "127.0.0.1:6969" # set up for join LAN
+		AudioServer.set_bus_mute(0, true) # mute all audio (it gets annoying)
+		AudioServer.set_bus_mute(1, true)
+		AudioServer.set_bus_mute(2, true)
 	if args.has("--host"):
 		if args.has("--join"):
 			printerr("ARGUMENTS CANNOT CONTAIN BOTH HOST AND JOIN")

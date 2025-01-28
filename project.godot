@@ -29,6 +29,10 @@ window/size/viewport_width=1612
 window/size/viewport_height=908
 window/stretch/mode="canvas_items"
 
+[editor]
+
+run/main_run_args="--mst-debug"
+
 [importer_defaults]
 
 texture={
