@@ -149,6 +149,10 @@ func selection_phase(delta : float):
 
 
 func execution_phase(delta : float):
+	if not multiplayer.is_server():
+		for agent in agent_children():
+			agent._anim._game_step(delta)
+		return
 	determine_cqc_events()
 	determine_weapon_events()
 	for agent in agent_children():
@@ -387,12 +391,15 @@ func transition_phase():
 
 
 func _physics_process(delta: float) -> void:
-	if phase == Phases.SELECTION: # Server and Client can do things here
-		selection_phase(delta)
+	match phase:
+		Phases.SELECTION: # Server and Client can do things here
+			selection_phase(delta)
+		Phases.EXECUTION: # Server does stuff, Client does animations
+			execution_phase(delta)
 	if multiplayer.is_server(): # Server only handles this
 		match phase:
-			Phases.EXECUTION:
-				execution_phase(delta)
+			#Phases.EXECUTION:
+				#execution_phase(delta)
 			#Phases.RESOLUTION: only needed for one moment, written here for consistency
 				#resolution_step()
 			Phases.COMPLETION:
