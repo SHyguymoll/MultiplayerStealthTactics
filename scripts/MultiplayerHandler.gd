@@ -505,7 +505,9 @@ func remove_weapon_from_agent(agent_name : String, weapon_name : String):
 
 @rpc("any_peer", "call_local", "reliable")
 func set_agent_action(agent_name : String, action : Array):
-	game.agents.get_node(agent_name).queued_action = action
+	print(action)
+	var ref_ag = game.agents.get_node(agent_name)
+	ref_ag.queued_action = action
 	print("{0}: {1}".format([multiplayer.get_unique_id(),
 		str(game.agents.get_node(agent_name).queued_action)]))
 

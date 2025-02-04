@@ -1,7 +1,6 @@
 class_name Grenade
 extends CharacterBody3D
 
-@warning_ignore("unused_private_class_variable")
 @onready var _explosion_hitbox : Area3D = $ExplosionHitbox
 
 @export var server_knows : bool
@@ -36,3 +35,7 @@ func _tick() -> void:
 	global_position = start_position.lerp(landing_position, clamp(float(30 - boom_time)/30.0, 0.0, 1.0))
 	if boom_time == -100:
 		explode = true
+
+
+func explosion_afflicted() -> Array:
+	return _explosion_hitbox.get_overlapping_areas()

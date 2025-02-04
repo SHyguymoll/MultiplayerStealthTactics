@@ -217,7 +217,7 @@ func execution_phase(delta : float):
 		if grenade.explode:
 			match grenade.wep_id:
 				"grenade_frag":
-					for exploded in grenade._explosion_hitbox.get_overlapping_areas():
+					for exploded in grenade.explosion_afflicted():
 						var attacked : Agent = exploded.get_parent()
 						if attacked.in_prone_state():
 							continue # prone agents dodge explosions for Reasons™
@@ -501,8 +501,6 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	if indicators.get_node_or_null(String(ref_ag.name)): # remove prev indicator
 		indicators.get_node(String(ref_ag.name))._neutral()
 		indicators.get_node(String(ref_ag.name)).name += "_neutralling"
-	server.set_agent_action.rpc(ref_ag.name, decision_array)
-	ref_ag.queued_action = decision_array
 	var final_text_string := ""
 	var clean_name = GameRefs.extract_agent_name(ref_ag.name)
 	match decision_array[0]:
@@ -546,6 +544,8 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 		null:
 			ref_ag.queued_action = []
 	ref_ag.action_text = final_text_string
+	server.set_agent_action.rpc(ref_ag.name, decision_array)
+
 	ui.update_text()
 	ui.execute_button.visible = true
 	ui.execute_button.disabled = false
