@@ -143,7 +143,7 @@ func verify_game_completeness() -> bool:
 
 func selection_phase(delta : float):
 	if verify_game_completeness():
-		server._update_game_phase(Phases.COMPLETION)
+		update_game_phase(Phases.COMPLETION)
 		return
 	for selector in ui.selectors.get_children() as Array[AgentSelector]:
 		selector.position = camera.unproject_position(
@@ -260,15 +260,7 @@ func execution_phase(delta : float):
 		for agent in agent_children():
 			if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 				return
-		server.update_game_phase.rpc(Phases.SELECTION)
-
-
-func resolution_step(): #TODO
-	pass
-	# if team still around
-	phase = Phases.SELECTION
-	return
-	# else do completion step
+		update_game_phase.rpc(Phases.RESOLUTION)
 
 
 func completion_phase(delta):
@@ -282,6 +274,12 @@ func completion_phase(delta):
 		elif ag.in_prone_state():
 			ag.state = Agent.States.PRONE
 		ag._game_step(delta, true)
+
+
+@rpc("authority", "call_local", "reliable")
+func update_game_phase(new_phase: Game.Phases):
+	phase = new_phase
+	transition_phase()
 
 
 func transition_phase():
@@ -362,26 +360,30 @@ func transition_phase():
 			# create selectors and otherwise prepare for selection or completion
 			var server_team_dead = true
 			var client_team_dead = true
-			for ag in agent_children():
-				ag.action_done = Agent.ActionDoneness.NOT_DONE
-				ag.ungrabbable = false
-				if multiplayer.is_server():
+			if multiplayer.is_server():
+				for ag in agent_children():
+					ag.action_done = Agent.ActionDoneness.NOT_DONE
+					ag.ungrabbable = false
 					server.set_agent_action.rpc(ag.name, [])
-				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
-					ui.create_agent_selector(ag)
-					ag.flash_outline(Color.ORCHID)
-				if ag.state != Agent.States.DEAD:
-					if ag.player_id == 1:
-						server_team_dead = false
-					else:
-						client_team_dead = false
+					if not ag.in_incapacitated_state():
+						if ag.is_multiplayer_authority(): # server
+							ui.create_agent_selector(ag.name)
+							ag.flash_outline(Color.ORCHID)
+						else: # client
+							ui.create_agent_selector.rpc(ag.name)
+							ag.flash_outline.rpc(Color.ORCHID)
+					if ag.state != Agent.States.DEAD:
+						if ag.player_id == 1:
+							server_team_dead = false
+						else:
+							client_team_dead = false
 			if not server.player_has_won(server_team_dead, client_team_dead): # win conditions
 				ui.show_hud()
 				if ui.selectors.get_child_count() == 0 and server.check_incap:
 					ui._on_execute_pressed() # run execute since the player can't do anything
-				server.update_game_phase(Phases.SELECTION)
+				update_game_phase(Phases.SELECTION)
 			else:
-				server.update_game_phase(Phases.COMPLETION)
+				update_game_phase(Phases.COMPLETION)
 		Phases.COMPLETION:
 			save_replay()
 			if multiplayer.is_server() and not server.sent_final_message:
@@ -395,16 +397,15 @@ func transition_phase():
 
 
 func _physics_process(delta: float) -> void:
-	if phase == Phases.SELECTION:
-		selection_phase(delta)
-	if multiplayer.is_server():
-		match phase:
-			Phases.EXECUTION:
-				execution_phase(delta)
-			Phases.RESOLUTION:
-				resolution_step()
-			Phases.COMPLETION:
-				completion_phase(delta)
+	match phase:
+		Phases.SELECTION:
+			selection_phase(delta)
+		Phases.EXECUTION:
+			execution_phase(delta)
+		Phases.RESOLUTION:
+			pass
+		Phases.COMPLETION:
+			completion_phase(delta)
 
 
 func return_attacked(attacker : Agent, location : Vector3):

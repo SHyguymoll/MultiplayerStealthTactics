@@ -122,7 +122,7 @@ enum States {
 var mark_for_drop := {}
 var try_grab_pickup := false
 var mark_for_grenade_throw := false
-var ungrabbable = false
+@export var ungrabbable = false
 var in_smoke = false
 @export var step_seen : int = 0
 @export var noticed : int = 0
@@ -325,6 +325,7 @@ func take_damage(amount : int, is_stun : bool = false):
 		state = States.HURT if health > 0 else States.DEAD
 
 
+@rpc("authority", "call_remote")
 func flash_outline(color : Color):
 	_outline_mat.albedo_color = color
 

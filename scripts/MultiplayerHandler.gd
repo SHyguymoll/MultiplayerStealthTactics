@@ -83,7 +83,7 @@ func player_quits(_peer_id):
 	create_toast_update(GameRefs.TXT.forfeit, GameRefs.TXT.forfeit, false)
 	ui.fadeout_sprite.play("victory")
 	ui.animate_fade(true)
-	update_game_phase(Game.Phases.COMPLETION)
+	game.update_game_phase(Game.Phases.COMPLETION)
 
 
 @rpc("call_local")
@@ -229,7 +229,7 @@ func _on_cold_boot_timer_timeout() -> void:
 			pickup_spawner.spawn(data.pickup)
 		game_map.Objectives.TARGET_DEFEND:
 			game_map.objective_params
-	update_game_phase.rpc(Game.Phases.SELECTION, false)
+	game.update_game_phase.rpc(Game.Phases.SELECTION)
 	animate_fade.rpc(false)
 
 
@@ -244,7 +244,7 @@ func player_is_ready(id):
 		if multiplayer.is_server():
 			ui.hurry_up.visible = true
 	if multiplayer.is_server() and server_ready_bool and client_ready_bool:
-		update_game_phase.rpc(Game.Phases.EXECUTION)
+		game.update_game_phase.rpc(Game.Phases.EXECUTION)
 
 
 func _on_execute_pressed() -> void:
@@ -499,12 +499,6 @@ func set_server_progress(val : ProgressParts):
 @rpc("authority", "call_local", "reliable")
 func set_client_progress(val : ProgressParts):
 	client_progress = val
-
-
-@rpc("authority", "call_local", "reliable")
-func update_game_phase(new_phase: Game.Phases, check_incap := true):
-	game.phase = new_phase
-	game.transition_phase()
 
 
 @rpc("any_peer", "call_local", "reliable")
