@@ -49,52 +49,52 @@ properties/4/replication_mode = 1
 properties/5/path = NodePath(".:stun_health")
 properties/5/spawn = true
 properties/5/replication_mode = 1
-properties/6/path = NodePath(".:weapons_animation_blend")
+properties/6/path = NodePath(".:target_world_collide_height")
 properties/6/spawn = true
 properties/6/replication_mode = 1
-properties/7/path = NodePath(".:target_world_collide_height")
+properties/7/path = NodePath(".:target_world_collide_y")
 properties/7/spawn = true
 properties/7/replication_mode = 1
-properties/8/path = NodePath(".:target_world_collide_y")
+properties/8/path = NodePath(".:game_steps_since_execute")
 properties/8/spawn = true
 properties/8/replication_mode = 1
-properties/9/path = NodePath(".:game_steps_since_execute")
+properties/9/path = NodePath(".:attack_step")
 properties/9/spawn = true
 properties/9/replication_mode = 1
-properties/10/path = NodePath(".:attack_step")
+properties/10/path = NodePath(".:position")
 properties/10/spawn = true
 properties/10/replication_mode = 1
-properties/11/path = NodePath(".:position")
+properties/11/path = NodePath(".:rotation")
 properties/11/spawn = true
 properties/11/replication_mode = 1
-properties/12/path = NodePath(".:rotation")
+properties/12/path = NodePath(".:target_visible_level")
 properties/12/spawn = true
 properties/12/replication_mode = 1
-properties/13/path = NodePath(".:target_visible_level")
+properties/13/path = NodePath(".:server_knows")
 properties/13/spawn = true
 properties/13/replication_mode = 1
-properties/14/path = NodePath(".:server_knows")
+properties/14/path = NodePath(".:client_knows")
 properties/14/spawn = true
 properties/14/replication_mode = 1
-properties/15/path = NodePath(".:client_knows")
+properties/15/path = NodePath(".:held_items")
 properties/15/spawn = true
 properties/15/replication_mode = 1
-properties/16/path = NodePath(".:held_items")
+properties/16/path = NodePath(".:held_weapons")
 properties/16/spawn = true
 properties/16/replication_mode = 1
-properties/17/path = NodePath(".:held_weapons")
+properties/17/path = NodePath("Agent/Box:visible")
 properties/17/spawn = true
 properties/17/replication_mode = 1
-properties/18/path = NodePath("Agent/Box:visible")
+properties/18/path = NodePath("Agent/game_rig/Skeleton3D/Mesh:visible")
 properties/18/spawn = true
 properties/18/replication_mode = 1
-properties/19/path = NodePath("Agent/game_rig/Skeleton3D/Mesh:visible")
+properties/19/path = NodePath(".:noticed")
 properties/19/spawn = true
 properties/19/replication_mode = 1
-properties/20/path = NodePath(".:noticed")
+properties/20/path = NodePath(".:step_seen")
 properties/20/spawn = true
 properties/20/replication_mode = 1
-properties/21/path = NodePath(".:step_seen")
+properties/21/path = NodePath("AnimationTree:weapons_animation_blend")
 properties/21/spawn = true
 properties/21/replication_mode = 1
 
@@ -555,31 +555,31 @@ bones/43/position = Vector3(-0.0622964, 0.126496, 0.352349)
 bones/43/rotation = Quaternion(0.00533393, 0.190558, 0.975424, -0.110484)
 
 [node name="FlagCenter" parent="Agent/game_rig/Skeleton3D" index="0"]
-transform = Transform3D(-0.201244, -0.0357047, 0.97889, 0.219041, 0.972389, 0.0804987, -0.954737, 0.230617, -0.187867, -0.0603735, 0.0223624, 0.774924)
+transform = Transform3D(-0.201245, -0.0357043, 0.97889, 0.219041, 0.972389, 0.0804985, -0.954737, 0.230617, -0.187868, -0.0603734, 0.0223631, 0.774924)
 
 [node name="FlagClient" parent="Agent/game_rig/Skeleton3D" index="1"]
-transform = Transform3D(-0.201244, -0.0357047, 0.97889, 0.219041, 0.972389, 0.0804987, -0.954737, 0.230617, -0.187867, -0.0603735, 0.0223624, 0.774924)
+transform = Transform3D(-0.201245, -0.0357043, 0.97889, 0.219041, 0.972389, 0.0804985, -0.954737, 0.230617, -0.187868, -0.0603734, 0.0223631, 0.774924)
 
 [node name="FlagServer" parent="Agent/game_rig/Skeleton3D" index="2"]
-transform = Transform3D(-0.201244, -0.0357047, 0.97889, 0.219041, 0.972389, 0.0804987, -0.954737, 0.230617, -0.187867, -0.0603735, 0.0223624, 0.774924)
+transform = Transform3D(-0.201245, -0.0357043, 0.97889, 0.219041, 0.972389, 0.0804985, -0.954737, 0.230617, -0.187868, -0.0603734, 0.0223631, 0.774924)
 
 [node name="GrenadeFrag" parent="Agent/game_rig/Skeleton3D" index="3"]
-transform = Transform3D(-0.201244, -0.0357047, 0.97889, 0.219041, 0.972389, 0.0804987, -0.954737, 0.230617, -0.187867, -0.0603735, 0.0223624, 0.774924)
+transform = Transform3D(-0.201245, -0.0357043, 0.97889, 0.219041, 0.972389, 0.0804985, -0.954737, 0.230617, -0.187868, -0.0603734, 0.0223631, 0.774924)
 
 [node name="GrenadeNoise" parent="Agent/game_rig/Skeleton3D" index="4"]
-transform = Transform3D(-0.201244, -0.0357047, 0.97889, 0.219041, 0.972389, 0.0804987, -0.954737, 0.230617, -0.187867, -0.0603735, 0.0223624, 0.774924)
+transform = Transform3D(-0.201245, -0.0357043, 0.97889, 0.219041, 0.972389, 0.0804985, -0.954737, 0.230617, -0.187868, -0.0603734, 0.0223631, 0.774924)
 
 [node name="GrenadeSmoke" parent="Agent/game_rig/Skeleton3D" index="5"]
-transform = Transform3D(-0.201244, -0.0357047, 0.97889, 0.219041, 0.972389, 0.0804987, -0.954737, 0.230617, -0.187867, -0.0603735, 0.0223624, 0.774924)
+transform = Transform3D(-0.201245, -0.0357043, 0.97889, 0.219041, 0.972389, 0.0804985, -0.954737, 0.230617, -0.187868, -0.0603734, 0.0223631, 0.774924)
 
 [node name="Pistol" parent="Agent/game_rig/Skeleton3D" index="6"]
-transform = Transform3D(0.104024, 0.852443, 0.512366, -0.986913, 0.152292, -0.0530039, -0.123212, -0.500147, 0.85713, -0.0785761, 0.011261, 0.776301)
+transform = Transform3D(0.104024, 0.852443, 0.512367, -0.986913, 0.152291, -0.0530037, -0.123212, -0.500148, 0.857129, -0.0785761, 0.0112617, 0.776302)
 
 [node name="Rifle" parent="Agent/game_rig/Skeleton3D" index="7"]
-transform = Transform3D(-0.00357502, 0.841841, 0.539714, -0.983567, 0.0944644, -0.15386, -0.18051, -0.531395, 0.827668, -0.0753905, -0.00219843, 0.78144)
+transform = Transform3D(-0.00357539, 0.841841, 0.539714, -0.983567, 0.0944641, -0.15386, -0.180509, -0.531395, 0.827668, -0.0753904, -0.00219775, 0.781441)
 
 [node name="Shotgun" parent="Agent/game_rig/Skeleton3D" index="8"]
-transform = Transform3D(0.129373, 0.839725, 0.527374, -0.948795, 0.259398, -0.180279, -0.288185, -0.477047, 0.830286, -0.0805348, -0.00449035, 0.786305)
+transform = Transform3D(0.129373, 0.839725, 0.527375, -0.948795, 0.259398, -0.180279, -0.288185, -0.477048, 0.830285, -0.0805347, -0.00448967, 0.786305)
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_no7tm")

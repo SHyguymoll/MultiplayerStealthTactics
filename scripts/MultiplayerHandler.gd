@@ -495,7 +495,6 @@ func set_client_progress(val : ProgressParts):
 
 @rpc("authority", "call_local", "reliable")
 func update_game_phase(new_phase: Game.Phases, check_incap := true):
-	await get_tree().create_timer(0.1).timeout
 	game.phase = new_phase
 	game.transition_phase()
 

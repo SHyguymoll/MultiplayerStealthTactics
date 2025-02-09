@@ -77,34 +77,6 @@
 [ext_resource type="Script" path="res://scripts/UI.gd" id="68_kct0c"]
 [ext_resource type="Script" path="res://scripts/MultiplayerHandler.gd" id="75_f35fg"]
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pu7ty"]
-properties/0/path = NodePath(".:action_timeline")
-properties/0/spawn = true
-properties/0/replication_mode = 2
-properties/1/path = NodePath(".:game_phase")
-properties/1/spawn = true
-properties/1/replication_mode = 2
-properties/2/path = NodePath(".:server_progress")
-properties/2/spawn = true
-properties/2/replication_mode = 1
-properties/3/path = NodePath(".:client_progress")
-properties/3/spawn = true
-properties/3/replication_mode = 1
-
-[sub_resource type="Environment" id="Environment_bedr1"]
-background_mode = 1
-background_color = Color(0.215686, 0, 0.176471, 1)
-ambient_light_source = 2
-ambient_light_color = Color(1, 1, 1, 1)
-ambient_light_energy = 0.18
-reflected_light_source = 1
-ssao_radius = 4.96
-ssao_intensity = 3.48
-ssao_power = 0.675937
-fog_light_color = Color(1, 1, 1, 1)
-fog_light_energy = 0.0
-volumetric_fog_emission = Color(1, 1, 1, 1)
-
 [sub_resource type="SpriteFrames" id="SpriteFrames_25ism"]
 animations = [{
 "frames": [{
@@ -315,83 +287,36 @@ animations = [{
 "speed": 24.0
 }]
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_pu7ty"]
+properties/0/path = NodePath(".:action_timeline")
+properties/0/spawn = true
+properties/0/replication_mode = 2
+properties/1/path = NodePath("MultiplayerHandler:server_progress")
+properties/1/spawn = true
+properties/1/replication_mode = 2
+properties/2/path = NodePath("MultiplayerHandler:client_progress")
+properties/2/spawn = true
+properties/2/replication_mode = 2
+properties/3/path = NodePath(".:phase")
+properties/3/spawn = true
+properties/3/replication_mode = 2
+
+[sub_resource type="Environment" id="Environment_bedr1"]
+background_mode = 1
+background_color = Color(0.215686, 0, 0.176471, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.18
+reflected_light_source = 1
+ssao_radius = 4.96
+ssao_intensity = 3.48
+ssao_power = 0.675937
+fog_light_color = Color(1, 1, 1, 1)
+fog_light_energy = 0.0
+volumetric_fog_emission = Color(1, 1, 1, 1)
+
 [node name="Game" type="Node3D"]
 script = ExtResource("1_re23i")
-
-[node name="ColdBootTimer" type="Timer" parent="."]
-one_shot = true
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_pu7ty")
-
-[node name="MultiplayerLoadTimer" type="Timer" parent="."]
-wait_time = 0.1
-one_shot = true
-
-[node name="MultiplayerHandler" type="Node" parent="."]
-script = ExtResource("75_f35fg")
-
-[node name="AgentSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
-spawn_path = NodePath("../Agents")
-
-[node name="PickupSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
-spawn_path = NodePath("../Pickups")
-
-[node name="WeaponSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
-spawn_path = NodePath("../Weapons")
-
-[node name="GrenadeSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
-spawn_path = NodePath("../Grenades")
-
-[node name="SmokeSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
-spawn_path = NodePath("../Smokes")
-
-[node name="Agents" type="Node3D" parent="."]
-
-[node name="Pickups" type="Node3D" parent="."]
-
-[node name="Weapons" type="Node" parent="."]
-
-[node name="Grenades" type="Node3D" parent="."]
-
-[node name="Smokes" type="Node3D" parent="."]
-
-[node name="World" type="Node3D" parent="."]
-
-[node name="Camera3D" type="Camera3D" parent="World"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 15, 0)
-current = true
-script = ExtResource("2_f2a8t")
-
-[node name="RayCast3D" type="RayCast3D" parent="World/Camera3D"]
-target_position = Vector3(0, 0, -1000)
-debug_shape_custom_color = Color(0.615686, 0.839216, 0, 1)
-debug_shape_thickness = 1
-
-[node name="Label" type="Label" parent="World/Camera3D"]
-visible = false
-offset_right = 40.0
-offset_bottom = 23.0
-theme = ExtResource("5_b0o1h")
-theme_override_font_sizes/font_size = 32
-
-[node name="GameMap" parent="World" instance=ExtResource("2_ow13f")]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
-environment = SubResource("Environment_bedr1")
-
-[node name="ClientsideIndicators" type="Node3D" parent="."]
-
-[node name="RayCasts" type="Node3D" parent="."]
-
-[node name="AudioEvents" type="Node3D" parent="."]
-
-[node name="Popups" type="Node3D" parent="."]
 
 [node name="UI" type="Node2D" parent="."]
 script = ExtResource("68_kct0c")
@@ -652,8 +577,82 @@ stream = ExtResource("11_87rki")
 volume_db = -20.0
 bus = &"Music"
 
-[connection signal="timeout" from="ColdBootTimer" to="." method="_on_cold_boot_timer_timeout"]
-[connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]
+[node name="ColdBootTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_pu7ty")
+
+[node name="MultiplayerLoadTimer" type="Timer" parent="."]
+wait_time = 0.1
+one_shot = true
+
+[node name="MultiplayerHandler" type="Node" parent="." node_paths=PackedStringArray("game_map")]
+script = ExtResource("75_f35fg")
+game_map = NodePath("../World/GameMap")
+
+[node name="AgentSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
+spawn_path = NodePath("../Agents")
+
+[node name="PickupSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+spawn_path = NodePath("../Pickups")
+
+[node name="WeaponSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+spawn_path = NodePath("../Weapons")
+
+[node name="GrenadeSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+spawn_path = NodePath("../Grenades")
+
+[node name="SmokeSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+spawn_path = NodePath("../Smokes")
+
+[node name="Agents" type="Node3D" parent="."]
+
+[node name="Pickups" type="Node3D" parent="."]
+
+[node name="Weapons" type="Node" parent="."]
+
+[node name="Grenades" type="Node3D" parent="."]
+
+[node name="Smokes" type="Node3D" parent="."]
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 15, 0)
+current = true
+script = ExtResource("2_f2a8t")
+
+[node name="RayCast3D" type="RayCast3D" parent="World/Camera3D"]
+target_position = Vector3(0, 0, -1000)
+debug_shape_custom_color = Color(0.615686, 0.839216, 0, 1)
+debug_shape_thickness = 1
+
+[node name="Label" type="Label" parent="World/Camera3D"]
+visible = false
+offset_right = 40.0
+offset_bottom = 23.0
+theme = ExtResource("5_b0o1h")
+theme_override_font_sizes/font_size = 32
+
+[node name="GameMap" parent="World" instance=ExtResource("2_ow13f")]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
+environment = SubResource("Environment_bedr1")
+
+[node name="ClientsideIndicators" type="Node3D" parent="."]
+
+[node name="RayCasts" type="Node3D" parent="."]
+
+[node name="AudioEvents" type="Node3D" parent="."]
+
+[node name="Popups" type="Node3D" parent="."]
+
 [connection signal="pressed" from="UI/PauseMenu/ColorRect/VBoxContainer/YesForfeit" to="." method="_on_yes_forfeit_pressed"]
 [connection signal="pressed" from="UI/PauseMenu/ColorRect/VBoxContainer/NoForfeit" to="UI" method="_on_no_forfeit_pressed"]
 [connection signal="pressed" from="UI/HUDBase/Execute" to="UI" method="_on_execute_pressed"]
@@ -662,3 +661,5 @@ bus = &"Music"
 [connection signal="decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
 [connection signal="movement_decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_movement_decision_made"]
 [connection signal="no_decision_made" from="UI/HUDSelected/RadialMenu" to="." method="_on_radial_menu_no_decision_made"]
+[connection signal="timeout" from="ColdBootTimer" to="MultiplayerHandler" method="_on_cold_boot_timer_timeout"]
+[connection signal="despawned" from="PickupSpawner" to="." method="_on_pickup_spawner_despawned"]

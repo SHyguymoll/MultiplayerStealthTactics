@@ -342,7 +342,8 @@ func transition_phase():
 						server.exfiltration_queue.append(actual_agent.name)
 			for agent_name in server.exfiltration_queue:
 				(agents.get_node(str(agent_name)) as Agent).exfiltrate()
-			server.track_objective_completion() # objective based updates here
+			if multiplayer.is_server():
+				server.track_objective_completion() # objective based updates here
 		Phases.EXECUTION:
 			ui.hurry_up.visible = false
 			for agent in agent_children():

@@ -365,7 +365,7 @@ func calculate_sight_chance(pos: Vector3, vis_lvl: int): #TODO
 	var dist = clampf(
 		remap(position.distance_to(pos), 0.0, view_dist, 0.0, 1.0),
 		0.0, 1.0)
-	var exponent = ((1.5 * dist)/(log10(visible_level)))
+	var exponent = ((1.5 * dist)/(log10(vis_lvl)))
 	var inv_eye = 1.0/eye_strength
 	return maxf(1.0/(inv_eye**exponent), 0.01)
 
