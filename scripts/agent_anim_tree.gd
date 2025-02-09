@@ -15,6 +15,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	pass
 
+
+@rpc("authority", "call_local", "reliable")
 func _game_step(delta: float):
 	if len(agent.queued_action) > 0 and agent.queued_action[0] != Agent.GameActions.RELOAD_WEAPON:
 		weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), Agent.GENERAL_LERP_VAL)

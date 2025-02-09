@@ -94,15 +94,6 @@ properties/19/replication_mode = 2
 properties/20/path = NodePath(".:step_seen")
 properties/20/spawn = true
 properties/20/replication_mode = 2
-properties/21/path = NodePath("AnimationTree:weapons_animation_blend")
-properties/21/spawn = true
-properties/21/replication_mode = 2
-properties/22/path = NodePath("AnimationTree:parameters/Stand/blend_position")
-properties/22/spawn = true
-properties/22/replication_mode = 2
-properties/23/path = NodePath("AnimationTree:parameters/Crouch/blend_position")
-properties/23/spawn = true
-properties/23/replication_mode = 2
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_3a7ln"]
 animation = &"B_Crawl"

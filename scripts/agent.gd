@@ -503,7 +503,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			GENERAL_LERP_VAL
 	)
 
-	_anim._game_step(delta)
+	_anim._game_step.rpc(delta)
 	visible_level = clamp(visible_level, 0, 100)
 	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
 	# update agent specifically
