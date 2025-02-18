@@ -313,7 +313,6 @@ func _physics_process(delta: float) -> void:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent._game_step(delta)
 				agent.in_smoke = false
-				#agent._debug_label.text = str(agent.target_visible_level) + "\n" + str(agent.noticed) + "\n" + str(current_game_step - agent.step_seen) + " : " + str(agent.step_seen)
 				if current_game_step - agent.step_seen == REMEMBER_TILL and agent.visible:
 					if agent.player_id == 1:
 						set_agent_client_visibility.rpc(agent.name, false)

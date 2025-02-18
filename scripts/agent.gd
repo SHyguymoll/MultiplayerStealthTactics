@@ -39,8 +39,6 @@ const VIS_CONE_BASE = Vector2(0.405, 0.98)
 @onready var _custom_skin_mat : StandardMaterial3D
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat : StandardMaterial3D
-@warning_ignore("unused_private_class_variable")
-@onready var _debug_label : Label3D = $DebugLabel3D
 @onready var _eyes : Area3D = $Eyes
 @onready var _eye_cone : ConvexPolygonShape3D = $Eyes/CollisionShape3D.shape
 @onready var _ears : Area3D = $Ears
@@ -297,54 +295,6 @@ func action_complete(successfully : bool = true, no_flash : bool = false, single
 			flash_outline(Color.GREEN if successfully else Color.RED)
 	queued_action.clear()
 
-
-func debug_setup():
-	# states
-	$DebugValues/DuringGame/StateScroll.min_value = 0
-	$DebugValues/DuringGame/StateScroll.max_value = len(States.keys()) - 1
-	$DebugValues/DuringGame/StateScroll.value = 0
-	$DebugValues/DuringGame/StateScroll.step = 1
-	# eyes
-	$DebugValues/DuringGame/EyeScroll.min_value = 0.05
-	$DebugValues/DuringGame/EyeScroll.max_value = 1
-	$DebugValues/DuringGame/EyeScroll.value = 1
-	$DebugValues/GameSetup/EyeLengthScroll.min_value = 0.5
-	$DebugValues/GameSetup/EyeLengthScroll.max_value = 4.5
-	$DebugValues/GameSetup/EyeLengthScroll.value = 2.5
-	$DebugValues/GameSetup/EyeAcrossScroll.min_value = 0.5
-	$DebugValues/GameSetup/EyeAcrossScroll.max_value = 1.5
-	$DebugValues/GameSetup/EyeAcrossScroll.value = 1
-	# ears
-	$DebugValues/DuringGame/EarScroll.min_value = 0
-	$DebugValues/DuringGame/EarScroll.max_value = 1
-	$DebugValues/DuringGame/EarScroll.value = 1
-	$DebugValues/GameSetup/EarScroll.min_value = 0.25
-	$DebugValues/GameSetup/EarScroll.max_value = 3
-	$DebugValues/GameSetup/EarScroll.value = 1.5
-	# head rotation
-	$DebugValues/DuringGame/HeadScroll.min_value = -(PI * 0.9)/2
-	$DebugValues/DuringGame/HeadScroll.max_value = (PI * 0.9)/2
-	$DebugValues/DuringGame/HeadScroll.value = 0
-	$DebugValues/DuringGame/HeadScroll.step = 0.01
-
-
-func debug_process():
-	$DebugValues/DuringGame/StateLabel.text = States.keys()[state]
-	state = $DebugValues/DuringGame/StateScroll.value
-	view_dist = $DebugValues/GameSetup/EyeLengthScroll.value
-	view_across = $DebugValues/GameSetup/EyeAcrossScroll.value
-	hearing_dist = $DebugValues/GameSetup/EarScroll.value
-
-	eye_strength = $DebugValues/DuringGame/EyeScroll.value
-	#target_head_rot_off_y = $DebugValues/DuringGame/HeadScroll.value
-	$DebugCamera.position = lerp(
-			Vector3(1.56, 0.553, 0.802),
-			Vector3(0.969, 3.016, 0.634),
-			$DebugValues/CameraScroll.value)
-	$DebugCamera.rotation_degrees = lerp(
-			Vector3(0, 61.3, 0),
-			Vector3(-74.9, 61.3, 0.629),
-			$DebugValues/CameraScroll.value)
 
 
 func _ready() -> void:

@@ -1,8 +1,7 @@
-[gd_scene load_steps=89 format=3 uid="uid://oitco668lkwj"]
+[gd_scene load_steps=88 format=3 uid="uid://oitco668lkwj"]
 
 [ext_resource type="Script" path="res://scripts/agent.gd" id="1_qe0u1"]
 [ext_resource type="PackedScene" uid="uid://c2d2uqv4wgbv7" path="res://assets/models/exports/Agent.gltf" id="2_bu3bb"]
-[ext_resource type="FontFile" uid="uid://50pgbui3omif" path="res://assets/fonts/Jersey_25/Jersey25-Regular.ttf" id="3_iugk5"]
 [ext_resource type="Texture2D" uid="uid://cwqah8mx0lopn" path="res://assets/sprites/hud_agent_small/items/analyzer.png" id="4_k5gu7"]
 [ext_resource type="Texture2D" uid="uid://bdnyhebpqwdr6" path="res://assets/sprites/game_popups/spotted.png" id="5_ciyir"]
 [ext_resource type="AudioStream" uid="uid://d0e1mgvv6n3j" path="res://assets/sounds/agent/noticed_sight.wav" id="6_1rg8k"]
@@ -551,92 +550,6 @@ advance_expression_base_node = NodePath("..")
 anim_player = NodePath("../Agent/AnimationPlayer")
 parameters/Crouch/blend_position = Vector2(1, 1)
 parameters/Stand/blend_position = Vector2(1, 1)
-
-[node name="DebugCamera" type="Camera3D" parent="."]
-transform = Transform3D(0.480224, -0.846861, 0.228501, 0, 0.260505, 0.965473, -0.877146, -0.463643, 0.1251, 0.969, 3.016, 0.634)
-
-[node name="DebugValues" type="VBoxContainer" parent="."]
-visible = false
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 89.0
-grow_horizontal = 2
-
-[node name="DuringGame" type="HBoxContainer" parent="DebugValues"]
-layout_mode = 2
-alignment = 1
-
-[node name="StateLabel" type="Label" parent="DebugValues/DuringGame"]
-layout_mode = 2
-
-[node name="StateScroll" type="HScrollBar" parent="DebugValues/DuringGame"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="EyeLabel" type="Label" parent="DebugValues/DuringGame"]
-layout_mode = 2
-text = "EYES"
-
-[node name="EyeScroll" type="HScrollBar" parent="DebugValues/DuringGame"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="EarLabel" type="Label" parent="DebugValues/DuringGame"]
-layout_mode = 2
-text = "EARS"
-
-[node name="EarScroll" type="HScrollBar" parent="DebugValues/DuringGame"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="HeadLabel" type="Label" parent="DebugValues/DuringGame"]
-layout_mode = 2
-text = "HEAD ROTATION"
-
-[node name="HeadScroll" type="HScrollBar" parent="DebugValues/DuringGame"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="GameSetup" type="HBoxContainer" parent="DebugValues"]
-layout_mode = 2
-alignment = 1
-
-[node name="EyeLabel" type="Label" parent="DebugValues/GameSetup"]
-layout_mode = 2
-text = "EYES"
-
-[node name="EyeLengthScroll" type="HScrollBar" parent="DebugValues/GameSetup"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="EyeAcrossScroll" type="HScrollBar" parent="DebugValues/GameSetup"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="EarLabel" type="Label" parent="DebugValues/GameSetup"]
-layout_mode = 2
-text = "EARS"
-
-[node name="EarScroll" type="HScrollBar" parent="DebugValues/GameSetup"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="CameraLabel" type="Label" parent="DebugValues"]
-layout_mode = 2
-text = "Camera Position"
-horizontal_alignment = 1
-
-[node name="CameraScroll" type="HScrollBar" parent="DebugValues"]
-layout_mode = 2
-max_value = 1.0
-
-[node name="DebugLabel3D" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.24062, 0)
-visible = false
-billboard = 1
-font = ExtResource("3_iugk5")
-font_size = 64
-outline_size = 11
 
 [node name="ProneCheck" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17, 0)
