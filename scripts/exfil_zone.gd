@@ -7,6 +7,8 @@ const CLIENT_COL_VAL = 16
 
 const EXFIL_SHADER = preload("res://assets/models/materials/exfil_zone.tres")
 
+const CHECKERBOARD_SIZE = 4.0
+
 const SERV_COLOR = Color(0x8a2be2FF)
 const CLIE_COLOR = Color(0x004700FF)
 const ALL_COLOR = Color(0x808080FF)
@@ -16,6 +18,8 @@ const NONE_COLOR = Color(0x000000FF)
 
 @export var server_can_exfil : bool
 @export var client_can_exfil : bool
+
+@export var exfil_enabled : bool
 
 @onready var collision_zone := $CollisionShape3D
 @onready var rendered_shape := $MeshInstance3D
@@ -37,6 +41,8 @@ func _ready() -> void:
 			CLIE_COLOR if client_can_exfil else NONE_COLOR)
 	((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"oscillation_rate", osc_rate)
 	((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"col_shape", Vector2(collision_shape.x, collision_shape.z))
+	((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"checkerboard_size", CHECKERBOARD_SIZE)
+	((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"checkerboard_gap", 0.0 if exfil_enabled else 0.5)
 
 
 func _process(delta: float) -> void:
@@ -53,3 +59,4 @@ func _process(delta: float) -> void:
 				CLIE_COLOR if client_can_exfil else NONE_COLOR)
 		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"oscillation_rate", osc_rate)
 		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"col_shape", Vector2(collision_shape.x, collision_shape.z))
+		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"checkerboard_gap", 0.0 if exfil_enabled else 0.5)

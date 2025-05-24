@@ -5,16 +5,18 @@
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ycwvl"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_12vj6"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7xx5s"]
 render_priority = 0
 shader = ExtResource("3_x58t7")
 shader_parameter/oscillation_rate = 1.0
 shader_parameter/color = Color(0, 0, 0, 1)
 shader_parameter/edge = 0.1
 shader_parameter/col_shape = Vector2(1, 1)
+shader_parameter/checkerboard_size = 4.0
+shader_parameter/checkerboard_gap = 0.5
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_axpnq"]
-material = SubResource("ShaderMaterial_12vj6")
+[sub_resource type="PlaneMesh" id="PlaneMesh_6j5xt"]
+material = SubResource("ShaderMaterial_7xx5s")
 size = Vector2(1, 1)
 subdivide_width = 8
 subdivide_depth = 8
@@ -30,4 +32,4 @@ shape = SubResource("BoxShape3D_ycwvl")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
-mesh = SubResource("PlaneMesh_axpnq")
+mesh = SubResource("PlaneMesh_6j5xt")
