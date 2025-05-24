@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://cmp5i0lkbpfbn"]
 
-[ext_resource type="Script" path="res://scripts/exfil_zone.gd" id="1_cde5i"]
+[ext_resource type="Script" uid="uid://d30ga01c4alon" path="res://scripts/exfil_zone.gd" id="1_cde5i"]
 [ext_resource type="Shader" uid="uid://7k1e88u2c1y2" path="res://assets/models/materials/exfil_zone.tres" id="3_x58t7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ycwvl"]

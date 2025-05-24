@@ -1,7 +1,7 @@
 [gd_scene load_steps=78 format=3 uid="uid://ch5a0i5hokoj8"]
 
-[ext_resource type="Script" path="res://scripts/Game.gd" id="1_re23i"]
-[ext_resource type="Script" path="res://scripts/game_camera.gd" id="2_f2a8t"]
+[ext_resource type="Script" uid="uid://dwwjm28230hxa" path="res://scripts/Game.gd" id="1_re23i"]
+[ext_resource type="Script" uid="uid://lcj6llj6mdc7" path="res://scripts/game_camera.gd" id="2_f2a8t"]
 [ext_resource type="PackedScene" uid="uid://mr6n3d2nksvr" path="res://scenes/maps/game_map.tscn" id="2_ow13f"]
 [ext_resource type="PackedScene" uid="uid://d4hiq2jbaabj5" path="res://scenes/hud_radial_menu.tscn" id="2_xp2mg"]
 [ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="5_b0o1h"]
@@ -320,31 +320,31 @@ game_map = NodePath("World/GameMap")
 [node name="Agents" type="Node3D" parent="."]
 
 [node name="AgentSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/agent.tscn")
+_spawnable_scenes = PackedStringArray("uid://oitco668lkwj")
 spawn_path = NodePath("../Agents")
 
 [node name="Pickups" type="Node3D" parent="."]
 
 [node name="PickupSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+_spawnable_scenes = PackedStringArray("uid://bokbyc6n8xxeu")
 spawn_path = NodePath("../Pickups")
 
 [node name="Weapons" type="Node" parent="."]
 
 [node name="WeaponSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+_spawnable_scenes = PackedStringArray("uid://bokbyc6n8xxeu")
 spawn_path = NodePath("../Weapons")
 
 [node name="Grenades" type="Node3D" parent="."]
 
 [node name="GrenadeSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+_spawnable_scenes = PackedStringArray("uid://bokbyc6n8xxeu")
 spawn_path = NodePath("../Grenades")
 
 [node name="Smokes" type="Node3D" parent="."]
 
 [node name="SmokeSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://scenes/weapon_pickup.tscn")
+_spawnable_scenes = PackedStringArray("uid://bokbyc6n8xxeu")
 spawn_path = NodePath("../Smokes")
 
 [node name="World" type="Node3D" parent="."]

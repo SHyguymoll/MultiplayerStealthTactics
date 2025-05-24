@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://ckcsdsq46mb4p"]
 
-[ext_resource type="Script" path="res://scripts/spawn_point.gd" id="1_actow"]
+[ext_resource type="Script" uid="uid://c2p8mcp2mqc3k" path="res://scripts/spawn_point.gd" id="1_actow"]
 [ext_resource type="Texture2D" uid="uid://d4mlypqhq31vj" path="res://assets/sprites/game_popups/debug_agspawn_client.png" id="2_pourx"]
 
 [node name="SpawnPoint" type="Node3D"]

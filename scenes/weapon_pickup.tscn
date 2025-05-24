@@ -1,6 +1,6 @@
 [gd_scene load_steps=39 format=4 uid="uid://bokbyc6n8xxeu"]
 
-[ext_resource type="Script" path="res://scripts/game_weapon_pickup.gd" id="2_hqexf"]
+[ext_resource type="Script" uid="uid://dl7467vf36wgw" path="res://scripts/game_weapon_pickup.gd" id="2_hqexf"]
 [ext_resource type="Texture2D" uid="uid://rknp5rllix1t" path="res://assets/models/exports/textures/palettething.png" id="3_e8605"]
 [ext_resource type="Material" uid="uid://6kvgqc45bkpu" path="res://assets/models/materials/agent_outline.tres" id="3_edff4"]
 [ext_resource type="Material" uid="uid://bp6trppwv7l7l" path="res://assets/models/materials/map_element_outline.tres" id="4_4c4f3"]

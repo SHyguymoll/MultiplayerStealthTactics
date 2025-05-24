@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://brtbfw2plui6g"]
 
-[ext_resource type="Script" path="res://scripts/smoke.gd" id="1_upq5s"]
+[ext_resource type="Script" uid="uid://ca5je6h2numq5" path="res://scripts/smoke.gd" id="1_upq5s"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_32g65"]
 radius = 3.5

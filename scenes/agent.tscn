@@ -1,6 +1,6 @@
 [gd_scene load_steps=88 format=3 uid="uid://oitco668lkwj"]
 
-[ext_resource type="Script" path="res://scripts/agent.gd" id="1_qe0u1"]
+[ext_resource type="Script" uid="uid://daf3tjtdy7ln7" path="res://scripts/agent.gd" id="1_qe0u1"]
 [ext_resource type="PackedScene" uid="uid://c2d2uqv4wgbv7" path="res://assets/models/exports/Agent.gltf" id="2_bu3bb"]
 [ext_resource type="Texture2D" uid="uid://cwqah8mx0lopn" path="res://assets/sprites/hud_agent_small/items/analyzer.png" id="4_k5gu7"]
 [ext_resource type="Texture2D" uid="uid://bdnyhebpqwdr6" path="res://assets/sprites/game_popups/spotted.png" id="5_ciyir"]

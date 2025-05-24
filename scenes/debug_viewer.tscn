@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://cqxyjrd5ehma8"]
 
-[ext_resource type="Script" path="res://scripts/debug_viewer.gd" id="1_ll1kf"]
+[ext_resource type="Script" uid="uid://cjrikd1c2xkav" path="res://scripts/debug_viewer.gd" id="1_ll1kf"]
 [ext_resource type="FontFile" uid="uid://50pgbui3omif" path="res://assets/fonts/Jersey_25/Jersey25-Regular.ttf" id="2_sfgqo"]
 [ext_resource type="PackedScene" uid="uid://oitco668lkwj" path="res://scenes/agent.tscn" id="3_t1s3w"]
 

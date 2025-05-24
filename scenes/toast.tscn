@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://b5e7r1vbpllv5"]
 
 [ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="1_f1uw1"]
-[ext_resource type="Script" path="res://scripts/game_toast.gd" id="1_kbu1w"]
+[ext_resource type="Script" uid="uid://6tr87tj825uv" path="res://scripts/game_toast.gd" id="1_kbu1w"]
 [ext_resource type="AudioStream" uid="uid://c1racinscro6b" path="res://assets/sounds/menu/toast_progress.wav" id="3_bhypg"]
 
 [node name="Toast" type="Label"]

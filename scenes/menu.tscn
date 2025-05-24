@@ -1,7 +1,7 @@
 [gd_scene load_steps=82 format=3 uid="uid://tpqpwqi5p3an"]
 
 [ext_resource type="Theme" uid="uid://d0mg34cbak5t1" path="res://assets/themes/ui.tres" id="1_s0wmi"]
-[ext_resource type="Script" path="res://scripts/menu.gd" id="1_y43yw"]
+[ext_resource type="Script" uid="uid://dfqt85rqoajw1" path="res://scripts/menu.gd" id="1_y43yw"]
 [ext_resource type="Texture2D" uid="uid://cm1j5ov30v5ah" path="res://assets/ui/logos/MST_Logo_Transparent.png" id="3_hbl0t"]
 [ext_resource type="Texture2D" uid="uid://cp2fo0iw6giig" path="res://assets/sprites/hud_agent_small/items/box.png" id="4_88vtr"]
 [ext_resource type="Texture2D" uid="uid://dvluc888xwefq" path="res://assets/sprites/hud_agent_small/items/body_armor.png" id="5_0dyx8"]

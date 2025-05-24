@@ -100,12 +100,12 @@ default_value_enabled = true
 default_value = 1.0
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_io2jf"]
-size = Vector2(1464, 398)
+size = Vector2(1464, 583)
 title = "PulsingLight"
 attached_nodes = PackedInt32Array(29, 30, 7, 25, 32, 31, 28, 27, 26)
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_oplp8"]
-size = Vector2(2044, 998)
+size = Vector2(2044, 1183)
 title = "CreateEdges"
 attached_nodes = PackedInt32Array(5, 17, 19, 24, 23, 22, 21, 20, 18, 16, 15, 14, 13, 12, 11, 9, 6)
 
@@ -131,7 +131,7 @@ linked_parent_graph_frame = 34
 code = "shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
 
-uniform float oscillation_rate = 1;
+uniform float oscillation_rate = 1.0;
 uniform vec4 color : source_color;
 uniform float edge = 0.10000000149012;
 uniform vec2 col_shape = vec2(1.000000, 1.000000);
@@ -261,6 +261,7 @@ void fragment() {
 
 }
 "
+graph_offset = Vector2(130.839, 138.895)
 nodes/vertex/0/position = Vector2(520, 160)
 nodes/fragment/0/position = Vector2(1380, -220)
 nodes/fragment/5/node = SubResource("VisualShaderNodeInput_qefe8")

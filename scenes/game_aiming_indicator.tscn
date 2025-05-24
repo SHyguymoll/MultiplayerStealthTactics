@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dfphyu7r7m07o" path="res://assets/sprites/game_popups/animated/aiming/3.png" id="4_42jvv"]
 [ext_resource type="Texture2D" uid="uid://o1e60rw5jlih" path="res://assets/sprites/game_popups/animated/movement/fail.png" id="5_tmjgr"]
 [ext_resource type="Texture2D" uid="uid://86gycgkrmhxo" path="res://assets/sprites/game_popups/animated/movement/checkmark.png" id="6_o8ddq"]
-[ext_resource type="Script" path="res://scripts/game_aiming_indicator.gd" id="7_l8n8m"]
+[ext_resource type="Script" uid="uid://bgl7uxjfppcj6" path="res://scripts/game_aiming_indicator.gd" id="7_l8n8m"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_akm5w"]
 animations = [{

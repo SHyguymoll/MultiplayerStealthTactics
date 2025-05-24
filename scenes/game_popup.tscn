@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cg4d2ckwhy0bx"]
 
-[ext_resource type="Script" path="res://scripts/game_popup.gd" id="1_xs4qa"]
+[ext_resource type="Script" uid="uid://mcr1ia6k3ly0" path="res://scripts/game_popup.gd" id="1_xs4qa"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_kgyoq"]
 height = 7.0
