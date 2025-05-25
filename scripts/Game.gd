@@ -103,8 +103,6 @@ func _ready(): # Preconfigure game.
 	Lobby.player_disconnected.connect(player_quits)
 	if not multiplayer.is_server():
 		client_is_loaded.rpc_id(1)
-	else:
-		set_start_time.rpc(str(int(Time.get_unix_time_from_system())))
 
 @rpc("authority", "call_local")
 func set_start_time(val):
@@ -118,6 +116,7 @@ func client_is_loaded():
 func start_game(): # Called only on the server.
 	await ($MultiplayerLoadTimer as Timer).timeout # wait for client to load in
 	ping.rpc()
+	set_start_time.rpc(str(int(Time.get_unix_time_from_system())))
 	server_populate_variables()
 	force_camera.rpc_id(
 		GameSettings.other_player_id,
