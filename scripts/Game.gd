@@ -1284,10 +1284,10 @@ func _on_execute_pressed() -> void:
 
 
 func _on_cold_boot_timer_timeout() -> void:
-	_update_game_phase(GamePhases.SELECTION, false)
-	animate_fade(false)
 	if not multiplayer.is_server():
 		return
+	animate_fade.rpc(false)
+	_update_game_phase(GamePhases.SELECTION, false)
 	var data : Dictionary
 	data.pickup = {}
 	data.pickup.generate_weapon = true
