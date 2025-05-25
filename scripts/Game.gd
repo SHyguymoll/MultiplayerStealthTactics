@@ -87,7 +87,7 @@ func _ready(): # Preconfigure game.
 	weapon_spawner.spawn_function = create_weapon
 	grenade_spawner.spawn_function = create_grenade
 	smoke_spawner.spawn_function = create_smoke
-	start_time = str(int(Time.get_unix_time_from_system()))
+
 	$FadeOut.visible = true
 	$FadeOut/ColorRect.modulate = Color.WHITE
 	$HUDBase/HurryUp.visible = false
@@ -98,10 +98,18 @@ func _ready(): # Preconfigure game.
 	else:
 		$HUDBase/ServerPlayerName.text = GameSettings.other_player_name
 		$HUDBase/ClientPlayerName.text = Lobby.player_info.name
+
 	Lobby.player_loaded.rpc_id(1) # Tell the server that this peer has loaded.
 	Lobby.player_disconnected.connect(player_quits)
 	if not multiplayer.is_server():
 		client_is_loaded.rpc_id(1)
+	else:
+		set_start_time.rpc(str(int(Time.get_unix_time_from_system())))
+
+@rpc("authority", "call_local")
+func set_start_time(val):
+	start_time = val
+
 
 @rpc("any_peer")
 func client_is_loaded():
