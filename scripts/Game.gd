@@ -175,7 +175,7 @@ func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = fal
 func update_text() -> void:
 	_ag_insts.text = ""
 	for agent in ($Agents.get_children() as Array[Agent]):
-		if agent.is_multiplayer_authority():
+		if agent.owned():
 			_ag_insts.text += agent.action_text + "\n"
 
 func determine_sights():
@@ -522,7 +522,7 @@ func create_agent(data) -> Agent: #TODO
 
 	new_agent.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
 	new_agent.rotation.y = data.rot_y
-	new_agent.set_multiplayer_authority(data.player_id)
+	#new_agent.set_multiplayer_authority(data.player_id)
 	new_agent.player_id = data.player_id
 	new_agent.health = data.agent_stats.health
 	new_agent.stun_health = data.agent_stats.stun_health
@@ -808,7 +808,7 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Crawling"
 		null:
 			ref_ag.queued_action = []
-	if ref_ag.is_multiplayer_authority():
+	if ref_ag.owned():
 		ref_ag.action_text = final_text_string
 	update_text()
 	_execute_button.visible = true
@@ -843,7 +843,7 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.CRAWL_TO_POS:
 			final_text_string = "{0}: Crawl ".format([clean_name])
 	final_text_string += "to New Position"
-	if ref_ag.is_multiplayer_authority():
+	if ref_ag.owned():
 		ref_ag.action_text = final_text_string
 	update_text()
 	_execute_button.visible = true
@@ -877,7 +877,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
 				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
-	if ref_ag.is_multiplayer_authority():
+	if ref_ag.owned():
 		ref_ag.action_text = final_text_string
 	update_text()
 	_execute_button.visible = true
@@ -889,69 +889,72 @@ func _on_radial_menu_no_decision_made() -> void:
 	_execute_button.disabled = false
 
 
-@rpc("authority", "call_local", "reliable")
+@rpc("authority", "call_local")
+func do_round_ended_stuff():
+	_round_ended.play()
+	_phase_label.text = "SELECT ACTIONS"
+	_execute_button.disabled = false
+	_execute_button.text = "EXECUTE INSTRUCTIONS"
+
+# called by the server to update the game state and rpc to the client
 func _update_game_phase(new_phase: GamePhases, check_incap := true):
 	await get_tree().create_timer(0.1).timeout
 	game_phase = new_phase
 	match new_phase:
 		GamePhases.SELECTION:
-			_round_ended.play()
-			_phase_label.text = "SELECT ACTIONS"
-			_execute_button.disabled = false
-			_execute_button.text = "EXECUTE INSTRUCTIONS"
-			if multiplayer.is_server(): # update exfiltrations
-				if server_progress == ProgressParts.ITEM_HELD:
-					var can_exfil = false
-					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						for weap in actual_agent.held_weapons:
-							if (weap as String).begins_with("map_"):
-								can_exfil = true
-								break
-						if can_exfil:
+			do_round_ended_stuff.rpc()
+			# update exfiltrations
+			if server_progress == ProgressParts.ITEM_HELD:
+				var can_exfil = false
+				for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+					var actual_agent : Agent = detect.get_parent()
+					if actual_agent.state == Agent.States.DEAD:
+						continue
+					for weap in actual_agent.held_weapons:
+						if (weap as String).begins_with("map_"):
+							can_exfil = true
 							break
 					if can_exfil:
-						for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
-							var actual_agent : Agent = detect.get_parent()
-							if actual_agent.state == Agent.States.DEAD:
-								continue
-							exfiltration_queue.append(actual_agent.name)
-				elif server_progress == ProgressParts.OBJECTIVE_COMPLETE:
+						break
+				if can_exfil:
 					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
 						var actual_agent : Agent = detect.get_parent()
 						if actual_agent.state == Agent.States.DEAD:
 							continue
 						exfiltration_queue.append(actual_agent.name)
-				if client_progress == ProgressParts.ITEM_HELD:
-					var can_exfil = false
-					for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						for weap in actual_agent.held_weapons:
-							if (weap as String).begins_with("map_"):
-								can_exfil = true
-								break
-						if can_exfil:
+			elif server_progress == ProgressParts.OBJECTIVE_COMPLETE:
+				for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+					var actual_agent : Agent = detect.get_parent()
+					if actual_agent.state == Agent.States.DEAD:
+						continue
+					exfiltration_queue.append(actual_agent.name)
+			if client_progress == ProgressParts.ITEM_HELD:
+				var can_exfil = false
+				for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+					var actual_agent : Agent = detect.get_parent()
+					if actual_agent.state == Agent.States.DEAD:
+						continue
+					for weap in actual_agent.held_weapons:
+						if (weap as String).begins_with("map_"):
+							can_exfil = true
 							break
 					if can_exfil:
-						for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
-							var actual_agent : Agent = detect.get_parent()
-							if actual_agent.state == Agent.States.DEAD:
-								continue
-							exfiltration_queue.append(actual_agent.name)
-				elif client_progress == ProgressParts.OBJECTIVE_COMPLETE:
+						break
+				if can_exfil:
 					for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
 						var actual_agent : Agent = detect.get_parent()
 						if actual_agent.state == Agent.States.DEAD:
 							continue
 						exfiltration_queue.append(actual_agent.name)
+			elif client_progress == ProgressParts.OBJECTIVE_COMPLETE:
+				for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+					var actual_agent : Agent = detect.get_parent()
+					if actual_agent.state == Agent.States.DEAD:
+						continue
+					exfiltration_queue.append(actual_agent.name)
 			for agent_name in exfiltration_queue:
 				($Agents.get_node(str(agent_name)) as Agent).exfiltrate()
-			if multiplayer.is_server():
-				track_objective_completion() # objective based updates here
+			track_objective_completion() # objective based updates here
 			# create selectors and otherwise prepare for selection
 			var server_team_dead = true
 			var client_team_dead = true
@@ -960,7 +963,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				ag.ungrabbable = false
 				if multiplayer.is_server():
 					set_agent_action.rpc(ag.name, [])
-				if ag.is_multiplayer_authority() and not ag.in_incapacitated_state():
+				if ag.owned() and not ag.in_incapacitated_state():
 					create_agent_selector(ag)
 					ag.flash_outline(Color.ORCHID)
 				if ag.state != Agent.States.DEAD:
@@ -985,8 +988,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			# populate agents with actions, as well as action_timeline
 			for agent in ($Agents.get_children() as Array[Agent]):
 				agent.agent_is_done.rpc(Agent.ActionDoneness.NOT_DONE)
-				if multiplayer.is_server():
-					append_action_timeline(agent)
+				append_action_timeline(agent)
 				agent.perform_action()
 			await get_tree().create_timer(0.10).timeout
 		GamePhases.COMPLETION:

@@ -308,10 +308,10 @@ properties/1/spawn = true
 properties/1/replication_mode = 2
 properties/2/path = NodePath(".:server_progress")
 properties/2/spawn = true
-properties/2/replication_mode = 1
+properties/2/replication_mode = 2
 properties/3/path = NodePath(".:client_progress")
 properties/3/spawn = true
-properties/3/replication_mode = 1
+properties/3/replication_mode = 2
 
 [node name="Game" type="Node3D" node_paths=PackedStringArray("game_map")]
 script = ExtResource("1_re23i")
@@ -381,6 +381,7 @@ environment = SubResource("Environment_bedr1")
 
 [node name="PauseMenu" type="CanvasLayer" parent="."]
 layer = 100
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="PauseMenu"]
 anchors_preset = 8
@@ -448,6 +449,7 @@ text = "NO"
 
 [node name="FadeOut" type="CanvasLayer" parent="."]
 layer = 90
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="FadeOut"]
 anchors_preset = 15
