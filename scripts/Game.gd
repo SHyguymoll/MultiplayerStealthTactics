@@ -160,7 +160,7 @@ func create_sound_effect(location : Vector3, player_id : int, lifetime : int, _m
 	new_audio_event.selected_audio = sound_id
 	$AudioEvents.add_child(new_audio_event)
 
-
+@rpc()
 func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void:
 	location.y = 3.0
 	var new_popup : GamePopup = popup_scene.instantiate()
@@ -298,22 +298,18 @@ func determine_indicator_removals():
 func _physics_process(delta: float) -> void:
 	_server_progress.value = lerpf(_server_progress.value, float(server_progress), 0.2)
 	_client_progress.value = lerpf(_client_progress.value, float(client_progress), 0.2)
-	match game_phase:
-		GamePhases.SELECTION:
-			var game_is_actually_over_check = false
-			for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
-				if selector.referenced_agent == null: # the only case where the agent is null is the one where the node was destroyed by the server disconnecting
-					game_is_actually_over_check = true
-					for selector_to_free in $HUDSelectors.get_children() as Array[AgentSelector]:
-						selector_to_free.queue_free()
-					break
-				selector.position = (
-			$World/Camera3D as Camera3D).unproject_position(
-					selector.referenced_agent.position)
-				(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
-			if game_is_actually_over_check:
-				_update_game_phase(GamePhases.COMPLETION)
-		GamePhases.EXECUTION:
+	if game_phase == GamePhases.SELECTION:
+		for selector in $HUDSelectors.get_children() as Array[AgentSelector]:
+			if selector.referenced_agent == null: # the only case where the agent is null is the one where the node was destroyed by the server disconnecting
+				for selector_to_free in $HUDSelectors.get_children() as Array[AgentSelector]:
+					selector_to_free.queue_free()
+				break
+			selector.position = (
+		$World/Camera3D as Camera3D).unproject_position(
+				selector.referenced_agent.position)
+			(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
+	if multiplayer.is_server():
+		if game_phase == GamePhases.EXECUTION:
 			determine_cqc_events()
 			determine_weapon_events()
 			for agent in ($Agents.get_children() as Array[Agent]):
@@ -322,13 +318,11 @@ func _physics_process(delta: float) -> void:
 				if current_game_step - agent.step_seen == REMEMBER_TILL and agent.visible:
 					if agent.player_id == 1:
 						set_agent_client_visibility.rpc(agent.name, false)
-						if not multiplayer.is_server():
-							create_popup(GameRefs.POPUP.sight_unknown, agent.position)
+						create_popup.rpc_id(GameSettings.other_player_id, GameRefs.POPUP.sight_unknown, agent.position)
 					else:
 						set_agent_server_visibility.rpc(agent.name, false)
-						if multiplayer.is_server():
-							create_popup(GameRefs.POPUP.sight_unknown, agent.position)
-				if len(agent.mark_for_drop) > 0 and multiplayer.is_server():
+						create_popup(GameRefs.POPUP.sight_unknown, agent.position)
+				if len(agent.mark_for_drop) > 0:
 					var new_drop = {
 						pos_x = agent.mark_for_drop.position.x,
 						pos_y = agent.mark_for_drop.position.y,
@@ -342,11 +336,11 @@ func _physics_process(delta: float) -> void:
 					if multiplayer.is_server():
 						remove_weapon_from_agent.rpc(agent.name, agent.mark_for_drop.wep_node)
 					agent.mark_for_drop.clear()
-				if multiplayer.is_server() and agent.try_grab_pickup and len(agent.queued_action) > 1:
+				if agent.try_grab_pickup and len(agent.queued_action) > 1:
 					if $Pickups.get_node_or_null(str(agent.queued_action[1])) != null:
 						$Pickups.get_node(str(agent.queued_action[1])).queue_free()
 					agent.try_grab_pickup = false
-				if multiplayer.is_server() and agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
+				if agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
 					var new_drop = {
 						pos_x = agent.global_position.x + (randf() - 0.5),
 						pos_y = agent.global_position.y,
@@ -357,7 +351,7 @@ func _physics_process(delta: float) -> void:
 					}
 					pickup_spawner.spawn(new_drop)
 					remove_weapon_from_agent.rpc(agent.name, new_drop.wep_name)
-				if multiplayer.is_server() and agent.mark_for_grenade_throw:
+				if agent.mark_for_grenade_throw:
 					var try_name = agent.held_weapons[agent.selected_weapon]
 					while try_name in grenades_in_existence:
 						try_name += "N"
@@ -385,11 +379,9 @@ func _physics_process(delta: float) -> void:
 								var attacked : Agent = exploded.get_parent()
 								if attacked.in_prone_state():
 									continue # prone agents dodge explosions for Reasons™
-								if multiplayer.is_server():
-									damage_agent.rpc(attacked.name, 2, false)
-									create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
-							if multiplayer.is_server():
-								create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
+								damage_agent.rpc(attacked.name, 2, false)
+								create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
+							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
 						"grenade_smoke":
 							smoke_spawner.spawn({
 								pos_x = grenade.position.x,
@@ -397,11 +389,9 @@ func _physics_process(delta: float) -> void:
 								pos_z = grenade.position.z,
 								wep_name = grenade.name,
 							})
-							if multiplayer.is_server():
-								create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
+							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
 						"grenade_noise":
-							if multiplayer.is_server():
-								create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
+							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
 					if multiplayer.is_server():
 						grenades_in_existence.erase(grenade.name)
 						grenade.queue_free()
@@ -409,21 +399,19 @@ func _physics_process(delta: float) -> void:
 				smoke._tick()
 				for caught in smoke.col_area.get_overlapping_areas():
 					caught.get_parent().in_smoke = true
-				if multiplayer.is_server() and smoke.lifetime > 205:
+				if smoke.lifetime > 205:
 					smoke.queue_free()
 			for pickup in ($Pickups.get_children() as Array[WeaponPickup]):
 				pickup._animate(delta)
-			#if multiplayer.is_server():
 			current_game_step += 1
 			determine_sights()
 			determine_sounds()
 			determine_indicator_removals()
-			if multiplayer.is_server():
-				for agent in ($Agents.get_children() as Array[Agent]):
-					if agent.action_done == Agent.ActionDoneness.NOT_DONE:
-						return
-				_update_game_phase.rpc(GamePhases.SELECTION)
-		GamePhases.COMPLETION:
+			for agent in ($Agents.get_children() as Array[Agent]):
+				if agent.action_done == Agent.ActionDoneness.NOT_DONE:
+					return
+			_update_game_phase.rpc(GamePhases.SELECTION)
+		elif game_phase == GamePhases.COMPLETION:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				ag.visible = true
 				ag.queued_action.clear()
