@@ -76,7 +76,6 @@ enum ProgressParts {
 
 var start_time : String
 var end_time : String
-var sent_final_message = false
 var sent_reward = false
 
 func _ready(): # Preconfigure game.
@@ -959,8 +958,13 @@ func _exfiltrate_agents():
 	for agent in exfiltration_queue:
 		agent.exfiltrate()
 
-func _reward_():
-	pass
+@rpc()
+func create_end_screen():
+	$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
+	open_pause_menu()
+	$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
+	$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
+
 
 # called by the server to update the game state and rpc things to the client
 func _update_game_phase(new_phase: GamePhases, check_incap := true):
@@ -994,8 +998,8 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 			execution_ui.rpc()
 		# determine progress made by agents, choose winner if applicable
 		GamePhases.COMPLETION:
-			# update completion percentages
-
+			if sent_reward:
+				return
 			# who's escaping now
 			_exfiltrate_agents()
 			# has a team fully died
@@ -1008,7 +1012,6 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 					else:
 						client_team_dead = false
 			if server_team_dead and not client_team_dead:
-				pass
 				create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
 				reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
 				victory_jingle.rpc()
@@ -1023,73 +1026,35 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				sent_reward = true
 				# handle server win
 			elif server_team_dead and client_team_dead:
-				pass
 				create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
 				failure_jingle()
 				failure_jingle.rpc()
 				sent_reward = true
 			# how's the objective looking
-			not player_has_won(server_team_dead, client_team_dead)
+			_track_objective_completion()
+			if server_progress == ProgressParts.SURVIVORS_EXFILTRATED:
+				reward_team(1)
+				victory_jingle()
+				failure_jingle.rpc()
+				sent_reward = true
+			if client_progress == ProgressParts.SURVIVORS_EXFILTRATED:
+				reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
+				victory_jingle.rpc()
+				failure_jingle()
+				sent_reward = true
+			if sent_reward:
+				save_replay.rpc(str(int(Time.get_unix_time_from_system())))
+				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
+				animate_fade.rpc()
+				create_end_screen.rpc()
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	#match new_phase:
-		#GamePhases.COMPLETION:
-			#if : # win conditions
-				#show_hud()
-				#if $HUDSelectors.get_child_count() == 0 and check_incap:
-					#_on_execute_pressed() # run execute since the player can't do anything
-			#else:
-				#save_replay()
-				#if multiplayer.is_server() and not sent_final_message:
-					#create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
-					#animate_fade.rpc()
-					#sent_final_message = true
-				#$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
-				#open_pause_menu()
-				#$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
-				#$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
-
-
-func save_replay():
+@rpc("authority", "call_local")
+func save_replay(end_time):
 	action_timeline[current_game_step] = "END"
-	end_time = str(int(Time.get_unix_time_from_system()))
 	if DirAccess.open("user://replays") == null:
 		DirAccess.make_dir_absolute("user://replays")
 	var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
@@ -1253,31 +1218,6 @@ func failure_jingle():
 	$FadeOut/ColorRect/AnimatedSprite2D.play("failure")
 
 
-func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
-	return all_server_dead or all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED or client_progress == ProgressParts.SURVIVORS_EXFILTRATED
-	if all_server_dead and all_client_dead and multiplayer.is_server() and not sent_reward:
-		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
-		failure_jingle()
-		failure_jingle.rpc()
-		sent_reward = true
-	if not all_client_dead and (all_server_dead or client_progress == ProgressParts.SURVIVORS_EXFILTRATED):
-		if multiplayer.is_server() and not sent_reward:
-			if all_server_dead:
-				create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
-			print("REWARDING CLIENT TEAM")
-			reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
-			victory_jingle.rpc()
-			failure_jingle()
-			sent_reward = true
-	if not all_server_dead and (all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED):
-		if multiplayer.is_server() and not sent_reward:
-			if all_client_dead:
-				create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
-			print("REWARDING SERVER TEAM")
-			reward_team(1)
-			victory_jingle()
-			failure_jingle.rpc()
-			sent_reward = true
 
 
 @rpc("authority", "reliable")
@@ -1407,7 +1347,7 @@ func _on_pickup_spawner_despawned(node: Node) -> void:
 func _on_yes_forfeit_pressed() -> void:
 	if multiplayer.has_multiplayer_peer():
 		multiplayer.multiplayer_peer.close()
-	save_replay()
+	save_replay(str(int(Time.get_unix_time_from_system())))
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 
