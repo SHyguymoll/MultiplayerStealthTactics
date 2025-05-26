@@ -589,7 +589,8 @@ func create_pickup(data) -> WeaponPickup:
 
 
 @rpc()
-func create_agent_selector(agent : Agent):
+func create_agent_selector(agent_name : String):
+	var agent : Agent = $Agents.get_node(agent_name)
 	# check if selector already exists
 	for s in ($HUDSelectors.get_children() as Array[AgentSelector]):
 		if s.referenced_agent == agent:
@@ -967,10 +968,10 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				ag.queued_action.clear()
 				if not ag.in_incapacitated_state():
 					if ag.owned():
-						create_agent_selector(ag)
+						create_agent_selector(ag.name)
 						ag.flash_outline(Color.ORCHID)
 					else:
-						create_agent_selector.rpc_id(GameSettings.other_player_id, ag)
+						create_agent_selector.rpc_id(GameSettings.other_player_id, ag.name)
 						ag.flash_outline.rpc_id(GameSettings.other_player_id, Color.ORCHID)
 			selection_ui.rpc()
 		# hide & disable selection mode stuff, start agent actions
