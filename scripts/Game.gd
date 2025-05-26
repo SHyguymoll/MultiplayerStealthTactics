@@ -53,7 +53,7 @@ enum ProgressParts {
 @export var client_progress : ProgressParts = ProgressParts.INTRO
 
 @export var grenades_in_existence = []
-@export var exfiltration_queue = []
+@export var exfiltration_queue : Array[Agent] = []
 
 @onready var _camera : GameCamera = $World/Camera3D
 @onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
@@ -601,6 +601,7 @@ func create_pickup(data) -> WeaponPickup:
 	return new_pickup
 
 
+@rpc()
 func create_agent_selector(agent : Agent):
 	# check if selector already exists
 	for s in ($HUDSelectors.get_children() as Array[AgentSelector]):
@@ -890,117 +891,200 @@ func _on_radial_menu_no_decision_made() -> void:
 
 
 @rpc("authority", "call_local")
-func do_round_ended_stuff():
+func selection_ui():
 	_round_ended.play()
 	_phase_label.text = "SELECT ACTIONS"
 	_execute_button.disabled = false
 	_execute_button.text = "EXECUTE INSTRUCTIONS"
+	show_hud()
 
-# called by the server to update the game state and rpc to the client
+@rpc("authority", "call_local")
+func execution_ui():
+	$HUDBase/HurryUp.visible = false
+	update_text()
+	_phase_label.text = "EXECUTING ACTIONS..."
+
+# called by the server to handle exfiltrations
+func _exfiltrate_agents():
+	match server_progress:
+		ProgressParts.ITEM_HELD:
+			var exfil_available = false
+			for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+				var agent : Agent = detect.get_parent()
+				if agent.in_incapacitated_state():
+					continue
+				for weap in agent.held_weapons:
+					if (weap as String).begins_with("map_"):
+						exfil_available = true
+						break
+				if exfil_available:
+					break
+			if exfil_available:
+				for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+					var agent : Agent = detect.get_parent()
+					if agent.in_incapacitated_state():
+						continue
+					exfiltration_queue.append(agent)
+		ProgressParts.OBJECTIVE_COMPLETE:
+			for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+				var agent : Agent = detect.get_parent()
+				if agent.in_incapacitated_state():
+					continue
+				exfiltration_queue.append(agent)
+	match client_progress:
+		ProgressParts.ITEM_HELD:
+			var exfil_available = false
+			for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+				var agent : Agent = detect.get_parent()
+				if agent.state == Agent.States.DEAD:
+					continue
+				for weap in agent.held_weapons:
+					if (weap as String).begins_with("map_"):
+						exfil_available = true
+						break
+				if exfil_available:
+					break
+			if exfil_available:
+				for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+					var agent : Agent = detect.get_parent()
+					if agent.in_incapacitated_state():
+						continue
+					exfiltration_queue.append(agent)
+		ProgressParts.OBJECTIVE_COMPLETE:
+			for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+				var agent : Agent = detect.get_parent()
+				if agent.in_incapacitated_state():
+					continue
+				exfiltration_queue.append(agent)
+	for agent in exfiltration_queue:
+		agent.exfiltrate()
+
+func _reward_():
+	pass
+
+# called by the server to update the game state and rpc things to the client
 func _update_game_phase(new_phase: GamePhases, check_incap := true):
-	await get_tree().create_timer(0.1).timeout
+	#await get_tree().create_timer(0.1).timeout
 	game_phase = new_phase
-	match new_phase:
+	match game_phase:
+		# create/direct ui for both players to set up selection mode
 		GamePhases.SELECTION:
-			do_round_ended_stuff.rpc()
-			# update exfiltrations
-			if server_progress == ProgressParts.ITEM_HELD:
-				var can_exfil = false
-				for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
-					var actual_agent : Agent = detect.get_parent()
-					if actual_agent.state == Agent.States.DEAD:
-						continue
-					for weap in actual_agent.held_weapons:
-						if (weap as String).begins_with("map_"):
-							can_exfil = true
-							break
-					if can_exfil:
-						break
-				if can_exfil:
-					for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						exfiltration_queue.append(actual_agent.name)
-			elif server_progress == ProgressParts.OBJECTIVE_COMPLETE:
-				for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
-					var actual_agent : Agent = detect.get_parent()
-					if actual_agent.state == Agent.States.DEAD:
-						continue
-					exfiltration_queue.append(actual_agent.name)
-			if client_progress == ProgressParts.ITEM_HELD:
-				var can_exfil = false
-				for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
-					var actual_agent : Agent = detect.get_parent()
-					if actual_agent.state == Agent.States.DEAD:
-						continue
-					for weap in actual_agent.held_weapons:
-						if (weap as String).begins_with("map_"):
-							can_exfil = true
-							break
-					if can_exfil:
-						break
-				if can_exfil:
-					for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
-						var actual_agent : Agent = detect.get_parent()
-						if actual_agent.state == Agent.States.DEAD:
-							continue
-						exfiltration_queue.append(actual_agent.name)
-			elif client_progress == ProgressParts.OBJECTIVE_COMPLETE:
-				for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
-					var actual_agent : Agent = detect.get_parent()
-					if actual_agent.state == Agent.States.DEAD:
-						continue
-					exfiltration_queue.append(actual_agent.name)
-			for agent_name in exfiltration_queue:
-				($Agents.get_node(str(agent_name)) as Agent).exfiltrate()
-			track_objective_completion() # objective based updates here
-			# create selectors and otherwise prepare for selection
-			var server_team_dead = true
-			var client_team_dead = true
 			for ag in ($Agents.get_children() as Array[Agent]):
 				ag.action_done = Agent.ActionDoneness.NOT_DONE
 				ag.ungrabbable = false
-				if multiplayer.is_server():
-					set_agent_action.rpc(ag.name, [])
-				if ag.owned() and not ag.in_incapacitated_state():
-					create_agent_selector(ag)
-					ag.flash_outline(Color.ORCHID)
+				ag.queued_action.clear()
+				if not ag.in_incapacitated_state():
+					if ag.owned():
+						create_agent_selector(ag)
+						ag.flash_outline(Color.ORCHID)
+					else:
+						create_agent_selector.rpc_id(GameSettings.other_player_id, ag)
+						ag.flash_outline.rpc_id(GameSettings.other_player_id, Color.ORCHID)
+			selection_ui.rpc()
+		# hide & disable selection mode stuff, start agent actions
+		GamePhases.EXECUTION:
+			for agent in ($Agents.get_children() as Array[Agent]):
+				agent.action_text = ""
+			server_ready_bool = false
+			client_ready_bool = false
+			# populate agents with actions, as well as action_timeline
+			for agent in ($Agents.get_children() as Array[Agent]):
+				append_action_timeline(agent)
+				agent.perform_action()
+			execution_ui.rpc()
+		# determine progress made by agents, choose winner if applicable
+		GamePhases.COMPLETION:
+			# update completion percentages
+
+			# who's escaping now
+			_exfiltrate_agents()
+			# has a team fully died
+			var server_team_dead = true
+			var client_team_dead = true
+			for ag in ($Agents.get_children() as Array[Agent]):
 				if ag.state != Agent.States.DEAD:
 					if ag.player_id == 1:
 						server_team_dead = false
 					else:
 						client_team_dead = false
-			if not player_has_won(server_team_dead, client_team_dead): # win conditions
-				show_hud()
-				if $HUDSelectors.get_child_count() == 0 and check_incap:
-					_on_execute_pressed() # run execute since the player can't do anything
-			else:
-				_update_game_phase(GamePhases.COMPLETION)
-		GamePhases.EXECUTION:
-			$HUDBase/HurryUp.visible = false
-			for agent in ($Agents.get_children() as Array[Agent]):
-				agent.action_text = ""
-			update_text()
-			_phase_label.text = "EXECUTING ACTIONS..."
-			server_ready_bool = false
-			client_ready_bool = false
-			# populate agents with actions, as well as action_timeline
-			for agent in ($Agents.get_children() as Array[Agent]):
-				agent.agent_is_done.rpc(Agent.ActionDoneness.NOT_DONE)
-				append_action_timeline(agent)
-				agent.perform_action()
-			await get_tree().create_timer(0.10).timeout
-		GamePhases.COMPLETION:
-			save_replay()
-			if multiplayer.is_server() and not sent_final_message:
-				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
-				animate_fade.rpc()
-				sent_final_message = true
-			$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
-			open_pause_menu()
-			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
-			$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
+			if server_team_dead and not client_team_dead:
+				pass
+				create_toast_update.rpc(GameRefs.TXT.any_t_dead, GameRefs.TXT.any_y_dead, false)
+				reward_team.rpc_id(GameSettings.other_player_id, GameSettings.other_player_id)
+				victory_jingle.rpc()
+				failure_jingle()
+				sent_reward = true
+				# handle client win
+			elif client_team_dead and not server_team_dead:
+				create_toast_update.rpc(GameRefs.TXT.any_y_dead, GameRefs.TXT.any_t_dead, false)
+				reward_team(1)
+				victory_jingle()
+				failure_jingle.rpc()
+				sent_reward = true
+				# handle server win
+			elif server_team_dead and client_team_dead:
+				pass
+				create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
+				failure_jingle()
+				failure_jingle.rpc()
+				sent_reward = true
+			# how's the objective looking
+			not player_has_won(server_team_dead, client_team_dead)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	#match new_phase:
+		#GamePhases.COMPLETION:
+			#if : # win conditions
+				#show_hud()
+				#if $HUDSelectors.get_child_count() == 0 and check_incap:
+					#_on_execute_pressed() # run execute since the player can't do anything
+			#else:
+				#save_replay()
+				#if multiplayer.is_server() and not sent_final_message:
+					#create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
+					#animate_fade.rpc()
+					#sent_final_message = true
+				#$PauseMenu/ColorRect/CurrentPhase.text = "EXIT"
+				#open_pause_menu()
+				#$PauseMenu/ColorRect/VBoxContainer/NoForfeit.visible = false
+				#$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
 
 
 func save_replay():
@@ -1012,7 +1096,7 @@ func save_replay():
 	new_replay.store_string(JSON.stringify(action_timeline))
 
 
-func track_objective_completion():
+func _track_objective_completion():
 	match game_map.objective:
 		GameMap.Objectives.CAPTURE_CENTRAL_FLAG:
 			of_comp()
@@ -1063,91 +1147,82 @@ func of_comp_server():
 	match server_progress:
 		ProgressParts.INTRO:
 			create_toast_update.rpc(GameRefs.TXT.of_intro, GameRefs.TXT.of_intro, true)
-			set_server_progress.rpc(ProgressParts.NO_ADVANTAGE)
+			server_progress = ProgressParts.NO_ADVANTAGE
 		ProgressParts.NO_ADVANTAGE: # no one has the flag
 			if not check_agents_for_weapon(true, "map_flag_center"):
 				return
 			if not check_weapon_holder_exfil(true, "map_flag_center"):
 				create_toast_update.rpc(GameRefs.TXT.of_y_get, GameRefs.TXT.of_t_get, true)
-				set_server_progress.rpc(ProgressParts.ITEM_HELD)
+				server_progress = ProgressParts.ITEM_HELD
 				return
 			if not check_full_team_exfil_or_dead(true):
 				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-				set_server_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
+				server_progress = ProgressParts.OBJECTIVE_COMPLETE
 				return
 			create_toast_update.rpc(GameRefs.TXT.of_y_cap_left, GameRefs.TXT.of_t_cap_left, true)
-			set_server_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
+			server_progress = ProgressParts.SURVIVORS_EXFILTRATED
 			return
 		ProgressParts.ITEM_HELD: # the server team has the flag
 			if not check_agents_for_weapon(true, "map_flag_center"):
 				create_toast_update.rpc(GameRefs.TXT.of_y_lost, GameRefs.TXT.of_t_lost, true)
-				set_server_progress.rpc(ProgressParts.NO_ADVANTAGE)
+				server_progress = ProgressParts.NO_ADVANTAGE
 				return
 			if check_weapon_holder_exfil(true, "map_flag_center"):
 				if not check_full_team_exfil_or_dead(true):
 					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-					set_server_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
+					server_progress = ProgressParts.OBJECTIVE_COMPLETE
 					return
 				create_toast_update.rpc(GameRefs.TXT.of_y_cap_left, GameRefs.TXT.of_t_cap_left, true)
-				set_server_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
+				server_progress = ProgressParts.SURVIVORS_EXFILTRATED
 				return
 		ProgressParts.OBJECTIVE_COMPLETE: # a server team member has escaped with the flag
 			if check_full_team_exfil_or_dead(true):
 				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
-				set_server_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
+				server_progress = ProgressParts.SURVIVORS_EXFILTRATED
 
 
 func of_comp_client():
 	match client_progress:
 		ProgressParts.INTRO:
-			set_client_progress.rpc(ProgressParts.NO_ADVANTAGE)
+			client_progress = ProgressParts.NO_ADVANTAGE
 		ProgressParts.NO_ADVANTAGE: # no one has the flag
 			if not check_agents_for_weapon(false, "map_flag_center"):
 				return
 			if not check_weapon_holder_exfil(false, "map_flag_center"):
 				create_toast_update.rpc(GameRefs.TXT.of_t_get, GameRefs.TXT.of_y_get, true)
-				set_client_progress.rpc(ProgressParts.ITEM_HELD)
+				client_progress = ProgressParts.ITEM_HELD
 				return
 			if not check_full_team_exfil_or_dead(false):
 				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-				set_client_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
+				client_progress = ProgressParts.OBJECTIVE_COMPLETE
 				return
 			create_toast_update.rpc(GameRefs.TXT.of_t_cap_left, GameRefs.TXT.of_y_cap_left, true)
-			set_client_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
+			client_progress = ProgressParts.SURVIVORS_EXFILTRATED
 			return
 		ProgressParts.ITEM_HELD: # the client team has the flag
 			if not check_agents_for_weapon(false, "map_flag_center"):
 				create_toast_update.rpc(GameRefs.TXT.of_t_lost, GameRefs.TXT.of_y_lost, true)
-				set_client_progress.rpc(ProgressParts.NO_ADVANTAGE)
+				client_progress = ProgressParts.NO_ADVANTAGE
 				return
 			if check_weapon_holder_exfil(false, "map_flag_center"):
 				if not check_full_team_exfil_or_dead(false):
 					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-					set_client_progress.rpc(ProgressParts.OBJECTIVE_COMPLETE)
+					client_progress = ProgressParts.OBJECTIVE_COMPLETE
 					return
 				create_toast_update.rpc(GameRefs.TXT.of_t_cap_left, GameRefs.TXT.of_y_cap_left, true)
-				set_client_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
+				client_progress = ProgressParts.SURVIVORS_EXFILTRATED
 				return
 		ProgressParts.OBJECTIVE_COMPLETE: # a client team member has escaped with the flag
 			if check_full_team_exfil_or_dead(false):
 				create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
-				set_client_progress.rpc(ProgressParts.SURVIVORS_EXFILTRATED)
+				client_progress = ProgressParts.SURVIVORS_EXFILTRATED
 
-
-@rpc("authority", "call_local", "reliable")
-func set_server_progress(val : ProgressParts):
-	server_progress = val
-
-
-@rpc("authority", "call_local", "reliable")
-func set_client_progress(val : ProgressParts):
-	client_progress = val
 
 
 @rpc("authority", "call_local")
 func create_toast_update(server_text : String, client_text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
 	var new_toast : ToastMessage = toast_scene.instantiate()
-	new_toast.input_text = server_text if multiplayer.is_server() else client_text
+	new_toast.input_text = server_text if multiplayer.get_unique_id() else client_text
 	new_toast.color = color
 	$HUDToasts/Toasts.add_child(new_toast)
 	if add_sound_effect:
@@ -1179,6 +1254,7 @@ func failure_jingle():
 
 
 func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
+	return all_server_dead or all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED or client_progress == ProgressParts.SURVIVORS_EXFILTRATED
 	if all_server_dead and all_client_dead and multiplayer.is_server() and not sent_reward:
 		create_toast_update.rpc(GameRefs.TXT.any_a_dead, GameRefs.TXT.any_a_dead, false)
 		failure_jingle()
@@ -1202,7 +1278,6 @@ func player_has_won(all_server_dead : bool, all_client_dead : bool) -> bool:
 			victory_jingle()
 			failure_jingle.rpc()
 			sent_reward = true
-	return all_server_dead or all_client_dead or server_progress == ProgressParts.SURVIVORS_EXFILTRATED or client_progress == ProgressParts.SURVIVORS_EXFILTRATED
 
 
 @rpc("authority", "reliable")
@@ -1284,6 +1359,7 @@ func _on_execute_pressed() -> void:
 	player_is_ready.rpc(multiplayer.get_unique_id())
 
 
+# called by server after cold boot finishes to actually start the game
 func _on_cold_boot_timer_timeout() -> void:
 	if not multiplayer.is_server():
 		return

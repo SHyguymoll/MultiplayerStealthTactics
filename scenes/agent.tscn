@@ -96,6 +96,9 @@ properties/20/replication_mode = 1
 properties/21/path = NodePath(".:step_seen")
 properties/21/spawn = true
 properties/21/replication_mode = 1
+properties/22/path = NodePath(".:action_done")
+properties/22/spawn = true
+properties/22/replication_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_3a7ln"]
 animation = &"B_Crawl"

@@ -171,6 +171,7 @@ func get_required_y_rotation(aimed_position) -> float:
 
 
 func perform_action():
+	action_done = ActionDoneness.NOT_DONE
 	game_steps_since_execute = 0
 	if len(queued_action) == 0:
 		action_complete(true, false)
@@ -275,22 +276,16 @@ func perform_action():
 				state = States.PRONE
 
 
-@rpc("any_peer", "call_local", "reliable")
-func agent_is_done(doneness : Agent.ActionDoneness):
-	action_done = doneness
-
-
 func owned() -> bool:
 	return player_id == multiplayer.get_unique_id()
 
 
 func action_complete(successfully : bool = true, no_flash : bool = false, single_mode : bool = false):
+	action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
 	if not single_mode:
-		agent_is_done.rpc(ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL)
 		if is_multiplayer_authority() and not no_flash:
 			flash_outline(Color.GREEN if successfully else Color.RED)
 	else:
-		agent_is_done(ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL)
 		if not no_flash:
 			flash_outline(Color.GREEN if successfully else Color.RED)
 	queued_action.clear()
@@ -376,7 +371,7 @@ func select_hurt_animation():
 	else:
 		_anim_state.travel("B_Hurt_Prone")
 
-
+@rpc()
 func flash_outline(color : Color):
 	_outline_mat.albedo_color = color
 

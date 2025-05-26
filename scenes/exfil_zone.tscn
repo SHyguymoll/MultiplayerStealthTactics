@@ -4,6 +4,7 @@
 [ext_resource type="Shader" uid="uid://7k1e88u2c1y2" path="res://assets/models/materials/exfil_zone.tres" id="3_x58t7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ycwvl"]
+size = Vector3(9.42, 1, 2.545)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7xx5s"]
 render_priority = 0
