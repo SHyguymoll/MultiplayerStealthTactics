@@ -976,6 +976,8 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 	match game_phase:
 		# create/direct ui for both players to set up selection mode
 		GamePhases.SELECTION:
+			var server_selectors_created = 0
+			var client_selectors_created = 0
 			for ag in ($Agents.get_children() as Array[Agent]):
 				ag.action_done = Agent.ActionDoneness.NOT_DONE
 				ag.ungrabbable = false
@@ -984,10 +986,21 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 					if ag.owned():
 						create_agent_selector(ag.name)
 						ag.flash_outline(Color.ORCHID)
+						server_selectors_created += 1
 					else:
 						create_agent_selector.rpc_id(GameSettings.other_player_id, ag.name)
 						ag.flash_outline.rpc_id(GameSettings.other_player_id, Color.ORCHID)
+						client_selectors_created += 1
 			selection_ui.rpc()
+			# special case for double knockout, handle later
+			if server_selectors_created + client_selectors_created == 0:
+				_on_execute_pressed()
+				_on_execute_pressed.rpc_id(GameSettings.other_player_id)
+			else:
+				if server_selectors_created == 0:
+					_on_execute_pressed()
+				if client_selectors_created == 0:
+					_on_execute_pressed.rpc_id(GameSettings.other_player_id)
 		# hide & disable selection mode stuff, start agent actions
 		GamePhases.EXECUTION:
 			for agent in ($Agents.get_children() as Array[Agent]):
@@ -1050,6 +1063,8 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				create_toast_update.rpc("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
 				animate_fade.rpc()
 				create_end_screen.rpc()
+			else:
+				_update_game_phase(GamePhases.SELECTION)
 
 
 
@@ -1263,6 +1278,7 @@ func player_is_ready(caller_id):
 		_update_game_phase(GamePhases.EXECUTION)
 
 
+@rpc()
 func _on_execute_pressed() -> void:
 	_actions_submitted.play()
 	_execute_button.disabled = true
