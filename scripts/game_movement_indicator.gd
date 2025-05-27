@@ -9,6 +9,7 @@ const CLOSENESS := 2.0
 @onready var _ray_middle : RayCast3D = $MiddleCast
 @onready var _ray_right : RayCast3D = $RightCast
 var referenced_agent : Agent
+var queued_action : Array
 var ind_set := false
 
 var flat_position : Vector2
@@ -16,7 +17,7 @@ var ray_position : Vector3
 var position_valid : bool
 
 func _ready() -> void:
-	match referenced_agent.queued_action[0]:
+	match queued_action[0]:
 		Agent.GameActions.WALK_TO_POS:
 			play("walk")
 		Agent.GameActions.RUN_TO_POS:

@@ -744,15 +744,25 @@ func show_hud():
 	twe.tween_property(_ag_insts, "position:x", 1059, 0.25).from(1638)
 
 
+@rpc("any_peer", "call_remote", "reliable")
+func set_agent_action(agent_name: String, decision_array: Array):
+	print(decision_array)
+	($Agents.get_node(agent_name) as Agent).queued_action = decision_array
+
+
 func _on_radial_menu_decision_made(decision_array: Array) -> void:
-	var ref_ag : Agent = _radial_menu.referenced_agent
+	var ag_name : String = _radial_menu.referenced_agent.name
+	var ag : Agent = _radial_menu.referenced_agent
+	if multiplayer.is_server():
+		set_agent_action(ag_name, decision_array)
+	else:
+		set_agent_action.rpc_id(1, ag_name, decision_array)
 	_radial_menu.referenced_agent = null
-	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)): # remove prev indicator
-		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
-		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
-	ref_ag.queued_action = decision_array
+	if $ClientsideIndicators.get_node_or_null(String(ag_name)): # remove prev indicator
+		$ClientsideIndicators.get_node(String(ag_name))._neutral()
+		$ClientsideIndicators.get_node(String(ag_name)).name += "_neutralling"
 	var final_text_string := ""
-	var clean_name = GameRefs.extract_agent_name(ref_ag.name)
+	var clean_name = GameRefs.extract_agent_name(ag_name)
 	match decision_array[0]:
 		Agent.GameActions.GO_STAND:
 			final_text_string = "{0}: Stand Up".format([clean_name])
@@ -767,22 +777,22 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 			if decision_array[1] == -1:
 				final_text_string = "{0}: Unequip Item".format([clean_name])
 			else:
-				final_text_string += GameRefs.ITM[ref_ag.held_items[decision_array[1]]].name
+				final_text_string += GameRefs.ITM[ag.held_items[decision_array[1]]].name
 		Agent.GameActions.CHANGE_WEAPON:
 			final_text_string = "{0}: Switch to {1}".format([
-				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
+				clean_name, GameRefs.get_held_weapon_attribute(ag, decision_array[1], "name")])
 		Agent.GameActions.PICK_UP_WEAPON:
 			final_text_string = "{0}: Pick up {1}".format([
 				clean_name, GameRefs.get_pickup_attribute(GameRefs.get_pickup_node(decision_array[1]), "name")])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
-				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
+				clean_name, GameRefs.get_held_weapon_attribute(ag, decision_array[1], "name")])
 		Agent.GameActions.RELOAD_WEAPON:
 			final_text_string = "{0}: Reload {1}".format([
-				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
+				clean_name, GameRefs.get_held_weapon_attribute(ag, decision_array[1], "name")])
 		Agent.GameActions.HALT:
 			final_text_string = "{0}: Stop ".format([clean_name])
-			match ref_ag.state:
+			match ag.state:
 				Agent.States.RUN:
 					final_text_string += "Running"
 				Agent.States.WALK:
@@ -791,32 +801,34 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 					final_text_string += "Sneaking"
 				Agent.States.CRAWL:
 					final_text_string += "Crawling"
-		null:
-			ref_ag.queued_action = []
-	if ref_ag.owned():
-		ref_ag.action_text = final_text_string
+	ag.action_text = final_text_string
 	update_text()
 	_execute_button.visible = true
 	_execute_button.disabled = false
 
 
 func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
-	var ref_ag : Agent = _radial_menu.referenced_agent
+	var ag_name : String = _radial_menu.referenced_agent.name
+	var ag : Agent = _radial_menu.referenced_agent
 	_radial_menu.referenced_agent = null
-	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
-		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
-		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
-	ref_ag.queued_action = decision_array
+	if $ClientsideIndicators.get_node_or_null(String(ag_name)):
+		$ClientsideIndicators.get_node(String(ag_name))._neutral()
+		$ClientsideIndicators.get_node(String(ag_name)).name += "_neutralling"
 	selection_step = SelectionSteps.MOVEMENT
 	var new_indicator = movement_icon_scene.instantiate()
-	new_indicator.referenced_agent = ref_ag
-	new_indicator.name = ref_ag.name
+	new_indicator.referenced_agent = ag
+	new_indicator.queued_action = decision_array
+	new_indicator.name = ag_name
 	$ClientsideIndicators.add_child(new_indicator)
 	await new_indicator.indicator_placed
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator.position)
+	if multiplayer.is_server():
+		set_agent_action(ag_name, decision_array)
+	else:
+		set_agent_action.rpc_id(1, ag_name, decision_array)
 	var final_text_string := ""
-	var clean_name = GameRefs.extract_agent_name(ref_ag.name)
+	var clean_name = GameRefs.extract_agent_name(ag_name)
 	match decision_array[0]:
 		Agent.GameActions.RUN_TO_POS:
 			final_text_string = "{0}: Run ".format([clean_name])
@@ -827,41 +839,43 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 		Agent.GameActions.CRAWL_TO_POS:
 			final_text_string = "{0}: Crawl ".format([clean_name])
 	final_text_string += "to New Position"
-	if ref_ag.owned():
-		ref_ag.action_text = final_text_string
+	ag.action_text = final_text_string
 	update_text()
 	_execute_button.visible = true
 	_execute_button.disabled = false
 
 
 func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
-	var ref_ag : Agent = _radial_menu.referenced_agent
+	var ag_name : String = _radial_menu.referenced_agent.name
+	var ag : Agent = _radial_menu.referenced_agent
 	_radial_menu.referenced_agent = null
-	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
-		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
-		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
-	ref_ag.queued_action = decision_array
+	if $ClientsideIndicators.get_node_or_null(String(ag_name)):
+		$ClientsideIndicators.get_node(String(ag_name))._neutral()
+		$ClientsideIndicators.get_node(String(ag_name)).name += "_neutralling"
 	selection_step = SelectionSteps.AIMING
 	var new_indicator = aiming_icon_scene.instantiate()
-	new_indicator.referenced_agent = ref_ag
-	new_indicator.name = ref_ag.name
+	new_indicator.referenced_agent = ag
+	new_indicator.name = ag_name
 	$ClientsideIndicators.add_child(new_indicator)
 	await new_indicator.indicator_placed
 	selection_step = SelectionSteps.BASE
 	decision_array.append(new_indicator._indicator.global_position)
+	if multiplayer.is_server():
+		set_agent_action(ag_name, decision_array)
+	else:
+		set_agent_action.rpc_id(1, ag_name, decision_array)
 	var final_text_string := ""
-	var clean_name = GameRefs.extract_agent_name(ref_ag.name)
+	var clean_name = GameRefs.extract_agent_name(ag_name)
 	match decision_array[0]:
 		Agent.GameActions.LOOK_AROUND:
 			final_text_string = "{0}: Look at Position".format([clean_name])
 		Agent.GameActions.USE_WEAPON:
 			final_text_string = "{0}: Use {1} at Position".format(
-				[clean_name, GameRefs.get_held_weapon_attribute(ref_ag, ref_ag.selected_weapon, "name")])
+				[clean_name, GameRefs.get_held_weapon_attribute(ag, ag.selected_weapon, "name")])
 		Agent.GameActions.DROP_WEAPON:
 			final_text_string = "{0}: Drop {1}".format([
-				clean_name, GameRefs.get_held_weapon_attribute(ref_ag, decision_array[1], "name")])
-	if ref_ag.owned():
-		ref_ag.action_text = final_text_string
+				clean_name, GameRefs.get_held_weapon_attribute(ag, decision_array[1], "name")])
+	ag.action_text = final_text_string
 	update_text()
 	_execute_button.visible = true
 	_execute_button.disabled = false
