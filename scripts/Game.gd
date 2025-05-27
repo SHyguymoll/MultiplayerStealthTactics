@@ -1224,17 +1224,22 @@ func animate_fade(in_out := true):
 		twe.tween_property($FadeOut/ColorRect, "modulate", Color.TRANSPARENT, 1.5).from(Color.WHITE)
 
 
+@rpc()
+func nag_player():
+	$HUDBase/HurryUp.visible = true
+
+
 @rpc("any_peer", "call_remote", "reliable")
-func player_is_ready(id):
-	if id == 1:
+func player_is_ready(caller_id):
+	if caller_id == 1:
 		server_ready_bool = true
-		if not multiplayer.is_server():
-			$HUDBase/HurryUp.visible = true
+		if not client_ready_bool:
+			nag_player.rpc_id(GameSettings.other_player_id)
 	else:
 		client_ready_bool = true
-		if multiplayer.is_server():
-			$HUDBase/HurryUp.visible = true
-	if multiplayer.is_server() and server_ready_bool and client_ready_bool:
+		if not server_ready_bool:
+			nag_player()
+	if server_ready_bool and client_ready_bool:
 		_update_game_phase(GamePhases.EXECUTION)
 
 
@@ -1246,7 +1251,9 @@ func _on_execute_pressed() -> void:
 		selector.queue_free()
 	_radial_menu.button_collapse_animation()
 	hide_hud()
-	player_is_ready.rpc(multiplayer.get_unique_id())
+	if multiplayer.is_server():
+		player_is_ready(1)
+	player_is_ready.rpc_id(1, multiplayer.get_unique_id())
 
 
 # called by server after cold boot finishes to actually start the game
