@@ -433,17 +433,17 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 	if in_standing_state():
 		target_world_collide_height = 0.962
 		target_world_collide_y = 0.499
-		collision_mask = 1 + 2 + 4
+		collision_mask = Game.Collides.PRONE + Game.Collides.CROUCH + Game.Collides.STAND
 		visible_level = 50
 	if in_crouching_state():
 		target_world_collide_height = 0.666
 		target_world_collide_y = 0.35
-		collision_mask = 1 + 2
+		collision_mask = Game.Collides.PRONE + Game.Collides.CROUCH
 		visible_level = 25
 	if in_prone_state():
 		target_world_collide_height = 0.264
 		target_world_collide_y = 0.15
-		collision_mask = 1
+		collision_mask = Game.Collides.PRONE
 		visible_level = 5
 	_world_collide.position.y = lerpf(_world_collide.position.y, target_world_collide_y, GENERAL_LERP_VAL)
 	(_world_collide.get_shape() as CylinderShape3D).height = lerpf(

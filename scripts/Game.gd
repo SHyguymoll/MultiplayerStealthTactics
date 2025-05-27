@@ -39,6 +39,12 @@ var selection_step : SelectionSteps = SelectionSteps.BASE
 
 const REMEMBER_TILL = 150
 
+enum Collides {
+	PRONE = 1,
+	CROUCH = 2,
+	STAND = 4,
+}
+
 @export var game_map : GameMap
 
 enum ProgressParts {
