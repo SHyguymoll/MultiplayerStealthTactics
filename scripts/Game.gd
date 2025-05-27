@@ -218,20 +218,20 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 	var sight_chance = calculate_sight_chance(spotter, spottee.position, spottee.visible_level) * float(not instant_fail)
 	if sight_chance > 0.7 or instant_spot: # seent it
 		if current_game_step - spottee.step_seen < REMEMBER_TILL and spottee.step_seen > 0:
-			set_agent_step_seen.rpc(spottee.name, current_game_step)
+			spottee.step_seen = current_game_step
 			return
-		set_agent_step_seen.rpc(spottee.name, current_game_step)
+		spottee.step_seen = current_game_step
 		if spotter.player_id == 1:
-			set_agent_server_visibility.rpc(spottee.name, true)
+			spottee.server_knows = true
 		else:
-			set_agent_client_visibility.rpc(spottee.name, true)
+			spottee.client_knows = true
 		create_popup(GameRefs.POPUP.spotted, spottee.position, true)
 		if spotter.player_id != spottee.player_id:
 			spotter.sounds.spotted_agent.play()
 	elif sight_chance > 1.0/3.0: # almost seent it
 		if spottee.noticed > 0:
 			return
-		set_agent_notice.rpc(spottee.name, 10)
+		spottee.noticed = 10
 		var p_offset = -0.1/sight_chance
 		var x_off = randf_range(-p_offset, p_offset)
 		var z_off = randf_range(-p_offset, p_offset)
@@ -316,10 +316,10 @@ func _physics_process(delta: float) -> void:
 				agent.in_smoke = false
 				if current_game_step - agent.step_seen == REMEMBER_TILL and agent.visible:
 					if agent.player_id == 1:
-						set_agent_client_visibility.rpc(agent.name, false)
+						agent.client_knows = false
 						create_popup.rpc_id(GameSettings.other_player_id, GameRefs.POPUP.sight_unknown, agent.position)
 					else:
-						set_agent_server_visibility.rpc(agent.name, false)
+						agent.server_knows = false
 						create_popup(GameRefs.POPUP.sight_unknown, agent.position)
 				if len(agent.mark_for_drop) > 0:
 					var new_drop = {
@@ -331,9 +331,7 @@ func _physics_process(delta: float) -> void:
 						wep_name = str(agent.mark_for_drop.wep_node),
 					}
 					pickup_spawner.spawn(new_drop)
-					#agent.held_weapons.erase(agent.mark_for_drop.wep_node)
-					if multiplayer.is_server():
-						remove_weapon_from_agent.rpc(agent.name, agent.mark_for_drop.wep_node)
+					agent.held_weapons.erase(agent.mark_for_drop.wep_node)
 					agent.mark_for_drop.clear()
 				if agent.try_grab_pickup and len(agent.queued_action) > 1:
 					if $Pickups.get_node_or_null(str(agent.queued_action[1])) != null:
@@ -349,7 +347,7 @@ func _physics_process(delta: float) -> void:
 						wep_name = str(agent.held_weapons[1]),
 					}
 					pickup_spawner.spawn(new_drop)
-					remove_weapon_from_agent.rpc(agent.name, new_drop.wep_name)
+					agent.held_weapons.erase(new_drop.wep_name)
 				if agent.mark_for_grenade_throw:
 					var try_name = agent.held_weapons[agent.selected_weapon]
 					while try_name in grenades_in_existence:
@@ -378,7 +376,7 @@ func _physics_process(delta: float) -> void:
 								var attacked : Agent = exploded.get_parent()
 								if attacked.in_prone_state():
 									continue # prone agents dodge explosions for Reasons™
-								damage_agent.rpc(attacked.name, 2, false)
+								attacked.take_damage(2, false)
 								create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
 						"grenade_smoke":
@@ -645,7 +643,7 @@ func determine_cqc_events():
 		grabber._anim_state.travel("B_Stand_Attack_Slam")
 		grabbee.grabbing_agent = grabber
 		if multiplayer.is_server():
-			damage_agent.rpc(grabbee.name, 3, true)
+			grabbee.take_damage(3, true)
 		grabbee.step_seen = current_game_step
 
 func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
@@ -702,7 +700,7 @@ func determine_weapon_events():
 					if attacked.in_prone_state() or attacked.state == Agent.States.DEAD:
 						continue # skip prone agents
 					if multiplayer.is_server():
-						damage_agent.rpc(attacked.name, GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"), false)
+						attacked.take_damage(GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"), false)
 						create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
 
 
@@ -752,7 +750,6 @@ func _on_radial_menu_decision_made(decision_array: Array) -> void:
 	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)): # remove prev indicator
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
-	set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	var final_text_string := ""
 	var clean_name = GameRefs.extract_agent_name(ref_ag.name)
@@ -809,7 +806,6 @@ func _on_radial_menu_movement_decision_made(decision_array: Array) -> void:
 	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
-	set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.MOVEMENT
 	var new_indicator = movement_icon_scene.instantiate()
@@ -844,7 +840,6 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	if $ClientsideIndicators.get_node_or_null(String(ref_ag.name)):
 		$ClientsideIndicators.get_node(String(ref_ag.name))._neutral()
 		$ClientsideIndicators.get_node(String(ref_ag.name)).name += "_neutralling"
-	set_agent_action.rpc(ref_ag.name, decision_array)
 	ref_ag.queued_action = decision_array
 	selection_step = SelectionSteps.AIMING
 	var new_indicator = aiming_icon_scene.instantiate()
@@ -1229,7 +1224,7 @@ func animate_fade(in_out := true):
 		twe.tween_property($FadeOut/ColorRect, "modulate", Color.TRANSPARENT, 1.5).from(Color.WHITE)
 
 
-@rpc("any_peer", "call_local", "reliable")
+@rpc("any_peer", "call_remote", "reliable")
 func player_is_ready(id):
 	if id == 1:
 		server_ready_bool = true
@@ -1240,41 +1235,7 @@ func player_is_ready(id):
 		if multiplayer.is_server():
 			$HUDBase/HurryUp.visible = true
 	if multiplayer.is_server() and server_ready_bool and client_ready_bool:
-		_update_game_phase.rpc(GamePhases.EXECUTION)
-
-
-@rpc("any_peer", "call_local", "reliable")
-func remove_weapon_from_agent(agent_name : String, weapon_name : String):
-	$Agents.get_node(agent_name).held_weapons.erase(weapon_name)
-
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_action(agent_name : String, action : Array):
-	$Agents.get_node(agent_name).queued_action = action
-
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_notice(agent_name : String, new_noticed : int):
-	$Agents.get_node(agent_name).noticed = new_noticed
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_step_seen(agent_name : String, new_step_seen : int):
-	$Agents.get_node(agent_name).step_seen = new_step_seen
-
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_server_visibility(agent_name : String, visibility : bool):
-	$Agents.get_node(agent_name).server_knows = visibility
-
-
-@rpc("any_peer", "call_local", "reliable")
-func set_agent_client_visibility(agent_name : String, visibility : bool):
-	$Agents.get_node(agent_name).client_knows = visibility
-
-
-@rpc("authority", "call_local", "reliable")
-func damage_agent(agent_name : String, damage_amt : int, stun : bool):
-	($Agents.get_node(agent_name) as Agent).take_damage(damage_amt, stun)
+		_update_game_phase(GamePhases.EXECUTION)
 
 
 func _on_execute_pressed() -> void:
