@@ -407,7 +407,7 @@ func _physics_process(delta: float) -> void:
 			for agent in ($Agents.get_children() as Array[Agent]):
 				if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 					return
-			_update_game_phase.rpc(GamePhases.SELECTION)
+			_update_game_phase(GamePhases.COMPLETION)
 		elif game_phase == GamePhases.COMPLETION:
 			for ag in ($Agents.get_children() as Array[Agent]):
 				ag.visible = true
@@ -1253,7 +1253,8 @@ func _on_execute_pressed() -> void:
 	hide_hud()
 	if multiplayer.is_server():
 		player_is_ready(1)
-	player_is_ready.rpc_id(1, multiplayer.get_unique_id())
+	else:
+		player_is_ready.rpc_id(1, multiplayer.get_unique_id())
 
 
 # called by server after cold boot finishes to actually start the game
@@ -1261,6 +1262,7 @@ func _on_cold_boot_timer_timeout() -> void:
 	if not multiplayer.is_server():
 		return
 	animate_fade.rpc(false)
+	_track_objective_completion()
 	_update_game_phase(GamePhases.SELECTION, false)
 	var data : Dictionary
 	data.pickup = {}
