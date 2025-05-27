@@ -286,14 +286,15 @@ func owned() -> bool:
 
 func action_complete(successfully : bool = true, no_flash : bool = false, single_mode : bool = false):
 	action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
+	queued_action.clear()
 	if not single_mode:
-		if is_multiplayer_authority() and not no_flash:
+		if owned() and not no_flash:
 			flash_outline(Color.GREEN if successfully else Color.RED)
+		else:
+			flash_outline.rpc_id(GameSettings.other_player_id, Color.GREEN if successfully else Color.RED)
 	else:
 		if not no_flash:
 			flash_outline(Color.GREEN if successfully else Color.RED)
-	queued_action.clear()
-
 
 
 func _ready() -> void:
@@ -425,7 +426,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 	noticed = max(noticed - 1, 0)
 	if not single_mode:
 		visible = should_be_visible()
-	if single_mode or not is_multiplayer_authority() or (in_incapacitated_state() and not percieved_by_friendly) or selected_item == -1:
+	if single_mode or (in_incapacitated_state() and not percieved_by_friendly) or selected_item == -1:
 		_active_item_icon.texture = null
 	elif selected_item > -1:
 		_active_item_icon.texture = GameRefs.ITM[held_items[selected_item]].icon
