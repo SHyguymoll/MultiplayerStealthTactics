@@ -67,6 +67,7 @@ enum ProgressParts {
 @onready var weapon_spawner : MultiplayerSpawner = $WeaponSpawner
 @onready var grenade_spawner : MultiplayerSpawner = $GrenadeSpawner
 @onready var smoke_spawner : MultiplayerSpawner = $SmokeSpawner
+@onready var audio_spawner : MultiplayerSpawner = $AudioPulseSpawner
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu
@@ -91,6 +92,7 @@ func _ready(): # Preconfigure game.
 	weapon_spawner.spawn_function = create_weapon
 	grenade_spawner.spawn_function = create_grenade
 	smoke_spawner.spawn_function = create_smoke
+	audio_spawner.spawn_function = create_audio_pulse
 
 	$FadeOut.visible = true
 	$FadeOut/ColorRect.modulate = Color.WHITE
@@ -152,18 +154,6 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.final_position = Vector2(new_pos.x, new_pos.z) * Vector2(get_viewport().size/$World/Camera3D.sensitivity)
 	if new_fov != -1.0:
 		$World/Camera3D.fov_target = new_fov
-
-
-@rpc("authority", "call_local", "reliable")
-func create_sound_effect(location : Vector3, player_id : int, lifetime : int, _min_rad : float, max_rad : float, sound_id : String) -> void:
-	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
-	new_audio_event.position = location
-	new_audio_event.player_id = player_id
-	new_audio_event.max_radius = max_rad
-	new_audio_event.lifetime = lifetime
-	new_audio_event.max_lifetime = lifetime
-	new_audio_event.selected_audio = sound_id
-	$AudioEvents.add_child(new_audio_event)
 
 @rpc()
 func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void:
@@ -281,11 +271,26 @@ func determine_sounds():
 		if multiplayer.is_server():
 			match agent.state:
 				Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
-					create_sound_effect.rpc(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
+					audio_spawner.spawn({
+						player = agent.player_id,
+						agent = agent.name,
+						pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
+						max_rad = 2.0, lifetime = 13, sound_id = "ag_step_quiet",
+					})
 				Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
-					create_sound_effect.rpc(agent.position, agent.player_id, 13, 1.5, 2.75, "ag_step_loud")
+					audio_spawner.spawn({
+						player = agent.player_id,
+						agent = agent.name,
+						pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
+						max_rad = 2.75, lifetime = 13, sound_id = "ag_step_loud",
+					})
 				Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
-					create_sound_effect.rpc(agent.position, agent.player_id, 13, 0.25, 2.0, "ag_step_quiet")
+					audio_spawner.spawn({
+						player = agent.player_id,
+						agent = agent.name,
+						pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
+						max_rad = 2.0, lifetime = 13, sound_id = "ag_step_quiet",
+					})
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
 		audio_event.update()
 
@@ -383,8 +388,18 @@ func _physics_process(delta: float) -> void:
 								if attacked.in_prone_state():
 									continue # prone agents dodge explosions for Reasons™
 								attacked.take_damage(2, false)
-								create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
-							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_frag")
+								audio_spawner.spawn({
+									player = attacked.player_id,
+									agent = attacked.name,
+									pos_x = attacked.position.x, pos_y = attacked.position.y, pos_z = attacked.position.z,
+									max_rad = 2.5, lifetime = 5, sound_id = "ag_hurt",
+								})
+							audio_spawner.spawn({
+								player = grenade.player_id,
+								agent = grenade.name,
+								pos_x = grenade.global_position.x, pos_y = grenade.global_position.y, pos_z = grenade.global_position.z,
+								max_rad = 5.0, lifetime = 10, sound_id = "grenade_frag",
+							})
 						"grenade_smoke":
 							smoke_spawner.spawn({
 								pos_x = grenade.position.x,
@@ -392,9 +407,19 @@ func _physics_process(delta: float) -> void:
 								pos_z = grenade.position.z,
 								wep_name = grenade.name,
 							})
-							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 5.0, "grenade_smoke")
+							audio_spawner.spawn({
+								player = grenade.player_id,
+								agent = grenade.name,
+								pos_x = grenade.global_position.x, pos_y = grenade.global_position.y, pos_z = grenade.global_position.z,
+								max_rad = 5.0, lifetime = 10, sound_id = "grenade_smoke",
+							})
 						"grenade_noise":
-							create_sound_effect.rpc(grenade.global_position, grenade.player_id, 10, 0.1, 10.0, "grenade_frag")
+							audio_spawner.spawn({
+								player = grenade.player_id,
+								agent = grenade.name,
+								pos_x = grenade.global_position.x, pos_y = grenade.global_position.y, pos_z = grenade.global_position.z,
+								max_rad = 10.0, lifetime = 10, sound_id = "grenade_frag",
+							})
 					if multiplayer.is_server():
 						grenades_in_existence.erase(grenade.name)
 						grenade.queue_free()
@@ -552,6 +577,18 @@ func create_agent(data) -> Agent: #TODO
 	return new_agent
 
 
+func create_audio_pulse(data) -> GameAudioEvent:
+	var new_audio : GameAudioEvent = audio_event_scene.instantiate()
+	new_audio.name = data.agent
+	new_audio.player_id = data.player
+	new_audio.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_audio.max_radius = data.max_rad
+	new_audio.lifetime = data.lifetime
+	new_audio.max_lifetime = data.lifetime
+	new_audio.selected_audio = data.sound_id
+	return new_audio
+
+
 func create_weapon(data) -> GameWeapon:
 	var new_weapon : GameWeapon = weapon_scene.instantiate()
 	new_weapon.name = data.wep_name
@@ -664,12 +701,20 @@ func determine_weapon_events():
 		match GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).wep_id:
 			"pistol":
 				attackers[agent] = [return_attacked(agent, agent.queued_action[1])]
-				if multiplayer.is_server():
-					create_sound_effect.rpc(agent.position, agent.player_id, 10, 0.25, 0.5, "pistol")
+				audio_spawner.spawn({
+					player = agent.player_id,
+					agent = agent.name,
+					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
+					max_rad = 0.5, lifetime = 10, sound_id = "pistol",
+				})
 			"rifle":
 				attackers[agent] = [return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], 0.2)),return_attacked(agent, slide_end_pos(agent._body.global_position, agent.queued_action[1], -0.2)),]
-				if multiplayer.is_server():
-					create_sound_effect.rpc(agent.position, agent.player_id, 10, 0.5, 1.5, "rifle")
+				audio_spawner.spawn({
+					player = agent.player_id,
+					agent = agent.name,
+					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
+					max_rad = 1.5, lifetime = 10, sound_id = "rifle",
+				})
 			"shotgun":
 				attackers[agent] = [
 					return_attacked(
@@ -685,18 +730,31 @@ func determine_weapon_events():
 						slide_end_pos(agent._body.global_position, agent.queued_action[1], -1.0)
 						),
 					]
-				if multiplayer.is_server():
-					create_sound_effect.rpc(agent.position, agent.player_id, 15, 2.25, 3.5, "shotgun")
+
+				audio_spawner.spawn({
+					player = agent.player_id,
+					agent = agent.name,
+					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
+					max_rad = 3.5, lifetime = 15, sound_id = "shotgun",
+				})
 	for attacker in (attackers.keys() as Array[Agent]):
 		attacker.state = Agent.States.USING_WEAPON
 		for hit in attackers[attacker]:
 			if hit[0] == null: # hit a wall, make a sound event on the wall
-				if multiplayer.is_server():
-					create_sound_effect.rpc(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
+				audio_spawner.spawn({
+					player = attacker.player_id,
+					agent = attacker.name,
+					pos_x = hit[1].position.x, pos_y = hit[1].position.y, pos_z = hit[1].position.z,
+					max_rad = 2, lifetime = 4, sound_id = "projectile_bounce",
+				})
 			else:
 				if not (hit[0] as Area3D).get_parent() is Agent: # still hit a wall
-					if multiplayer.is_server():
-						create_sound_effect.rpc(hit[1], attacker.player_id, 4, 0.5, 2, "projectile_bounce")
+					audio_spawner.spawn({
+						player = attacker.player_id,
+						agent = attacker.name,
+						pos_x = hit[1].position.x, pos_y = hit[1].position.y, pos_z = hit[1].position.z,
+						max_rad = 2, lifetime = 4, sound_id = "projectile_bounce",
+					})
 				else: # actually hit an agent
 					var attacked : Agent = (hit[0] as Area3D).get_parent()
 					if attacker.player_id == attacked.player_id:
@@ -705,9 +763,13 @@ func determine_weapon_events():
 						continue # skip already attacked agents
 					if attacked.in_prone_state() or attacked.state == Agent.States.DEAD:
 						continue # skip prone agents
-					if multiplayer.is_server():
-						attacked.take_damage(GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"), false)
-						create_sound_effect.rpc(attacked.position, attacked.player_id, 5, 0.75, 2.5, "ag_hurt")
+					attacked.take_damage(GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"), false)
+					audio_spawner.spawn({
+						player = attacked.player_id,
+						agent = attacked.name,
+						pos_x = attacked.position.x, pos_y = attacked.position.y, pos_z = attacked.position.z,
+						max_rad = 2.5, lifetime = 5, sound_id = "ag_hurt",
+					})
 
 
 func _hud_agent_details_actions(agent_selector : AgentSelector):
