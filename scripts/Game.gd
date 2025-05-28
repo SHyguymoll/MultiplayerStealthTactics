@@ -333,15 +333,14 @@ func _physics_process(delta: float) -> void:
 						agent.server_knows = false
 						create_popup(GameRefs.POPUP.sight_unknown, agent.position)
 				if len(agent.mark_for_drop) > 0:
-					var new_drop = {
+					pickup_spawner.spawn({
 						pos_x = agent.mark_for_drop.position.x,
 						pos_y = agent.mark_for_drop.position.y,
 						pos_z = agent.mark_for_drop.position.z,
 						server_knows = agent.player_id == 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
 						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.mark_for_drop.wep_node)).is_map_element(),
 						wep_name = str(agent.mark_for_drop.wep_node),
-					}
-					pickup_spawner.spawn(new_drop)
+					})
 					agent.held_weapons.erase(agent.mark_for_drop.wep_node)
 					agent.mark_for_drop.clear()
 				if agent.try_grab_pickup and len(agent.queued_action) > 1:
@@ -349,21 +348,20 @@ func _physics_process(delta: float) -> void:
 						$Pickups.get_node(str(agent.queued_action[1])).queue_free()
 					agent.try_grab_pickup = false
 				if agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
-					var new_drop = {
+					pickup_spawner.spawn({
 						pos_x = agent.global_position.x + (randf() - 0.5),
 						pos_y = agent.global_position.y,
 						pos_z = agent.global_position.z + (randf() - 0.5),
 						server_knows = agent.player_id == 1 or $Weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
 						client_knows = agent.player_id != 1 or $Weapons.get_node(str(agent.held_weapons[1])).is_map_element(),
 						wep_name = str(agent.held_weapons[1]),
-					}
-					pickup_spawner.spawn(new_drop)
-					agent.held_weapons.erase(new_drop.wep_name)
+					})
+					agent.held_weapons.erase(str(agent.held_weapons[1]))
 				if agent.mark_for_grenade_throw:
 					var try_name = agent.held_weapons[agent.selected_weapon]
 					while try_name in grenades_in_existence:
 						try_name += "N"
-					var grenade_data = {
+					grenade_spawner.spawn({
 						pos_x = agent.position.x,
 						pos_y = agent.position.y,
 						pos_z = agent.position.z,
@@ -375,8 +373,7 @@ func _physics_process(delta: float) -> void:
 						end_pos_x = agent.queued_action[1].x,
 						end_pos_y = agent.queued_action[1].y,
 						end_pos_z = agent.queued_action[1].z,
-					}
-					grenade_spawner.spawn(grenade_data)
+					})
 					agent.mark_for_grenade_throw = false
 			for grenade in ($Grenades.get_children() as Array[Grenade]):
 				grenade._tick()
