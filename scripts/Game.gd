@@ -67,7 +67,7 @@ enum ProgressParts {
 @onready var weapon_spawner : MultiplayerSpawner = $WeaponSpawner
 @onready var grenade_spawner : MultiplayerSpawner = $GrenadeSpawner
 @onready var smoke_spawner : MultiplayerSpawner = $SmokeSpawner
-@onready var audio_spawner : MultiplayerSpawner = $AudioPulseSpawner
+@onready var audio_spawner : MultiplayerSpawner = $AudioEventSpawner
 
 @onready var _quick_views : HBoxContainer = $HUDBase/QuickViews
 @onready var _radial_menu = $HUDSelected/RadialMenu

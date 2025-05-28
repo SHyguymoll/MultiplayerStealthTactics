@@ -323,11 +323,11 @@ game_map = NodePath("World/GameMap")
 _spawnable_scenes = PackedStringArray("uid://oitco668lkwj")
 spawn_path = NodePath("../Agents")
 
-[node name="AudioPulses" type="Node3D" parent="."]
+[node name="AudioEvents" type="Node3D" parent="."]
 
-[node name="AudioPulseSpawner" type="MultiplayerSpawner" parent="."]
+[node name="AudioEventSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://gvwevpp5oysy")
-spawn_path = NodePath("../AudioPulses")
+spawn_path = NodePath("../AudioEvents")
 
 [node name="Pickups" type="Node3D" parent="."]
 
@@ -380,8 +380,6 @@ environment = SubResource("Environment_bedr1")
 [node name="ClientsideIndicators" type="Node3D" parent="."]
 
 [node name="RayCasts" type="Node3D" parent="."]
-
-[node name="AudioEvents" type="Node3D" parent="."]
 
 [node name="Popups" type="Node3D" parent="."]
 
