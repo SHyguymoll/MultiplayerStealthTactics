@@ -6,9 +6,9 @@ extends Node3D
 
 var player_id : int
 var max_lifetime : int
-var lifetime : int
-var radius : float
-var max_radius : float
+@export var lifetime : int
+@export var radius : float
+@export var max_radius : float
 var selected_audio : String
 
 var heard := false
