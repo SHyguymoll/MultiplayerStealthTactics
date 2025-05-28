@@ -92,7 +92,7 @@ func _ready(): # Preconfigure game.
 	weapon_spawner.spawn_function = create_weapon
 	grenade_spawner.spawn_function = create_grenade
 	smoke_spawner.spawn_function = create_smoke
-	audio_spawner.spawn_function = create_audio_pulse
+	audio_spawner.spawn_function = create_audio_event
 
 	$FadeOut.visible = true
 	$FadeOut/ColorRect.modulate = Color.WHITE
@@ -577,16 +577,16 @@ func create_agent(data) -> Agent: #TODO
 	return new_agent
 
 
-func create_audio_pulse(data) -> GameAudioEvent:
-	var new_audio : GameAudioEvent = audio_event_scene.instantiate()
-	new_audio.name = data.agent
-	new_audio.player_id = data.player
-	new_audio.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
-	new_audio.max_radius = data.max_rad
-	new_audio.lifetime = data.lifetime
-	new_audio.max_lifetime = data.lifetime
-	new_audio.selected_audio = data.sound_id
-	return new_audio
+func create_audio_event(data) -> GameAudioEvent:
+	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
+	new_audio_event.name = data.agent
+	new_audio_event.player_id = data.player
+	new_audio_event.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_audio_event.max_radius = data.max_rad
+	new_audio_event.lifetime = data.lifetime
+	new_audio_event.max_lifetime = data.lifetime
+	new_audio_event.selected_audio = data.sound_id
+	return new_audio_event
 
 
 func create_weapon(data) -> GameWeapon:
