@@ -165,9 +165,11 @@ func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = fal
 	if fleeting:
 		new_popup.disappear()
 
-
-func update_text() -> void:
+@rpc("authority", "call_local")
+func update_text(wipe : bool = false) -> void:
 	_ag_insts.text = ""
+	if wipe:
+		return
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if agent.owned():
 			_ag_insts.text += agent.action_text + "\n"
@@ -268,29 +270,28 @@ func determine_sounds():
 				continue # skip already heard sounds
 			create_popup(GameRefs.POPUP.sound_unknown, audio_event.global_position)
 			audio_event.play_sound()
-		if multiplayer.is_server():
-			match agent.state:
-				Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
-					audio_spawner.spawn({
-						player = agent.player_id,
-						agent = agent.name,
-						pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
-						max_rad = 2.0, lifetime = 13, sound_id = "ag_step_quiet",
-					})
-				Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
-					audio_spawner.spawn({
-						player = agent.player_id,
-						agent = agent.name,
-						pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
-						max_rad = 2.75, lifetime = 13, sound_id = "ag_step_loud",
-					})
-				Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
-					audio_spawner.spawn({
-						player = agent.player_id,
-						agent = agent.name,
-						pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
-						max_rad = 2.0, lifetime = 13, sound_id = "ag_step_quiet",
-					})
+		match agent.state:
+			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
+				audio_spawner.spawn({
+					player = agent.player_id,
+					agent = agent.name,
+					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
+					max_rad = 2.0, lifetime = 13, sound_id = "ag_step_quiet",
+				})
+			Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
+				audio_spawner.spawn({
+					player = agent.player_id,
+					agent = agent.name,
+					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
+					max_rad = 2.75, lifetime = 13, sound_id = "ag_step_loud",
+				})
+			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
+				audio_spawner.spawn({
+					player = agent.player_id,
+					agent = agent.name,
+					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
+					max_rad = 2.0, lifetime = 13, sound_id = "ag_step_quiet",
+				})
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
 		audio_event.update()
 
@@ -1075,6 +1076,8 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 		GamePhases.COMPLETION:
 			if sent_reward:
 				return
+			# clear texts
+			update_text.rpc(true)
 			# who's escaping now
 			_exfiltrate_agents()
 			# has a team fully died
