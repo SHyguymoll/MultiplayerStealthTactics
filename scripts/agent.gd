@@ -6,6 +6,10 @@ signal agent_selected(agent : Agent)
 const CQC_START = Vector3(0, 0, 0.48)
 const CQC_END = Vector3(0.545, 0, 0)
 const GENERAL_LERP_VAL = 0.2
+const STANCE_CHANGE_SHORT = -6
+const STANCE_CHANGE_LONG = -11
+const CQC_STEP_SUCCESS_START = -31
+const CQC_STEP_FAIL_START = -38
 
 var view_dist : float = 2.5 #length of vision "cone" (really a pyramid)
 var view_across : float = 1 #size of vision pyramid base
@@ -172,7 +176,8 @@ func get_required_y_rotation(aimed_position) -> float:
 
 @rpc("authority", "call_local")
 func do_anim(anim_name : String):
-	_anim_state.travel(anim_name)
+	if multiplayer.get_unique_id() != 1:
+		_anim_state.travel(anim_name)
 
 func perform_action():
 	action_done = ActionDoneness.NOT_DONE
@@ -183,12 +188,21 @@ func perform_action():
 	match queued_action[0]:
 		GameActions.GO_STAND:
 			do_anim.rpc("Stand")
+			if in_crouching_state():
+				game_steps_since_execute = STANCE_CHANGE_SHORT
+			if in_prone_state():
+				game_steps_since_execute = STANCE_CHANGE_LONG
 			state = States.STAND
 		GameActions.GO_CROUCH:
 			do_anim.rpc("Crouch")
+			game_steps_since_execute = STANCE_CHANGE_SHORT
 			state = States.CROUCH
 		GameActions.GO_PRONE:
 			do_anim.rpc("B_Prone")
+			if in_crouching_state():
+				game_steps_since_execute = STANCE_CHANGE_SHORT
+			if in_standing_state():
+				game_steps_since_execute = STANCE_CHANGE_LONG
 			state = States.PRONE
 		GameActions.RUN_TO_POS:
 			do_anim.rpc("B_Run")
@@ -285,7 +299,8 @@ func owned() -> bool:
 
 
 func action_complete(successfully : bool = true, no_flash : bool = false, single_mode : bool = false):
-	action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
+	if len(queued_action):
+		action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
 	queued_action.clear()
 	if not single_mode:
 		if owned() and not no_flash:
@@ -345,6 +360,7 @@ func decide_weapon_blend() -> Vector2:
 		_:
 			return Vector2.RIGHT + Vector2.UP
 
+var grabbed_counter = 0
 
 func take_damage(amount : int, is_stun : bool = false):
 	if is_stun:
@@ -355,6 +371,7 @@ func take_damage(amount : int, is_stun : bool = false):
 		else:
 			do_anim.rpc("B_Hurt_Collapse")
 		state = States.GRABBED
+		grabbed_counter = 22
 	else:
 		if selected_item > -1 and held_items[selected_item] != "body_armor":
 			amount = max(1, amount/2)
@@ -367,14 +384,18 @@ func take_damage(amount : int, is_stun : bool = false):
 func select_hurt_animation():
 	if health == 0:
 		do_anim.rpc("B_Hurt_Collapse")
+		action_complete(false)
 		return
 	var cur_node = _anim_state.get_current_node()
 	if cur_node.begins_with("B_Stand_") or cur_node in ["B_Walk", "B_Run", "B_CrouchToStand", "B_Hurt_Standing", "Stand"]:
 		do_anim.rpc("B_Hurt_Standing")
+		action_complete(false)
 	elif cur_node.begins_with("B_Crouch_") or cur_node in ["B_ProneToCrouch", "B_StandToCrouch", "Crouch", "B_Crouch_Walk"]:
 		do_anim.rpc("B_Hurt_Crouching")
+		action_complete(false)
 	else:
 		do_anim.rpc("B_Hurt_Prone")
+		action_complete(false)
 
 @rpc()
 func flash_outline(color : Color):
@@ -393,7 +414,7 @@ func exfiltrate():
 	twe.finished.connect(func(): visible = false)
 
 
-func _physics_process(_d: float) -> void:
+func _physics_process(delta: float) -> void:
 	var v_cone = Vector3(VIS_CONE_BASE.x * 2 * view_across, 1, VIS_CONE_BASE.y * view_dist/2.5)
 	_vision_cone.scale = v_cone
 	_outline_mat.albedo_color = _outline_mat.albedo_color.lerp(Color.BLACK, GENERAL_LERP_VAL / 3.0)
@@ -406,6 +427,8 @@ func _physics_process(_d: float) -> void:
 	$AgentIsStunned.visible = state == States.STUNNED
 	$AgentIsStunned.rotation.z += PI/20.0
 	$AgentIsDead.visible = state == States.DEAD
+	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
+	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
 
 
 func should_be_visible():
@@ -454,9 +477,6 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 	)
 	if len(queued_action) > 0 and queued_action[0] != GameActions.RELOAD_WEAPON:
 		weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), GENERAL_LERP_VAL)
-	_anim.set("parameters/Crouch/blend_position", weapons_animation_blend)
-	_anim.set("parameters/Stand/blend_position", weapons_animation_blend)
-	_anim.advance(delta)
 	visible_level = clamp(visible_level, 0, 100)
 	target_visible_level = lerp(target_visible_level, visible_level, GENERAL_LERP_VAL)
 	# update agent specifically
@@ -520,13 +540,20 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			state = States.CROUCH
 	if state == States.GRABBED:
 		visible_level = 100
+		grabbed_counter = max(grabbed_counter - 1, 0)
 		if grabbing_agent != null:
 			global_position = grabbing_agent._cqc_anim_helper.global_position
 			global_rotation = grabbing_agent._cqc_anim_helper.global_rotation
+		if grabbed_counter == 0:
+			state = States.STUNNED
+			do_anim.rpc("B_Hurt_Stunned")
 	if len(queued_action) == 0:
 		action_complete(true, true, single_mode)
 		return
 	match queued_action[0]:
+		GameActions.GO_STAND, GameActions.GO_CROUCH, GameActions.GO_PRONE:
+			if game_steps_since_execute == 0:
+				action_complete()
 		GameActions.LOOK_AROUND:
 			rotation.y = lerp_angle(rotation.y, target_direction, GENERAL_LERP_VAL)
 			if within_target():
@@ -553,15 +580,21 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 							if game_steps_since_execute == 30:
 								mark_for_grenade_throw = true
 								GameRefs.get_weapon_node(held_weapons[selected_weapon]).reload_weapon()
+							if game_steps_since_execute == 50:
+								action_complete()
 						GameRefs.WeaponTypes.PLACED:
 							if game_steps_since_execute == 20:
+								action_complete()
 								do_anim.rpc("Stand")
 						GameRefs.WeaponTypes.CQC:
 							var cqc_lerp_value = float(clamp(max(game_steps_since_execute - 20, 0)/60.0, 0.0, 1.0))
 							_cqc_anim_helper.position = CQC_START.lerp(CQC_END, cqc_lerp_value)
 							_cqc_anim_helper.rotation.y = lerp_angle(-PI/2, 0, cqc_lerp_value)
+							if game_steps_since_execute == 0:
+								action_complete()
 						GameRefs.WeaponTypes.SMALL, GameRefs.WeaponTypes.BIG:
-							pass
+							if game_steps_since_execute == 18:
+								action_complete()
 		GameActions.PICK_UP_WEAPON:
 			match attack_step:
 				AttackStep.ORIENTING:
@@ -634,28 +667,6 @@ func _attack_orient_transition():
 
 
 func _on_animation_finished(anim_name: StringName) -> void:
-	if anim_name.begins_with("B_Hurt") and not anim_name in ["B_Hurt_Stunned", "B_Hurt_WakeUp", "B_Hurt_Collapse"]:
-		action_complete(false)
 	if anim_name == "B_Hurt_Collapse":
 		if health == 0:
 			do_anim.rpc("B_Dead")
-		if stun_health == 0:
-			do_anim.rpc("B_Hurt_Stunned")
-	if state == States.GRABBED:
-		state = States.STUNNED
-	if len(queued_action) == 0:
-		action_complete(true, true)
-		return
-	match queued_action[0]:
-		GameActions.GO_STAND when anim_name == "B_CrouchToStand":
-			action_complete()
-		GameActions.GO_CROUCH when anim_name == "B_StandToCrouch":
-			action_complete()
-		GameActions.GO_CROUCH when anim_name == "B_ProneToCrouch":
-			action_complete()
-		GameActions.GO_PRONE when anim_name == "B_CrouchToProne":
-			action_complete()
-		GameActions.USE_WEAPON when anim_name in ["B_Stand_Attack_SmallArms", "B_Stand_Attack_BigArms", "B_Stand_Attack_Grenade", "B_Stand_Attack_Slam", "B_Stand_Attack_Whiff"]:
-			action_complete()
-		GameActions.USE_WEAPON when anim_name in ["B_Crouch_Attack_SmallArms", "B_Crouch_Attack_BigArms", "B_Crouch_Attack_Grenade"]:
-			action_complete()

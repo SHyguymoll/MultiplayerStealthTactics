@@ -663,25 +663,32 @@ func determine_cqc_events():
 		if cqc_actors[grabber] == null:
 			continue
 		if not (cqc_actors[grabber] as Area3D).get_parent() is Agent:
-			grabber._anim_state.travel("B_Stand_Attack_Whiff")
+			grabber.do_anim.rpc("B_Stand_Attack_Whiff")
+			grabber.game_steps_since_execute = Agent.CQC_STEP_FAIL_START
 			continue
 		var grabbee : Agent = (cqc_actors[grabber] as Area3D).get_parent()
 		if grabbee in cqc_actors and grabber.player_id == 1: #client wins tiebreakers
-			grabber._anim_state.travel("B_Stand_Attack_Whiff")
+			grabber.do_anim.rpc("B_Stand_Attack_Whiff")
+			grabber.game_steps_since_execute = Agent.CQC_STEP_FAIL_START
 			continue
 		if grabber.player_id == grabbee.player_id: # don't grab your friends
-			grabber._anim_state.travel("B_Stand_Attack_Whiff")
+			grabber.do_anim.rpc("B_Stand_Attack_Whiff")
+			grabber.game_steps_since_execute = Agent.CQC_STEP_FAIL_START
 			continue
 		if grabbee.in_incapacitated_state(): # don't grab people who're already on the ground
-			grabber._anim_state.travel("B_Stand_Attack_Whiff")
+			grabber.do_anim.rpc("B_Stand_Attack_Whiff")
+			grabber.game_steps_since_execute = Agent.CQC_STEP_FAIL_START
 			continue
 		if grabbee.selected_item > -1 and grabbee.held_items[grabbee.selected_item] == "box":
-			grabber._anim_state.travel("B_Stand_Attack_Whiff")  # don't grab boxes
+			grabber.do_anim.rpc("B_Stand_Attack_Whiff")
+			grabber.game_steps_since_execute = Agent.CQC_STEP_FAIL_START  # don't grab boxes
 			continue
 		if grabbee.ungrabbable: # don't grab the ungrabbable
-			grabber._anim_state.travel("B_Stand_Attack_Whiff")
+			grabber.do_anim.rpc("B_Stand_Attack_Whiff")
+			grabber.game_steps_since_execute = Agent.CQC_STEP_FAIL_START
 			continue
-		grabber._anim_state.travel("B_Stand_Attack_Slam")
+		grabber.do_anim.rpc("B_Stand_Attack_Slam")
+		grabber.game_steps_since_execute = Agent.CQC_STEP_SUCCESS_START
 		grabbee.grabbing_agent = grabber
 		if multiplayer.is_server():
 			grabbee.take_damage(3, true)
@@ -812,7 +819,6 @@ func show_hud():
 
 @rpc("any_peer", "call_remote", "reliable")
 func set_agent_action(agent_name: String, decision_array: Array):
-	print(decision_array)
 	($Agents.get_node(agent_name) as Agent).queued_action = decision_array
 
 
