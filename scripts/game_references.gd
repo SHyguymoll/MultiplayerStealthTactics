@@ -148,6 +148,7 @@ const POPUP := {
 	sight_unknown = preload("res://assets/sprites/game_popups/unknown_sight.png"),
 	sound_unknown = preload("res://assets/sprites/game_popups/unknown_sound.png"),
 	spotted = preload("res://assets/sprites/game_popups/spotted.png"),
+	invalid = preload("res://assets/sprites/game_popups/invalid_popup.png")
 }
 
 const TXT := {

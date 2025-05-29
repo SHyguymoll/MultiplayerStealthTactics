@@ -156,10 +156,10 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.fov_target = new_fov
 
 @rpc()
-func create_popup(texture : Texture2D, location : Vector3, fleeting : bool = false) -> void:
+func create_popup(popup_ref : String, location : Vector3, fleeting : bool = false) -> void:
 	location.y = 3.0
 	var new_popup : GamePopup = popup_scene.instantiate()
-	new_popup.texture = texture
+	new_popup.texture = GameRefs.POPUP.get(popup_ref, GameRefs.POPUP.invalid)
 	new_popup.position = location
 	$Popups.add_child(new_popup)
 	if fleeting:
@@ -223,7 +223,7 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 			spottee.server_knows = true
 		else:
 			spottee.client_knows = true
-		create_popup(GameRefs.POPUP.spotted, spottee.position, true)
+		create_popup("spotted", spottee.position, true)
 		if spotter.player_id != spottee.player_id:
 			spotter.sounds.spotted_agent.play()
 	elif sight_chance > 1.0/3.0: # almost seent it
@@ -233,7 +233,7 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 		var p_offset = -0.1/sight_chance
 		var x_off = randf_range(-p_offset, p_offset)
 		var z_off = randf_range(-p_offset, p_offset)
-		create_popup(GameRefs.POPUP.sight_unknown, spottee.position + Vector3(x_off, 0, z_off))
+		create_popup("sight_unknown", spottee.position + Vector3(x_off, 0, z_off))
 		spotter.sounds.glanced.play()
 
 
@@ -268,7 +268,7 @@ func determine_sounds():
 				continue # skip same team sources
 			if audio_event.heard:
 				continue # skip already heard sounds
-			create_popup(GameRefs.POPUP.sound_unknown, audio_event.global_position)
+			create_popup("sound_unknown", audio_event.global_position)
 			audio_event.play_sound()
 		match agent.state:
 			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
@@ -332,7 +332,7 @@ func _physics_process(delta: float) -> void:
 						create_popup.rpc_id(GameSettings.other_player_id, GameRefs.POPUP.sight_unknown, agent.position)
 					else:
 						agent.server_knows = false
-						create_popup(GameRefs.POPUP.sight_unknown, agent.position)
+						create_popup("sight_unknown", agent.position)
 				if len(agent.mark_for_drop) > 0:
 					pickup_spawner.spawn({
 						pos_x = agent.mark_for_drop.position.x,
