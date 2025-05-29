@@ -176,8 +176,7 @@ func get_required_y_rotation(aimed_position) -> float:
 
 @rpc("authority", "call_local")
 func do_anim(anim_name : String):
-	if multiplayer.get_unique_id() != 1:
-		_anim_state.travel(anim_name)
+	_anim_state.travel(anim_name)
 
 func perform_action():
 	action_done = ActionDoneness.NOT_DONE
