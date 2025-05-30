@@ -6,10 +6,10 @@ signal agent_selected(agent : Agent)
 const CQC_START = Vector3(0, 0, 0.48)
 const CQC_END = Vector3(0.545, 0, 0)
 const GENERAL_LERP_VAL = 0.2
-const STANCE_CHANGE_SHORT = -6
-const STANCE_CHANGE_LONG = -11
-const CQC_STEP_SUCCESS_START = -31
-const CQC_STEP_FAIL_START = -38
+const STANCE_CHANGE_SHORT = -11
+const STANCE_CHANGE_LONG = -21
+const CQC_STEP_SUCCESS_START = -61
+const CQC_STEP_FAIL_START = -75
 
 var view_dist : float = 2.5 #length of vision "cone" (really a pyramid)
 var view_across : float = 1 #size of vision pyramid base
