@@ -329,7 +329,7 @@ func _physics_process(delta: float) -> void:
 				if current_game_step - agent.step_seen == REMEMBER_TILL and agent.visible:
 					if agent.player_id == 1:
 						agent.client_knows = false
-						create_popup.rpc_id(GameSettings.other_player_id, GameRefs.POPUP.sight_unknown, agent.position)
+						create_popup.rpc_id(GameSettings.other_player_id, "sight_unknown", agent.position)
 					else:
 						agent.server_knows = false
 						create_popup("sight_unknown", agent.position)
