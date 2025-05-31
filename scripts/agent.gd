@@ -182,7 +182,7 @@ func perform_action():
 	action_done = ActionDoneness.NOT_DONE
 	game_steps_since_execute = 0
 	if len(queued_action) == 0:
-		action_complete(true, false)
+		action_complete(true, true)
 		return
 	match queued_action[0]:
 		GameActions.GO_STAND:
@@ -298,8 +298,7 @@ func owned() -> bool:
 
 
 func action_complete(successfully : bool = true, no_flash : bool = false, single_mode : bool = false):
-	if len(queued_action):
-		action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
+	action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
 	queued_action.clear()
 	if no_flash:
 		return
@@ -553,7 +552,6 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			state = States.STUNNED
 			do_anim.rpc("B_Hurt_Stunned")
 	if len(queued_action) == 0:
-		action_complete(true, true, single_mode)
 		return
 	match queued_action[0]:
 		GameActions.GO_STAND, GameActions.GO_CROUCH, GameActions.GO_PRONE:
