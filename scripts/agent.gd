@@ -301,14 +301,15 @@ func action_complete(successfully : bool = true, no_flash : bool = false, single
 	if len(queued_action):
 		action_done = ActionDoneness.SUCCESS if successfully else ActionDoneness.FAIL
 	queued_action.clear()
+	if no_flash:
+		return
 	if not single_mode:
-		if owned() and not no_flash:
+		if owned():
 			flash_outline(Color.GREEN if successfully else Color.RED)
 		else:
 			flash_outline.rpc_id(GameSettings.other_player_id, Color.GREEN if successfully else Color.RED)
 	else:
-		if not no_flash:
-			flash_outline(Color.GREEN if successfully else Color.RED)
+		flash_outline(Color.GREEN if successfully else Color.RED)
 
 
 func _ready() -> void:
