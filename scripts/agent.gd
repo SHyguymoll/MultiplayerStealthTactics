@@ -68,7 +68,7 @@ var _outline_mat : StandardMaterial3D
 	flag_client = $Agent/game_rig/Skeleton3D/FlagClient,
 }
 
-@onready var sounds = {
+@onready var sounds : Dictionary[String, AudioStreamPlayer3D] = {
 	glanced = ($ClientsideSoundEffects/GlancedSomething as AudioStreamPlayer3D),
 	spotted_element = ($ClientsideSoundEffects/SpottedElement as AudioStreamPlayer3D),
 	spotted_agent = ($ClientsideSoundEffects/SpottedAgent as AudioStreamPlayer3D),
@@ -321,6 +321,11 @@ func _ready() -> void:
 		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
 	_ear_cylinder.radius = hearing_dist
 	_body.collision_layer += 8 if player_id == 1 else 16
+	# set up rpcs
+	sounds.glanced.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
+	sounds.spotted_element.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
+	sounds.spotted_agent.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
+
 	# custom texture
 	if not owned():
 		skin_texture = "res://assets/models/Skins/enemy_agent.png"

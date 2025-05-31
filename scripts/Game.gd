@@ -221,11 +221,12 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 		spottee.step_seen = current_game_step
 		if spotter.player_id == 1:
 			spottee.server_knows = true
+			create_popup("spotted", spottee.position, true)
+			spotter.sounds.spotted_agent.play()
 		else:
 			spottee.client_knows = true
-		create_popup("spotted", spottee.position, true)
-		if spotter.player_id != spottee.player_id:
-			spotter.sounds.spotted_agent.play()
+			create_popup.rpc_id(GameSettings.other_player_id, "spotted", spottee.position, true)
+			spotter.sounds.spotted_agent.play.rpc_id(GameSettings.other_player_id)
 	elif sight_chance > 1.0/3.0: # almost seent it
 		if spottee.noticed > 0:
 			return
@@ -233,8 +234,12 @@ func try_see_agent(spotter : Agent, spottee : Agent):
 		var p_offset = -0.1/sight_chance
 		var x_off = randf_range(-p_offset, p_offset)
 		var z_off = randf_range(-p_offset, p_offset)
-		create_popup("sight_unknown", spottee.position + Vector3(x_off, 0, z_off))
-		spotter.sounds.glanced.play()
+		if spotter.player_id == 1:
+			create_popup("sight_unknown", spottee.position + Vector3(x_off, 0, z_off))
+			spotter.sounds.glanced.play()
+		else:
+			create_popup.rpc_id(GameSettings.other_player_id, "sight_unknown", spottee.position + Vector3(x_off, 0, z_off))
+			spotter.sounds.glanced.play.rpc_id(GameSettings.other_player_id)
 
 
 func try_see_element(spotter : Agent, element : Node3D):
