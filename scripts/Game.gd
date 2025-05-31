@@ -300,7 +300,6 @@ func determine_sounds():
 	for audio_event in ($AudioEvents.get_children() as Array[GameAudioEvent]):
 		audio_event.update()
 
-
 func determine_indicator_removals():
 	for ind in $ClientsideIndicators.get_children():
 		if ind is AimingIndicator or ind is MovementIndicator:
@@ -324,6 +323,8 @@ func _physics_process(delta: float) -> void:
 		$World/Camera3D as Camera3D).unproject_position(
 				selector.referenced_agent.position)
 			(selector.get_child(0) as CollisionShape2D).shape.size = Vector2(32, 32) * GameCamera.MAX_FOV/_camera.fov
+	if game_phase == GamePhases.EXECUTION:
+		determine_indicator_removals()
 	if multiplayer.is_server():
 		if game_phase == GamePhases.EXECUTION:
 			determine_cqc_events()
@@ -437,7 +438,6 @@ func _physics_process(delta: float) -> void:
 			current_game_step += 1
 			determine_sights()
 			determine_sounds()
-			determine_indicator_removals()
 			for agent in ($Agents.get_children() as Array[Agent]):
 				if agent.action_done == Agent.ActionDoneness.NOT_DONE:
 					return
@@ -932,6 +932,7 @@ func _on_radial_menu_aiming_decision_made(decision_array: Array) -> void:
 	selection_step = SelectionSteps.AIMING
 	var new_indicator = aiming_icon_scene.instantiate()
 	new_indicator.referenced_agent = ag
+	new_indicator.queued_action = decision_array[0]
 	new_indicator.name = ag_name
 	$ClientsideIndicators.add_child(new_indicator)
 	await new_indicator.indicator_placed

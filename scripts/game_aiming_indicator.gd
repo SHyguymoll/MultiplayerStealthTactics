@@ -7,6 +7,8 @@ const CLOSENESS := 2.0
 @onready var _game_camera : GameCamera = $"../../World/Camera3D"
 @onready var _indicator : AnimatedSprite3D = $GameMovementIndicator
 var referenced_agent : Agent
+# this indicator uses Agent.GameActions to decide its maximum ray length
+var queued_action : Agent.GameActions = Agent.GameActions.LOOK_AROUND
 var ind_set := false
 
 
@@ -37,9 +39,9 @@ func _on_animation_changed() -> void:
 func _physics_process(_d: float) -> void: #TODO
 	if not ind_set:
 		var ray_len = 10
-		if referenced_agent.queued_action[0] == Agent.GameActions.USE_WEAPON and GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC) or referenced_agent.queued_action[0] in [Agent.GameActions.LOOK_AROUND, Agent.GameActions.DROP_WEAPON]:
+		if queued_action == Agent.GameActions.USE_WEAPON and GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.CQC) or queued_action in [Agent.GameActions.LOOK_AROUND, Agent.GameActions.DROP_WEAPON]:
 			ray_len = 1
-		if referenced_agent.queued_action[0] == Agent.GameActions.USE_WEAPON and GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.THROWN):
+		if queued_action == Agent.GameActions.USE_WEAPON and GameRefs.compare_wep_type(referenced_agent, GameRefs.WeaponTypes.THROWN):
 			ray_len = 5
 		var final_position = Vector2(
 			(_game_camera.position.x - referenced_agent.global_position.x),
