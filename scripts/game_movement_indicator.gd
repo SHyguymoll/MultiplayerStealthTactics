@@ -110,7 +110,7 @@ func calculate_travel_dist():
 	(_travel_path.mesh as ArrayMesh).clear_surfaces()
 	var verts = PackedVector3Array()
 	var normals = PackedVector3Array()
-	create_path_rect(referenced_agent.global_position, global_position, 2.0, verts, normals)
+	create_path_rect(referenced_agent.global_position, global_position, 0.25, verts, normals)
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
 	surface_array[Mesh.ARRAY_VERTEX] = verts

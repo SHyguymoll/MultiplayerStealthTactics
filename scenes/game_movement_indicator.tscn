@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://byiuauwlgaakv"]
+[gd_scene load_steps=12 format=3 uid="uid://byiuauwlgaakv"]
 
 [ext_resource type="Texture2D" uid="uid://c1a4tc5047oxv" path="res://assets/sprites/game_popups/animated/movement/0.png" id="1_d3kem"]
 [ext_resource type="Script" uid="uid://bhin74mvixtyk" path="res://scripts/game_movement_indicator.gd" id="1_rfasu"]
@@ -146,6 +146,10 @@ animations = [{
 "speed": 8.0
 }]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c4gan"]
+shading_mode = 0
+albedo_color = Color(0.767667, 0.59, 1, 1)
+
 [sub_resource type="ArrayMesh" id="ArrayMesh_c4gan"]
 
 [node name="GameMovementIndicator" type="AnimatedSprite3D"]
@@ -170,6 +174,8 @@ font_size = 64
 outline_size = 11
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+top_level = true
+material_override = SubResource("StandardMaterial3D_c4gan")
 gi_mode = 0
 mesh = SubResource("ArrayMesh_c4gan")
 
