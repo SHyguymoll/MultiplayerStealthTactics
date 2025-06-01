@@ -37,15 +37,6 @@ enum SelectionSteps {
 }
 var selection_step : SelectionSteps = SelectionSteps.BASE
 
-const REMEMBER_TILL = 150
-
-enum Collides {
-	PRONE = 1,
-	CROUCH = 2,
-	STAND = 4,
-}
-
-@export var map : GameMap
 
 enum ProgressParts {
 	INTRO = -1,
@@ -57,6 +48,16 @@ enum ProgressParts {
 
 @export var server_progress : ProgressParts = ProgressParts.INTRO
 @export var client_progress : ProgressParts = ProgressParts.INTRO
+
+const REMEMBER_TILL = 150
+
+enum Collides {
+	PRONE = 1,
+	CROUCH = 2,
+	STAND = 4,
+}
+
+@export var map : GameMap
 
 @export var grenades_in_existence = []
 @export var exfiltration_queue : Array[Agent] = []
@@ -1194,7 +1195,7 @@ func check_weapon_holder_exfil(server_team : bool, item_name : String) -> bool:
 
 
 # only called by server, owned is used here to check if agent is on server team
-func _check_full_team_exfil_or_dead(server_team : bool):
+func has_team_exited(server_team : bool):
 	var count = 0
 	for ag in ($Agents.get_children() as Array[Agent]):
 		if ag.owned() and not server_team or not ag.owned() and server_team:
@@ -1222,7 +1223,7 @@ func of_comp_server():
 				create_toast_update.rpc(GameRefs.TXT.of_y_get, GameRefs.TXT.of_t_get, true)
 				server_progress = ProgressParts.ITEM_HELD
 				return
-			if not _check_full_team_exfil_or_dead(true):
+			if not has_team_exited(true):
 				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 				server_progress = ProgressParts.OBJECTIVE_COMPLETE
 				return
@@ -1235,7 +1236,7 @@ func of_comp_server():
 				server_progress = ProgressParts.NO_ADVANTAGE
 				return
 			if check_weapon_holder_exfil(true, "map_flag_center"):
-				if not _check_full_team_exfil_or_dead(true):
+				if not has_team_exited(true):
 					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 					server_progress = ProgressParts.OBJECTIVE_COMPLETE
 					return
@@ -1243,7 +1244,7 @@ func of_comp_server():
 				server_progress = ProgressParts.SURVIVORS_EXFILTRATED
 				return
 		ProgressParts.OBJECTIVE_COMPLETE: # a server team member has escaped with the flag
-			if _check_full_team_exfil_or_dead(true):
+			if has_team_exited(true):
 				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
 				server_progress = ProgressParts.SURVIVORS_EXFILTRATED
 
@@ -1259,7 +1260,7 @@ func of_comp_client():
 				create_toast_update.rpc(GameRefs.TXT.of_t_get, GameRefs.TXT.of_y_get, true)
 				client_progress = ProgressParts.ITEM_HELD
 				return
-			if not _check_full_team_exfil_or_dead(false):
+			if not has_team_exited(false):
 				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 				client_progress = ProgressParts.OBJECTIVE_COMPLETE
 				return
@@ -1272,7 +1273,7 @@ func of_comp_client():
 				client_progress = ProgressParts.NO_ADVANTAGE
 				return
 			if check_weapon_holder_exfil(false, "map_flag_center"):
-				if not _check_full_team_exfil_or_dead(false):
+				if not has_team_exited(false):
 					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
 					client_progress = ProgressParts.OBJECTIVE_COMPLETE
 					return
@@ -1280,7 +1281,7 @@ func of_comp_client():
 				client_progress = ProgressParts.SURVIVORS_EXFILTRATED
 				return
 		ProgressParts.OBJECTIVE_COMPLETE: # a client team member has escaped with the flag
-			if _check_full_team_exfil_or_dead(false):
+			if has_team_exited(false):
 				create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
 				client_progress = ProgressParts.SURVIVORS_EXFILTRATED
 
