@@ -8,6 +8,7 @@ const CLOSENESS := 2.0
 @onready var _ray_left : RayCast3D = $LeftCast
 @onready var _ray_middle : RayCast3D = $MiddleCast
 @onready var _ray_right : RayCast3D = $RightCast
+@onready var _travel_path : MeshInstance3D = $MeshInstance3D
 var referenced_agent : Agent
 var queued_action : Array
 var ind_set := false
@@ -83,19 +84,43 @@ func _check_position() -> bool:
 	return true
 
 
+func calculate_travel_dist():
+	var arr = referenced_agent.get_position_list()
+	print(arr)
+	var tot = 0.0
+	var mesh : ImmediateMesh = _travel_path.mesh
+	mesh.clear_surfaces()
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+	mesh.surface_set_color(Color.WHITE)
+	mesh.surface_set_normal(Vector3.UP)
+	mesh.surface_add_vertex(global_position + Vector3.UP * 0.5)
+	mesh.surface_add_vertex(global_position + (Vector3.LEFT * 2) + Vector3.UP * 0.5)
+	mesh.surface_add_vertex(global_position + (Vector3.RIGHT * 2) + (Vector3.BACK * 2) + Vector3.UP * 0.5)
+	#for pos in arr:
+		#tot += abs(pos.length_squared())
+		#mesh.surface_add_vertex(pos + Vector3.UP * 0.1)
+
+	mesh.surface_end()
+	return tot
+
+
 func _physics_process(_d: float) -> void:
 	if not ind_set:
+		var travel_length = calculate_travel_dist()
 		flat_position.x = _game_camera.position.x
 		flat_position.y = _game_camera.position.z
 		ray_position = Vector3(flat_position.x, _game_camera.ground_height, flat_position.y)
-		#distance clamp
+		# simple distance clamp
 		var ref_ag_move_dist = referenced_agent.movement_dist
 		var ray_to_ag = ray_position - referenced_agent.global_position
 		if ray_to_ag.length() > ref_ag_move_dist:
 			var col_norm = ray_to_ag / ray_to_ag.length()
 			ray_position = referenced_agent.global_position + (col_norm * ref_ag_move_dist)
 		global_position = ray_position
-		position_valid = _check_position()
+		# create movement path and limit actual movement distance
+		referenced_agent._nav_agent.target_position = global_position
+		#position_valid = _check_position()
+
 	modulate = Color.WHITE if position_valid else Color.RED
 	#$DebugLabel3D.text = str(referenced_agent.position.distance_to(position)) + "\n" + str(position)
 

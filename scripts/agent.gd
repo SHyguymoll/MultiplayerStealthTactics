@@ -443,6 +443,10 @@ func should_be_visible():
 	return false
 
 
+func get_position_list() -> PackedVector3Array:
+	return _nav_agent.get_current_navigation_path()
+
+
 func within_look_target() -> bool:
 	return abs(rotation.y - target_direction) < 0.1 or abs(rotation.y - (target_direction - TAU)) < 0.1 or abs(rotation.y - (target_direction + TAU)) < 0.1
 

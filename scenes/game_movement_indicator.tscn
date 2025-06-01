@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://byiuauwlgaakv"]
+[gd_scene load_steps=11 format=3 uid="uid://byiuauwlgaakv"]
 
 [ext_resource type="Texture2D" uid="uid://c1a4tc5047oxv" path="res://assets/sprites/game_popups/animated/movement/0.png" id="1_d3kem"]
 [ext_resource type="Script" uid="uid://bhin74mvixtyk" path="res://scripts/game_movement_indicator.gd" id="1_rfasu"]
@@ -146,6 +146,8 @@ animations = [{
 "speed": 8.0
 }]
 
+[sub_resource type="ImmediateMesh" id="ImmediateMesh_c4gan"]
+
 [node name="GameMovementIndicator" type="AnimatedSprite3D"]
 billboard = 1
 double_sided = false
@@ -166,5 +168,9 @@ billboard = 1
 font = ExtResource("8_q1ajn")
 font_size = 64
 outline_size = 11
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+top_level = true
+mesh = SubResource("ImmediateMesh_c4gan")
 
 [connection signal="animation_changed" from="." to="." method="_on_animation_changed"]
