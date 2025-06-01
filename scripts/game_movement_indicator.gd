@@ -28,23 +28,6 @@ func _ready() -> void:
 		Agent.GameActions.CRAWL_TO_POS:
 			play("crawl")
 
-	(_travel_path.mesh as ArrayMesh).clear_surfaces()
-	var verts = PackedVector3Array([
-		Vector3.UP * 0.5,
-		(Vector3.BACK * 3.5) + (Vector3.UP * 0.5),
-		(Vector3.LEFT * 3.5) + (Vector3.UP * 0.5),
-	])
-	var normals = PackedVector3Array([
-		Vector3.UP,
-		Vector3.UP,
-		Vector3.UP,
-	])
-	var surface_array = []
-	surface_array.resize(Mesh.ARRAY_MAX)
-	surface_array[Mesh.ARRAY_VERTEX] = verts
-	surface_array[Mesh.ARRAY_NORMAL] = normals
-	(_travel_path.mesh as ArrayMesh).add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
-
 
 func _succeed():
 	play("movement_end_success")
@@ -101,15 +84,41 @@ func _check_position() -> bool:
 	return true
 
 
+func create_path_rect(start : Vector3, end : Vector3, width : float, vert_arr : PackedVector3Array, norm_arr : PackedVector3Array):
+	var angle_perpendicular = start.direction_to(end).rotated(Vector3.DOWN, PI/2).normalized()
+	var point_1 = start - (angle_perpendicular * (width / 2.0))
+	var point_2 = end - (angle_perpendicular * (width / 2.0))
+	var point_3 = end + (angle_perpendicular * (width / 2.0))
+	var point_4 = start + (angle_perpendicular * (width / 2.0))
+	vert_arr.push_back(point_1)
+	norm_arr.push_back(Vector3.UP)
+	vert_arr.push_back(point_2)
+	norm_arr.push_back(Vector3.UP)
+	vert_arr.push_back(point_3)
+	norm_arr.push_back(Vector3.UP)
+	vert_arr.push_back(point_1)
+	norm_arr.push_back(Vector3.UP)
+	vert_arr.push_back(point_3)
+	norm_arr.push_back(Vector3.UP)
+	vert_arr.push_back(point_4)
+	norm_arr.push_back(Vector3.UP)
+
+
 func calculate_travel_dist():
 	var arr = referenced_agent._nav_agent.get_current_navigation_path()
 	var tot = 0.0
+	(_travel_path.mesh as ArrayMesh).clear_surfaces()
+	var verts = PackedVector3Array()
+	var normals = PackedVector3Array()
+	create_path_rect(referenced_agent.global_position, global_position, 2.0, verts, normals)
+	var surface_array = []
+	surface_array.resize(Mesh.ARRAY_MAX)
+	surface_array[Mesh.ARRAY_VERTEX] = verts
+	surface_array[Mesh.ARRAY_NORMAL] = normals
+	(_travel_path.mesh as ArrayMesh).add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
 	#for pos in arr:
 		#tot += abs(pos.length_squared())
 		#mesh.surface_add_vertex(pos + Vector3.UP * 0.1)
-
-
-
 
 func _physics_process(_d: float) -> void:
 	if not ind_set:
