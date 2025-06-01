@@ -110,6 +110,7 @@ func _ready(): # Preconfigure game.
 	if not multiplayer.is_server():
 		client_is_loaded.rpc_id(1)
 
+
 @rpc("authority", "call_local")
 func set_start_time(val):
 	start_time = val
@@ -118,6 +119,7 @@ func set_start_time(val):
 @rpc("any_peer")
 func client_is_loaded():
 	($MultiplayerLoadTimer as Timer).start()
+
 
 func start_game(): # Called only on the server.
 	await ($MultiplayerLoadTimer as Timer).timeout # wait for client to load in
@@ -146,6 +148,7 @@ func close_pause_menu():
 	$PauseMenu/ColorRect/VBoxContainer/NoForfeit.disabled = true
 	$PauseMenu.visible = false
 
+
 @rpc("authority", "call_remote", "reliable")
 func force_camera(new_pos, new_fov = -1.0):
 	if new_pos is Vector2:
@@ -154,6 +157,7 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.final_position = Vector2(new_pos.x, new_pos.z) * Vector2(get_viewport().size/$World/Camera3D.sensitivity)
 	if new_fov != -1.0:
 		$World/Camera3D.fov_target = new_fov
+
 
 @rpc()
 func create_popup(popup_ref : String, location : Vector3, fleeting : bool = false) -> void:
@@ -165,6 +169,7 @@ func create_popup(popup_ref : String, location : Vector3, fleeting : bool = fals
 	if fleeting:
 		new_popup.disappear()
 
+
 @rpc("authority", "call_local")
 func update_text(wipe : bool = false) -> void:
 	_ag_insts.text = ""
@@ -173,6 +178,7 @@ func update_text(wipe : bool = false) -> void:
 	for agent in ($Agents.get_children() as Array[Agent]):
 		if agent.owned():
 			_ag_insts.text += agent.action_text + "\n"
+
 
 func determine_sights():
 	for agent in ($Agents.get_children() as Array[Agent]):
@@ -699,8 +705,10 @@ func determine_cqc_events():
 			grabbee.take_damage(3, true)
 		grabbee.step_seen = current_game_step
 
+
 func slide_end_pos(start_pos : Vector3, end_pos : Vector3, change : float):
 	return end_pos + start_pos.direction_to(end_pos).rotated(Vector3.DOWN, PI/2) * change
+
 
 func determine_weapon_events():
 	var attackers = {}
@@ -972,11 +980,13 @@ func selection_ui():
 	_execute_button.text = "EXECUTE INSTRUCTIONS"
 	show_hud()
 
+
 @rpc("authority", "call_local")
 func execution_ui():
 	$HUDBase/HurryUp.visible = false
 	update_text()
 	_phase_label.text = "EXECUTING ACTIONS..."
+
 
 # called by the server to handle exfiltrations
 func _exfiltrate_agents():
@@ -1032,6 +1042,7 @@ func _exfiltrate_agents():
 				exfiltration_queue.append(agent)
 	for agent in exfiltration_queue:
 		agent.exfiltrate()
+
 
 @rpc()
 func create_end_screen():
@@ -1141,9 +1152,6 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				_update_game_phase(GamePhases.SELECTION)
 
 
-
-
-
 @rpc("authority", "call_local")
 func save_replay(end_time):
 	action_timeline[current_game_step] = "END"
@@ -1200,6 +1208,7 @@ func _check_full_team_exfil_or_dead(server_team : bool):
 func of_comp():
 	of_comp_server()
 	of_comp_client()
+
 
 func of_comp_server():
 	match server_progress:
@@ -1276,7 +1285,6 @@ func of_comp_client():
 				client_progress = ProgressParts.SURVIVORS_EXFILTRATED
 
 
-
 @rpc("authority", "call_local")
 func create_toast_update(server_text : String, client_text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
 	var new_toast : ToastMessage = toast_scene.instantiate()
@@ -1309,8 +1317,6 @@ func failure_jingle():
 	$Music/InProgress.stop()
 	$Music/Failure.play()
 	$FadeOut/ColorRect/AnimatedSprite2D.play("failure")
-
-
 
 
 @rpc("authority", "reliable")
