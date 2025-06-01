@@ -26,5 +26,10 @@ enum Objectives {
 func _ready():
 	for spawn in $Spawns.get_children() as Array[SpawnPoint]:
 		spawn.debug_icon.visible = false
-	$map_basic_nav.visible = false
-	$map_basic.visible = true
+	#$map_basic_nav.visible = false
+	#$map_basic.visible = true
+	$map_basic.visible = false
+	$map_basic_nav.visible = true
+	$map_basic_nav/Nav.visible = true
+	$map_basic_nav/Nav/StaticBody3D.visible = false
+	$map_basic_nav/Nav/NavigationRegion3D.visible = true
