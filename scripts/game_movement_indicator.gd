@@ -105,7 +105,8 @@ func create_path_rect(start : Vector3, end : Vector3, width : float, vert_arr : 
 
 
 func calculate_travel_dist():
-	var arr = referenced_agent._nav_agent.get_current_navigation_path()
+	var arr = referenced_agent.get_position_list()
+	print(arr)
 	var tot = 0.0
 	(_travel_path.mesh as ArrayMesh).clear_surfaces()
 	var verts = PackedVector3Array()
@@ -134,7 +135,7 @@ func _physics_process(_d: float) -> void:
 			ray_position = referenced_agent.global_position + (col_norm * ref_ag_move_dist)
 		global_position = ray_position
 		# create movement path and limit actual movement distance
-		referenced_agent._nav_agent.target_position = global_position
+		referenced_agent._nav_agent.set_target_position(global_position)
 		calculate_travel_dist()
 		#position_valid = _check_position()
 

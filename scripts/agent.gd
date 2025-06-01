@@ -444,6 +444,7 @@ func should_be_visible():
 
 
 func get_position_list() -> PackedVector3Array:
+	_nav_agent.get_next_path_position()
 	return _nav_agent.get_current_navigation_path()
 
 
