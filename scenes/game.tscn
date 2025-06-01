@@ -664,4 +664,5 @@ one_shot = true
 [connection signal="decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_decision_made"]
 [connection signal="movement_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_movement_decision_made"]
 [connection signal="no_decision_made" from="HUDSelected/RadialMenu" to="." method="_on_radial_menu_no_decision_made"]
-[connection signal="timeout" from="ColdBootTimer" to="." method="_on_cold_boot_timer_timeout"]
+[connection signal="timeout" from="ColdBootTimer" to="Server" method="_on_cold_boot_timer_timeout"]
+[connection signal="timeout" from="MultiplayerLoadTimer" to="Server" method="_on_multiplayer_load_timer_timeout"]

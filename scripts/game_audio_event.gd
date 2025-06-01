@@ -32,7 +32,7 @@ func update():
 		if not _audio_node.playing:
 			queue_free()
 
-
+@rpc()
 func play_sound():
 	_audio_node.play()
 	heard = true
