@@ -625,6 +625,7 @@ texture = ExtResource("4_k5gu7")
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 path_desired_distance = 3.0
 avoidance_enabled = true
+debug_enabled = true
 
 [node name="CQCAnimationHelper" type="Node3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0.48)
