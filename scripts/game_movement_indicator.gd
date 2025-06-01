@@ -106,19 +106,21 @@ func create_path_rect(start : Vector3, end : Vector3, width : float, vert_arr : 
 
 func calculate_travel_dist():
 	var arr = referenced_agent.get_position_list()
-	print(arr)
+	#print(arr)
 	var tot = 0.0
 	(_travel_path.mesh as ArrayMesh).clear_surfaces()
 	var verts = PackedVector3Array()
 	var normals = PackedVector3Array()
-	create_path_rect(referenced_agent.global_position, global_position, 0.25, verts, normals)
+	var start = referenced_agent.global_position
+	for pos in arr:
+		tot += abs(pos.length_squared())
+		create_path_rect(start, pos, 0.25, verts, normals)
+		start = pos
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
 	surface_array[Mesh.ARRAY_VERTEX] = verts
 	surface_array[Mesh.ARRAY_NORMAL] = normals
 	(_travel_path.mesh as ArrayMesh).add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
-	#for pos in arr:
-		#tot += abs(pos.length_squared())
 		#mesh.surface_add_vertex(pos + Vector3.UP * 0.1)
 
 func _physics_process(_d: float) -> void:
