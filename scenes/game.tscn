@@ -314,9 +314,9 @@ properties/3/path = NodePath(".:client_progress")
 properties/3/spawn = true
 properties/3/replication_mode = 2
 
-[node name="Game" type="Node3D" node_paths=PackedStringArray("game_map")]
+[node name="Game" type="Node3D" node_paths=PackedStringArray("map")]
 script = ExtResource("1_re23i")
-game_map = NodePath("World/GameMap")
+map = NodePath("World/GameMap")
 
 [node name="Server" type="Node" parent="." node_paths=PackedStringArray("game")]
 script = ExtResource("2_753oq")

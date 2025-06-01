@@ -45,7 +45,7 @@ enum Collides {
 	STAND = 4,
 }
 
-@export var game_map : GameMap
+@export var map : GameMap
 
 enum ProgressParts {
 	INTRO = -1,
@@ -128,11 +128,11 @@ func start_game(): # Called only on the server.
 	server_populate_variables()
 	force_camera.rpc_id(
 		GameSettings.other_player_id,
-		(game_map.agent_spawn_client_1.position + game_map.agent_spawn_client_2.position +
-		game_map.agent_spawn_client_3.position + game_map.agent_spawn_client_4.position)/4, 20)
+		(map.agent_spawn_client_1.position + map.agent_spawn_client_2.position +
+		map.agent_spawn_client_3.position + map.agent_spawn_client_4.position)/4, 20)
 	force_camera(
-		(game_map.agent_spawn_server_1.position + game_map.agent_spawn_server_2.position +
-		game_map.agent_spawn_server_3.position + game_map.agent_spawn_server_4.position)/4, 20)
+		(map.agent_spawn_server_1.position + map.agent_spawn_server_2.position +
+		map.agent_spawn_server_3.position + map.agent_spawn_server_4.position)/4, 20)
 	($ColdBootTimer as Timer).start()
 
 
@@ -471,61 +471,61 @@ func server_populate_variables(): #TODO
 	var data = {
 		player_id = 1,
 		agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[0]],
-		pos_x = game_map.agent_spawn_server_1.position.x,
-		pos_y = game_map.agent_spawn_server_1.position.y - 0.666,
-		pos_z = game_map.agent_spawn_server_1.position.z,
-		rot_y = game_map.agent_spawn_server_1.rotation.y,
+		pos_x = map.agent_spawn_server_1.position.x,
+		pos_y = map.agent_spawn_server_1.position.y - 0.666,
+		pos_z = map.agent_spawn_server_1.position.z,
+		rot_y = map.agent_spawn_server_1.rotation.y,
 	}
 	ag_spawner.spawn(data)
 	if len(GameSettings.selected_agents) > 1:
 		data.agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[1]]
-		data.pos_x = game_map.agent_spawn_server_2.position.x
-		data.pos_y = game_map.agent_spawn_server_2.position.y - 0.666
-		data.pos_z = game_map.agent_spawn_server_2.position.z
-		data.rot_y = game_map.agent_spawn_server_2.rotation.y
+		data.pos_x = map.agent_spawn_server_2.position.x
+		data.pos_y = map.agent_spawn_server_2.position.y - 0.666
+		data.pos_z = map.agent_spawn_server_2.position.z
+		data.rot_y = map.agent_spawn_server_2.rotation.y
 		ag_spawner.spawn(data)
 	if len(GameSettings.selected_agents) > 2:
 		data.agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[2]]
-		data.pos_x = game_map.agent_spawn_server_3.position.x
-		data.pos_y = game_map.agent_spawn_server_3.position.y - 0.666
-		data.pos_z = game_map.agent_spawn_server_3.position.z
-		data.rot_y = game_map.agent_spawn_server_3.rotation.y
+		data.pos_x = map.agent_spawn_server_3.position.x
+		data.pos_y = map.agent_spawn_server_3.position.y - 0.666
+		data.pos_z = map.agent_spawn_server_3.position.z
+		data.rot_y = map.agent_spawn_server_3.rotation.y
 		ag_spawner.spawn(data)
 	if len(GameSettings.selected_agents) > 3:
 		data.agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[3]]
-		data.pos_x = game_map.agent_spawn_server_4.position.x
-		data.pos_y = game_map.agent_spawn_server_4.position.y - 0.666
-		data.pos_z = game_map.agent_spawn_server_4.position.z
-		data.rot_y = game_map.agent_spawn_server_4.rotation.y
+		data.pos_x = map.agent_spawn_server_4.position.x
+		data.pos_y = map.agent_spawn_server_4.position.y - 0.666
+		data.pos_z = map.agent_spawn_server_4.position.z
+		data.rot_y = map.agent_spawn_server_4.rotation.y
 		ag_spawner.spawn(data)
 	# client's agents
 	data.player_id = GameSettings.other_player_id
 	data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[0]]
-	data.pos_x = game_map.agent_spawn_client_1.position.x
-	data.pos_y = game_map.agent_spawn_client_1.position.y - 0.666
-	data.pos_z = game_map.agent_spawn_client_1.position.z
-	data.rot_y = game_map.agent_spawn_client_1.rotation.y
+	data.pos_x = map.agent_spawn_client_1.position.x
+	data.pos_y = map.agent_spawn_client_1.position.y - 0.666
+	data.pos_z = map.agent_spawn_client_1.position.z
+	data.rot_y = map.agent_spawn_client_1.rotation.y
 	ag_spawner.spawn(data)
 	if len(GameSettings.client_selected_agents) > 1:
 		data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[1]]
-		data.pos_x = game_map.agent_spawn_client_2.position.x
-		data.pos_y = game_map.agent_spawn_client_2.position.y - 0.666
-		data.pos_z = game_map.agent_spawn_client_2.position.z
-		data.rot_y = game_map.agent_spawn_client_2.rotation.y
+		data.pos_x = map.agent_spawn_client_2.position.x
+		data.pos_y = map.agent_spawn_client_2.position.y - 0.666
+		data.pos_z = map.agent_spawn_client_2.position.z
+		data.rot_y = map.agent_spawn_client_2.rotation.y
 		ag_spawner.spawn(data)
 	if len(GameSettings.client_selected_agents) > 2:
 		data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[2]]
-		data.pos_x = game_map.agent_spawn_client_3.position.x
-		data.pos_y = game_map.agent_spawn_client_3.position.y - 0.666
-		data.pos_z = game_map.agent_spawn_client_3.position.z
-		data.rot_y = game_map.agent_spawn_client_3.rotation.y
+		data.pos_x = map.agent_spawn_client_3.position.x
+		data.pos_y = map.agent_spawn_client_3.position.y - 0.666
+		data.pos_z = map.agent_spawn_client_3.position.z
+		data.rot_y = map.agent_spawn_client_3.rotation.y
 		ag_spawner.spawn(data)
 	if len(GameSettings.client_selected_agents) > 3:
 		data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[3]]
-		data.pos_x = game_map.agent_spawn_client_4.position.x
-		data.pos_y = game_map.agent_spawn_client_4.position.y - 0.666
-		data.pos_z = game_map.agent_spawn_client_4.position.z
-		data.rot_y = game_map.agent_spawn_client_4.rotation.y
+		data.pos_x = map.agent_spawn_client_4.position.x
+		data.pos_y = map.agent_spawn_client_4.position.y - 0.666
+		data.pos_z = map.agent_spawn_client_4.position.z
+		data.rot_y = map.agent_spawn_client_4.rotation.y
 		ag_spawner.spawn(data)
 
 
@@ -993,7 +993,7 @@ func _exfiltrate_agents():
 	match server_progress:
 		ProgressParts.ITEM_HELD:
 			var exfil_available = false
-			for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+			for detect in map.server_exfiltrate_zone.get_overlapping_areas():
 				var agent : Agent = detect.get_parent()
 				if agent.in_incapacitated_state():
 					continue
@@ -1004,13 +1004,13 @@ func _exfiltrate_agents():
 				if exfil_available:
 					break
 			if exfil_available:
-				for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+				for detect in map.server_exfiltrate_zone.get_overlapping_areas():
 					var agent : Agent = detect.get_parent()
 					if agent.in_incapacitated_state():
 						continue
 					exfiltration_queue.append(agent)
 		ProgressParts.OBJECTIVE_COMPLETE:
-			for detect in game_map.server_exfiltrate_zone.get_overlapping_areas():
+			for detect in map.server_exfiltrate_zone.get_overlapping_areas():
 				var agent : Agent = detect.get_parent()
 				if agent.in_incapacitated_state():
 					continue
@@ -1018,7 +1018,7 @@ func _exfiltrate_agents():
 	match client_progress:
 		ProgressParts.ITEM_HELD:
 			var exfil_available = false
-			for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+			for detect in map.client_exfiltrate_zone.get_overlapping_areas():
 				var agent : Agent = detect.get_parent()
 				if agent.state == Agent.States.DEAD:
 					continue
@@ -1029,13 +1029,13 @@ func _exfiltrate_agents():
 				if exfil_available:
 					break
 			if exfil_available:
-				for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+				for detect in map.client_exfiltrate_zone.get_overlapping_areas():
 					var agent : Agent = detect.get_parent()
 					if agent.in_incapacitated_state():
 						continue
 					exfiltration_queue.append(agent)
 		ProgressParts.OBJECTIVE_COMPLETE:
-			for detect in game_map.client_exfiltrate_zone.get_overlapping_areas():
+			for detect in map.client_exfiltrate_zone.get_overlapping_areas():
 				var agent : Agent = detect.get_parent()
 				if agent.in_incapacitated_state():
 					continue
@@ -1162,7 +1162,7 @@ func save_replay(end_time):
 
 
 func _track_objective_completion():
-	match game_map.objective:
+	match map.objective:
 		GameMap.Objectives.CAPTURE_CENTRAL_FLAG:
 			of_comp()
 		#GameMap.Objectives.CAPTURE_ENEMY_FLAG:
@@ -1384,35 +1384,35 @@ func _on_cold_boot_timer_timeout() -> void:
 	data.pickup = {}
 	data.pickup.generate_weapon = true
 	data.weapon = {}
-	match game_map.objective:
-		game_map.Objectives.CAPTURE_ENEMY_FLAG:
+	match map.objective:
+		map.Objectives.CAPTURE_ENEMY_FLAG:
 			# create server's flag
-			data.pickup.pos_x = game_map.objective_params[0]
-			data.pickup.pos_y = game_map.objective_params[1]
-			data.pickup.pos_z = game_map.objective_params[2]
+			data.pickup.pos_x = map.objective_params[0]
+			data.pickup.pos_y = map.objective_params[1]
+			data.pickup.pos_z = map.objective_params[2]
 			data.pickup.server_knows = true
 			data.pickup.client_knows = false
 			data.pickup.wep_name = "map_flag_server"
 			pickup_spawner.spawn(data.pickup)
 			# create client's flag
-			data.pickup.pos_x = game_map.objective_params[3]
-			data.pickup.pos_y = game_map.objective_params[4]
-			data.pickup.pos_z = game_map.objective_params[5]
+			data.pickup.pos_x = map.objective_params[3]
+			data.pickup.pos_y = map.objective_params[4]
+			data.pickup.pos_z = map.objective_params[5]
 			data.pickup.server_knows = false
 			data.pickup.client_knows = true
 			data.pickup.wep_name = "map_flag_client"
 			pickup_spawner.spawn(data.pickup)
-		game_map.Objectives.CAPTURE_CENTRAL_FLAG:
+		map.Objectives.CAPTURE_CENTRAL_FLAG:
 			# create central flag
-			data.pickup.pos_x = game_map.objective_params[0]
-			data.pickup.pos_y = game_map.objective_params[1]
-			data.pickup.pos_z = game_map.objective_params[2]
+			data.pickup.pos_x = map.objective_params[0]
+			data.pickup.pos_y = map.objective_params[1]
+			data.pickup.pos_z = map.objective_params[2]
 			data.pickup.server_knows = true
 			data.pickup.client_knows = true
 			data.pickup.wep_name = "map_flag_center"
 			pickup_spawner.spawn(data.pickup)
-		game_map.Objectives.TARGET_DEFEND:
-			game_map.objective_params
+		map.Objectives.TARGET_DEFEND:
+			map.objective_params
 
 
 func _on_pickup_spawner_despawned(node: Node) -> void:
