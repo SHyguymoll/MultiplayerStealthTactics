@@ -45,9 +45,10 @@ func _ready() -> void:
 		Lobby.port = 6969
 		Lobby.port_known = true
 		$MainMenu/VBoxContainer/JoinH/LineEdit.text = "127.0.0.1:6969" # set up for join LAN
-		#AudioServer.set_bus_mute(0, true) # mute all audio (it gets annoying)
+	if args.has("--mute-music"):
 		AudioServer.set_bus_mute(1, true)
-		#AudioServer.set_bus_mute(2, true)
+	if args.has("--mute-sfx"):
+		AudioServer.set_bus_mute(2, true)
 	if args.has("--host"):
 		if args.has("--join"):
 			printerr("ARGUMENTS CANNOT CONTAIN BOTH HOST AND JOIN")
