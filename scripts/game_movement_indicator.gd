@@ -122,9 +122,10 @@ func calculate_travel_dist():
 
 func _physics_process(_d: float) -> void:
 	if not ind_set:
-		flat_position.x = _game_camera.position.x
-		flat_position.y = _game_camera.position.z
-		ray_position = Vector3(flat_position.x, _game_camera.ground_height, flat_position.y)
+		if _game_camera.ground_detected():
+			flat_position.x = _game_camera.position.x
+			flat_position.y = _game_camera.position.z
+			ray_position = Vector3(flat_position.x, _game_camera.ground_height, flat_position.y)
 		# simple distance clamp
 		var ref_ag_move_dist = referenced_agent.movement_dist
 		var ray_to_ag = ray_position - referenced_agent.global_position

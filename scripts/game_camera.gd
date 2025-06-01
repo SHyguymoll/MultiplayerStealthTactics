@@ -33,6 +33,10 @@ func _input(event: InputEvent) -> void:
 		last_position = event.position
 
 
+func ground_detected() -> bool:
+	return ($RayCast3D as RayCast3D).is_colliding()
+
+
 func _process(_d: float) -> void:
 	if Input.is_action_just_pressed("fov_change"):
 		match fov_target:
@@ -47,7 +51,8 @@ func _process(_d: float) -> void:
 			15,
 			(final_position.y * sensitivity/get_viewport().size.y)
 	), quickness)
-	ground_height = ($RayCast3D as RayCast3D).get_collision_point().y
+	if ground_detected():
+		ground_height = ($RayCast3D as RayCast3D).get_collision_point().y
 	#$Label.text = "POS: " + str(Vector3(position.x, ground_height, position.z)) + "\n" + str(ground_height)
 	fov = lerpf(fov, fov_target, quickness)
 

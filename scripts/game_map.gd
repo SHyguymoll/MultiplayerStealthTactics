@@ -31,5 +31,5 @@ func _ready():
 	$map_basic.visible = false
 	$map_basic_nav.visible = false
 	$map_basic_nav/Nav.visible = false
-	$map_basic_nav/Nav/StaticBody3D.visible = false
+	$map_basic_nav/Nav/StaticBody3D.visible = true
 	$map_basic_nav/Nav/NavigationRegion3D.visible = false
