@@ -146,7 +146,7 @@ animations = [{
 "speed": 8.0
 }]
 
-[sub_resource type="ImmediateMesh" id="ImmediateMesh_c4gan"]
+[sub_resource type="ArrayMesh" id="ArrayMesh_c4gan"]
 
 [node name="GameMovementIndicator" type="AnimatedSprite3D"]
 billboard = 1
@@ -170,7 +170,7 @@ font_size = 64
 outline_size = 11
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-top_level = true
-mesh = SubResource("ImmediateMesh_c4gan")
+gi_mode = 0
+mesh = SubResource("ArrayMesh_c4gan")
 
 [connection signal="animation_changed" from="." to="." method="_on_animation_changed"]
