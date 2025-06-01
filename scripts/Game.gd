@@ -15,6 +15,14 @@ var weapon_pickup_scene = preload("res://scenes/weapon_pickup.tscn")
 var grenade_scene = preload("res://scenes/grenade.tscn")
 var smoke_scene = preload("res://scenes/smoke.tscn")
 
+@onready var ag_spawner : MultiplayerSpawner = $AgentSpawner
+@onready var pickup_spawner : MultiplayerSpawner = $PickupSpawner
+@onready var weapon_spawner : MultiplayerSpawner = $WeaponSpawner
+@onready var grenade_spawner : MultiplayerSpawner = $GrenadeSpawner
+@onready var smoke_spawner : MultiplayerSpawner = $SmokeSpawner
+@onready var audio_spawner : MultiplayerSpawner = $AudioEventSpawner
+
+
 var server_ready_bool := false
 var client_ready_bool := false
 
@@ -83,6 +91,12 @@ func _ready(): # Preconfigure game.
 	_radial_menu.visible = false
 	close_pause_menu()
 
+	ag_spawner.spawn_function = create_agent
+	pickup_spawner.spawn_function = create_pickup
+	weapon_spawner.spawn_function = create_weapon
+	grenade_spawner.spawn_function = create_grenade
+	smoke_spawner.spawn_function = create_smoke
+	audio_spawner.spawn_function = create_audio_event
 	$FadeOut.visible = true
 	$FadeOut/ColorRect.modulate = Color.WHITE
 	$HUDBase/HurryUp.visible = false
@@ -132,6 +146,102 @@ func force_camera(new_pos, new_fov = -1.0):
 		$World/Camera3D.final_position = Vector2(new_pos.x, new_pos.z) * Vector2(get_viewport().size/$World/Camera3D.sensitivity)
 	if new_fov != -1.0:
 		$World/Camera3D.fov_target = new_fov
+
+
+func create_agent(data) -> Agent: #TODO
+	var new_agent : Agent = agent_scene.instantiate()
+	new_agent.name = str(data.player_id) + "_" + str(data.agent_stats.name)
+
+	new_agent.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_agent.rotation.y = data.rot_y
+	new_agent.player_id = data.player_id
+	new_agent.health = data.agent_stats.health
+	new_agent.stun_health = data.agent_stats.stun_health
+	new_agent.view_dist = data.agent_stats.view_dist
+	new_agent.view_across = data.agent_stats.view_across
+	new_agent.eye_strength = data.agent_stats.eye_strength
+	new_agent.hearing_dist = data.agent_stats.hearing_dist
+	new_agent.held_items = data.agent_stats.held_items
+	if multiplayer.is_server():
+		var weapon_data = {
+			wep_id = "fist",
+			wep_name = new_agent.name + "_fist",
+			loaded_ammo = GameRefs.WEP["fist"].ammo,
+			reserve_ammo = GameRefs.WEP["fist"].ammo * 3,
+		}
+		weapon_spawner.spawn(weapon_data)
+		new_agent.held_weapons.append(weapon_data.wep_name)
+		for weapon in data.agent_stats.held_weapons:
+			weapon_data.wep_id = weapon
+			weapon_data.wep_name = new_agent.name + "_" + weapon
+			weapon_data.loaded_ammo = GameRefs.WEP[weapon_data.wep_id].ammo
+			weapon_data.reserve_ammo = GameRefs.WEP[weapon_data.wep_id].ammo * 3
+			weapon_spawner.spawn(weapon_data)
+			new_agent.held_weapons.append(weapon_data.wep_name)
+	new_agent.visible = false
+	if multiplayer.get_unique_id() == data.player_id:
+		if multiplayer.get_unique_id() == 1:
+			new_agent.server_knows = true
+		else:
+			new_agent.client_knows = true
+		var new_small_hud = hud_agent_small_scene.instantiate()
+		_quick_views.add_child(new_small_hud)
+		new_small_hud._health_bar.max_value = data.agent_stats.health
+		new_small_hud._stun_health_bar.max_value = data.agent_stats.health / 2
+		new_small_hud.ref_ag = new_agent
+	return new_agent
+
+
+func create_audio_event(data) -> GameAudioEvent:
+	var new_audio_event : GameAudioEvent = audio_event_scene.instantiate()
+	new_audio_event.name = data.agent
+	new_audio_event.player_id = data.player
+	new_audio_event.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_audio_event.max_radius = data.max_rad
+	new_audio_event.lifetime = data.lifetime
+	new_audio_event.max_lifetime = data.lifetime
+	new_audio_event.selected_audio = data.sound_id
+	return new_audio_event
+
+
+func create_weapon(data) -> GameWeapon:
+	var new_weapon : GameWeapon = weapon_scene.instantiate()
+	new_weapon.name = data.wep_name
+	new_weapon.wep_id = data.wep_id
+	new_weapon.loaded_ammo = data.loaded_ammo
+	new_weapon.reserve_ammo = data.reserve_ammo
+	return new_weapon
+
+
+func create_grenade(data) -> Grenade:
+	var new_grenade : Grenade = grenade_scene.instantiate()
+	new_grenade.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_grenade.name = data.wep_name
+	new_grenade.wep_id = data.wep_id
+	new_grenade.player_id = data.player_id
+	new_grenade.server_knows = data.server_knows
+	new_grenade.client_knows = data.client_knows
+	new_grenade.landing_position = Vector3(data.end_pos_x, data.end_pos_y, data.end_pos_z)
+	return new_grenade
+
+
+func create_smoke(data) -> Smoke:
+	var new_smoke : Smoke = smoke_scene.instantiate()
+	new_smoke.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_smoke.name = data.wep_name
+	return new_smoke
+
+
+func create_pickup(data) -> WeaponPickup:
+	var new_pickup : WeaponPickup = weapon_pickup_scene.instantiate()
+	new_pickup.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
+	new_pickup.server_knows = data.server_knows
+	new_pickup.client_knows = data.client_knows
+	new_pickup.name = data.wep_name
+	new_pickup.attached_wep = data.wep_name
+	new_pickup.generate_weapon = data.get("generate_weapon", false)
+	new_pickup.game = self
+	return new_pickup
 
 
 @rpc()

@@ -8,6 +8,7 @@ var position_y = 0
 @export var client_knows = false
 var agent_collecting : Agent = null
 var generate_weapon : bool = false
+var game : Game
 
 var _outline_mat_base = preload("res://assets/models/materials/agent_outline.tres")
 var _outline_mat_flag = preload("res://assets/models/materials/map_element_outline.tres")
@@ -32,7 +33,7 @@ func _process(_d) -> void:
 	if generate_weapon:
 		if multiplayer.is_server():
 			var wep_id = attached_wep.split("_", true, 1)[1]
-			$"../../Server".weapon_spawner.spawn({
+			game.weapon_spawner.spawn({
 				wep_id = wep_id,
 				wep_name = name,
 				loaded_ammo = GameRefs.WEP[wep_id].ammo,

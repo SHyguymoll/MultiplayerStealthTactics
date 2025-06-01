@@ -1,22 +1,10 @@
 extends Node
 
 @export var game : Game
-@onready var ag_spawner : MultiplayerSpawner = $"../AgentSpawner"
-@onready var pickup_spawner : MultiplayerSpawner = $"../PickupSpawner"
-@onready var weapon_spawner : MultiplayerSpawner = $"../WeaponSpawner"
-@onready var grenade_spawner : MultiplayerSpawner = $"../GrenadeSpawner"
-@onready var smoke_spawner : MultiplayerSpawner = $"../SmokeSpawner"
-@onready var audio_spawner : MultiplayerSpawner = $"../AudioEventSpawner"
 
 func _ready() -> void:
 	if not multiplayer.is_server():
 		queue_free()
-	ag_spawner.spawn_function = create_agent
-	pickup_spawner.spawn_function = create_pickup
-	weapon_spawner.spawn_function = create_weapon
-	grenade_spawner.spawn_function = create_grenade
-	smoke_spawner.spawn_function = create_smoke
-	audio_spawner.spawn_function = create_audio_event
 
 
 func _physics_process(delta: float) -> void:
@@ -34,7 +22,7 @@ func _physics_process(delta: float) -> void:
 					agent.server_knows = false
 					game.create_popup("sight_unknown", agent.position)
 			if len(agent.mark_for_drop) > 0:
-				pickup_spawner.spawn({
+				game.pickup_spawner.spawn({
 					pos_x = agent.mark_for_drop.position.x,
 					pos_y = agent.mark_for_drop.position.y,
 					pos_z = agent.mark_for_drop.position.z,
@@ -49,7 +37,7 @@ func _physics_process(delta: float) -> void:
 					$"../Pickups".get_node(str(agent.queued_action[1])).queue_free()
 				agent.try_grab_pickup = false
 			if agent.state == Agent.States.DEAD and len(agent.held_weapons) > 1:
-				pickup_spawner.spawn({
+				game.pickup_spawner.spawn({
 					pos_x = agent.global_position.x + (randf() - 0.5),
 					pos_y = agent.global_position.y,
 					pos_z = agent.global_position.z + (randf() - 0.5),
@@ -62,7 +50,7 @@ func _physics_process(delta: float) -> void:
 				var try_name = agent.held_weapons[agent.selected_weapon]
 				while try_name in game.grenades_in_existence:
 					try_name += "N"
-				grenade_spawner.spawn({
+				game.grenade_spawner.spawn({
 					pos_x = agent.position.x,
 					pos_y = agent.position.y,
 					pos_z = agent.position.z,
@@ -86,33 +74,33 @@ func _physics_process(delta: float) -> void:
 							if attacked.in_prone_state():
 								continue # prone agents dodge explosions for Reasons™
 							attacked.take_damage(2, false)
-							audio_spawner.spawn({
+							game.audio_spawner.spawn({
 								player = attacked.player_id,
 								agent = attacked.name,
 								pos_x = attacked.position.x, pos_y = attacked.position.y, pos_z = attacked.position.z,
 								max_rad = 2.5, lifetime = 5, sound_id = "ag_hurt",
 							})
-						audio_spawner.spawn({
+						game.audio_spawner.spawn({
 							player = grenade.player_id,
 							agent = grenade.name,
 							pos_x = grenade.global_position.x, pos_y = grenade.global_position.y, pos_z = grenade.global_position.z,
 							max_rad = 5.0, lifetime = 10, sound_id = "grenade_frag",
 						})
 					"grenade_smoke":
-						smoke_spawner.spawn({
+						game.smoke_spawner.spawn({
 							pos_x = grenade.position.x,
 							pos_y = grenade.position.y,
 							pos_z = grenade.position.z,
 							wep_name = grenade.name,
 						})
-						audio_spawner.spawn({
+						game.audio_spawner.spawn({
 							player = grenade.player_id,
 							agent = grenade.name,
 							pos_x = grenade.global_position.x, pos_y = grenade.global_position.y, pos_z = grenade.global_position.z,
 							max_rad = 5.0, lifetime = 10, sound_id = "grenade_smoke",
 						})
 					"grenade_noise":
-						audio_spawner.spawn({
+						game.audio_spawner.spawn({
 							player = grenade.player_id,
 							agent = grenade.name,
 							pos_x = grenade.global_position.x, pos_y = grenade.global_position.y, pos_z = grenade.global_position.z,
@@ -197,7 +185,7 @@ func determine_weapon_events():
 		match GameRefs.get_weapon_node(agent.held_weapons[agent.selected_weapon]).wep_id:
 			"pistol":
 				attackers[agent] = [game.return_attacked(agent, agent.queued_action[1])]
-				audio_spawner.spawn({
+				game.audio_spawner.spawn({
 					player = agent.player_id,
 					agent = agent.name,
 					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
@@ -205,7 +193,7 @@ func determine_weapon_events():
 				})
 			"rifle":
 				attackers[agent] = [game.return_attacked(agent, game.slide_end_pos(agent._body.global_position, agent.queued_action[1], 0.2)),game.return_attacked(agent, game.slide_end_pos(agent._body.global_position, agent.queued_action[1], -0.2)),]
-				audio_spawner.spawn({
+				game.audio_spawner.spawn({
 					player = agent.player_id,
 					agent = agent.name,
 					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
@@ -227,7 +215,7 @@ func determine_weapon_events():
 						),
 					]
 
-				audio_spawner.spawn({
+				game.audio_spawner.spawn({
 					player = agent.player_id,
 					agent = agent.name,
 					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
@@ -237,7 +225,7 @@ func determine_weapon_events():
 		attacker.state = Agent.States.USING_WEAPON
 		for hit in attackers[attacker]:
 			if hit[0] == null: # hit a wall, make a sound event on the wall
-				audio_spawner.spawn({
+				game.audio_spawner.spawn({
 					player = attacker.player_id,
 					agent = attacker.name,
 					pos_x = hit[1].position.x, pos_y = hit[1].position.y, pos_z = hit[1].position.z,
@@ -245,7 +233,7 @@ func determine_weapon_events():
 				})
 			else:
 				if not (hit[0] as Area3D).get_parent() is Agent: # still hit a wall
-					audio_spawner.spawn({
+					game.audio_spawner.spawn({
 						player = attacker.player_id,
 						agent = attacker.name,
 						pos_x = hit[1].position.x, pos_y = hit[1].position.y, pos_z = hit[1].position.z,
@@ -260,56 +248,13 @@ func determine_weapon_events():
 					if attacked.in_prone_state() or attacked.state == Agent.States.DEAD:
 						continue # skip prone agents
 					attacked.take_damage(GameRefs.get_held_weapon_attribute(attacker, attacker.selected_weapon, "damage"), false)
-					audio_spawner.spawn({
+					game.audio_spawner.spawn({
 						player = attacked.player_id,
 						agent = attacked.name,
 						pos_x = attacked.position.x, pos_y = attacked.position.y, pos_z = attacked.position.z,
 						max_rad = 2.5, lifetime = 5, sound_id = "ag_hurt",
 					})
 
-
-func create_agent(data) -> Agent: #TODO
-	var new_agent : Agent = game.agent_scene.instantiate()
-	new_agent.name = str(data.player_id) + "_" + str(data.agent_stats.name)
-
-	new_agent.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
-	new_agent.rotation.y = data.rot_y
-	#new_agent.set_multiplayer_authority(data.player_id)
-	new_agent.player_id = data.player_id
-	new_agent.health = data.agent_stats.health
-	new_agent.stun_health = data.agent_stats.stun_health
-	new_agent.view_dist = data.agent_stats.view_dist
-	new_agent.view_across = data.agent_stats.view_across
-	new_agent.eye_strength = data.agent_stats.eye_strength
-	new_agent.hearing_dist = data.agent_stats.hearing_dist
-	new_agent.held_items = data.agent_stats.held_items
-	var weapon_data = {
-		wep_id = "fist",
-		wep_name = new_agent.name + "_fist",
-		loaded_ammo = GameRefs.WEP["fist"].ammo,
-		reserve_ammo = GameRefs.WEP["fist"].ammo * 3,
-	}
-	weapon_spawner.spawn(weapon_data)
-	new_agent.held_weapons.append(weapon_data.wep_name)
-	for weapon in data.agent_stats.held_weapons:
-		weapon_data.wep_id = weapon
-		weapon_data.wep_name = new_agent.name + "_" + weapon
-		weapon_data.loaded_ammo = GameRefs.WEP[weapon_data.wep_id].ammo
-		weapon_data.reserve_ammo = GameRefs.WEP[weapon_data.wep_id].ammo * 3
-		weapon_spawner.spawn(weapon_data)
-		new_agent.held_weapons.append(weapon_data.wep_name)
-	new_agent.visible = false
-	if multiplayer.get_unique_id() == data.player_id:
-		if multiplayer.get_unique_id() == 1:
-			new_agent.server_knows = true
-		else:
-			new_agent.client_knows = true
-		var new_small_hud = game.hud_agent_small_scene.instantiate()
-		game._quick_views.add_child(new_small_hud)
-		new_small_hud._health_bar.max_value = data.agent_stats.health
-		new_small_hud._stun_health_bar.max_value = data.agent_stats.health / 2
-		new_small_hud.ref_ag = new_agent
-	return new_agent
 
 
 func populate_variables():
@@ -322,28 +267,28 @@ func populate_variables():
 		pos_x = game.map.agent_spawn_server_1.position.x,
 		rot_y = game.map.agent_spawn_server_1.rotation.y,
 	}
-	ag_spawner.spawn(data)
+	game.ag_spawner.spawn(data)
 	if len(GameSettings.selected_agents) > 1:
 		data.agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[1]]
 		data.pos_x = game.map.agent_spawn_server_2.position.x
 		data.pos_y = game.map.agent_spawn_server_2.position.y - 0.666
 		data.pos_z = game.map.agent_spawn_server_2.position.z
 		data.rot_y = game.map.agent_spawn_server_2.rotation.y
-		ag_spawner.spawn(data)
+		game.ag_spawner.spawn(data)
 	if len(GameSettings.selected_agents) > 2:
 		data.agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[2]]
 		data.pos_x = game.map.agent_spawn_server_3.position.x
 		data.pos_y = game.map.agent_spawn_server_3.position.y - 0.666
 		data.pos_z = game.map.agent_spawn_server_3.position.z
 		data.rot_y = game.map.agent_spawn_server_3.rotation.y
-		ag_spawner.spawn(data)
+		game.ag_spawner.spawn(data)
 	if len(GameSettings.selected_agents) > 3:
 		data.agent_stats = Lobby.players[1].agents[GameSettings.selected_agents[3]]
 		data.pos_x = game.map.agent_spawn_server_4.position.x
 		data.pos_y = game.map.agent_spawn_server_4.position.y - 0.666
 		data.pos_z = game.map.agent_spawn_server_4.position.z
 		data.rot_y = game.map.agent_spawn_server_4.rotation.y
-		ag_spawner.spawn(data)
+		game.ag_spawner.spawn(data)
 	# client's agents
 	data.player_id = GameSettings.other_player_id
 	data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[0]]
@@ -351,28 +296,28 @@ func populate_variables():
 	data.pos_y = game.map.agent_spawn_client_1.position.y - 0.666
 	data.pos_z = game.map.agent_spawn_client_1.position.z
 	data.rot_y = game.map.agent_spawn_client_1.rotation.y
-	ag_spawner.spawn(data)
+	game.ag_spawner.spawn(data)
 	if len(GameSettings.client_selected_agents) > 1:
 		data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[1]]
 		data.pos_x = game.map.agent_spawn_client_2.position.x
 		data.pos_y = game.map.agent_spawn_client_2.position.y - 0.666
 		data.pos_z = game.map.agent_spawn_client_2.position.z
 		data.rot_y = game.map.agent_spawn_client_2.rotation.y
-		ag_spawner.spawn(data)
+		game.ag_spawner.spawn(data)
 	if len(GameSettings.client_selected_agents) > 2:
 		data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[2]]
 		data.pos_x = game.map.agent_spawn_client_3.position.x
 		data.pos_y = game.map.agent_spawn_client_3.position.y - 0.666
 		data.pos_z = game.map.agent_spawn_client_3.position.z
 		data.rot_y = game.map.agent_spawn_client_3.rotation.y
-		ag_spawner.spawn(data)
+		game.ag_spawner.spawn(data)
 	if len(GameSettings.client_selected_agents) > 3:
 		data.agent_stats = Lobby.players[data.player_id].agents[GameSettings.client_selected_agents[3]]
 		data.pos_x = game.map.agent_spawn_client_4.position.x
 		data.pos_y = game.map.agent_spawn_client_4.position.y - 0.666
 		data.pos_z = game.map.agent_spawn_client_4.position.z
 		data.rot_y = game.map.agent_spawn_client_4.rotation.y
-		ag_spawner.spawn(data)
+		game.ag_spawner.spawn(data)
 
 
 func _on_multiplayer_load_timer_timeout() -> void:
@@ -412,7 +357,7 @@ func _on_cold_boot_timer_timeout() -> void:
 			data.pickup.server_knows = true
 			data.pickup.client_knows = false
 			data.pickup.wep_name = "map_flag_server"
-			pickup_spawner.spawn(data.pickup)
+			game.pickup_spawner.spawn(data.pickup)
 			# create client's flag
 			data.pickup.pos_x = game.map.objective_params[3]
 			data.pickup.pos_y = game.map.objective_params[4]
@@ -420,7 +365,7 @@ func _on_cold_boot_timer_timeout() -> void:
 			data.pickup.server_knows = false
 			data.pickup.client_knows = true
 			data.pickup.wep_name = "map_flag_client"
-			pickup_spawner.spawn(data.pickup)
+			game.pickup_spawner.spawn(data.pickup)
 		game.map.Objectives.CAPTURE_CENTRAL_FLAG:
 			# create central flag
 			data.pickup.pos_x = game.map.objective_params[0]
@@ -429,60 +374,9 @@ func _on_cold_boot_timer_timeout() -> void:
 			data.pickup.server_knows = true
 			data.pickup.client_knows = true
 			data.pickup.wep_name = "map_flag_center"
-			pickup_spawner.spawn(data.pickup)
+			game.pickup_spawner.spawn(data.pickup)
 		game.map.Objectives.TARGET_DEFEND:
 			game.map.objective_params
-
-
-func create_audio_event(data) -> GameAudioEvent:
-	var new_audio_event : GameAudioEvent = game.audio_event_scene.instantiate()
-	new_audio_event.name = data.agent
-	new_audio_event.player_id = data.player
-	new_audio_event.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
-	new_audio_event.max_radius = data.max_rad
-	new_audio_event.lifetime = data.lifetime
-	new_audio_event.max_lifetime = data.lifetime
-	new_audio_event.selected_audio = data.sound_id
-	return new_audio_event
-
-
-func create_weapon(data) -> GameWeapon:
-	var new_weapon : GameWeapon = game.weapon_scene.instantiate()
-	new_weapon.name = data.wep_name
-	new_weapon.wep_id = data.wep_id
-	new_weapon.loaded_ammo = data.loaded_ammo
-	new_weapon.reserve_ammo = data.reserve_ammo
-	return new_weapon
-
-
-func create_grenade(data) -> Grenade:
-	var new_grenade : Grenade = game.grenade_scene.instantiate()
-	new_grenade.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
-	new_grenade.name = data.wep_name
-	new_grenade.wep_id = data.wep_id
-	new_grenade.player_id = data.player_id
-	new_grenade.server_knows = data.server_knows
-	new_grenade.client_knows = data.client_knows
-	new_grenade.landing_position = Vector3(data.end_pos_x, data.end_pos_y, data.end_pos_z)
-	return new_grenade
-
-
-func create_smoke(data) -> Smoke:
-	var new_smoke : Smoke = game.smoke_scene.instantiate()
-	new_smoke.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
-	new_smoke.name = data.wep_name
-	return new_smoke
-
-
-func create_pickup(data) -> WeaponPickup:
-	var new_pickup : WeaponPickup = game.weapon_pickup_scene.instantiate()
-	new_pickup.position = Vector3(data.pos_x, data.pos_y, data.pos_z)
-	new_pickup.server_knows = data.server_knows
-	new_pickup.client_knows = data.client_knows
-	new_pickup.name = data.wep_name
-	new_pickup.attached_wep = data.wep_name
-	new_pickup.generate_weapon = data.get("generate_weapon", false)
-	return new_pickup
 
 
 func determine_sights():
@@ -579,21 +473,21 @@ func determine_sounds():
 				audio_event.play_sound.rpc_id(GameSettings.other_player_id)
 		match agent.state:
 			Agent.States.WALK when agent.game_steps_since_execute % 40 == 0:
-				audio_spawner.spawn({
+				game.audio_spawner.spawn({
 					player = agent.player_id,
 					agent = agent.name,
 					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
 					max_rad = 2.0, lifetime = 13, sound_id = "ag_step_quiet",
 				})
 			Agent.States.RUN when agent.game_steps_since_execute % 20 == 0:
-				audio_spawner.spawn({
+				game.audio_spawner.spawn({
 					player = agent.player_id,
 					agent = agent.name,
 					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
 					max_rad = 2.75, lifetime = 13, sound_id = "ag_step_loud",
 				})
 			Agent.States.CROUCH_WALK when agent.game_steps_since_execute % 50 == 0:
-				audio_spawner.spawn({
+				game.audio_spawner.spawn({
 					player = agent.player_id,
 					agent = agent.name,
 					pos_x = agent.position.x, pos_y = agent.position.y, pos_z = agent.position.z,
