@@ -105,23 +105,38 @@ func create_path_rect(start : Vector3, end : Vector3, width : float, vert_arr : 
 
 
 func calculate_travel_dist():
-	var arr = referenced_agent.get_position_list()
+	var arr : PackedVector3Array = referenced_agent.get_position_list(global_position)
 	#print(arr)
 	var tot = 0.0
+	var final : Vector3 = referenced_agent.global_position
 	(_travel_path.mesh as ArrayMesh).clear_surfaces()
 	var verts = PackedVector3Array()
 	var normals = PackedVector3Array()
 	var start = referenced_agent.global_position
+	$DebugLabel3D.text = ""
 	for pos in arr:
-		tot += abs(pos.length_squared())
-		create_path_rect(start, pos, 0.25, verts, normals)
-		start = pos
+		$DebugLabel3D.text += str(pos) + "\n"
+		var try_tot = tot + abs(start.distance_to(pos))
+		if try_tot <= referenced_agent.movement_dist:
+			tot = try_tot
+			final = pos
+			create_path_rect(start, pos, 0.25, verts, normals)
+			start = pos
+		else:
+			var diff = abs(start.distance_to(pos))/referenced_agent.movement_dist
+			var end_clipped = start + (start.direction_to(pos) * diff)
+			#print("diff = {0}\nend_clipped = {1}".format([diff, end_clipped]))
+			final = end_clipped
+			$DebugLabel3D.text += str(final) + " CLIPPED\n"
+			create_path_rect(start, end_clipped, 0.25, verts, normals)
+			start = pos
+			break
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
 	surface_array[Mesh.ARRAY_VERTEX] = verts
 	surface_array[Mesh.ARRAY_NORMAL] = normals
 	(_travel_path.mesh as ArrayMesh).add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
-		#mesh.surface_add_vertex(pos + Vector3.UP * 0.1)
+	return final
 
 func _physics_process(_d: float) -> void:
 	if not ind_set:
@@ -137,8 +152,7 @@ func _physics_process(_d: float) -> void:
 			ray_position = referenced_agent.global_position + (col_norm * ref_ag_move_dist)
 		global_position = ray_position
 		# create movement path and limit actual movement distance
-		referenced_agent._nav_agent.set_target_position(global_position)
-		calculate_travel_dist()
+		global_position = calculate_travel_dist()
 		#position_valid = _check_position()
 
 	modulate = Color.WHITE if position_valid else Color.RED
