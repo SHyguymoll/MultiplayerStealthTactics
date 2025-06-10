@@ -107,27 +107,26 @@ func create_path_rect(start : Vector3, end : Vector3, width : float, vert_arr : 
 func calculate_travel_dist():
 	var arr : PackedVector3Array = referenced_agent.get_position_list(global_position)
 	#print(arr)
-	var tot = 0.0
 	var final : Vector3 = referenced_agent.global_position
 	(_travel_path.mesh as ArrayMesh).clear_surfaces()
 	var verts = PackedVector3Array()
 	var normals = PackedVector3Array()
 	var start = referenced_agent.global_position
-	$DebugLabel3D.text = ""
+	var max_travel = referenced_agent.movement_dist
+	$DebugLabel3D.text = str(max_travel)
 	for pos in arr:
-		$DebugLabel3D.text += str(pos) + "\n"
-		var try_tot = tot + abs(start.distance_to(pos))
-		if try_tot <= referenced_agent.movement_dist:
-			tot = try_tot
+		var step_len = abs(start.distance_to(pos))
+		if step_len <= max_travel:
+			max_travel -= step_len
+			$DebugLabel3D.text += "\n" + str(max_travel)
 			final = pos
 			create_path_rect(start, pos, 0.25, verts, normals)
 			start = pos
 		else:
-			var diff = abs(start.distance_to(pos))/referenced_agent.movement_dist
+			var diff = abs(start.distance_to(pos))
 			var end_clipped = start + (start.direction_to(pos) * diff)
-			#print("diff = {0}\nend_clipped = {1}".format([diff, end_clipped]))
 			final = end_clipped
-			$DebugLabel3D.text += str(final) + " CLIPPED\n"
+			$DebugLabel3D.text += "\n0, CLIPPED"
 			create_path_rect(start, end_clipped, 0.25, verts, normals)
 			start = pos
 			break
