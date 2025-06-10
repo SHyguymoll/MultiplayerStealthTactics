@@ -160,6 +160,8 @@ func create_agent(data) -> Agent: #TODO
 	new_agent.view_dist = data.agent_stats.view_dist
 	new_agent.view_across = data.agent_stats.view_across
 	new_agent.eye_strength = data.agent_stats.eye_strength
+	new_agent.movement_dist = data.agent_stats.movement_dist
+	new_agent.movement_speed = data.agent_stats.movement_speed
 	new_agent.hearing_dist = data.agent_stats.hearing_dist
 	new_agent.held_items = data.agent_stats.held_items
 	if multiplayer.is_server():
