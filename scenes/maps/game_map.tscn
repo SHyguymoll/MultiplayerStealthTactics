@@ -136,7 +136,7 @@ transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.5247
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 1.53053, 0.665981, 12.2249)
 
 [node name="ClientDebug" parent="Spawns" instance=ExtResource("5_vhrbe")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -10.6744, 0.665981, 10.7315)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -3.02666, 0.665981, 9.55947)
 
 [editable path="map_basic"]
 [editable path="map_basic_nav"]
