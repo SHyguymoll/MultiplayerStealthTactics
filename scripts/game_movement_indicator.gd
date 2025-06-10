@@ -18,6 +18,7 @@ var ray_position : Vector3
 var position_valid : bool
 
 func _ready() -> void:
+	$DebugLabel3D.text = ""
 	match queued_action[0]:
 		Agent.GameActions.WALK_TO_POS:
 			play("walk")
@@ -104,6 +105,27 @@ func create_path_rect(start : Vector3, end : Vector3, width : float, vert_arr : 
 	norm_arr.push_back(Vector3.UP)
 
 
+func create_path_corner(start : Vector3, last_angle : Vector3, now_angle : Vector3, width : float, vert_arr : PackedVector3Array, norm_arr : PackedVector3Array):
+	var cross = last_angle.cross(now_angle)
+	var last_perp = last_angle.rotated(Vector3.DOWN, PI/2).normalized()
+	var now_perp = now_angle.rotated(Vector3.DOWN, PI/2).normalized()
+	var point_1 = start
+	var point_2 = Vector3.ZERO
+	var point_3 = Vector3.ZERO
+	if cross.y > 0:
+		point_2 = start + (now_perp * (width / 2.0))
+		point_3 = start + (last_perp * (width / 2.0))
+	else:
+		point_2 = start - (last_perp * (width / 2.0))
+		point_3 = start - (now_perp * (width / 2.0))
+	vert_arr.push_back(point_1)
+	norm_arr.push_back(Vector3.UP)
+	vert_arr.push_back(point_2)
+	norm_arr.push_back(Vector3.UP)
+	vert_arr.push_back(point_3)
+	norm_arr.push_back(Vector3.UP)
+
+
 func calculate_travel_dist():
 	var arr : PackedVector3Array = referenced_agent.get_position_list(global_position)
 	#print(arr)
@@ -113,22 +135,30 @@ func calculate_travel_dist():
 	var normals = PackedVector3Array()
 	var start = referenced_agent.global_position
 	var max_travel = referenced_agent.movement_dist
-	$DebugLabel3D.text = str(max_travel)
+	var last_ang = Vector3.ZERO
+	#$DebugLabel3D.text = str(max_travel)
 	for pos in arr:
 		var step_len = abs(start.distance_to(pos))
+		var step_ang = start.direction_to(pos)
 		if step_len <= max_travel:
 			max_travel -= step_len
-			$DebugLabel3D.text += "\n" + str(max_travel)
+			#$DebugLabel3D.text += "\n" + str(max_travel)
 			final = pos
+			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
+				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
 			create_path_rect(start, pos, 0.25, verts, normals)
 			start = pos
+			last_ang = step_ang
 		else:
 			var diff = abs(start.distance_to(pos))
 			var end_clipped = start + (start.direction_to(pos) * diff)
 			final = end_clipped
-			$DebugLabel3D.text += "\n0, CLIPPED"
+			#$DebugLabel3D.text += "\n0, CLIPPED"
+			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
+				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
 			create_path_rect(start, end_clipped, 0.25, verts, normals)
 			start = pos
+			last_ang = step_ang
 			break
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
