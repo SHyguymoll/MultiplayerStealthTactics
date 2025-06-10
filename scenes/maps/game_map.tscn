@@ -45,9 +45,6 @@ client_exfiltrate_zone = NodePath("ServerExfil")
 
 [node name="map_basic" parent="." instance=ExtResource("2_cn121")]
 
-[node name="World" parent="map_basic" index="0"]
-visible = false
-
 [node name="ProneForcingCollisions" type="StaticBody3D" parent="map_basic/World" index="0"]
 collision_layer = 4
 collision_mask = 0
@@ -69,6 +66,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.730598, 0.0974756, 5.28888)
 shape = SubResource("BoxShape3D_tbfxx")
 
 [node name="BaseCollision" type="StaticBody3D" parent="map_basic/World" index="1"]
+visible = false
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="map_basic/World/BaseCollision"]
@@ -76,11 +74,16 @@ shape = SubResource("ConcavePolygonShape3D_j8i2u")
 
 [node name="map_basic_nav" parent="." instance=ExtResource("3_2c5nq")]
 
+[node name="Nav" parent="map_basic_nav" index="0"]
+visible = false
+
 [node name="StaticBody3D" type="StaticBody3D" parent="map_basic_nav/Nav" index="0"]
+visible = false
 collision_layer = 129
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="map_basic_nav/Nav/StaticBody3D"]
+visible = false
 shape = SubResource("ConcavePolygonShape3D_6ai2t")
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="map_basic_nav/Nav" index="1"]

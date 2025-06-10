@@ -71,8 +71,11 @@ pause_menu={
 [layer_names]
 
 3d_physics/layer_1="world_base_collisions"
+3d_navigation/layer_1="stand_nav"
 3d_physics/layer_2="world_crouch_forcing"
+3d_navigation/layer_2="crouch_nav"
 3d_physics/layer_3="world_prone_forcing"
+3d_navigation/layer_3="prone_nav"
 3d_physics/layer_4="server_agent_exfil"
 3d_physics/layer_5="client_agent_exfil"
 3d_physics/layer_6="agent_sight"
