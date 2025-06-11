@@ -133,8 +133,9 @@ func calculate_travel_dist():
 			start = pos
 			last_ang = step_ang
 		else:
-			var diff = abs(start.distance_to(pos))
-			var end_clipped = start + (start.direction_to(pos) * diff)
+			var diff = max_travel / abs(start.distance_to(pos))
+			$DebugLabel3D.text += "\ndiff = " + str(diff)
+			var end_clipped = start + (start.direction_to(pos) * (abs(start.distance_to(pos)) * diff))
 			final = end_clipped
 			$DebugLabel3D.text += "\n0, CLIPPED"
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
