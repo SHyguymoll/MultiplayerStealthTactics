@@ -35,10 +35,10 @@ func _ready():
 	#$map_basic.visible = true
 	$map_basic.visible = false
 	$map_standcrouch_nav.visible = false
-	$map_standcrouch_nav/Nav.visible = false
-	$map_standcrouch_nav/Nav/StaticBody3D.visible = true
-	$map_standcrouch_nav/Nav/NavigationRegion3D.visible = false
+	$map_standcrouch_nav/Nav_0_Stand.visible = false
+	$map_standcrouch_nav/Nav_0_Stand/StaticBody3D.visible = true
+	$map_standcrouch_nav/Nav_0_Stand/NavigationRegion3D.visible = false
 	$map_prone_nav.visible = false
-	$map_prone_nav/Nav.visible = false
-	$map_prone_nav/Nav/StaticBody3D.visible = true
-	$map_prone_nav/Nav/NavigationRegion3D.visible = false
+	$map_prone_nav/Nav_2_Prone.visible = false
+	$map_prone_nav/Nav_2_Prone/StaticBody3D.visible = true
+	$map_prone_nav/Nav_2_Prone/NavigationRegion3D.visible = false
