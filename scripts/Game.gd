@@ -289,6 +289,16 @@ func determine_indicator_removals():
 				Agent.ActionDoneness.FAIL:
 					ind._fail()
 
+@rpc("authority", "call_local")
+func update_indicator(ref_ag : String, action_done : Agent.ActionDoneness):
+	for ind in $ClientsideIndicators.get_children():
+		if ind is AimingIndicator or ind is MovementIndicator:
+			if ind.referenced_agent.name == ref_ag:
+				match action_done:
+					Agent.ActionDoneness.SUCCESS:
+						ind._succeed()
+					Agent.ActionDoneness.FAIL:
+						ind._fail()
 
 func _physics_process(delta: float) -> void:
 	_server_progress.value = lerpf(_server_progress.value, float(server_progress), 0.2)
@@ -664,6 +674,9 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				return
 			# clear texts
 			update_text.rpc(true)
+			# clear aiming/moving indicators
+			for ag in ($Agents.get_children() as Array[Agent]):
+				update_indicator.rpc(ag.name, ag.action_done)
 			# who's escaping now
 			_exfiltrate_agents()
 			# has a team fully died

@@ -42,14 +42,17 @@ func update_detection(new_mask : int):
 
 func _succeed():
 	play("movement_end_success")
+	(_travel_path.mesh as ArrayMesh).clear_surfaces()
 
 
 func _fail():
 	play("movement_end_fail")
+	(_travel_path.mesh as ArrayMesh).clear_surfaces()
 
 
 func _neutral():
 	play("movement_end_neutral")
+	(_travel_path.mesh as ArrayMesh).clear_surfaces()
 
 
 func _on_animation_changed() -> void:
@@ -161,8 +164,7 @@ func _physics_process(_d: float) -> void:
 		# create movement path and limit actual movement distance
 		global_position = _clamped_path_position(ray_position)
 		position_valid = _check_position()
-
-	modulate = Color.WHITE if position_valid else Color.RED
+		modulate = Color.WHITE if position_valid else Color.RED
 	#$DebugLabel3D.text = str(referenced_agent.position.distance_to(position)) + "\n" + str(position)
 
 
