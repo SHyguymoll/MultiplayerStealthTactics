@@ -109,8 +109,8 @@ func create_path_corner(start : Vector3, last_angle : Vector3, now_angle : Vecto
 	norm_arr.push_back(Vector3.UP)
 
 
-func calculate_travel_dist():
-	var arr : PackedVector3Array = referenced_agent.get_position_list(global_position)
+func _clamped_path_position(target_position : Vector3):
+	var arr : PackedVector3Array = referenced_agent.get_position_list(target_position)
 	#print(arr)
 	var final : Vector3 = referenced_agent.global_position
 	(_travel_path.mesh as ArrayMesh).clear_surfaces()
@@ -158,15 +158,8 @@ func _physics_process(_d: float) -> void:
 			flat_position.x = _game_camera.position.x
 			flat_position.y = _game_camera.position.z
 			ray_position = Vector3(flat_position.x, _game_camera.ground_height, flat_position.y)
-		# simple distance clamp
-		#var ref_ag_move_dist = referenced_agent.movement_dist
-		#var ray_to_ag = ray_position - referenced_agent.global_position
-		#if ray_to_ag.length() > ref_ag_move_dist:
-			#var col_norm = ray_to_ag / ray_to_ag.length()
-			#ray_position = referenced_agent.global_position + (col_norm * ref_ag_move_dist)
-		global_position = ray_position
 		# create movement path and limit actual movement distance
-		global_position = calculate_travel_dist()
+		global_position = _clamped_path_position(ray_position)
 		position_valid = _check_position()
 
 	modulate = Color.WHITE if position_valid else Color.RED
