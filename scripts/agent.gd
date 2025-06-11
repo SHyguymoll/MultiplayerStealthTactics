@@ -10,6 +10,9 @@ const STANCE_CHANGE_SHORT = -11
 const STANCE_CHANGE_LONG = -21
 const CQC_STEP_SUCCESS_START = -61
 const CQC_STEP_FAIL_START = -75
+const NAV_LAYER_STAND = 1
+const NAV_LAYER_CROUCH = 2
+const NAV_LAYER_PRONE = 4
 
 var view_dist : float = 2.5 #length of vision "cone" (really a pyramid)
 var view_across : float = 1 #size of vision pyramid base
@@ -191,10 +194,12 @@ func perform_action():
 				game_steps_since_execute = STANCE_CHANGE_SHORT
 			if in_prone_state():
 				game_steps_since_execute = STANCE_CHANGE_LONG
+			_nav_agent.navigation_layers = NAV_LAYER_STAND
 			state = States.STAND
 		GameActions.GO_CROUCH:
 			do_anim.rpc("Crouch")
 			game_steps_since_execute = STANCE_CHANGE_SHORT
+			_nav_agent.navigation_layers = NAV_LAYER_CROUCH
 			state = States.CROUCH
 		GameActions.GO_PRONE:
 			do_anim.rpc("B_Prone")
@@ -202,6 +207,7 @@ func perform_action():
 				game_steps_since_execute = STANCE_CHANGE_SHORT
 			if in_standing_state():
 				game_steps_since_execute = STANCE_CHANGE_LONG
+			_nav_agent.navigation_layers = NAV_LAYER_PRONE
 			state = States.PRONE
 		GameActions.RUN_TO_POS:
 			do_anim.rpc("B_Run")
@@ -321,6 +327,7 @@ func _ready() -> void:
 		_eyes.collision_mask += 1024 # add in client side popup layer to collide with
 	_ear_cylinder.radius = hearing_dist
 	_body.collision_layer += 8 if player_id == 1 else 16
+	_nav_agent.navigation_layers = NAV_LAYER_STAND
 	# set up rpcs
 	sounds.glanced.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
 	sounds.spotted_element.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
@@ -469,16 +476,22 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 		target_world_collide_y = 0.499
 		collision_mask = Game.Collides.PRONE + Game.Collides.CROUCH + Game.Collides.STAND
 		visible_level = 50
+		if _nav_agent.navigation_layers != NAV_LAYER_STAND:
+			_nav_agent.navigation_layers = NAV_LAYER_STAND
 	if in_crouching_state():
 		target_world_collide_height = 0.666
 		target_world_collide_y = 0.35
 		collision_mask = Game.Collides.PRONE + Game.Collides.CROUCH
 		visible_level = 25
+		if _nav_agent.navigation_layers != NAV_LAYER_CROUCH:
+			_nav_agent.navigation_layers = NAV_LAYER_CROUCH
 	if in_prone_state():
 		target_world_collide_height = 0.264
 		target_world_collide_y = 0.15
 		collision_mask = Game.Collides.PRONE
 		visible_level = 5
+		if _nav_agent.navigation_layers != NAV_LAYER_PRONE:
+			_nav_agent.navigation_layers = NAV_LAYER_PRONE
 	_world_collide.position.y = lerpf(_world_collide.position.y, target_world_collide_y, GENERAL_LERP_VAL)
 	(_world_collide.get_shape() as CylinderShape3D).height = lerpf(
 			(_world_collide.get_shape() as CylinderShape3D).height,
