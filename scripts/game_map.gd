@@ -23,13 +23,22 @@ enum Objectives {
 @export var server_exfiltrate_zone : Area3D
 @export var client_exfiltrate_zone : Area3D
 
+@export var navigation_stand : Node3D
+@export var navigation_crouch : Node3D
+@export var navigation_prone : Node3D
+
+
 func _ready():
 	for spawn in $Spawns.get_children() as Array[SpawnPoint]:
 		spawn.debug_icon.visible = false
 	#$map_basic_nav.visible = false
 	#$map_basic.visible = true
 	$map_basic.visible = false
-	$map_basic_nav.visible = false
-	$map_basic_nav/Nav.visible = false
-	$map_basic_nav/Nav/StaticBody3D.visible = true
-	$map_basic_nav/Nav/NavigationRegion3D.visible = false
+	$map_standcrouch_nav.visible = false
+	$map_standcrouch_nav/Nav.visible = false
+	$map_standcrouch_nav/Nav/StaticBody3D.visible = true
+	$map_standcrouch_nav/Nav/NavigationRegion3D.visible = false
+	$map_prone_nav.visible = false
+	$map_prone_nav/Nav.visible = false
+	$map_prone_nav/Nav/StaticBody3D.visible = true
+	$map_prone_nav/Nav/NavigationRegion3D.visible = false
