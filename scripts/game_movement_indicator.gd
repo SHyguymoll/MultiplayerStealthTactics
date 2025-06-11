@@ -5,9 +5,7 @@ signal indicator_placed(indicator)
 const CLOSENESS := 2.0
 
 @onready var _game_camera : GameCamera = $"../../World/Camera3D"
-@onready var _ray_left : RayCast3D = $LeftCast
 @onready var _ray_middle : RayCast3D = $MiddleCast
-@onready var _ray_right : RayCast3D = $RightCast
 @onready var _travel_path : MeshInstance3D = $MeshInstance3D
 var referenced_agent : Agent
 var queued_action : Array
@@ -17,17 +15,29 @@ var flat_position : Vector2
 var ray_position : Vector3
 var position_valid : bool
 
+const MASK_STAND = 128
+const MASK_CROUCH = 2
+const MASK_PRONE = 4
+
 func _ready() -> void:
 	$DebugLabel3D.text = ""
 	match queued_action[0]:
 		Agent.GameActions.WALK_TO_POS:
+			update_detection(MASK_STAND)
 			play("walk")
 		Agent.GameActions.RUN_TO_POS:
+			update_detection(MASK_STAND)
 			play("run")
 		Agent.GameActions.CROUCH_WALK_TO_POS:
+			update_detection(MASK_CROUCH)
 			play("crouch_walk")
 		Agent.GameActions.CRAWL_TO_POS:
+			update_detection(MASK_PRONE)
 			play("crawl")
+
+
+func update_detection(new_mask : int):
+	_ray_middle.collision_mask = new_mask
 
 
 func _succeed():
@@ -53,36 +63,9 @@ func _check_position() -> bool:
 	# height check
 	if global_position.y > 1:
 		return false
-	# sightline check
-	var center_start = referenced_agent.global_position + Vector3.UP * 0.1
-	var center_target = (global_position - referenced_agent.global_position) + Vector3.UP * 0.1
-	center_target.y = maxf(center_target.y, 0.5)
-	var final_col_mask = 1 + 64 + 128
-	if referenced_agent.in_prone_state():
-		final_col_mask = 1
-	elif referenced_agent.in_crouching_state():
-		final_col_mask = 1 + 64
 
-	var angled_left = (center_target.normalized() * 0.3).rotated(
-					Vector3.UP, deg_to_rad(-90))
-	var angled_right = (center_target.normalized() * 0.3).rotated(
-					Vector3.UP, deg_to_rad(90))
-
-	_ray_left.global_position = center_start + angled_left
-	_ray_middle.global_position = center_start
-	_ray_right.global_position = center_start + angled_right
-	_ray_left.target_position = center_target
-	_ray_middle.target_position = center_target
-	_ray_right.target_position = center_target
-	_ray_left.collision_mask = final_col_mask
-	_ray_middle.collision_mask = final_col_mask
-	_ray_right.collision_mask = final_col_mask
-	_ray_left.force_raycast_update()
 	_ray_middle.force_raycast_update()
-	_ray_right.force_raycast_update()
-	if _ray_left.get_collider() or _ray_middle.get_collider() or _ray_right.get_collider():
-		return false
-	return true
+	return _ray_middle.is_colliding()
 
 
 func create_path_rect(start : Vector3, end : Vector3, width : float, vert_arr : PackedVector3Array, norm_arr : PackedVector3Array):
@@ -174,15 +157,15 @@ func _physics_process(_d: float) -> void:
 			flat_position.y = _game_camera.position.z
 			ray_position = Vector3(flat_position.x, _game_camera.ground_height, flat_position.y)
 		# simple distance clamp
-		var ref_ag_move_dist = referenced_agent.movement_dist
-		var ray_to_ag = ray_position - referenced_agent.global_position
-		if ray_to_ag.length() > ref_ag_move_dist:
-			var col_norm = ray_to_ag / ray_to_ag.length()
-			ray_position = referenced_agent.global_position + (col_norm * ref_ag_move_dist)
-		global_position = ray_position
+		#var ref_ag_move_dist = referenced_agent.movement_dist
+		#var ray_to_ag = ray_position - referenced_agent.global_position
+		#if ray_to_ag.length() > ref_ag_move_dist:
+			#var col_norm = ray_to_ag / ray_to_ag.length()
+			#ray_position = referenced_agent.global_position + (col_norm * ref_ag_move_dist)
+		#global_position = ray_position
 		# create movement path and limit actual movement distance
 		global_position = calculate_travel_dist()
-		#position_valid = _check_position()
+		position_valid = _check_position()
 
 	modulate = Color.WHITE if position_valid else Color.RED
 	#$DebugLabel3D.text = str(referenced_agent.position.distance_to(position)) + "\n" + str(position)

@@ -13,10 +13,6 @@ var ground_height : float = 0
 
 const MAX_FOV = 75.0
 
-const MASK_STAND = 128
-const MASK_CROUCH = 2
-const MASK_PRONE = 4
-
 func _ready() -> void:
 	position = Vector3(0, 15, 0)
 	h_offset = 0
@@ -39,10 +35,6 @@ func _input(event: InputEvent) -> void:
 
 func ground_detected() -> bool:
 	return ($RayCast3D as RayCast3D).is_colliding()
-
-
-func update_detection(new_mask : int):
-	($RayCast3D as RayCast3D).collision_mask = new_mask
 
 
 func _process(_d: float) -> void:
