@@ -119,13 +119,13 @@ func calculate_travel_dist():
 	var start = referenced_agent.global_position
 	var max_travel = referenced_agent.movement_dist
 	var last_ang = Vector3.ZERO
-	#$DebugLabel3D.text = str(max_travel)
+	$DebugLabel3D.text = str(max_travel)
 	for pos in arr:
 		var step_len = abs(start.distance_to(pos))
 		var step_ang = start.direction_to(pos)
 		if step_len <= max_travel:
 			max_travel -= step_len
-			#$DebugLabel3D.text += "\n" + str(max_travel)
+			$DebugLabel3D.text += "\n" + str(max_travel)
 			final = pos
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
 				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
@@ -136,7 +136,7 @@ func calculate_travel_dist():
 			var diff = abs(start.distance_to(pos))
 			var end_clipped = start + (start.direction_to(pos) * diff)
 			final = end_clipped
-			#$DebugLabel3D.text += "\n0, CLIPPED"
+			$DebugLabel3D.text += "\n0, CLIPPED"
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
 				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
 			create_path_rect(start, end_clipped, 0.25, verts, normals)
@@ -151,6 +151,7 @@ func calculate_travel_dist():
 	return final
 
 func _physics_process(_d: float) -> void:
+	#print(_game_camera.ground_detected())
 	if not ind_set:
 		if _game_camera.ground_detected():
 			flat_position.x = _game_camera.position.x
@@ -162,7 +163,7 @@ func _physics_process(_d: float) -> void:
 		#if ray_to_ag.length() > ref_ag_move_dist:
 			#var col_norm = ray_to_ag / ray_to_ag.length()
 			#ray_position = referenced_agent.global_position + (col_norm * ref_ag_move_dist)
-		#global_position = ray_position
+		global_position = ray_position
 		# create movement path and limit actual movement distance
 		global_position = calculate_travel_dist()
 		position_valid = _check_position()

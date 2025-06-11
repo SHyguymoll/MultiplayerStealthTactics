@@ -161,6 +161,7 @@ animation = &"movement_end_neutral"
 script = ExtResource("1_rfasu")
 
 [node name="MiddleCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 target_position = Vector3(0, -10, 0)
 collision_mask = 0
 
