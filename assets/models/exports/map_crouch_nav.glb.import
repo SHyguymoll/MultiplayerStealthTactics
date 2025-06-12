@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c18j3nsnbokwo"
-path="res://.godot/imported/map_standcrouch_nav.glb-58d9932a50448d6f9bcf61e77e114599.scn"
+uid="uid://bm8t1hok15lcc"
+path="res://.godot/imported/map_crouch_nav.glb-40ed687ac5159e6070e98f778c316eb0.scn"
 
 [deps]
 
-source_file="res://assets/models/exports/map_standcrouch_nav.glb"
-dest_files=["res://.godot/imported/map_standcrouch_nav.glb-58d9932a50448d6f9bcf61e77e114599.scn"]
+source_file="res://assets/models/exports/map_crouch_nav.glb"
+dest_files=["res://.godot/imported/map_crouch_nav.glb-40ed687ac5159e6070e98f778c316eb0.scn"]
 
 [params]
 
