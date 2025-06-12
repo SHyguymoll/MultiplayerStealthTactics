@@ -29,10 +29,10 @@ func _ready() -> void:
 			update_detection(MASK_STAND)
 			play("run")
 		Agent.GameActions.CROUCH_WALK_TO_POS:
-			update_detection(MASK_CROUCH)
+			update_detection(MASK_STAND + MASK_CROUCH)
 			play("crouch_walk")
 		Agent.GameActions.CRAWL_TO_POS:
-			update_detection(MASK_PRONE)
+			update_detection(MASK_STAND + MASK_CROUCH + MASK_PRONE)
 			play("crawl")
 
 
@@ -121,11 +121,38 @@ func _clamped_path_position(target_position : Vector3):
 	var normals = PackedVector3Array()
 	var start = referenced_agent.global_position
 	var max_travel = referenced_agent.movement_dist
+	# either Agent.NAV_LAYER_STAND (1), Agent.NAV_LAYER_CROUCH (2), or Agent.NAV_LAYER_PRONE (4)
+	var ray_collide = Agent.NAV_LAYER_STAND + Agent.NAV_LAYER_CROUCH + Agent.NAV_LAYER_PRONE
+	match referenced_agent._nav_agent.navigation_layers:
+		Agent.NAV_LAYER_STAND:
+			ray_collide = Agent.NAV_LAYER_CROUCH + Agent.NAV_LAYER_PRONE
+		Agent.NAV_LAYER_CROUCH:
+			ray_collide = Agent.NAV_LAYER_PRONE
+		Agent.NAV_LAYER_PRONE:
+			ray_collide = 0
+
 	var last_ang = Vector3.ZERO
 	$DebugLabel3D.text = str(max_travel)
+	var space_state = get_world_3d().direct_space_state
 	for pos in arr:
 		var step_len = abs(start.distance_to(pos))
 		var step_ang = start.direction_to(pos)
+		# stance check
+		var query = PhysicsRayQueryParameters3D.create(start, pos, ray_collide)
+		query.collide_with_areas = true
+		query.hit_back_faces = true
+		query.exclude = [query, referenced_agent]
+		var result = space_state.intersect_ray(query)
+		if result.get(position): # we collided with an area which the agent can't stand/crouch through
+			final = result.position
+			$DebugLabel3D.text += "\n0, IMPASSABLE"
+			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
+				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
+			create_path_rect(start, final, 0.25, verts, normals)
+			start = pos
+			last_ang = step_ang
+			break
+		# movement distance check
 		if step_len <= max_travel:
 			max_travel -= step_len
 			$DebugLabel3D.text += "\n" + str(max_travel)
