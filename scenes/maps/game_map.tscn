@@ -142,7 +142,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7929, 0.665981, -11.9257)
 server_true_client_false = true
 
 [node name="ServerDebug" parent="Spawns" instance=ExtResource("5_vhrbe")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.06112, 0.66598, -1.22804)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.93072, 0.66598, 1.7598)
 server_true_client_false = true
 
 [node name="Client1" parent="Spawns" instance=ExtResource("5_vhrbe")]
@@ -158,6 +158,6 @@ transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.5247
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 1.53053, 0.665981, 12.2249)
 
 [node name="ClientDebug" parent="Spawns" instance=ExtResource("5_vhrbe")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -3.02666, 0.665981, 9.55947)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -7.40065, 0.665981, 5.07814)
 
 [editable path="map_basic"]
