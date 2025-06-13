@@ -23,10 +23,6 @@ enum Objectives {
 @export var server_exfiltrate_zone : Area3D
 @export var client_exfiltrate_zone : Area3D
 
-@export var navigation_stand : Node3D
-@export var navigation_crouch : Node3D
-@export var navigation_prone : Node3D
-
 
 func _ready():
 	for spawn in $Spawns.get_children() as Array[SpawnPoint]:

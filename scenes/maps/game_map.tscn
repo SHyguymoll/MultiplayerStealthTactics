@@ -46,7 +46,6 @@ client_exfiltrate_zone = NodePath("ServerExfil")
 visible = false
 
 [node name="world_collision" type="StaticBody3D" parent="."]
-visible = false
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="world_collision"]
@@ -97,7 +96,6 @@ client_can_exfil = true
 collision_shape = Vector3(9.42, 1, 2.545)
 
 [node name="Spawns" type="Node3D" parent="."]
-visible = false
 
 [node name="Server1" parent="Spawns" instance=ExtResource("5_vhrbe")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.90223, 0.665981, -11.9257)

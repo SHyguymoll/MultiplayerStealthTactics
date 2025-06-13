@@ -130,20 +130,20 @@ func _clamped_path_position(target_position : Vector3):
 			ray_collide = Agent.NAV_LAYER_PRONE
 		Agent.NAV_LAYER_PRONE:
 			ray_collide = 0
+	$DebugLabel3D.text = str(ray_collide) + " " + str(referenced_agent._nav_agent.navigation_layers)
 
 	var last_ang = Vector3.ZERO
-	$DebugLabel3D.text = str(max_travel)
-	var space_state = get_world_3d().direct_space_state
+	$DebugLabel3D.text += "\n" + str(max_travel)
 	for pos in arr:
 		var step_len = abs(start.distance_to(pos))
 		var step_ang = start.direction_to(pos)
 		# stance check
 		var query = PhysicsRayQueryParameters3D.create(start, pos, ray_collide)
-		query.collide_with_areas = true
+		query.collide_with_bodies = true
 		query.hit_back_faces = true
-		query.exclude = [query, referenced_agent]
-		var result = space_state.intersect_ray(query)
-		if result.get(position): # we collided with an area which the agent can't stand/crouch through
+		#query.exclude = [query, referenced_agent]
+		var result = get_world_3d().direct_space_state.intersect_ray(query)
+		if result.get("position"): # we collided with an area which the agent can't stand/crouch through
 			final = result.position
 			$DebugLabel3D.text += "\n0, IMPASSABLE"
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
