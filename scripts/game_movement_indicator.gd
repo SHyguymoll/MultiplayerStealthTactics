@@ -128,9 +128,9 @@ func _clamped_path_position(target_position : Vector3):
 		ray_collide = 0
 	elif referenced_agent.in_crouching_state():
 		ray_collide = Agent.NAV_LAYER_PRONE
-	$DebugLabel3D.text = str(ray_collide)
+	#$DebugLabel3D.text = str(ray_collide)
 	var last_ang = Vector3.ZERO
-	$DebugLabel3D.text += "\n" + str(max_travel)
+	#$DebugLabel3D.text += "\n" + str(max_travel)
 	for pos in arr:
 		var step_len = abs(start.distance_to(pos))
 		var step_ang = start.direction_to(pos)
@@ -142,7 +142,7 @@ func _clamped_path_position(target_position : Vector3):
 		var result = get_world_3d().direct_space_state.intersect_ray(query)
 		if result.get("position"): # we collided with an area which the agent can't stand/crouch through
 			final = result.position
-			$DebugLabel3D.text += "\n0, IMPASSABLE"
+			#$DebugLabel3D.text += "\n0, IMPASSABLE"
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
 				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
 			create_path_rect(start, final, 0.25, verts, normals)
@@ -152,7 +152,7 @@ func _clamped_path_position(target_position : Vector3):
 		# movement distance check
 		if step_len <= max_travel:
 			max_travel -= step_len
-			$DebugLabel3D.text += "\n" + str(max_travel)
+			#$DebugLabel3D.text += "\n" + str(max_travel)
 			final = pos
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
 				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
@@ -161,10 +161,10 @@ func _clamped_path_position(target_position : Vector3):
 			last_ang = step_ang
 		else:
 			var diff = max_travel / abs(start.distance_to(pos))
-			$DebugLabel3D.text += "\ndiff = " + str(diff)
+			#$DebugLabel3D.text += "\ndiff = " + str(diff)
 			var end_clipped = start + (start.direction_to(pos) * (abs(start.distance_to(pos)) * diff))
 			final = end_clipped
-			$DebugLabel3D.text += "\n0, CLIPPED"
+			#$DebugLabel3D.text += "\n0, CLIPPED"
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
 				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
 			create_path_rect(start, end_clipped, 0.25, verts, normals)

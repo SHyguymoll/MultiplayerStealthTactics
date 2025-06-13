@@ -338,7 +338,7 @@ func _ready() -> void:
 	sounds.glanced.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
 	sounds.spotted_element.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
 	sounds.spotted_agent.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
-
+	_nav_agent.max_speed = movement_speed
 	# custom texture
 	if not owned():
 		skin_texture = "res://assets/models/Skins/enemy_agent.png"
@@ -515,8 +515,11 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 	if in_moving_state():
 		if selected_item > -1 and held_items[selected_item] == "box":
 			target_visible_level = 150
-		velocity = global_position.direction_to(_nav_agent.get_next_path_position())
+		var npp = _nav_agent.get_next_path_position()
+		#$DebugLabel3D.text = str(npp)
+		velocity = global_position.direction_to(npp)
 		velocity *= movement_speed
+		rotation.y = lerpf(rotation.y, get_required_y_rotation(npp), GENERAL_LERP_VAL)
 		match state:
 			States.RUN:
 				visible_level += 30
@@ -526,6 +529,7 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			States.CRAWL:
 				velocity /= 2.5
 				visible_level += 10
+		#$DebugLabel3D.text += "\n" + str(velocity)
 		move_and_slide()
 		if len(queued_action) < 2:
 			match state:
