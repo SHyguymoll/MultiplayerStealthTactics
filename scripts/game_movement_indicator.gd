@@ -122,16 +122,13 @@ func _clamped_path_position(target_position : Vector3):
 	var start = referenced_agent.global_position
 	var max_travel = referenced_agent.movement_dist
 	# either Agent.NAV_LAYER_STAND (1), Agent.NAV_LAYER_CROUCH (2), or Agent.NAV_LAYER_PRONE (4)
-	var ray_collide = Agent.NAV_LAYER_STAND + Agent.NAV_LAYER_CROUCH + Agent.NAV_LAYER_PRONE
-	match referenced_agent._nav_agent.navigation_layers:
-		Agent.NAV_LAYER_STAND:
-			ray_collide = Agent.NAV_LAYER_CROUCH + Agent.NAV_LAYER_PRONE
-		Agent.NAV_LAYER_CROUCH:
-			ray_collide = Agent.NAV_LAYER_PRONE
-		Agent.NAV_LAYER_PRONE:
-			ray_collide = 0
-	$DebugLabel3D.text = str(ray_collide) + " " + str(referenced_agent._nav_agent.navigation_layers)
-
+	@warning_ignore("unused_local_constant")
+	var ray_collide = Agent.NAV_LAYER_CROUCH + Agent.NAV_LAYER_PRONE
+	if referenced_agent.in_prone_state():
+		ray_collide = 0
+	elif referenced_agent.in_crouching_state():
+		ray_collide = Agent.NAV_LAYER_PRONE
+	$DebugLabel3D.text = str(ray_collide)
 	var last_ang = Vector3.ZERO
 	$DebugLabel3D.text += "\n" + str(max_travel)
 	for pos in arr:

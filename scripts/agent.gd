@@ -70,6 +70,11 @@ var _outline_mat : StandardMaterial3D
 	flag_server = $Agent/game_rig/Skeleton3D/FlagServer,
 	flag_client = $Agent/game_rig/Skeleton3D/FlagClient,
 }
+@onready var _collide_shapes : Dictionary[String, Shape3D] = {
+	stand = preload("res://scenes/agent_world_shapes/stand_collision.tres"),
+	crouch = preload("res://scenes/agent_world_shapes/crouch_collision.tres"),
+	prone = preload("res://scenes/agent_world_shapes/prone_collision.tres"),
+}
 
 @onready var sounds : Dictionary[String, AudioStreamPlayer3D] = {
 	glanced = ($ClientsideSoundEffects/GlancedSomething as AudioStreamPlayer3D),
@@ -115,7 +120,7 @@ enum States {
 @export var target_visible_level : int = 50
 @export var target_accuracy : float
 @export var weapons_animation_blend := Vector2.ONE
-@export var target_world_collide_height : float
+@export var target_world_collide : String
 @export var target_world_collide_y : float
 @export var game_steps_since_execute : int
 @export var grabbing_agent : Agent
@@ -328,6 +333,7 @@ func _ready() -> void:
 	_ear_cylinder.radius = hearing_dist
 	_body.collision_layer += 8 if player_id == 1 else 16
 	_nav_agent.navigation_layers = NAV_LAYER_STAND
+	_world_collide.shape = _collide_shapes.stand
 	# set up rpcs
 	sounds.glanced.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
 	sounds.spotted_element.rpc_config("play", {rpc_mode=MultiplayerAPI.RPC_MODE_AUTHORITY, transfer_mode=MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, call_local=false})
@@ -472,32 +478,28 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 		_active_item_icon.texture = GameRefs.ITM[held_items[selected_item]].icon
 	visible_level = 100
 	if in_standing_state():
-		target_world_collide_height = 0.962
+		target_world_collide = "stand"
 		target_world_collide_y = 0.499
-		collision_mask = Game.Collides.PRONE + Game.Collides.CROUCH + Game.Collides.STAND
+		#collision_mask = Game.Collides.PRONE + Game.Collides.CROUCH + Game.Collides.STAND
 		visible_level = 50
 		if _nav_agent.navigation_layers != NAV_LAYER_STAND:
 			_nav_agent.navigation_layers = NAV_LAYER_STAND
 	if in_crouching_state():
-		target_world_collide_height = 0.666
-		target_world_collide_y = 0.35
-		collision_mask = Game.Collides.PRONE + Game.Collides.CROUCH
+		target_world_collide = "crouch"
+		target_world_collide_y = 0.285
+		#collision_mask = Game.Collides.PRONE + Game.Collides.CROUCH
 		visible_level = 25
 		if _nav_agent.navigation_layers != NAV_LAYER_CROUCH:
 			_nav_agent.navigation_layers = NAV_LAYER_CROUCH
 	if in_prone_state():
-		target_world_collide_height = 0.264
+		target_world_collide = "prone"
 		target_world_collide_y = 0.15
-		collision_mask = Game.Collides.PRONE
+		#collision_mask = Game.Collides.PRONE
 		visible_level = 5
 		if _nav_agent.navigation_layers != NAV_LAYER_PRONE:
 			_nav_agent.navigation_layers = NAV_LAYER_PRONE
+	_world_collide.shape = _collide_shapes.get(target_world_collide)
 	_world_collide.position.y = lerpf(_world_collide.position.y, target_world_collide_y, GENERAL_LERP_VAL)
-	(_world_collide.get_shape() as CylinderShape3D).height = lerpf(
-			(_world_collide.get_shape() as CylinderShape3D).height,
-			target_world_collide_height,
-			GENERAL_LERP_VAL
-	)
 	if len(queued_action) > 0 and queued_action[0] != GameActions.RELOAD_WEAPON:
 		weapons_animation_blend = weapons_animation_blend.lerp(decide_weapon_blend(), GENERAL_LERP_VAL)
 	visible_level = clamp(visible_level, 0, 100)
