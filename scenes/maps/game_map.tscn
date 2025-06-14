@@ -27,7 +27,7 @@ cell_height = 0.05
 agent_height = 0.75
 detail_sample_distance = 0.1
 
-[node name="GameMap" type="Node3D" node_paths=PackedStringArray("agent_spawn_server_1", "agent_spawn_server_2", "agent_spawn_server_3", "agent_spawn_server_4", "agent_spawn_client_1", "agent_spawn_client_2", "agent_spawn_client_3", "agent_spawn_client_4", "server_exfiltrate_zone", "client_exfiltrate_zone")]
+[node name="GameMap" type="Node3D" node_paths=PackedStringArray("agent_spawn_server_1", "agent_spawn_server_2", "agent_spawn_server_3", "agent_spawn_server_4", "agent_spawn_client_1", "agent_spawn_client_2", "agent_spawn_client_3", "agent_spawn_client_4", "server_exfiltrate_zone", "client_exfiltrate_zone", "world_graphics", "world_collision", "crouch_gates", "prone_gates", "pointable_areas", "navigation")]
 script = ExtResource("1_8s54t")
 agent_spawn_server_1 = NodePath("Spawns/Server1")
 agent_spawn_server_2 = NodePath("Spawns/Server2")
@@ -41,6 +41,12 @@ objective = 1
 objective_params = [0.0, 0.222, 0.0]
 server_exfiltrate_zone = NodePath("ClientExfil")
 client_exfiltrate_zone = NodePath("ServerExfil")
+world_graphics = NodePath("map_basic")
+world_collision = NodePath("world_collision")
+crouch_gates = NodePath("gate_crouch")
+prone_gates = NodePath("gate_prone")
+pointable_areas = NodePath("nav_pointable")
+navigation = NodePath("nav_total")
 
 [node name="map_basic" parent="." instance=ExtResource("2_cn121")]
 visible = false
@@ -84,7 +90,6 @@ visible = false
 
 [node name="ServerExfil" parent="." instance=ExtResource("4_k6fta")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11.873)
-visible = false
 collision_layer = 8
 collision_mask = 8
 server_can_exfil = true
@@ -92,7 +97,6 @@ collision_shape = Vector3(9.42, 1, 2.545)
 
 [node name="ClientExfil" parent="." instance=ExtResource("4_k6fta")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12.4165)
-visible = false
 collision_layer = 16
 collision_mask = 16
 client_can_exfil = true

@@ -23,18 +23,26 @@ enum Objectives {
 @export var server_exfiltrate_zone : Area3D
 @export var client_exfiltrate_zone : Area3D
 
+@export var world_graphics : Node3D
+@export var world_collision : StaticBody3D
+@export var crouch_gates : StaticBody3D
+@export var prone_gates : StaticBody3D
+@export var pointable_areas : StaticBody3D
+@export var navigation : NavigationRegion3D
 
 func _ready():
-	for spawn in $Spawns.get_children() as Array[SpawnPoint]:
-		spawn.debug_icon.visible = false
-	#$map_basic_nav.visible = false
-	#$map_basic.visible = true
-	#$map_basic.visible = false
-	#$map_standcrouch_nav.visible = false
-	#$map_standcrouch_nav/Nav_0_Stand.visible = false
-	#$map_standcrouch_nav/Nav_0_Stand/StaticBody3D.visible = true
-	#$map_standcrouch_nav/Nav_0_Stand/NavigationRegion3D.visible = false
-	#$map_prone_nav.visible = false
-	#$map_prone_nav/Nav_2_Prone.visible = false
-	#$map_prone_nav/Nav_2_Prone/StaticBody3D.visible = true
-	#$map_prone_nav/Nav_2_Prone/NavigationRegion3D.visible = false
+	agent_spawn_client_1.debug_icon.visible = false
+	agent_spawn_client_2.debug_icon.visible = false
+	agent_spawn_client_3.debug_icon.visible = false
+	agent_spawn_client_4.debug_icon.visible = false
+	agent_spawn_server_1.debug_icon.visible = false
+	agent_spawn_server_2.debug_icon.visible = false
+	agent_spawn_server_3.debug_icon.visible = false
+	agent_spawn_server_4.debug_icon.visible = false
+
+	world_graphics.visible = true
+	world_collision.visible = false
+	crouch_gates.visible = false
+	prone_gates.visible = false
+	pointable_areas.visible = false
+	navigation.visible = false
