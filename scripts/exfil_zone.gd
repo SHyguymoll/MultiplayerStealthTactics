@@ -27,7 +27,6 @@ const NONE_COLOR = Color(0x000000FF)
 
 func _ready() -> void:
 	(collision_zone.shape as BoxShape3D).size = collision_shape
-	collision_layer = (SERVER_COL_VAL * int(server_can_exfil)) + (CLIENT_COL_VAL * int(client_can_exfil))
 	collision_mask = (SERVER_COL_VAL * int(server_can_exfil)) + (CLIENT_COL_VAL * int(client_can_exfil))
 
 	rendered_shape.mesh = PlaneMesh.new()
@@ -51,7 +50,6 @@ func _process(delta: float) -> void:
 		(rendered_shape.mesh as PlaneMesh).size = Vector2(collision_shape.x, collision_shape.z)
 		(rendered_shape.mesh as PlaneMesh).subdivide_width = max(0, int(collision_shape.x * 8))
 		(rendered_shape.mesh as PlaneMesh).subdivide_depth = max(0, int(collision_shape.z * 8))
-		collision_layer = (SERVER_COL_VAL * int(server_can_exfil)) + (CLIENT_COL_VAL * int(client_can_exfil))
 		collision_mask = (SERVER_COL_VAL * int(server_can_exfil)) + (CLIENT_COL_VAL * int(client_can_exfil))
 
 		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"color",

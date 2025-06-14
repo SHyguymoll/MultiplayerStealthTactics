@@ -90,14 +90,12 @@ visible = false
 
 [node name="ServerExfil" parent="." instance=ExtResource("4_k6fta")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11.873)
-collision_layer = 8
 collision_mask = 8
 server_can_exfil = true
 collision_shape = Vector3(9.42, 1, 2.545)
 
 [node name="ClientExfil" parent="." instance=ExtResource("4_k6fta")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12.4165)
-collision_layer = 16
 collision_mask = 16
 client_can_exfil = true
 collision_shape = Vector3(9.42, 1, 2.545)
