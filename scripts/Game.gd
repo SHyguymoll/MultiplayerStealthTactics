@@ -708,7 +708,7 @@ func _update_game_phase(new_phase: GamePhases, check_incap := true):
 				failure_jingle.rpc()
 				sent_reward = true
 			# how's the objective looking
-			_track_objective_completion()
+			$Server._track_objective_completion()
 			if server_progress == ProgressParts.SURVIVORS_EXFILTRATED:
 				reward_team(1)
 				victory_jingle()
@@ -735,14 +735,6 @@ func save_replay(end_time):
 		DirAccess.make_dir_absolute("user://replays")
 	var new_replay = FileAccess.open("user://replays/" + start_time + "_" + end_time + ".mstr", FileAccess.WRITE)
 	new_replay.store_string(JSON.stringify(action_timeline))
-
-
-func _track_objective_completion():
-	match map.objective:
-		GameMap.Objectives.CAPTURE_CENTRAL_FLAG:
-			of_comp()
-		#GameMap.Objectives.CAPTURE_ENEMY_FLAG:
-			#enemy_flag_completion()
 
 
 func check_agents_for_weapon(server_team : bool, item_name : String) -> bool:
@@ -779,86 +771,6 @@ func has_team_exited(server_team : bool):
 		if ag.state in [Agent.States.EXFILTRATED, Agent.States.DEAD]:
 			count -= 1
 	return count == 0
-
-
-func of_comp():
-	of_comp_server()
-	of_comp_client()
-
-
-func of_comp_server():
-	match server_progress:
-		ProgressParts.INTRO:
-			create_toast_update.rpc(GameRefs.TXT.of_intro, GameRefs.TXT.of_intro, true)
-			server_progress = ProgressParts.NO_ADVANTAGE
-		ProgressParts.NO_ADVANTAGE: # no one has the flag
-			if not check_agents_for_weapon(true, "map_flag_center"):
-				return
-			if not check_weapon_holder_exfil(true, "map_flag_center"):
-				create_toast_update.rpc(GameRefs.TXT.of_y_get, GameRefs.TXT.of_t_get, true)
-				server_progress = ProgressParts.ITEM_HELD
-				return
-			if not has_team_exited(true):
-				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-				server_progress = ProgressParts.OBJECTIVE_COMPLETE
-				return
-			create_toast_update.rpc(GameRefs.TXT.of_y_cap_left, GameRefs.TXT.of_t_cap_left, true)
-			server_progress = ProgressParts.SURVIVORS_EXFILTRATED
-			return
-		ProgressParts.ITEM_HELD: # the server team has the flag
-			if not check_agents_for_weapon(true, "map_flag_center"):
-				create_toast_update.rpc(GameRefs.TXT.of_y_lost, GameRefs.TXT.of_t_lost, true)
-				server_progress = ProgressParts.NO_ADVANTAGE
-				return
-			if check_weapon_holder_exfil(true, "map_flag_center"):
-				if not has_team_exited(true):
-					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-					server_progress = ProgressParts.OBJECTIVE_COMPLETE
-					return
-				create_toast_update.rpc(GameRefs.TXT.of_y_cap_left, GameRefs.TXT.of_t_cap_left, true)
-				server_progress = ProgressParts.SURVIVORS_EXFILTRATED
-				return
-		ProgressParts.OBJECTIVE_COMPLETE: # a server team member has escaped with the flag
-			if has_team_exited(true):
-				create_toast_update.rpc(GameRefs.TXT.mission_success, GameRefs.TXT.mission_failure, true)
-				server_progress = ProgressParts.SURVIVORS_EXFILTRATED
-
-
-func of_comp_client():
-	match client_progress:
-		ProgressParts.INTRO:
-			client_progress = ProgressParts.NO_ADVANTAGE
-		ProgressParts.NO_ADVANTAGE: # no one has the flag
-			if not check_agents_for_weapon(false, "map_flag_center"):
-				return
-			if not check_weapon_holder_exfil(false, "map_flag_center"):
-				create_toast_update.rpc(GameRefs.TXT.of_t_get, GameRefs.TXT.of_y_get, true)
-				client_progress = ProgressParts.ITEM_HELD
-				return
-			if not has_team_exited(false):
-				create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-				client_progress = ProgressParts.OBJECTIVE_COMPLETE
-				return
-			create_toast_update.rpc(GameRefs.TXT.of_t_cap_left, GameRefs.TXT.of_y_cap_left, true)
-			client_progress = ProgressParts.SURVIVORS_EXFILTRATED
-			return
-		ProgressParts.ITEM_HELD: # the client team has the flag
-			if not check_agents_for_weapon(false, "map_flag_center"):
-				create_toast_update.rpc(GameRefs.TXT.of_t_lost, GameRefs.TXT.of_y_lost, true)
-				client_progress = ProgressParts.NO_ADVANTAGE
-				return
-			if check_weapon_holder_exfil(false, "map_flag_center"):
-				if not has_team_exited(false):
-					create_toast_update.rpc(GameRefs.TXT.of_cap_agents_remain, GameRefs.TXT.of_cap_agents_remain, true)
-					client_progress = ProgressParts.OBJECTIVE_COMPLETE
-					return
-				create_toast_update.rpc(GameRefs.TXT.of_t_cap_left, GameRefs.TXT.of_y_cap_left, true)
-				client_progress = ProgressParts.SURVIVORS_EXFILTRATED
-				return
-		ProgressParts.OBJECTIVE_COMPLETE: # a client team member has escaped with the flag
-			if has_team_exited(false):
-				create_toast_update.rpc(GameRefs.TXT.mission_failure, GameRefs.TXT.mission_success, true)
-				client_progress = ProgressParts.SURVIVORS_EXFILTRATED
 
 
 @rpc("authority", "call_local")
