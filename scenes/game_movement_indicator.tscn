@@ -152,6 +152,7 @@ render_priority = 0
 shader = ExtResource("9_hx3g3")
 shader_parameter/oscillation_rate = 1.0
 shader_parameter/color = Color(0.541176, 0.168627, 0.886275, 1)
+shader_parameter/TriangleMode = false
 shader_parameter/speed = 0.25
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_c4gan"]

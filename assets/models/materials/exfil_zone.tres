@@ -100,17 +100,17 @@ default_value_enabled = true
 default_value = 1.0
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_io2jf"]
-size = Vector2(1464, 402)
+size = Vector2(1464, 583)
 title = "PulsingLight"
 attached_nodes = PackedInt32Array(29, 30, 7, 25, 32, 31, 28, 27, 26)
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_oplp8"]
-size = Vector2(2304, 862)
+size = Vector2(2304, 1043)
 title = "CreateEdges"
 attached_nodes = PackedInt32Array(5, 17, 19, 24, 23, 22, 21, 20, 18, 16, 15, 14, 13, 12, 11, 9, 6)
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_ya4f3"]
-size = Vector2(1764, 702)
+size = Vector2(1775, 883)
 title = "Checkerboard"
 attached_nodes = PackedInt32Array(36, 37, 40, 38, 86, 41, 42, 43, 44, 45, 46, 47, 48, 39)
 
@@ -400,6 +400,7 @@ void fragment() {
 
 }
 "
+graph_offset = Vector2(-150.883, -231.202)
 preview_params/checkerboard_gap = "0.5"
 preview_params/edge = "0.1"
 nodes/vertex/0/position = Vector2(520, 160)
