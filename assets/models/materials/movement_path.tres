@@ -8,19 +8,17 @@ linked_parent_graph_frame = 103
 op_type = 0
 
 [sub_resource type="VisualShaderNodeFloatOp" id="VisualShaderNodeFloatOp_7xxgq"]
-output_port_for_preview = 0
 default_input_values = [0, 0.0, 1, 4.0]
 linked_parent_graph_frame = 103
 operator = 2
 
 [sub_resource type="VisualShaderNodeFloatOp" id="VisualShaderNodeFloatOp_ugwy4"]
-output_port_for_preview = 0
 default_input_values = [0, 0.0, 1, 0.25]
 linked_parent_graph_frame = 103
 operator = 4
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_k0mvn"]
-size = Vector2(1004, 534)
+size = Vector2(824, 534)
 title = "CreateSteps"
 attached_nodes = PackedInt32Array(99, 100, 101, 102)
 
@@ -70,12 +68,12 @@ default_value_enabled = true
 default_value = 1.0
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_io2jf"]
-size = Vector2(1464, 583)
+size = Vector2(1364, 523)
 title = "PulsingLight"
 attached_nodes = PackedInt32Array(29, 30, 7, 25, 32, 31, 28, 27, 26)
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_oplp8"]
-size = Vector2(1344, 737)
+size = Vector2(1304, 723)
 title = "CreateTriangles"
 attached_nodes = PackedInt32Array(5, 88, 98, 93, 91, 89, 90, 92, 94)
 
@@ -258,35 +256,35 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(502.367, 21.1266)
+graph_offset = Vector2(86.697, -87.5212)
 nodes/vertex/0/position = Vector2(520, 160)
-nodes/fragment/0/position = Vector2(2140, 240)
+nodes/fragment/0/position = Vector2(1720, -140)
 nodes/fragment/5/node = SubResource("VisualShaderNodeInput_qefe8")
-nodes/fragment/5/position = Vector2(-100, -20)
+nodes/fragment/5/position = Vector2(-60, 160)
 nodes/fragment/7/node = SubResource("VisualShaderNodeColorParameter_p2ave")
-nodes/fragment/7/position = Vector2(820, -340)
+nodes/fragment/7/position = Vector2(1180, -340)
 nodes/fragment/25/node = SubResource("VisualShaderNodeInput_qebgp")
-nodes/fragment/25/position = Vector2(-80, -600)
+nodes/fragment/25/position = Vector2(360, -520)
 nodes/fragment/26/node = SubResource("VisualShaderNodeFloatFunc_5bxsw")
-nodes/fragment/26/position = Vector2(620, -420)
+nodes/fragment/26/position = Vector2(1020, -480)
 nodes/fragment/27/node = SubResource("VisualShaderNodeFloatOp_k8ko6")
-nodes/fragment/27/position = Vector2(220, -560)
+nodes/fragment/27/position = Vector2(640, -520)
 nodes/fragment/28/node = SubResource("VisualShaderNodeFloatConstant_ujbij")
-nodes/fragment/28/position = Vector2(20, -480)
+nodes/fragment/28/position = Vector2(440, -420)
 nodes/fragment/29/node = SubResource("VisualShaderNodeVectorOp_1bdua")
-nodes/fragment/29/position = Vector2(1140, -620)
+nodes/fragment/29/position = Vector2(1480, -540)
 nodes/fragment/30/node = SubResource("VisualShaderNodeFloatOp_ul3vf")
-nodes/fragment/30/position = Vector2(880, -600)
+nodes/fragment/30/position = Vector2(1220, -520)
 nodes/fragment/31/node = SubResource("VisualShaderNodeFloatOp_pick7")
-nodes/fragment/31/position = Vector2(420, -500)
+nodes/fragment/31/position = Vector2(840, -520)
 nodes/fragment/32/node = SubResource("VisualShaderNodeFloatParameter_o60jt")
-nodes/fragment/32/position = Vector2(-80, -340)
+nodes/fragment/32/position = Vector2(540, -320)
 nodes/fragment/33/node = SubResource("VisualShaderNodeFrame_io2jf")
-nodes/fragment/33/position = Vector2(-120, -661)
+nodes/fragment/33/position = Vector2(320, -580)
 nodes/fragment/34/node = SubResource("VisualShaderNodeFrame_oplp8")
 nodes/fragment/34/position = Vector2(-100, -60)
 nodes/fragment/88/node = SubResource("VisualShaderNodeInput_28hb5")
-nodes/fragment/88/position = Vector2(-20, 160)
+nodes/fragment/88/position = Vector2(-60, 320)
 nodes/fragment/89/node = SubResource("VisualShaderNodeFloatOp_a14vt")
 nodes/fragment/89/position = Vector2(500, 180)
 nodes/fragment/90/node = SubResource("VisualShaderNodeFloatOp_k0mvn")
@@ -296,24 +294,24 @@ nodes/fragment/91/position = Vector2(500, 20)
 nodes/fragment/92/node = SubResource("VisualShaderNodeFloatFunc_7xxgq")
 nodes/fragment/92/position = Vector2(720, 0)
 nodes/fragment/93/node = SubResource("VisualShaderNodeFloatParameter_ugwy4")
-nodes/fragment/93/position = Vector2(-60, 340)
+nodes/fragment/93/position = Vector2(-40, 420)
 nodes/fragment/94/node = SubResource("VisualShaderNodeFloatOp_grigj")
-nodes/fragment/94/position = Vector2(240, 320)
+nodes/fragment/94/position = Vector2(340, 440)
 nodes/fragment/98/node = SubResource("VisualShaderNodeCompare_pomtl")
 nodes/fragment/98/position = Vector2(1000, 140)
 nodes/fragment/99/node = SubResource("VisualShaderNodeTexture_ugwy4")
-nodes/fragment/99/position = Vector2(1000, 720)
+nodes/fragment/99/position = Vector2(1300, 720)
 nodes/fragment/100/node = SubResource("VisualShaderNodeVectorCompose_k0mvn")
-nodes/fragment/100/position = Vector2(680, 760)
+nodes/fragment/100/position = Vector2(1100, 820)
 nodes/fragment/101/node = SubResource("VisualShaderNodeFloatOp_7xxgq")
-nodes/fragment/101/position = Vector2(460, 820)
+nodes/fragment/101/position = Vector2(920, 940)
 nodes/fragment/102/node = SubResource("VisualShaderNodeFloatOp_ugwy4")
-nodes/fragment/102/position = Vector2(240, 740)
+nodes/fragment/102/position = Vector2(720, 940)
 nodes/fragment/103/node = SubResource("VisualShaderNodeFrame_k0mvn")
-nodes/fragment/103/position = Vector2(200, 679)
+nodes/fragment/103/position = Vector2(680, 680)
 nodes/fragment/105/node = SubResource("VisualShaderNodeBooleanParameter_a14vt")
-nodes/fragment/105/position = Vector2(1220, 420)
+nodes/fragment/105/position = Vector2(1220, 40)
 nodes/fragment/109/node = SubResource("VisualShaderNodeSwitch_k0mvn")
-nodes/fragment/109/position = Vector2(1640, 340)
+nodes/fragment/109/position = Vector2(1500, 320)
 nodes/fragment/connections = PackedInt32Array(25, 0, 27, 0, 28, 0, 27, 1, 26, 0, 30, 0, 30, 0, 29, 0, 27, 0, 31, 0, 31, 0, 26, 0, 32, 0, 31, 1, 7, 0, 29, 1, 89, 0, 90, 0, 5, 1, 91, 0, 91, 0, 92, 0, 88, 0, 94, 0, 93, 0, 94, 1, 5, 2, 89, 0, 94, 0, 89, 1, 92, 0, 98, 0, 5, 1, 100, 0, 100, 0, 99, 0, 90, 0, 98, 1, 89, 0, 102, 0, 102, 0, 101, 0, 101, 0, 100, 1, 29, 0, 0, 0, 99, 0, 109, 2, 98, 0, 109, 1, 105, 0, 109, 0, 109, 0, 0, 1)
 nodes/light/0/position = Vector2(400, 160)
