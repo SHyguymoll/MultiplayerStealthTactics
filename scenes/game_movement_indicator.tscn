@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://byiuauwlgaakv"]
+[gd_scene load_steps=13 format=3 uid="uid://byiuauwlgaakv"]
 
 [ext_resource type="Texture2D" uid="uid://c1a4tc5047oxv" path="res://assets/sprites/game_popups/animated/movement/0.png" id="1_d3kem"]
 [ext_resource type="Script" uid="uid://bhin74mvixtyk" path="res://scripts/game_movement_indicator.gd" id="1_rfasu"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://o1e60rw5jlih" path="res://assets/sprites/game_popups/animated/movement/fail.png" id="5_osgha"]
 [ext_resource type="Texture2D" uid="uid://86gycgkrmhxo" path="res://assets/sprites/game_popups/animated/movement/checkmark.png" id="6_sfetn"]
 [ext_resource type="FontFile" uid="uid://50pgbui3omif" path="res://assets/fonts/Jersey_25/Jersey25-Regular.ttf" id="8_q1ajn"]
+[ext_resource type="Shader" uid="uid://by1dhhojbkwlc" path="res://assets/models/materials/movement_path.tres" id="9_hx3g3"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_vjpas"]
 animations = [{
@@ -146,9 +147,12 @@ animations = [{
 "speed": 8.0
 }]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c4gan"]
-shading_mode = 0
-albedo_color = Color(0.767667, 0.59, 1, 1)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gddgi"]
+render_priority = 0
+shader = ExtResource("9_hx3g3")
+shader_parameter/oscillation_rate = 1.0
+shader_parameter/color = Color(0.541176, 0.168627, 0.886275, 1)
+shader_parameter/speed = 0.25
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_c4gan"]
 
@@ -174,7 +178,8 @@ outline_size = 11
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 top_level = true
-material_override = SubResource("StandardMaterial3D_c4gan")
+material_override = SubResource("ShaderMaterial_gddgi")
+cast_shadow = 0
 gi_mode = 0
 mesh = SubResource("ArrayMesh_c4gan")
 

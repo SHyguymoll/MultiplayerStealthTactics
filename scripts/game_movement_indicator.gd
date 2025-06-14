@@ -24,16 +24,20 @@ func _ready() -> void:
 	match queued_action[0]:
 		Agent.GameActions.WALK_TO_POS:
 			update_detection(MASK_STAND)
+			_travel_path.material_override.set("shader_parameter/speed", 0.5)
 			play("walk")
 		Agent.GameActions.RUN_TO_POS:
 			update_detection(MASK_STAND)
 			play("run")
+			_travel_path.material_override.set("shader_parameter/speed", 0.9)
 		Agent.GameActions.CROUCH_WALK_TO_POS:
 			update_detection(MASK_STAND + MASK_CROUCH)
 			play("crouch_walk")
+			_travel_path.material_override.set("shader_parameter/speed", 0.4)
 		Agent.GameActions.CRAWL_TO_POS:
 			update_detection(MASK_STAND + MASK_CROUCH + MASK_PRONE)
 			play("crawl")
+			_travel_path.material_override.set("shader_parameter/speed", 0.25)
 
 
 func update_detection(new_mask : int):
