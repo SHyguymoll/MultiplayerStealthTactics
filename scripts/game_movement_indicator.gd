@@ -21,6 +21,7 @@ const MASK_PRONE = 4
 
 func _ready() -> void:
 	$DebugLabel3D.text = ""
+	_travel_path.mesh = ArrayMesh.new()
 	match queued_action[0]:
 		Agent.GameActions.WALK_TO_POS:
 			update_detection(MASK_STAND)
