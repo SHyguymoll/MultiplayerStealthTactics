@@ -31,14 +31,14 @@ enum Objectives {
 @export var navigation : NavigationRegion3D
 
 func _ready():
-	agent_spawn_client_1.debug_icon.visible = false
-	agent_spawn_client_2.debug_icon.visible = false
-	agent_spawn_client_3.debug_icon.visible = false
-	agent_spawn_client_4.debug_icon.visible = false
-	agent_spawn_server_1.debug_icon.visible = false
-	agent_spawn_server_2.debug_icon.visible = false
-	agent_spawn_server_3.debug_icon.visible = false
-	agent_spawn_server_4.debug_icon.visible = false
+	agent_spawn_client_1.visible = false
+	agent_spawn_client_2.visible = false
+	agent_spawn_client_3.visible = false
+	agent_spawn_client_4.visible = false
+	agent_spawn_server_1.visible = false
+	agent_spawn_server_2.visible = false
+	agent_spawn_server_3.visible = false
+	agent_spawn_server_4.visible = false
 
 	world_graphics.visible = true
 	world_collision.visible = false
