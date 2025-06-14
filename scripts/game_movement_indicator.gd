@@ -75,39 +75,58 @@ func _check_position() -> bool:
 	return _ray_middle.is_colliding()
 
 
-func create_path_rect(start : Vector3, end : Vector3, width : float, vert_arr : PackedVector3Array, norm_arr : PackedVector3Array):
+func create_path_rect(start : Vector3, end : Vector3, width : float, vert_arr : PackedVector3Array, norm_arr : PackedVector3Array, uv_arr : PackedVector2Array):
 	var angle_perpendicular = start.direction_to(end).rotated(Vector3.DOWN, PI/2).normalized()
 	var point_1 = start - (angle_perpendicular * (width / 2.0))
 	var point_2 = end - (angle_perpendicular * (width / 2.0))
 	var point_3 = end + (angle_perpendicular * (width / 2.0))
 	var point_4 = start + (angle_perpendicular * (width / 2.0))
+
+	var v_length = point_1.distance_to(point_2)
 	vert_arr.push_back(point_1)
 	norm_arr.push_back(Vector3.UP)
+	uv_arr.push_back(Vector2(0, v_length))
+
 	vert_arr.push_back(point_2)
 	norm_arr.push_back(Vector3.UP)
+	uv_arr.push_back(Vector2(0, 0))
+
 	vert_arr.push_back(point_3)
 	norm_arr.push_back(Vector3.UP)
+	uv_arr.push_back(Vector2(1, 0))
+
 	vert_arr.push_back(point_1)
 	norm_arr.push_back(Vector3.UP)
+	uv_arr.push_back(Vector2(0, v_length))
+
 	vert_arr.push_back(point_3)
 	norm_arr.push_back(Vector3.UP)
+	uv_arr.push_back(Vector2(1, 0))
+
 	vert_arr.push_back(point_4)
 	norm_arr.push_back(Vector3.UP)
+	uv_arr.push_back(Vector2(1, v_length))
 
 
-func create_path_corner(start : Vector3, last_angle : Vector3, now_angle : Vector3, width : float, vert_arr : PackedVector3Array, norm_arr : PackedVector3Array):
+func create_path_corner(start : Vector3, last_angle : Vector3, now_angle : Vector3, width : float, vert_arr : PackedVector3Array, norm_arr : PackedVector3Array, uv_arr : PackedVector2Array):
 	var cross = last_angle.cross(now_angle)
+	#$DebugLabel3D.text += "\n" + str(last_angle) + "\n cross " + str(now_angle) + " = " + str(cross)
 	var last_perp = last_angle.rotated(Vector3.DOWN, PI/2).normalized()
 	var now_perp = now_angle.rotated(Vector3.DOWN, PI/2).normalized()
 	var point_1 = start
+	uv_arr.push_back(Vector2(0.5, 0.5))
 	var point_2 = Vector3.ZERO
 	var point_3 = Vector3.ZERO
-	if cross.y > 0:
+	if cross.y >= 0:
 		point_2 = start + (now_perp * (width / 2.0))
+		uv_arr.push_back(Vector2(1, 0))
 		point_3 = start + (last_perp * (width / 2.0))
+		uv_arr.push_back(Vector2(1, 1))
 	else:
 		point_2 = start - (last_perp * (width / 2.0))
+		uv_arr.push_back(Vector2(0, 1))
 		point_3 = start - (now_perp * (width / 2.0))
+		uv_arr.push_back(Vector2(0, 0))
 	vert_arr.push_back(point_1)
 	norm_arr.push_back(Vector3.UP)
 	vert_arr.push_back(point_2)
@@ -123,9 +142,9 @@ func _clamped_path_position(target_position : Vector3):
 	(_travel_path.mesh as ArrayMesh).clear_surfaces()
 	var verts = PackedVector3Array()
 	var normals = PackedVector3Array()
+	var uvs = PackedVector2Array()
 	var start = referenced_agent.global_position
 	var max_travel = referenced_agent.movement_dist
-	# either Agent.NAV_LAYER_STAND (1), Agent.NAV_LAYER_CROUCH (2), or Agent.NAV_LAYER_PRONE (4)
 	@warning_ignore("unused_local_constant")
 	var ray_collide = Agent.NAV_LAYER_CROUCH + Agent.NAV_LAYER_PRONE
 	if referenced_agent.in_prone_state():
@@ -138,6 +157,7 @@ func _clamped_path_position(target_position : Vector3):
 	for pos in arr:
 		var step_len = abs(start.distance_to(pos))
 		var step_ang = start.direction_to(pos)
+		#$DebugLabel3D.text = str(last_ang) + str(step_ang)
 		# stance check
 		var query = PhysicsRayQueryParameters3D.create(start, pos, ray_collide)
 		query.collide_with_bodies = true
@@ -148,8 +168,9 @@ func _clamped_path_position(target_position : Vector3):
 			final = result.position
 			#$DebugLabel3D.text += "\n0, IMPASSABLE"
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
-				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
-			create_path_rect(start, final, 0.25, verts, normals)
+				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals, uvs)
+			#create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
+			create_path_rect(start, final, 0.25, verts, normals, uvs)
 			start = pos
 			last_ang = step_ang
 			break
@@ -159,8 +180,9 @@ func _clamped_path_position(target_position : Vector3):
 			#$DebugLabel3D.text += "\n" + str(max_travel)
 			final = pos
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
-				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
-			create_path_rect(start, pos, 0.25, verts, normals)
+				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals, uvs)
+			#create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
+			create_path_rect(start, pos, 0.25, verts, normals, uvs)
 			start = pos
 			last_ang = step_ang
 		else:
@@ -170,8 +192,9 @@ func _clamped_path_position(target_position : Vector3):
 			final = end_clipped
 			#$DebugLabel3D.text += "\n0, CLIPPED"
 			if last_ang != Vector3.ZERO and not is_zero_approx(step_ang.dot(last_ang) - 1.0):
-				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
-			create_path_rect(start, end_clipped, 0.25, verts, normals)
+				create_path_corner(start, last_ang, step_ang, 0.25, verts, normals, uvs)
+			#create_path_corner(start, last_ang, step_ang, 0.25, verts, normals)
+			create_path_rect(start, end_clipped, 0.25, verts, normals, uvs)
 			start = pos
 			last_ang = step_ang
 			break
@@ -179,8 +202,10 @@ func _clamped_path_position(target_position : Vector3):
 	surface_array.resize(Mesh.ARRAY_MAX)
 	surface_array[Mesh.ARRAY_VERTEX] = verts
 	surface_array[Mesh.ARRAY_NORMAL] = normals
+	surface_array[Mesh.ARRAY_TEX_UV] = uvs
 	(_travel_path.mesh as ArrayMesh).add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
 	return final
+
 
 func _physics_process(_d: float) -> void:
 	#print(_game_camera.ground_detected())
@@ -194,7 +219,6 @@ func _physics_process(_d: float) -> void:
 		position_valid = _check_position()
 		modulate = Color.WHITE if position_valid else Color.RED
 	#$DebugLabel3D.text = str(referenced_agent.position.distance_to(position)) + "\n" + str(position)
-
 
 
 func _input(event: InputEvent) -> void:
