@@ -864,7 +864,7 @@ func of_comp_client():
 @rpc("authority", "call_local")
 func create_toast_update(server_text : String, client_text : String, add_sound_effect : bool, color := Color(0.565, 0, 0.565, 0.212)):
 	var new_toast : ToastMessage = toast_scene.instantiate()
-	new_toast.input_text = server_text if multiplayer.get_unique_id() else client_text
+	new_toast.input_text = server_text if multiplayer.is_server() else client_text
 	new_toast.color = color
 	$HUDToasts/Toasts.add_child(new_toast)
 	if add_sound_effect:
