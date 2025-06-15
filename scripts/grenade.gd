@@ -10,6 +10,7 @@ extends CharacterBody3D
 @export var boom_time : int
 @export var explode := false
 
+
 var start_position : Vector3
 var landing_position : Vector3
 
@@ -22,7 +23,7 @@ func _ready() -> void:
 	get_node(wep_id).visible = true
 
 
-func should_be_visible():
+func should_be_visible() -> bool:
 	if server_knows and multiplayer.is_server():
 		return true
 	if client_knows and not multiplayer.is_server():
@@ -30,8 +31,10 @@ func should_be_visible():
 	return false
 
 
-func _tick() -> void:
+func _physics_process(delta: float) -> void:
 	visible = should_be_visible()
+
+func _tick() -> void:
 	boom_time = boom_time - 1
 	global_position = start_position.lerp(landing_position, clamp(float(30 - boom_time)/30.0, 0.0, 1.0))
 	if boom_time == -100:

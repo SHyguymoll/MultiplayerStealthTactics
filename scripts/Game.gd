@@ -181,11 +181,11 @@ func create_agent(data) -> Agent: #TODO
 			weapon_spawner.spawn(weapon_data)
 			new_agent.held_weapons.append(weapon_data.wep_name)
 	new_agent.visible = false
+	if data.player_id == 1:
+		new_agent.server_knows = true
+	else:
+		new_agent.client_knows = true
 	if multiplayer.get_unique_id() == data.player_id:
-		if multiplayer.get_unique_id() == 1:
-			new_agent.server_knows = true
-		else:
-			new_agent.client_knows = true
 		var new_small_hud = hud_agent_small_scene.instantiate()
 		_quick_views.add_child(new_small_hud)
 		new_small_hud._health_bar.max_value = data.agent_stats.health
