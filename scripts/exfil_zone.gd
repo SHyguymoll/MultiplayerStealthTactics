@@ -55,3 +55,6 @@ func _process(delta: float) -> void:
 		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"oscillation_rate", osc_rate)
 		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"col_shape", Vector2(collision_shape.x, collision_shape.z))
 		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"checkerboard_gap", 0.0 if exfil_enabled else 0.5)
+	else:
+		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"oscillation_rate", osc_rate)
+		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"checkerboard_gap", 0.0 if exfil_enabled else 0.5)
