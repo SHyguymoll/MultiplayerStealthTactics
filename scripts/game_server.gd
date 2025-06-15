@@ -14,7 +14,7 @@ func _physics_process(delta: float) -> void:
 		for agent in ($"../Agents".get_children() as Array[Agent]):
 			agent._game_step(delta)
 			agent.in_smoke = false
-			if game.current_game_step - agent.step_seen == game.REMEMBER_TILL and agent.visible:
+			if game.current_game_step - agent.step_seen == game.REMEMBER_TILL and agent.visible and not agent.in_incapacitated_state():
 				if agent.player_id == 1:
 					agent.client_knows = false
 					game.create_popup.rpc_id(GameSettings.other_player_id, "sight_unknown", agent.position)

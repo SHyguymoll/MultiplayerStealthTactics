@@ -396,6 +396,9 @@ func take_damage(amount : int, is_stun : bool = false):
 		stun_time = 10
 		select_hurt_animation()
 		state = States.HURT if health > 0 else States.DEAD
+		if state == States.DEAD:
+			server_knows = true
+			client_knows = true
 
 
 func select_hurt_animation():
@@ -449,6 +452,8 @@ func _physics_process(delta: float) -> void:
 
 
 func should_be_visible():
+	if in_incapacitated_state():
+		return true
 	if server_knows and multiplayer.is_server():
 		return true
 	if client_knows and not multiplayer.is_server():
