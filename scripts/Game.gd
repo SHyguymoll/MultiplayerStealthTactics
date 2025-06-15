@@ -561,58 +561,68 @@ func execution_ui():
 	_phase_label.text = "EXECUTING ACTIONS..."
 
 
+func enable_exfil(server_team: bool):
+	map.update_exfil(true, server_team)
+
+
+func disable_exfil(server_team: bool):
+	map.update_exfil(false, server_team)
+
+
 # called by the server to handle exfiltrations
 func _exfiltrate_agents():
-	match server_progress:
-		ProgressParts.ITEM_HELD:
-			var exfil_available = false
-			for detect in map.server_exfiltrate_zone.get_overlapping_areas():
-				var agent : Agent = detect.get_parent()
-				if agent.in_incapacitated_state():
-					continue
-				for weap in agent.held_weapons:
-					if (weap as String).begins_with("map_"):
-						exfil_available = true
+	if map.server_exfiltrate_zone.exfil_enabled:
+		match server_progress:
+			ProgressParts.ITEM_HELD:
+				var exfil_available = false
+				for detect in map.server_exfiltrate_zone.get_overlapping_areas():
+					var agent : Agent = detect.get_parent()
+					if agent.in_incapacitated_state():
+						continue
+					for weap in agent.held_weapons:
+						if (weap as String).begins_with("map_"):
+							exfil_available = true
+							break
+					if exfil_available:
 						break
 				if exfil_available:
-					break
-			if exfil_available:
+					for detect in map.server_exfiltrate_zone.get_overlapping_areas():
+						var agent : Agent = detect.get_parent()
+						if agent.in_incapacitated_state():
+							continue
+						exfiltration_queue.append(agent)
+			ProgressParts.OBJECTIVE_COMPLETE:
 				for detect in map.server_exfiltrate_zone.get_overlapping_areas():
 					var agent : Agent = detect.get_parent()
 					if agent.in_incapacitated_state():
 						continue
 					exfiltration_queue.append(agent)
-		ProgressParts.OBJECTIVE_COMPLETE:
-			for detect in map.server_exfiltrate_zone.get_overlapping_areas():
-				var agent : Agent = detect.get_parent()
-				if agent.in_incapacitated_state():
-					continue
-				exfiltration_queue.append(agent)
-	match client_progress:
-		ProgressParts.ITEM_HELD:
-			var exfil_available = false
-			for detect in map.client_exfiltrate_zone.get_overlapping_areas():
-				var agent : Agent = detect.get_parent()
-				if agent.state == Agent.States.DEAD:
-					continue
-				for weap in agent.held_weapons:
-					if (weap as String).begins_with("map_"):
-						exfil_available = true
+	if map.client_exfiltrate_zone.exfil_enabled:
+		match client_progress:
+			ProgressParts.ITEM_HELD:
+				var exfil_available = false
+				for detect in map.client_exfiltrate_zone.get_overlapping_areas():
+					var agent : Agent = detect.get_parent()
+					if agent.state == Agent.States.DEAD:
+						continue
+					for weap in agent.held_weapons:
+						if (weap as String).begins_with("map_"):
+							exfil_available = true
+							break
+					if exfil_available:
 						break
 				if exfil_available:
-					break
-			if exfil_available:
+					for detect in map.client_exfiltrate_zone.get_overlapping_areas():
+						var agent : Agent = detect.get_parent()
+						if agent.in_incapacitated_state():
+							continue
+						exfiltration_queue.append(agent)
+			ProgressParts.OBJECTIVE_COMPLETE:
 				for detect in map.client_exfiltrate_zone.get_overlapping_areas():
 					var agent : Agent = detect.get_parent()
 					if agent.in_incapacitated_state():
 						continue
 					exfiltration_queue.append(agent)
-		ProgressParts.OBJECTIVE_COMPLETE:
-			for detect in map.client_exfiltrate_zone.get_overlapping_areas():
-				var agent : Agent = detect.get_parent()
-				if agent.in_incapacitated_state():
-					continue
-				exfiltration_queue.append(agent)
 	for agent in exfiltration_queue:
 		agent.exfiltrate()
 
