@@ -552,19 +552,20 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 		if position.distance_to(queued_action[1]) < 0.3 or game_steps_since_execute > 10*60:
 			position = _nav_agent.target_position
 			if game_steps_since_execute > 10*60:
-				position.y = 0.0
-			match state:
-				States.WALK, States.RUN:
-					do_anim.rpc("Stand")
-					state = States.STAND
-				States.CROUCH_WALK:
-					do_anim.rpc("Crouch")
-					state = States.CROUCH
-				States.CRAWL:
-					do_anim.rpc("B_Prone")
-					state = States.PRONE
-			action_complete()
-			return
+				game_steps_since_execute = -5
+			if game_steps_since_execute >= 0:
+				match state:
+					States.WALK, States.RUN:
+						do_anim.rpc("Stand")
+						state = States.STAND
+					States.CROUCH_WALK:
+						do_anim.rpc("Crouch")
+						state = States.CROUCH
+					States.CRAWL:
+						do_anim.rpc("B_Prone")
+						state = States.PRONE
+				action_complete()
+				return
 	if state == States.STUNNED:
 		visible_level = 50
 		stun_time = max(0, stun_time - 1)
