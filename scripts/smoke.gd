@@ -8,7 +8,7 @@ extends MeshInstance3D
 @export var smoke_hei_curve : Curve
 @export var trans_curve : Curve
 
-var lifetime := 0
+@export var lifetime := 0
 
 func _ready() -> void:
 	mesh_shape.radius = 0.001
@@ -18,9 +18,11 @@ func _ready() -> void:
 	trans_curve.bake()
 	transparency = 1.0
 
-func _tick():
+func _physics_process(delta: float) -> void:
 	mesh_shape.radius = remap(smoke_rad_curve.sample(float(lifetime)/400), 0.0, 1.0, 0.001, 5.0)
 	mesh_shape.height = remap(smoke_hei_curve.sample(float(lifetime)/400), 0.0, 1.0, 0.001, 3.5)
 	transparency = trans_curve.sample(float(lifetime)/400)
+
+func _tick():
 	collision.radius = max(mesh_shape.radius - 0.25, 0.001)
 	lifetime += 1

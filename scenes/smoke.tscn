@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://brtbfw2plui6g"]
+[gd_scene load_steps=8 format=3 uid="uid://brtbfw2plui6g"]
 
 [ext_resource type="Script" uid="uid://ca5je6h2numq5" path="res://scripts/smoke.gd" id="1_upq5s"]
 
@@ -22,6 +22,14 @@ point_count = 4
 height = 3.5
 radius = 3.25
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_acmqr"]
+properties/0/path = NodePath(".:transparency")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:lifetime")
+properties/1/spawn = true
+properties/1/replication_mode = 1
+
 [node name="Smoke" type="MeshInstance3D"]
 mesh = SubResource("SphereMesh_32g65")
 script = ExtResource("1_upq5s")
@@ -35,3 +43,6 @@ collision_mask = 256
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
 shape = SubResource("CylinderShape3D_3p7sy")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_acmqr")
