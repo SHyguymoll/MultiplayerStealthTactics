@@ -19,6 +19,11 @@ shader_parameter/checkerboard_gap = 0.5
 material = SubResource("ShaderMaterial_7xx5s")
 size = Vector2(1, 1)
 
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_ibf5p"]
+properties/0/path = NodePath(".:exfil_enabled")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+
 [node name="ExfilZone" type="Area3D"]
 collision_layer = 0
 collision_mask = 0
@@ -31,3 +36,6 @@ shape = SubResource("BoxShape3D_ycwvl")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
 mesh = SubResource("PlaneMesh_6j5xt")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_ibf5p")
