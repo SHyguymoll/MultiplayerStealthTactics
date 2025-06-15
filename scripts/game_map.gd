@@ -46,3 +46,10 @@ func _ready():
 	prone_gates.visible = false
 	pointable_areas.visible = false
 	navigation.visible = false
+
+
+func update_exfil(enable: bool, is_server_team : bool):
+	if is_server_team:
+		server_exfiltrate_zone.exfil_enabled = enable
+	else:
+		client_exfiltrate_zone.exfil_enabled = enable
