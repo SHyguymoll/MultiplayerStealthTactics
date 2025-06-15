@@ -516,6 +516,7 @@ func _one_flag_completion_server():
 		game.ProgressParts.NO_ADVANTAGE: # no one has the flag
 			if not game.check_agents_for_weapon(true, "map_flag_center"):
 				return
+			game.enable_exfil(true)
 			if not game.check_weapon_holder_exfil(true, "map_flag_center"):
 				game.create_toast_update.rpc(GameRefs.TXT.of_y_get, GameRefs.TXT.of_t_get, true)
 				game.server_progress = game.ProgressParts.ITEM_HELD
@@ -531,6 +532,7 @@ func _one_flag_completion_server():
 			if not game.check_agents_for_weapon(true, "map_flag_center"):
 				game.create_toast_update.rpc(GameRefs.TXT.of_y_lost, GameRefs.TXT.of_t_lost, true)
 				game.server_progress = game.ProgressParts.NO_ADVANTAGE
+				game.disable_exfil(true)
 				return
 			if game.check_weapon_holder_exfil(true, "map_flag_center"):
 				if not game.has_team_exited(true):
@@ -553,6 +555,7 @@ func _one_flag_completion_client():
 		game.ProgressParts.NO_ADVANTAGE: # no one has the flag
 			if not game.check_agents_for_weapon(false, "map_flag_center"):
 				return
+			game.enable_exfil(false)
 			if not game.check_weapon_holder_exfil(false, "map_flag_center"):
 				game.create_toast_update.rpc(GameRefs.TXT.of_t_get, GameRefs.TXT.of_y_get, true)
 				game.client_progress = game.ProgressParts.ITEM_HELD
@@ -568,6 +571,7 @@ func _one_flag_completion_client():
 			if not game.check_agents_for_weapon(false, "map_flag_center"):
 				game.create_toast_update.rpc(GameRefs.TXT.of_t_lost, GameRefs.TXT.of_y_lost, true)
 				game.client_progress = game.ProgressParts.NO_ADVANTAGE
+				game.disable_exfil(false)
 				return
 			if game.check_weapon_holder_exfil(false, "map_flag_center"):
 				if not game.has_team_exited(false):
