@@ -20,8 +20,8 @@ enum Objectives {
 @export var objective : Objectives
 @export var objective_params : Array
 
-@export var server_exfiltrate_zone : Area3D
-@export var client_exfiltrate_zone : Area3D
+@export var server_exfiltrate_zone : ExfilZone
+@export var client_exfiltrate_zone : ExfilZone
 
 @export var world_graphics : Node3D
 @export var world_collision : StaticBody3D
