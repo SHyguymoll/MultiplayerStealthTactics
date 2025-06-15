@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://cmp5i0lkbpfbn"]
+[gd_scene load_steps=7 format=3 uid="uid://cmp5i0lkbpfbn"]
 
 [ext_resource type="Script" uid="uid://d30ga01c4alon" path="res://scripts/exfil_zone.gd" id="1_cde5i"]
 [ext_resource type="Shader" uid="uid://7k1e88u2c1y2" path="res://assets/models/materials/exfil_zone.tres" id="3_x58t7"]
@@ -12,14 +12,14 @@ shader_parameter/oscillation_rate = 1.0
 shader_parameter/color = Color(0, 0, 0, 1)
 shader_parameter/edge = 0.1
 shader_parameter/col_shape = Vector2(1, 1)
+shader_parameter/width = 1.0
 shader_parameter/checkerboard_size = 4.0
 shader_parameter/checkerboard_gap = 0.5
+shader_parameter/height = 1.0
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_6j5xt"]
 material = SubResource("ShaderMaterial_7xx5s")
 size = Vector2(1, 1)
-subdivide_width = 8
-subdivide_depth = 8
 
 [node name="ExfilZone" type="Area3D"]
 collision_layer = 0
