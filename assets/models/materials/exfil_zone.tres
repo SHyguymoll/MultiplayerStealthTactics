@@ -1,4 +1,4 @@
-[gd_resource type="VisualShader" load_steps=53 format=3 uid="uid://7k1e88u2c1y2"]
+[gd_resource type="VisualShader" load_steps=51 format=3 uid="uid://7k1e88u2c1y2"]
 
 [sub_resource type="VisualShaderNodeIntOp" id="VisualShaderNodeIntOp_ugeyq"]
 linked_parent_graph_frame = 34
@@ -110,9 +110,9 @@ title = "CreateEdges"
 attached_nodes = PackedInt32Array(5, 17, 19, 24, 23, 22, 21, 20, 18, 16, 15, 14, 13, 12, 11, 9, 6)
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_ya4f3"]
-size = Vector2(2515, 1052)
+size = Vector2(2215, 1052)
 title = "Checkerboard"
-attached_nodes = PackedInt32Array(36, 37, 40, 38, 86, 41, 42, 43, 44, 45, 46, 47, 48, 39, 87, 88, 89, 90, 91, 92, 93, 94)
+attached_nodes = PackedInt32Array(36, 37, 40, 38, 86, 41, 42, 43, 44, 45, 46, 47, 48, 39, 94, 88, 89, 90, 93, 92)
 
 [sub_resource type="VisualShaderNodeInput" id="VisualShaderNodeInput_frry5"]
 expanded_output_ports = [0]
@@ -200,12 +200,6 @@ parameter_name = "checkerboard_gap"
 default_value_enabled = true
 default_value = 0.5
 
-[sub_resource type="VisualShaderNodeFloatParameter" id="VisualShaderNodeFloatParameter_ya4f3"]
-linked_parent_graph_frame = 35
-parameter_name = "width"
-default_value_enabled = true
-default_value = 1.0
-
 [sub_resource type="VisualShaderNodeFloatOp" id="VisualShaderNodeFloatOp_frry5"]
 linked_parent_graph_frame = 35
 operator = 2
@@ -222,12 +216,6 @@ linked_parent_graph_frame = 34
 default_input_values = [0, 1.0, 1, 0.0]
 linked_parent_graph_frame = 35
 operator = 3
-
-[sub_resource type="VisualShaderNodeFloatParameter" id="VisualShaderNodeFloatParameter_bvsls"]
-linked_parent_graph_frame = 35
-parameter_name = "height"
-default_value_enabled = true
-default_value = 1.0
 
 [sub_resource type="VisualShaderNodeFloatOp" id="VisualShaderNodeFloatOp_vpc1v"]
 default_input_values = [0, 1.0, 1, 0.0]
@@ -250,10 +238,8 @@ uniform float oscillation_rate = 1.0;
 uniform vec4 color : source_color = vec4(0.541176, 0.168627, 0.886275, 1.000000);
 uniform float edge = 0.10000000149012;
 uniform vec2 col_shape = vec2(1.000000, 1.000000);
-uniform float width = 1.0;
 uniform float checkerboard_size = 4.0;
 uniform float checkerboard_gap = 0.5;
-uniform float height = 1.0;
 
 
 
@@ -379,17 +365,13 @@ void fragment() {
 	float n_out36p2 = n_out36p0.g;
 
 
-// FloatParameter:87
-	float n_out87p0 = width;
-
-
 // FloatOp:88
-	float n_out88p0 = n_out36p1 * n_out87p0;
+	float n_out88p0 = n_out36p1 * n_out20p1;
 
 
 // FloatOp:90
 	float n_in90p0 = 1.00000;
-	float n_out90p0 = n_in90p0 / n_out87p0;
+	float n_out90p0 = n_in90p0 / n_out20p1;
 
 
 // FloatOp:89
@@ -428,17 +410,13 @@ void fragment() {
 	bool n_out45p0 = n_out41p0 > n_out86p0;
 
 
-// FloatParameter:91
-	float n_out91p0 = height;
-
-
 // FloatOp:93
-	float n_out93p0 = n_out36p2 * n_out91p0;
+	float n_out93p0 = n_out36p2 * n_out20p2;
 
 
 // FloatOp:92
 	float n_in92p0 = 1.00000;
-	float n_out92p0 = n_in92p0 / n_out91p0;
+	float n_out92p0 = n_in92p0 / n_out20p2;
 
 
 // FloatOp:94
@@ -476,7 +454,7 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(-493.353, 476.584)
+graph_offset = Vector2(-656.781, 463.679)
 preview_params/checkerboard_gap = "0.5"
 preview_params/edge = "0.1"
 nodes/vertex/0/position = Vector2(520, 160)
@@ -540,13 +518,13 @@ nodes/fragment/34/position = Vector2(-1420, 59)
 nodes/fragment/35/node = SubResource("VisualShaderNodeFrame_ya4f3")
 nodes/fragment/35/position = Vector2(-880, 1100)
 nodes/fragment/36/node = SubResource("VisualShaderNodeInput_frry5")
-nodes/fragment/36/position = Vector2(-1520, 1440)
+nodes/fragment/36/position = Vector2(-1280, 1260)
 nodes/fragment/37/node = SubResource("VisualShaderNodeFloatFunc_e53yp")
 nodes/fragment/37/position = Vector2(-100, 1400)
 nodes/fragment/38/node = SubResource("VisualShaderNodeFloatOp_p3ufh")
 nodes/fragment/38/position = Vector2(-300, 1360)
 nodes/fragment/39/node = SubResource("VisualShaderNodeFloatConstant_m7vxu")
-nodes/fragment/39/position = Vector2(-1540, 1640)
+nodes/fragment/39/position = Vector2(-1160, 1620)
 nodes/fragment/40/node = SubResource("VisualShaderNodeFloatOp_bvsls")
 nodes/fragment/40/position = Vector2(-700, 1620)
 nodes/fragment/41/node = SubResource("VisualShaderNodeFloatFunc_vpc1v")
@@ -560,7 +538,7 @@ nodes/fragment/44/position = Vector2(80, 1520)
 nodes/fragment/45/node = SubResource("VisualShaderNodeCompare_kw2po")
 nodes/fragment/45/position = Vector2(480, 1140)
 nodes/fragment/46/node = SubResource("VisualShaderNodeFloatParameter_2nc3h")
-nodes/fragment/46/position = Vector2(-1580, 1740)
+nodes/fragment/46/position = Vector2(-1200, 1720)
 nodes/fragment/47/node = SubResource("VisualShaderNodeCompare_xjrlc")
 nodes/fragment/47/position = Vector2(480, 1520)
 nodes/fragment/48/node = SubResource("VisualShaderNodeIntOp_nc27q")
@@ -569,21 +547,17 @@ nodes/fragment/85/node = SubResource("VisualShaderNodeIntOp_og4cp")
 nodes/fragment/85/position = Vector2(1140, 700)
 nodes/fragment/86/node = SubResource("VisualShaderNodeFloatParameter_yiaxs")
 nodes/fragment/86/position = Vector2(-260, 1740)
-nodes/fragment/87/node = SubResource("VisualShaderNodeFloatParameter_ya4f3")
-nodes/fragment/87/position = Vector2(-1160, 1480)
 nodes/fragment/88/node = SubResource("VisualShaderNodeFloatOp_frry5")
 nodes/fragment/88/position = Vector2(-700, 1280)
 nodes/fragment/89/node = SubResource("VisualShaderNodeFloatOp_e53yp")
 nodes/fragment/89/position = Vector2(-520, 1280)
 nodes/fragment/90/node = SubResource("VisualShaderNodeFloatOp_m7vxu")
 nodes/fragment/90/position = Vector2(-700, 1440)
-nodes/fragment/91/node = SubResource("VisualShaderNodeFloatParameter_bvsls")
-nodes/fragment/91/position = Vector2(-1220, 1880)
 nodes/fragment/92/node = SubResource("VisualShaderNodeFloatOp_vpc1v")
 nodes/fragment/92/position = Vector2(-700, 1960)
 nodes/fragment/93/node = SubResource("VisualShaderNodeFloatOp_upajy")
 nodes/fragment/93/position = Vector2(-700, 1800)
 nodes/fragment/94/node = SubResource("VisualShaderNodeFloatOp_8hgyi")
 nodes/fragment/94/position = Vector2(-500, 1960)
-nodes/fragment/connections = PackedInt32Array(6, 0, 11, 0, 9, 0, 11, 1, 12, 0, 6, 0, 12, 0, 9, 0, 5, 1, 13, 0, 12, 0, 14, 0, 5, 2, 15, 0, 12, 0, 16, 0, 11, 0, 17, 0, 16, 0, 18, 1, 14, 0, 18, 0, 18, 0, 17, 1, 17, 0, 19, 0, 20, 1, 21, 1, 21, 0, 14, 1, 20, 1, 22, 1, 22, 0, 6, 1, 20, 2, 23, 1, 23, 0, 16, 1, 24, 0, 9, 1, 20, 2, 24, 1, 25, 0, 27, 0, 28, 0, 27, 1, 26, 0, 30, 0, 30, 0, 29, 0, 27, 0, 31, 0, 31, 0, 26, 0, 32, 0, 31, 1, 7, 0, 29, 1, 29, 0, 0, 0, 37, 0, 41, 0, 43, 0, 44, 0, 41, 0, 45, 0, 44, 0, 47, 0, 45, 0, 48, 0, 47, 0, 48, 1, 42, 0, 43, 0, 38, 0, 37, 0, 13, 0, 21, 0, 15, 0, 23, 0, 19, 0, 85, 0, 48, 0, 85, 1, 85, 0, 0, 1, 5, 1, 22, 0, 5, 2, 24, 0, 86, 0, 47, 1, 86, 0, 45, 1, 39, 0, 40, 0, 40, 0, 38, 1, 40, 0, 42, 1, 46, 0, 40, 1, 36, 1, 88, 0, 88, 0, 89, 0, 90, 0, 89, 1, 93, 0, 94, 0, 92, 0, 94, 1, 36, 2, 93, 0, 89, 0, 38, 0, 94, 0, 42, 0, 91, 0, 93, 1, 91, 0, 92, 1, 87, 0, 88, 1, 87, 0, 90, 1)
+nodes/fragment/connections = PackedInt32Array(6, 0, 11, 0, 9, 0, 11, 1, 12, 0, 6, 0, 12, 0, 9, 0, 5, 1, 13, 0, 12, 0, 14, 0, 5, 2, 15, 0, 12, 0, 16, 0, 11, 0, 17, 0, 16, 0, 18, 1, 14, 0, 18, 0, 18, 0, 17, 1, 17, 0, 19, 0, 20, 1, 21, 1, 21, 0, 14, 1, 20, 1, 22, 1, 22, 0, 6, 1, 20, 2, 23, 1, 23, 0, 16, 1, 24, 0, 9, 1, 20, 2, 24, 1, 25, 0, 27, 0, 28, 0, 27, 1, 26, 0, 30, 0, 30, 0, 29, 0, 27, 0, 31, 0, 31, 0, 26, 0, 32, 0, 31, 1, 7, 0, 29, 1, 29, 0, 0, 0, 37, 0, 41, 0, 43, 0, 44, 0, 41, 0, 45, 0, 44, 0, 47, 0, 45, 0, 48, 0, 47, 0, 48, 1, 42, 0, 43, 0, 38, 0, 37, 0, 13, 0, 21, 0, 15, 0, 23, 0, 19, 0, 85, 0, 48, 0, 85, 1, 85, 0, 0, 1, 5, 1, 22, 0, 5, 2, 24, 0, 86, 0, 47, 1, 86, 0, 45, 1, 39, 0, 40, 0, 40, 0, 38, 1, 40, 0, 42, 1, 46, 0, 40, 1, 36, 1, 88, 0, 88, 0, 89, 0, 90, 0, 89, 1, 93, 0, 94, 0, 92, 0, 94, 1, 36, 2, 93, 0, 89, 0, 38, 0, 94, 0, 42, 0, 20, 1, 88, 1, 20, 1, 90, 1, 20, 2, 93, 1, 20, 2, 92, 1)
 nodes/light/0/position = Vector2(400, 160)

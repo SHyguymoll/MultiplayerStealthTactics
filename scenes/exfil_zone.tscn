@@ -12,10 +12,8 @@ shader_parameter/oscillation_rate = 1.0
 shader_parameter/color = Color(0, 0, 0, 1)
 shader_parameter/edge = 0.1
 shader_parameter/col_shape = Vector2(1, 1)
-shader_parameter/width = 1.0
 shader_parameter/checkerboard_size = 4.0
 shader_parameter/checkerboard_gap = 0.5
-shader_parameter/height = 1.0
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_6j5xt"]
 material = SubResource("ShaderMaterial_7xx5s")

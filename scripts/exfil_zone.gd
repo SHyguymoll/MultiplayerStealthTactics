@@ -31,10 +31,8 @@ func _ready() -> void:
 
 	rendered_shape.mesh = PlaneMesh.new()
 	(rendered_shape.mesh as PlaneMesh).material = ShaderMaterial.new()
-	((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).shader = EXFIL_SHADER
+	((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).shader = EXFIL_SHADER.duplicate(true)
 	(rendered_shape.mesh as PlaneMesh).size = Vector2(collision_shape.x, collision_shape.z)
-	(rendered_shape.mesh as PlaneMesh).subdivide_width = max(0, int(collision_shape.x * 8))
-	(rendered_shape.mesh as PlaneMesh).subdivide_depth = max(0, int(collision_shape.z * 8))
 	((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"color",
 		ALL_COLOR if server_can_exfil and client_can_exfil else SERV_COLOR if server_can_exfil else
 			CLIE_COLOR if client_can_exfil else NONE_COLOR)
@@ -44,12 +42,11 @@ func _ready() -> void:
 	((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"checkerboard_gap", 0.0 if exfil_enabled else 0.5)
 
 
+
 func _process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		(collision_zone.shape as BoxShape3D).size = collision_shape
 		(rendered_shape.mesh as PlaneMesh).size = Vector2(collision_shape.x, collision_shape.z)
-		(rendered_shape.mesh as PlaneMesh).subdivide_width = max(0, int(collision_shape.x * 8))
-		(rendered_shape.mesh as PlaneMesh).subdivide_depth = max(0, int(collision_shape.z * 8))
 		collision_mask = (SERVER_COL_VAL * int(server_can_exfil)) + (CLIENT_COL_VAL * int(client_can_exfil))
 
 		((rendered_shape.mesh as PlaneMesh).material as ShaderMaterial).set_shader_parameter(&"color",
