@@ -522,20 +522,21 @@ func _game_step(delta: float, single_mode : bool = false) -> void:
 			target_visible_level = 150
 		var npp = _nav_agent.get_next_path_position()
 		#$DebugLabel3D.text = str(npp)
-		velocity = global_position.direction_to(npp)
-		velocity *= movement_speed
-		rotation.y = lerpf(rotation.y, get_required_y_rotation(npp), GENERAL_LERP_VAL)
-		match state:
-			States.RUN:
-				visible_level += 30
-			States.WALK, States.CROUCH_WALK:
-				velocity /= 2.0
-				visible_level += 20
-			States.CRAWL:
-				velocity /= 2.5
-				visible_level += 10
-		#$DebugLabel3D.text += "\n" + str(velocity)
-		move_and_slide()
+		if game_steps_since_execute >= 0:
+			velocity = global_position.direction_to(npp)
+			velocity *= movement_speed
+			rotation.y = lerpf(rotation.y, get_required_y_rotation(npp), GENERAL_LERP_VAL)
+			match state:
+				States.RUN:
+					visible_level += 30
+				States.WALK, States.CROUCH_WALK:
+					velocity /= 2.0
+					visible_level += 20
+				States.CRAWL:
+					velocity /= 2.5
+					visible_level += 10
+			#$DebugLabel3D.text += "\n" + str(velocity)
+			move_and_slide()
 		if len(queued_action) < 2:
 			match state:
 				States.WALK, States.RUN:
