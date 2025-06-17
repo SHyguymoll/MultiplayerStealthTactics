@@ -109,6 +109,17 @@ func save_agents():
 
 
 func load_agents():
+	var dir = DirAccess.open("user://agents")
+	if dir == null:
+		DirAccess.make_dir_absolute("user://agents")
+	# pre-update check
+	var file = FileAccess.open("user://agents.mstd", FileAccess.READ)
+	if file != null:
+		print("old agent file detected, converting to new system.")
+		var agent_file = JSON.parse_string(file.get_as_text(true))
+
+
+func load_agents_old():
 	var file = FileAccess.open("user://agents.mstd", FileAccess.READ)
 	if file == null:
 		agents = [
