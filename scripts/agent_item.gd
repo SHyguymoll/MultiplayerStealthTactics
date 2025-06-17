@@ -17,6 +17,7 @@ extends Resource
 func serialize_agent():
 	var file = FileAccess.open("user://agents/{0}.mstd".format([name]), FileAccess.WRITE)
 	file.store_pascal_string(ProjectSettings.get_setting("application/config/version"))
+	file.store_pascal_string(name)
 	file.store_64(mission_count)
 	file.store_64(health)
 	file.store_64(stun_health)
@@ -30,8 +31,11 @@ func serialize_agent():
 	file.store_var(held_weapons)
 	file.close()
 
-func load_agent():
-	var file = FileAccess.open("user://agents/{0}.mstd".format([name]), FileAccess.READ)
+
+func load_agent(file_string : String):
+	var file = FileAccess.open(file_string, FileAccess.READ)
+	var version = file.get_pascal_string()
+	name = file.get_pascal_string()
 	mission_count = file.get_64()
 	health = file.get_64()
 	stun_health = file.get_64()
