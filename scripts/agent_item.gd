@@ -1,3 +1,4 @@
+class_name AgentItem
 extends Resource
 
 @export var name : String
