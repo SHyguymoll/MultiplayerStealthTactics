@@ -28,7 +28,7 @@ extends Resource
 @export var held_weapons : Array[String]
 
 func serialize_agent():
-	var file = FileAccess.open("user://agents/{0}.mstd".format([name]), FileAccess.WRITE)
+	var file = FileAccess.open("user://agents/{0}.msta".format([name]), FileAccess.WRITE)
 	file.store_pascal_string(ProjectSettings.get_setting("application/config/version"))
 	file.store_pascal_string(name)
 	file.store_64(mission_count)
