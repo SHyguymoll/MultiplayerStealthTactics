@@ -61,3 +61,32 @@ func load_agent(file_string : String):
 	held_items = file.get_var()
 	held_weapons = file.get_var()
 	file.close()
+
+
+func equip_items(item_list : Array[String]):
+	if len(item_list) > 2:
+		push_warning("item list given is greater than allowed maximum, truncating to first two.")
+		item_list.resize(min(len(item_list), 2))
+	held_items = item_list.duplicate()
+
+
+func equip_weapons(weapon_list : Array[String]):
+	if len(weapon_list) > 2:
+		push_warning("weapon list given is greater than allowed maximum, truncating to first two.")
+		weapon_list.resize(min(len(weapon_list), 2))
+	held_weapons = weapon_list.duplicate()
+
+## Generates and sets random values for the main stats. The max values of each range is truncated to allow the agent to level up its stats.
+func random_starting_values():
+	health = randi_range(1, 4)
+	stun_health = randi_range(3, 5)
+	view_dist = randf_range(2.00, 2.75)
+	view_across = randf_range(0.8, 0.9)
+	eye_strength = randf_range(0.30, 0.45)
+	hearing_dist = randf_range(0.8, 1.5)
+	movement_dist = randf_range(4.0, 6.0)
+	movement_speed = randf_range(1.25, 2.7)
+
+
+func upgrade_random_value():
+	pass
