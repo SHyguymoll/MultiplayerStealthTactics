@@ -14,7 +14,7 @@ extends ColorRect
 var review_selected_agent : int = -1
 
 var user_data = {}
-var agents = []
+var agents : Array[AgentItem] = []
 
 func _ready() -> void:
 	GameSettings.selected_agents.clear()
@@ -103,12 +103,15 @@ func load_user():
 
 
 func save_agents():
-	var file = FileAccess.open("user://agents.mstd", FileAccess.WRITE)
-	var json_data = JSON.stringify(agents)
-	file.store_string(json_data)
+	#var file = FileAccess.open("user://agents.mstd", FileAccess.WRITE)
+	#var json_data = JSON.stringify(agents)
+	#file.store_string(json_data)
+	for agent in agents:
+		agent.serialize_agent()
 
 
 func load_agents():
+	agents.clear()
 	var dir = DirAccess.open("user://agents")
 	if dir == null:
 		DirAccess.make_dir_absolute("user://agents")
@@ -117,46 +120,77 @@ func load_agents():
 	if file != null:
 		print("old agent file detected, converting to new system.")
 		var agent_file = JSON.parse_string(file.get_as_text(true))
+		if agent_file != null:
+			for agent_item in agent_file:
+				var new_agent = AgentItem.new()
+				new_agent.name = agent_item["name"]
+				new_agent.mission_count = agent_item["mission_count"]
+				new_agent.health = agent_item["health"]
+				new_agent.stun_health = agent_item["stun_health"]
+				new_agent.view_dist = agent_item["view_dist"]
+				new_agent.view_across = agent_item["view_across"]
+				new_agent.eye_strength = agent_item["eye_strength"]
+				new_agent.hearing_dist = agent_item["hearing_dist"]
+				new_agent.movement_dist = agent_item["movement_dist"]
+				new_agent.movement_speed = agent_item["movement_speed"]
+				var items : Array[String]
+				for i in agent_item["held_items"]:
+					items.append(str(i))
+				var weapons : Array[String]
+				for w in agent_item["held_weapons"]:
+					weapons.append(str(w))
+				new_agent.equip_items(items)
+				new_agent.equip_weapons(weapons)
+				new_agent.serialize_agent()
+		else:
+			push_error("couldn't convert agents, continuing.")
+		print("copying to agents_old and trashing.")
+		var repl_old_file = FileAccess.open("user://agents_old.mstd", FileAccess.WRITE)
+		repl_old_file.store_line(file.get_as_text(true))
+		file.close()
+		OS.move_to_trash(ProjectSettings.globalize_path("user://agents.mstd"))
+	# for every agent file in user://agents/, create and append an AgentItem resource.
+	for agent_file in dir.get_files():
+		if agent_file.get_extension() != "msta":
+			continue
+		var new_agent = AgentItem.new()
+		new_agent.load_agent("user://agents/{0}".format([agent_file]))
+		agents.append(new_agent)
+	if len(agents) == 0: # no agents? no problem
+		create_inital_agent_list()
 
 
-func load_agents_old():
-	var file = FileAccess.open("user://agents.mstd", FileAccess.READ)
-	if file == null:
-		agents = [
-			{
-				name="Smoking Shark_32", # the agent's name
-				mission_count=0, # the number of missions that this agent has been used in
-				health=3, # the agent's health
-# value between 1 and 4
-				stun_health=5, # the agent's stun health
-# value between 3 and 8
-				view_dist=2.5, # how far the view cone extends from the agent
-# value between 2.00 and 3.50
-				view_across=1.0, # how wide the view cone base is
-# value between 0.80 and 1.20
-				eye_strength=0.4, # the strength of the agent's vision as elements get closer
-# value between 0.30 and 0.60
-# (note, this is within the view cone, calculated here: https://www.desmos.com/calculator/azk19m9ik3)
-				hearing_dist=1.5, # the radius of the hearing cylinder
-# value between 0.80 and 1.65
-				movement_dist=5.50, # how far the agent can move in a single step
-# value between 4.00 and 9.00
-				movement_speed=2.75, # how fast the agent moves
-# value between 1.25 and 3.00
-				held_items=["cigar", "box"], # the items that the agent starts with
-# no more than 2
-				held_weapons=["pistol", "grenade_smoke"], # the weapons that the agent starts with
-# no more than 2
-			},
-		]
-		_on_recruit_agent_pressed()
-		_on_recruit_agent_pressed()
-		_on_recruit_agent_pressed()
-		save_agents()
-		file = FileAccess.open("user://agents.mstd", FileAccess.READ)
-	var agent_file = JSON.parse_string(file.get_as_text(true))
-	if agent_file != null:
-		agents = agent_file
+func create_inital_agent_list():
+	var shark_agent = AgentItem.new()
+	shark_agent.name = "Smoking Shark_32"
+	shark_agent.mission_count = 0
+	shark_agent.health = 3
+	shark_agent.stun_health = 5
+	shark_agent.view_dist = 2.5
+	shark_agent.view_across = 1.0
+	shark_agent.eye_strength = 0.4
+	shark_agent.hearing_dist = 1.5
+	shark_agent.movement_dist = 5.5
+	shark_agent.movement_speed = 2.75
+	shark_agent.held_items = ["cigar", "box"]
+	shark_agent.held_weapons = ["pistol", "grenade_smoke"]
+	agents.append(shark_agent)
+	for _i in range(3):
+		create_agent()
+	save_agents()
+
+
+const ADJECTIVE : Array[String] = ["Cunning", "Silent", "White", "Gray", "Black", "Plasma", "Dachous", "Shy", "Cubed", "Smoking", "Large", "Imposing", "Explosive"]
+const ANIMAL : Array[String] = ["Wolf", "Bobcat", "Shark", "Serpent", "Penguin", "Crocodile"]
+
+func create_agent():
+	var new_agent = AgentItem.new()
+	new_agent.name = ADJECTIVE.pick_random() + " " + ANIMAL.pick_random() + "_" + str(int(fmod(Time.get_unix_time_from_system(), 1.0) * 100))
+	new_agent.mission_count = 0
+	new_agent.generate_random_values()
+	new_agent.equip_items(["box", "body_armor"])
+	new_agent.equip_weapons(["pistol", "grenade_smoke"])
+	agents.append(new_agent)
 
 
 func _on_join_pressed() -> void:
@@ -464,24 +498,8 @@ func _on_weapons_item_selected(index: int) -> void:
 			_review_weapons_list.set_item_text(index, "^")
 
 
-const ADJECTIVE : Array[String] = ["Cunning", "Silent", "White", "Gray", "Black", "Plasma", "Dachous", "Shy", "Cubed", "Smoking", "Large", "Imposing", "Explosive"]
-const ANIMAL : Array[String] = ["Wolf", "Bobcat", "Shark", "Serpent", "Penguin", "Crocodile"]
-
 func _on_recruit_agent_pressed() -> void:
-	agents.append({
-				name=ADJECTIVE.pick_random() + " " + ANIMAL.pick_random() + "_" + str(int(fmod(Time.get_unix_time_from_system(), 1.0) * 100)),
-				mission_count=0,
-				health=randi_range(1, 4),
-				stun_health=randi_range(3, 5),
-				view_dist=randf_range(2.00, 2.75),
-				view_across=randf_range(0.8, 0.9),
-				eye_strength=randf_range(0.30, 0.45),
-				hearing_dist=randf_range(0.8, 1.5),
-				movement_dist=randf_range(4.0, 6.0),
-				movement_speed=randf_range(1.25, 2.7),
-				held_items=["box", "body_armor"],
-				held_weapons=["pistol", "grenade_smoke"],
-			})
+	create_agent()
 	_populate_agent_list()
 
 
