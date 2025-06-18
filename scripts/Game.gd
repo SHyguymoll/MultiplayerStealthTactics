@@ -35,6 +35,7 @@ enum GamePhases {
 	SELECTION,
 	EXECUTION,
 	COMPLETION,
+	SPECIAL_STOP,
 }
 @export var game_phase : GamePhases = GamePhases.SELECTION
 
@@ -800,7 +801,11 @@ func player_quits(_peer_id):
 	create_toast_update(GameRefs.TXT.forfeit, GameRefs.TXT.forfeit, false)
 	$FadeOut/ColorRect/AnimatedSprite2D.play("victory")
 	animate_fade(true)
-	_update_game_phase(GamePhases.COMPLETION)
+	victory_jingle()
+	save_replay.rpc(str(int(Time.get_unix_time_from_system())))
+	create_toast_update("GAME OVER", "GAME OVER", true, Color.INDIGO - Color(0, 0, 0, 1 - 0.212))
+	create_end_screen()
+	_update_game_phase(GamePhases.SPECIAL_STOP)
 
 
 @rpc("authority", "call_remote", "reliable")
