@@ -204,9 +204,12 @@ func _on_join_pressed() -> void:
 	_ready_button.visible = true
 	_start_button.visible = false
 	GameSettings.other_player_id = 1
+	var ag_jsons = []
+	for agent in agents:
+		ag_jsons.append(agent.get_agent_as_json())
 	Lobby.player_info = {
 		name = user_data.name,
-		agents = agents,
+		agents = ag_jsons,
 	}
 	if Lobby.join_game($MainMenu/VBoxContainer/JoinH/LineEdit.text) == OK:
 		$MainMenu.visible = false
@@ -227,9 +230,12 @@ func _on_host_pressed() -> void:
 	$MainMenu.visible = false
 	_ready_button.visible = false
 	_start_button.visible = true
+	var ag_jsons = []
+	for agent in agents:
+		ag_jsons.append(agent.get_agent_as_json())
 	Lobby.player_info = {
 		name = user_data.name,
-		agents = agents,
+		agents = ag_jsons,
 	}
 	Lobby.create_game(0, $MainMenu/VBoxContainer/HostH/CheckBox.button_pressed)
 	$HostScreen/Label.text += Lobby.extern_addr
@@ -325,6 +331,7 @@ func _on_player_connect(peer_id, player_info):
 	$SelectSound3.play()
 	GameSettings.other_player_id = multiplayer.get_remote_sender_id()
 	GameSettings.other_player_name = player_info.name
+
 	if multiplayer.is_server():
 		$HostScreen/Label.text = "Player found! " + str(player_info.name)
 		synchronize_agents.rpc_id(GameSettings.other_player_id, GameSettings.selected_agents)
