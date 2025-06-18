@@ -49,7 +49,6 @@ pointable_areas = NodePath("nav_pointable")
 navigation = NodePath("nav_total")
 
 [node name="map_basic" parent="." instance=ExtResource("2_cn121")]
-visible = false
 
 [node name="world_collision" type="StaticBody3D" parent="."]
 collision_mask = 0
@@ -120,6 +119,7 @@ server_true_client_false = true
 
 [node name="ServerDebug" parent="Spawns" instance=ExtResource("5_vhrbe")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.60186, 0.66598, -0.617821)
+visible = false
 server_true_client_false = true
 
 [node name="Client1" parent="Spawns" instance=ExtResource("5_vhrbe")]
@@ -136,5 +136,6 @@ transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 1.5305
 
 [node name="ClientDebug" parent="Spawns" instance=ExtResource("5_vhrbe")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 4.08749, 0.665981, 3.58935)
+visible = false
 
 [editable path="map_basic"]
