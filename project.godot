@@ -32,7 +32,7 @@ window/stretch/mode="canvas_items"
 
 [editor]
 
-run/main_run_args="--mst-debug --mute-music"
+run/main_run_args="--mute-music"
 
 [importer_defaults]
 
