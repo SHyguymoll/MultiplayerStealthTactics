@@ -11,7 +11,8 @@ config_version=5
 [application]
 
 config/name="MultiplayerStealthTactics"
-config/version="v0.8"
+config/description="Simul-turn Stealth Operations Game"
+config/version="0.8.0"
 run/main_scene="res://scenes/menu.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
 boot_splash/bg_color=Color(0.345098, 0, 0.360784, 1)
