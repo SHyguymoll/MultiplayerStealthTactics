@@ -90,3 +90,20 @@ func random_starting_values():
 
 func upgrade_random_value():
 	pass
+
+
+func get_agent_as_json():
+	return JSON.stringify({
+		"name"=name,
+		"mission_count"=mission_count,
+		"health"=health,
+		"stun_health"=stun_health,
+		"view_dist"=view_dist,
+		"view_across"=view_across,
+		"eye_strength"=eye_strength,
+		"hearing_dist"=hearing_dist,
+		"movement_dist"=movement_dist,
+		"movement_speed"=movement_speed,
+		"held_items"=held_items,
+		"held_weapons"=held_weapons,
+	}, "", false, true)
