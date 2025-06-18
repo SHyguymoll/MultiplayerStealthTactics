@@ -187,7 +187,7 @@ func create_agent():
 	var new_agent = AgentItem.new()
 	new_agent.name = ADJECTIVE.pick_random() + " " + ANIMAL.pick_random() + "_" + str(int(fmod(Time.get_unix_time_from_system(), 1.0) * 100))
 	new_agent.mission_count = 0
-	new_agent.generate_random_values()
+	new_agent.random_starting_values()
 	new_agent.equip_items(["box", "body_armor"])
 	new_agent.equip_weapons(["pistol", "grenade_smoke"])
 	agents.append(new_agent)
